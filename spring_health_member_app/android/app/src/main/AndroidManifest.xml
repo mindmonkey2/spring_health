@@ -1,0 +1,119 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+    FCM NOTIFICATIONS & FLUTTER SYSTEM
+    ═══════════════════════════════════════════════════════════════ -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+    HEALTH CONNECT + FITNESS
+    ═══════════════════════════════════════════════════════════════ -->
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED"/>
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED"/>
+    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP"/>
+    <uses-permission android:name="android.permission.health.READ_EXERCISE"/>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+
+    <application
+        android:label="Spring Health"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+
+            <!-- App launch -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- FCM notification click -->
+            <intent-filter>
+                <action android:name="FLUTTER_NOTIFICATION_CLICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <!-- Health Connect: Android 13 rationale -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
+        </activity>
+
+        <!-- Health Connect: privacy policy alias (required for Android 14+ permission sheet) -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
+            </intent-filter>
+            <!-- Health Connect: declare which permissions this app uses -->
+            <meta-data
+                android:name="health_permissions"
+                android:resource="@array/health_permissions" />
+        </activity-alias>
+
+        <!-- FCM config -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
+
+        <!-- Flutter embedding -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+    </application>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+    QUERIES — package visibility (Android 11+)
+    ═══════════════════════════════════════════════════════════════ -->
+    <queries>
+        <!-- Flutter text processing -->
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Health Connect app -->
+        <package android:name="com.google.android.apps.healthdata" />
+        <intent>
+            <action android:name="androidx.health.ACTION_VIEW_DATA_TYPES"/>
+        </intent>
+        <!-- Health Connect permission sheet (Android 14+) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
+            <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
+        </intent>
+    </queries>
+
+</manifest>

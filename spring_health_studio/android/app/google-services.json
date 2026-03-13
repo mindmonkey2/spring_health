@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "527678863150",
+    "project_id": "spring-health-studio-f4930",
+    "storage_bucket": "spring-health-studio-f4930.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527678863150:android:b7c18fb4abd67526eaecbf",
+        "android_client_info": {
+          "package_name": "com.example.spring_health_studio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9y_fTKrfIRYlw4Th_2o93tZUlOsfwu30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

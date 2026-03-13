@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+
+	<!-- ═══════════════════════════════════════════════════════════════
+	FLUTTER / APP IDENTITY
+	═══════════════════════════════════════════════════════════════ -->
+	<key>CFBundleDevelopmentRegion</key>
+<string>$(DEVELOPMENT_LANGUAGE)</string>
+
+<key>CFBundleDisplayName</key>
+<string>Spring Health</string>
+
+<key>CFBundleExecutable</key>
+<string>$(EXECUTABLE_NAME)</string>
+
+<key>CFBundleIdentifier</key>
+<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+
+<key>CFBundleName</key>
+<string>spring_health_member_app</string>
+
+<key>CFBundlePackageType</key>
+<string>APPL</string>
+
+<key>CFBundleShortVersionString</key>
+<string>$(FLUTTER_BUILD_NAME)</string>
+
+<key>CFBundleSignature</key>
+<string>????</string>
+
+<key>CFBundleVersion</key>
+<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+<key>LSRequiresIPhoneOS</key>
+<true/>
+
+<!-- Minimum iOS 14.0 — required for HealthKit read + Health Connect parity -->
+<key>MinimumOSVersion</key>
+<string>14.0</string>
+
+<!-- ═══════════════════════════════════════════════════════════════
+UI / ORIENTATION
+═══════════════════════════════════════════════════════════════ -->
+<key>UILaunchStoryboardName</key>
+<string>LaunchScreen</string>
+
+<key>UIMainStoryboardFile</key>
+<string>Main</string>
+
+<key>UISupportedInterfaceOrientations</key>
+<array>
+	<string>UIInterfaceOrientationPortrait</string>
+<string>UIInterfaceOrientationLandscapeLeft</string>
+<string>UIInterfaceOrientationLandscapeRight</string>
+</array>
+
+<!-- iPad support -->
+<key>UISupportedInterfaceOrientations~ipad</key>
+<array>
+	<string>UIInterfaceOrientationPortrait</string>
+<string>UIInterfaceOrientationPortraitUpsideDown</string>
+<string>UIInterfaceOrientationLandscapeLeft</string>
+<string>UIInterfaceOrientationLandscapeRight</string>
+</array>
+
+<!-- Status bar / safe area -->
+<key>UIViewControllerBasedStatusBarAppearance</key>
+<false/>
+
+<!-- ═══════════════════════════════════════════════════════════════
+BACKGROUND MODES  (FCM + HealthKit background delivery)
+═══════════════════════════════════════════════════════════════ -->
+<key>UIBackgroundModes</key>
+<array>
+	<!-- FCM silent push & background refresh -->
+	<string>fetch</string>
+<string>remote-notification</string>
+<!-- BGTaskScheduler for periodic Health data sync -->
+<string>processing</string>
+</array>
+
+<!-- ═══════════════════════════════════════════════════════════════
+HEALTHKIT — READ STEPS, CALORIES, HEART RATE, DISTANCE
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- Required: tells iOS WHY you read health data -->
+<key>NSHealthShareUsageDescription</key>
+<string>Spring Health reads your steps, calories, heart rate and distance from Apple Health to show your fitness dashboard and weekly goals.</string>
+
+<!-- Required even if you only read — Apple mandates both keys -->
+<key>NSHealthUpdateUsageDescription</key>
+<string>Spring Health may write workout summaries to Apple Health so your activity stays in sync across apps.</string>
+
+<!-- Declare which HealthKit data types you access -->
+<key>com.apple.developer.healthkit</key>
+<true/>
+
+<key>com.apple.developer.healthkit.access</key>
+<array>
+	<string>health-records</string>
+</array>
+
+<!-- ═══════════════════════════════════════════════════════════════
+CAMERA  (QR code scan for gym check-in)
+═══════════════════════════════════════════════════════════════ -->
+<key>NSCameraUsageDescription</key>
+<string>Spring Health uses the camera to scan your membership QR code at the gym entrance for quick check-in.</string>
+
+<!-- ═══════════════════════════════════════════════════════════════
+PHOTO LIBRARY  (profile photo upload)
+═══════════════════════════════════════════════════════════════ -->
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Spring Health accesses your photo library so you can set a profile picture.</string>
+
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Spring Health saves your membership QR code to your photo library.</string>
+
+<!-- ═══════════════════════════════════════════════════════════════
+MOTION & FITNESS  (step counting via CMPedometer — iOS 14+)
+═══════════════════════════════════════════════════════════════ -->
+<key>NSMotionUsageDescription</key>
+<string>Spring Health uses motion data to count your steps accurately when Apple Health data is unavailable.</string>
+
+<!-- ═══════════════════════════════════════════════════════════════
+FIREBASE / FCM
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- Prevent Firebase from swizzling AppDelegate methods — Flutter
+handles this via GeneratedPluginRegistrant -->
+<key>FirebaseAppDelegateProxyEnabled</key>
+<false/>
+
+<!-- APNs environment (use 'development' for debug, 'production' for release)
+This is usually set automatically by Xcode entitlements,
+but explicit declaration avoids surprises in TestFlight. -->
+<key>aps-environment</key>
+<string>production</string>
+
+<!-- ═══════════════════════════════════════════════════════════════
+FLUTTER ENGINE
+═══════════════════════════════════════════════════════════════ -->
+<key>CADisableMinimumFrameDurationOnPhone</key>
+<true/>
+
+<!-- Enables 120 Hz ProMotion on iPhone 13 Pro+ / iPad Pro -->
+<key>UIApplicationSupportsIndirectInputEvents</key>
+<true/>
+
+</dict>
+</plist>

@@ -1,0 +1,13 @@
+total 320
+drwxr-xr-x. 1 mindmonkey mindmonkey    302 Feb 11 18:55 .
+drwxr-xr-x. 1 mindmonkey mindmonkey    648 Feb 11 18:37 ..
+-rw-r--r--. 1 mindmonkey mindmonkey  16383 Feb 11 18:36 app.png
+-rw-r--r--. 1 mindmonkey mindmonkey  18365 Feb 11 14:52 apps.png
+-rw-r--r--. 1 mindmonkey mindmonkey  13060 Feb 11 14:51 daily-health-app.png
+-rw-r--r--. 1 mindmonkey mindmonkey  46656 Feb 11 14:54 fitness-app.png
+-rw-r--r--. 1 mindmonkey mindmonkey  18482 Feb 11 14:54 fitness-watch.png
+-rw-r--r--. 1 mindmonkey mindmonkey  23949 Feb 11 14:52 gear.png
+-rw-r--r--. 1 mindmonkey mindmonkey 104521 Feb 11 18:54 Gym & fitness stroke icons - FREE.svg
+-rw-r--r--. 1 mindmonkey mindmonkey  18389 Feb 11 14:56 heart-rate.png
+-rw-r--r--. 1 mindmonkey mindmonkey  31247 Feb 11 18:35 smartwatch.png
+-rw-r--r--. 1 mindmonkey mindmonkey  19134 Feb 11 14:53 virtual.png

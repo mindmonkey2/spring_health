@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Owner';
+    }
+    
+    function isReceptionist() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Receptionist';
+    }
+    
+    function getUserBranch() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.branch;
+    }
+    
+    function isSameBranch(branch) {
+      return isReceptionist() && getUserBranch() == branch;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isOwner();
+    }
+    
+    // Members collection
+    match /members/{memberId} {
+      allow read: if isAuthenticated() && (
+        isOwner() || 
+        (isReceptionist() && isSameBranch(resource.data.branch))
+      );
+      
+      allow create: if isAuthenticated() && (
+        isOwner() || 
+        (isReceptionist() && isSameBranch(request.resource.data.branch))
+      );
+      
+      allow update: if isAuthenticated() && (
+        isOwner() || 
+        (isReceptionist() && isSameBranch(resource.data.branch))
+      );
+      
+      allow delete: if isOwner();
+    }
+    
+    // Attendance collection
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated() && (
+        isOwner() || 
+        (isReceptionist() && isSameBranch(resource.data.branch))
+      );
+      
+      allow create: if isAuthenticated();
+      allow update, delete: if isOwner();
+    }
+    
+    // Payments collection
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (
+        isOwner() || 
+        (isReceptionist() && isSameBranch(resource.data.branch))
+      );
+      
+      allow create: if isAuthenticated();
+      allow update, delete: if isOwner();
+    }
+  }
+}

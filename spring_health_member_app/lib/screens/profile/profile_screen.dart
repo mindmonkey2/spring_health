@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/member_model.dart';
 import '../../services/firebase_auth_service.dart';
+import '../../services/firestore_service.dart';
+import '../../services/storage_service.dart';
 import '../auth/login_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
@@ -25,6 +30,64 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
   final FirebaseAuthService _authService = FirebaseAuthService();
+  final StorageService _storageService = StorageService();
+  final FirestoreService _firestoreService = FirestoreService();
+  final ImagePicker _imagePicker = ImagePicker();
+
+  final ValueNotifier<bool> _isUploading = ValueNotifier<bool>(false);
+  late MemberModel _currentMember;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentMember = widget.member;
+  }
+
+  @override
+  void dispose() {
+    _isUploading.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+      if (image == null) return;
+
+      _isUploading.value = true;
+      final File imageFile = File(image.path);
+
+      final String? downloadUrl = await _storageService.uploadProfileImage(_currentMember.id, imageFile);
+
+      if (downloadUrl != null) {
+        await _firestoreService.updateProfileImageUrl(_currentMember.id, downloadUrl);
+
+        // Update local member object
+        if (mounted) {
+          setState(() {
+            _currentMember = MemberModel.fromMap({
+              ..._currentMember.toMap(),
+              'photoUrl': downloadUrl,
+            }, id: _currentMember.id);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking or uploading image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Failed to update profile picture.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        _isUploading.value = false;
+      }
+    }
+  }
 
   // ─── Navigation Methods ──────────────────────────────────────────────────
 
@@ -173,29 +236,78 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
       child: Column(
         children: [
           // Profile Picture
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.neonLime, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.neonLime.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  spreadRadius: 5,
+          GestureDetector(
+            onTap: _pickAndUploadImage,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.neonLime, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.neonLime.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: _currentMember.photoUrl != null
+                    ? Image.network(
+                      _currentMember.photoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                      _buildDefaultAvatar(),
+                    )
+                    : _buildDefaultAvatar(),
+                  ),
+                ),
+                // Camera Icon Overlay
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundBlack,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.neonLime, width: 1.5),
+                    ),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: AppColors.neonLime,
+                      size: 16,
+                    ),
+                  ),
+                ),
+                // Uploading State Overlay
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isUploading,
+                  builder: (context, isUploading, child) {
+                    if (isUploading) {
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundBlack.withValues(alpha: 0.6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.neonLime,
+                            strokeWidth: 3,
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
               ],
-            ),
-            child: ClipOval(
-              child: widget.member.photoUrl != null
-              ? Image.network(
-                widget.member.photoUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                _buildDefaultAvatar(),
-              )
-              : _buildDefaultAvatar(),
             ),
           )
           .animate()
@@ -207,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
 
             // Name
             Text(
-              widget.member.name.toUpperCase(),
+              _currentMember.name.toUpperCase(),
               style:
               AppTextStyles.heading2.copyWith(color: AppColors.neonLime),
               textAlign: TextAlign.center,
@@ -225,7 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
                   color: AppColors.gray400.withValues(alpha: 0.3)),
               ),
               child: Text(
-                'ID: ${widget.member.id}',
+                'ID: ${_currentMember.id}',
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.gray400,
                   letterSpacing: 1.2,
@@ -246,8 +358,8 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
       color: AppColors.cardSurface,
       child: Center(
         child: Text(
-          widget.member.name.isNotEmpty
-          ? widget.member.name[0].toUpperCase()
+          _currentMember.name.isNotEmpty
+          ? _currentMember.name[0].toUpperCase()
           : '?',
           style: AppTextStyles.heading1.copyWith(
             color: AppColors.neonLime,
@@ -259,8 +371,8 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
   }
 
   Widget _buildStatusBadge() {
-    final isExpired = widget.member.isExpired;
-    final isExpiringSoon = widget.member.isExpiringSoon;
+    final isExpired = _currentMember.isExpired;
+    final isExpiringSoon = _currentMember.isExpiringSoon;
 
     Color badgeColor;
     String statusText;
@@ -336,34 +448,34 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
           ),
           const SizedBox(height: 20),
           _buildInfoRow(
-            'Plan', widget.member.membershipPlan, Icons.fitness_center),
+            'Plan', _currentMember.membershipPlan, Icons.fitness_center),
             const SizedBox(height: 16),
             _buildInfoRow('Branch',
-                          widget.member.branch.toUpperCase(), Icons.location_on),
+                          _currentMember.branch.toUpperCase(), Icons.location_on),
                           const SizedBox(height: 16),
                           _buildInfoRow(
                             'Start Date',
                             DateFormat('dd MMM yyyy')
-                            .format(widget.member.membershipStartDate),
+                            .format(_currentMember.membershipStartDate),
                             Icons.calendar_today,
                           ),
                     const SizedBox(height: 16),
                     _buildInfoRow(
                       'Expiry Date',
                       DateFormat('dd MMM yyyy')
-                      .format(widget.member.membershipEndDate),
+                      .format(_currentMember.membershipEndDate),
                       Icons.event,
                     ),
                     const SizedBox(height: 16),
                     _buildInfoRow(
                       'Days Remaining',
-                      widget.member.daysRemaining > 0
-                      ? '${widget.member.daysRemaining} days'
+                      _currentMember.daysRemaining > 0
+                      ? '${_currentMember.daysRemaining} days'
                     : 'Expired',
                     Icons.timelapse,
-                    valueColor: widget.member.isExpired
+                    valueColor: _currentMember.isExpired
                     ? AppColors.error
-                    : widget.member.isExpiringSoon
+                    : _currentMember.isExpiringSoon
                     ? AppColors.warning
                     : AppColors.success,
                     ),
@@ -401,20 +513,20 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
           ),
           const SizedBox(height: 20),
           _buildInfoRow(
-            'Phone', widget.member.phone, Icons.phone),
+            'Phone', _currentMember.phone, Icons.phone),
             const SizedBox(height: 16),
             _buildInfoRow(
               'Email',
-              widget.member.email.isNotEmpty
-              ? widget.member.email
+              _currentMember.email.isNotEmpty
+              ? _currentMember.email
               : 'Not provided',
               Icons.email,
             ),
-            if (widget.member.address != null &&
-              widget.member.address!.isNotEmpty) ...[
+            if (_currentMember.address != null &&
+              _currentMember.address!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 _buildInfoRow(
-                  'Address', widget.member.address!, Icons.home),
+                  'Address', _currentMember.address!, Icons.home),
               ],
         ],
       ),

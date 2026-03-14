@@ -9,6 +9,19 @@ class FirestoreService {
 
   // ==================== MEMBER METHODS ====================
 
+  /// Update member's profile image URL
+  Future<void> updateProfileImageUrl(String memberId, String imageUrl) async {
+    try {
+      await _firestore.collection('members').doc(memberId).update({
+        'photoUrl': imageUrl,
+      });
+      debugPrint('Profile image URL updated successfully for $memberId');
+    } catch (e) {
+      debugPrint('Error updating profile image URL: $e');
+      rethrow;
+    }
+  }
+
   /// Get member data by ID
   Future<MemberModel?> getMemberById(String id) async {
     try {

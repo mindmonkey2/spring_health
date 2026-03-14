@@ -829,25 +829,38 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                           ]),
                         ]),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: (isInitial ? tealAqua : const Color(0xFFF59E0B))
-                              .withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: isInitial ? tealAqua : const Color(0xFFF59E0B),
-                              width: 1.2),
-                        ),
-                        child: Text(
-                          p.type.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isInitial ? tealAqua : const Color(0xFFF59E0B),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: (isInitial ? tealAqua : const Color(0xFFF59E0B))
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: isInitial ? tealAqua : const Color(0xFFF59E0B),
+                                  width: 1.2),
+                            ),
+                            child: Text(
+                              p.type.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: isInitial ? tealAqua : const Color(0xFFF59E0B),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          _PaymentReceiptButton(
+                            payment: p,
+                            member: currentMember!,
+                            pdfService: pdfService,
+                            tealAqua: tealAqua,
+                            coralRed: coralRed,
+                          ),
+                        ],
                       ),
                     ]),
                   ),
@@ -1189,6 +1202,82 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           ),
         ),
       ]),
+    );
+  }
+}
+
+class _PaymentReceiptButton extends StatefulWidget {
+  final PaymentModel payment;
+  final MemberModel member;
+  final PDFService pdfService;
+  final Color tealAqua;
+  final Color coralRed;
+
+  const _PaymentReceiptButton({
+    required this.payment,
+    required this.member,
+    required this.pdfService,
+    required this.tealAqua,
+    required this.coralRed,
+  });
+
+  @override
+  State<_PaymentReceiptButton> createState() => _PaymentReceiptButtonState();
+}
+
+class _PaymentReceiptButtonState extends State<_PaymentReceiptButton> {
+  final ValueNotifier<bool> _isGenerating = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _isGenerating.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _isGenerating,
+      builder: (context, isGenerating, child) {
+        return IconButton(
+          icon: isGenerating
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: widget.tealAqua,
+                  ),
+                )
+              : Icon(Icons.receipt_long, color: widget.tealAqua),
+          onPressed: isGenerating
+              ? null
+              : () async {
+                  _isGenerating.value = true;
+                  try {
+                    final pdfData = await widget.pdfService.generatePaymentReceipt(
+                      member: widget.member,
+                      payment: widget.payment,
+                    );
+                    if (context.mounted) {
+                      await widget.pdfService.printPDF(pdfData);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $e'),
+                          backgroundColor: widget.coralRed,
+                        ),
+                      );
+                    }
+                  } finally {
+                    _isGenerating.value = false;
+                  }
+                },
+          tooltip: 'Generate Receipt',
+        );
+      },
     );
   }
 }

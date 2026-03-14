@@ -8,6 +8,7 @@ class TrainerFeedbackModel {
   final String memberName;
   final double rating;          // 1.0 – 5.0
   final String? comment;
+  final String? trainerReply;
   final DateTime createdAt;
 
   const TrainerFeedbackModel({
@@ -17,6 +18,7 @@ class TrainerFeedbackModel {
     required this.memberName,
     required this.rating,
     this.comment,
+    this.trainerReply,
     required this.createdAt,
   });
 
@@ -28,6 +30,7 @@ class TrainerFeedbackModel {
       memberName: data['memberName'] as String? ?? '',
       rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
       comment: data['comment'] as String?,
+      trainerReply: data['trainerReply'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -38,7 +41,8 @@ class TrainerFeedbackModel {
     'memberName': memberName,
     'rating': rating,
     if (comment != null) 'comment': comment,
-      'createdAt': Timestamp.fromDate(createdAt),
+    if (trainerReply != null) 'trainerReply': trainerReply,
+    'createdAt': Timestamp.fromDate(createdAt),
   };
 
   /// Average rating helper — used by detail screen

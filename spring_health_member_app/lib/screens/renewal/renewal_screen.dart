@@ -28,7 +28,7 @@ class _RenewalScreenState extends State<RenewalScreen> {
   late Razorpay _razorpay;
 
   String _selectedPlan = '1 Month';
-  bool _processing = false;
+  final ValueNotifier<bool> _processingNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -42,6 +42,7 @@ class _RenewalScreenState extends State<RenewalScreen> {
   @override
   void dispose() {
     _razorpay.clear();
+    _processingNotifier.dispose();
     super.dispose();
   }
 
@@ -73,11 +74,12 @@ class _RenewalScreenState extends State<RenewalScreen> {
   }
 
   void _onPaymentSuccess(PaymentSuccessResponse response) async {
+    debugPrint('Razorpay Success: ${response.paymentId}');
     if (!mounted) return;
-    setState(() => _processing = true);
+    _processingNotifier.value = true;
     try {
       final plan = _kPlans[_selectedPlan]!;
-      await _renewalService.recordRenewal(
+      await _renewalService.processSuccessfulRenewal(
         memberId: widget.member.id,
         memberPhone: widget.member.phone,
         branch: widget.member.branch,
@@ -103,24 +105,40 @@ class _RenewalScreenState extends State<RenewalScreen> {
         );
       }
     } catch (e) {
-      _showSnack('Payment recorded but update failed. Contact gym. Error: $e');
+      debugPrint('Razorpay Update Error: $e');
+      _showSnack('Payment recorded but update failed. Contact gym.');
     } finally {
-      if (mounted) setState(() => _processing = false);
+      if (mounted) _processingNotifier.value = false;
     }
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
+    debugPrint('Razorpay Error: code=${response.code} message=${response.message}');
     _showSnack('Payment failed: ${response.message ?? 'Unknown error'}');
   }
 
   void _onExternalWallet(ExternalWalletResponse response) {
+    debugPrint('Razorpay External Wallet: ${response.walletName}');
     _showSnack('External wallet selected: ${response.walletName ?? ''}');
   }
 
   void _showSnack(String msg) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-    .showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          msg,
+          style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.backgroundBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.neonTeal.withValues(alpha: 0.5)),
+        ),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   @override
@@ -140,21 +158,25 @@ class _RenewalScreenState extends State<RenewalScreen> {
             color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
-      body: _processing
-      ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: AppColors.neonLime),
-            SizedBox(height: 16),
-            Text('Processing renewal...',
-                 style: TextStyle(color: Colors.white70)),
-          ],
-        ),
-      )
-      : SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+      body: ValueListenableBuilder<bool>(
+        valueListenable: _processingNotifier,
+        builder: (context, isProcessing, child) {
+          if (isProcessing) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: AppColors.neonLime),
+                  SizedBox(height: 16),
+                  Text('Processing renewal...',
+                      style: TextStyle(color: Colors.white70)),
+                ],
+              ),
+            );
+          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildMemberCard(),
@@ -173,16 +195,17 @@ class _RenewalScreenState extends State<RenewalScreen> {
             const SizedBox(height: 32),
             _buildPayButton(),
             const SizedBox(height: 12),
-            const Center(
-              child: Text(
-                'Secured by Razorpay',
-                style:
-                TextStyle(color: Colors.white38, fontSize: 12),
+              const Center(
+                child: Text(
+                  'Secured by Razorpay',
+                  style:
+                  TextStyle(color: Colors.white38, fontSize: 12),
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      }),
     );
   }
 

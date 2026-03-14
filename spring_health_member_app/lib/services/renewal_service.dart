@@ -2,7 +2,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RenewalService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// Writes a renewal payment record and extends member expiry.
   /// [memberId]    — Firestore doc ID in `members`
@@ -13,7 +12,7 @@ class RenewalService {
   /// [amount]      — amount paid online (paise converted to rupees)
   /// [razorpayPaymentId] — Razorpay payment ID for reference
   /// [currentExpiry] — member's current expiry date
-  Future<void> recordRenewal({
+  Future<void> processSuccessfulRenewal({
     required String memberId,
     required String memberPhone,
     required String branch,
@@ -29,26 +28,26 @@ class RenewalService {
     final baseDate = currentExpiry.isBefore(now) ? now : currentExpiry;
     final newExpiry = baseDate.add(Duration(days: planDays));
 
-    final batch = _db.batch();
+    final batch = FirebaseFirestore.instance.batch();
 
     // 1. Payment record (mirrors PaymentModel schema)
-    final paymentRef = _db.collection('payments').doc();
+    final paymentRef = FirebaseFirestore.instance.collection('payments').doc();
     batch.set(paymentRef, {
       'memberId': memberId,
       'memberPhone': memberPhone,
       'branch': branch,
       'amount': amount,
-      'mode': 'online',
-      'type': 'renewal',
+      'paymentMode': 'Online',
+      'type': 'Renewal',
       'plan': plan,
       'razorpayPaymentId': razorpayPaymentId,
-      'createdAt': Timestamp.fromDate(now),
+      'timestamp': Timestamp.fromDate(now),
       'month': now.month,
       'year': now.year,
     });
 
     // 2. Update member expiry + isActive
-    final memberRef = _db.collection('members').doc(memberId);
+    final memberRef = FirebaseFirestore.instance.collection('members').doc(memberId);
     batch.update(memberRef, {
       'expiryDate': Timestamp.fromDate(newExpiry),
       'isActive': true,

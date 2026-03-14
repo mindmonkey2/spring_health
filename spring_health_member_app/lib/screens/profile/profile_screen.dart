@@ -241,7 +241,9 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Container(
+              Hero(
+                tag: '${_currentMember.id}_profile',
+                child: Container(
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
@@ -264,6 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> { // ✅ FIXED generic
                       _buildDefaultAvatar(),
                     )
                     : _buildDefaultAvatar(),
+                  ),
                   ),
                 ),
                 // Camera Icon Overlay

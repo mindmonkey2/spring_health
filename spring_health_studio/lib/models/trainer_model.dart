@@ -19,7 +19,7 @@ class TrainerModel {
   final DateTime createdAt;
   final String? address;
 
-  TrainerModel({
+  const TrainerModel({
     required this.id,
     required this.name,
     required this.phone,

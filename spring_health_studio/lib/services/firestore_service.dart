@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../models/member_model.dart';
 import '../models/attendance_model.dart';
 import '../models/expense_model.dart';
+import '../models/diet_plan_model.dart';
+import '../models/trainer_feedback_model.dart';
 import '../models/payment_model.dart';
 import '../models/trainer_model.dart';
 import '../models/document_sent_model.dart';
@@ -1212,6 +1214,79 @@ class FirestoreService {
       return {};
     }
   }
+
+  // ==================== TRAINER ROLE METHODS ====================
+
+  /// Fetch members assigned to the logged-in trainer respecting branch
+  Future<List<MemberModel>> getAssignedMembers(String branch, List<String> assignedIds) async {
+    if (assignedIds.isEmpty) return [];
+    try {
+      final snapshot = await _firestore.collection('members')
+          .where('branch', isEqualTo: branch)
+          .where('isArchived', isEqualTo: false)
+          .where(FieldPath.documentId, whereIn: assignedIds)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => MemberModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting assigned members: $e');
+      return [];
+    }
+  }
+
+  /// Create or update a diet plan using WriteBatch
+  Future<void> saveDietPlan(DietPlanModel dietPlan) async {
+    try {
+      final batch = _firestore.batch();
+      final docRef = _firestore.collection('dietPlans').doc(dietPlan.id);
+
+      batch.set(docRef, dietPlan.toMap(), SetOptions(merge: true));
+
+      await batch.commit();
+    } catch (e) {
+      debugPrint('Error saving diet plan: $e');
+      rethrow;
+    }
+  }
+
+  /// Get diet plans for a member
+  Stream<List<DietPlanModel>> getDietPlans(String memberId) {
+    return _firestore.collection('dietPlans')
+        .where('memberId', isEqualTo: memberId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => DietPlanModel.fromMap(doc.data(), doc.id))
+            .toList());
+  }
+
+  /// Fetch trainer feedback
+  Stream<List<TrainerFeedbackModel>> getTrainerFeedback(String trainerId) {
+    return _firestore.collection('trainers')
+        .doc(trainerId)
+        .collection('feedback')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => TrainerFeedbackModel.fromMap(doc.data(), doc.id))
+            .toList());
+  }
+
+  /// Reply to trainer feedback
+  Future<void> replyToFeedback(String trainerId, String feedbackId, String reply) async {
+    try {
+      await _firestore.collection('trainers')
+          .doc(trainerId)
+          .collection('feedback')
+          .doc(feedbackId)
+          .update({'trainerReply': reply});
+    } catch (e) {
+      debugPrint('Error replying to feedback: $e');
+      rethrow;
+    }
+  }
+
 
   Future<Map<String, dynamic>> getProfitLoss(
     String? branch,

@@ -5,6 +5,8 @@ import '../../services/firestore_service.dart';
 import '../../theme/app_colors.dart';
 import '../owner/owner_dashboard.dart';
 import '../receptionist/receptionist_dashboard.dart';
+import '../trainers/trainer_dashboard_screen.dart';
+import '../../models/user_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -87,6 +89,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       if (role == 'Owner') {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const OwnerDashboard()),
+        );
+      } else if (role == 'Trainer') {
+        final userModel = UserModel(
+          uid: userCredential.user!.uid,
+          email: userData['email'] as String? ?? '',
+          role: role,
+          branch: userData['branch'] as String?,
+          createdAt: DateTime.now(), // Fallback for existing users if missing in map
+        );
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => TrainerDashboardScreen(user: userModel)),
         );
       } else {
         Navigator.of(context).pushReplacement(

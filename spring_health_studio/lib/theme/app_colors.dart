@@ -21,7 +21,10 @@ class AppColors {
   static const Color coral = Color(0xFFFF6B6B);
   static const Color coralDark = Color(0xFFEE5A6F);
   
-  static const Color gold = Color(0xFFFFE66D);
+  static const Color gold = Color(0xFFFFD700);
+  static const Color silver   = Color(0xFFC0C0C0);
+  static const Color bronze   = Color(0xFFCD7F32);
+  static const Color whatsApp = Color(0xFF25D366);
   static const Color goldDark = Color(0xFFFFAA00);
   
   static const Color pink = Color(0xFFFF6B9D);

@@ -8,6 +8,7 @@ import '../../utils/validators.dart';
 import '../../utils/date_utils.dart' as app_date_utils;
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/payment_mode_selector.dart';
+import '../../theme/app_colors.dart';
 
 class EditMemberScreen extends StatefulWidget {
   final MemberModel member;
@@ -174,7 +175,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cash + UPI amounts must equal Final Amount'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -250,7 +251,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(widget.isRejoin ? 'Member rejoined successfully' : 'Member updated successfully'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
 
@@ -258,7 +259,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) {
@@ -275,7 +276,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6), Color(0xFFEC4899)],
+              colors: [AppColors.primary, AppColors.turquoise],
             ),
           ),
         ),
@@ -293,13 +294,13 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: AppColors.infoLight,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue[200]!),
+                  border: Border.all(color: AppColors.infoLight),
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue),
+                    Icon(Icons.info_outline, color: AppColors.info),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -325,7 +326,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                   prefixIcon: const Icon(Icons.person),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: AppColors.background,
                 ),
                 validator: (value) => Validators.validateRequired(value, 'Name'),
                 enabled: !widget.isRejoin,
@@ -339,7 +340,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                   prefixIcon: const Icon(Icons.phone),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: AppColors.background,
                 ),
                 validator: Validators.validatePhone,
                 enabled: !widget.isRejoin,
@@ -353,7 +354,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                   prefixIcon: const Icon(Icons.email),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: AppColors.background,
                 ),
                 validator: Validators.validateEmail,
                 enabled: !widget.isRejoin,
@@ -398,7 +399,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                     prefixIcon: const Icon(Icons.event_busy),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true,
-                    fillColor: Colors.blue[50],
+                    fillColor: AppColors.infoLight,
                   ),
                   child: Text(
                     app_date_utils.DateUtils.formatDate(_expiryDate!),
@@ -417,7 +418,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: AppColors.infoLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -429,7 +430,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                            color: AppColors.info,
                           ),
                         ),
                       ],
@@ -448,7 +449,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                             prefixText: '₹ ',
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             filled: true,
-                            fillColor: Colors.grey[50],
+                            fillColor: AppColors.background,
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -463,7 +464,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                             prefixText: '₹ ',
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             filled: true,
-                            fillColor: Colors.grey[50],
+                            fillColor: AppColors.background,
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -475,7 +476,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.green[50],
+                      color: AppColors.successLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -490,7 +491,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: AppColors.success,
                           ),
                         ),
                       ],
@@ -547,7 +548,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
         onPressed: _saveMember,
         icon: const Icon(Icons.save),
         label: Text(widget.isRejoin ? 'Rejoin' : 'Save'),
-        backgroundColor: const Color(0xFF6366F1),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

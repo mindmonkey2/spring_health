@@ -9,6 +9,7 @@ import '../../../../utils/date_utils.dart' as appdateutils;
 import 'add_trainer_screen.dart';
 import '../../../../services/trainer_feedback_service.dart';
 import '../../models/trainer_feedback_model.dart';
+import '../../theme/app_colors.dart';
 
 class TrainerDetailScreen extends StatefulWidget {
   final String trainerId;
@@ -26,13 +27,6 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
   late TabController _tabController;
   TrainerModel? _cachedTrainer; // FIX: cache so setState doesn't re-fetch
   bool _salaryVisible = false;  // FIX: salary privacy toggle
-
-  // Wellness & Balance palette
-  static const Color sageGreen = Color(0xFF10B981);
-  static const Color tealAqua  = Color(0xFF14B8A6);
-  static const Color navyBlue  = Color(0xFF1E3A8A);
-  //static const Color softCoral = Color(0xFFF87171);
-  static const Color warmYellow = Color(0xFFFCD34D);
 
   @override
   void initState() {
@@ -79,7 +73,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Row(children: [
-          Icon(Icons.person_add, color: sageGreen),
+          Icon(Icons.person_add, color: AppColors.success),
           SizedBox(width: 12),
           Text('Assign Member'),
         ]),
@@ -103,11 +97,11 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor:
-                              sageGreen.withValues(alpha: 0.1),
+                              AppColors.success.withValues(alpha: 0.1),
                           child: Text(
                             member.name.substring(0, 1).toUpperCase(),
                             style: const TextStyle(
-                                color: sageGreen,
+                                color: AppColors.success,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -115,7 +109,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                         subtitle: Text('${member.category} · ${member.plan}',
                             style: const TextStyle(fontSize: 12)),
                         trailing: const Icon(Icons.add_circle,
-                            color: sageGreen),
+                            color: AppColors.success),
                         onTap: () async {
                           Navigator.pop(ctx);
                           await assignMember(trainer, member);
@@ -143,13 +137,13 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${member.name} assigned to ${trainer.name}'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
       ));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error: $e'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
       ));
     }
   }
@@ -169,7 +163,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red),
+                backgroundColor: AppColors.error),
             child: const Text('Remove'),
           ),
         ],
@@ -182,13 +176,13 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${member.name} removed from ${trainer.name}'),
-        backgroundColor: Colors.orange,
+        backgroundColor: AppColors.warning,
       ));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error: $e'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
       ));
     }
   }
@@ -210,7 +204,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    trainer.isActive ? Colors.orange : sageGreen),
+                    trainer.isActive ? AppColors.warning : AppColors.success),
             child: Text(trainer.isActive ? 'Deactivate' : 'Activate'),
           ),
         ],
@@ -225,13 +219,13 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             'Trainer ${trainer.isActive ? 'deactivated' : 'activated'}'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
       ));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Error: $e'),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
       ));
     }
   }
@@ -240,17 +234,17 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
   @override
   Widget build(BuildContext context) {
     if (_cachedTrainer == null) {
-      return Scaffold(
-        backgroundColor: Colors.grey.shade50,
-        body: const Center(
-          child: CircularProgressIndicator(color: sageGreen),
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.success),
         ),
       );
     }
     final trainer = _cachedTrainer!;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: AppColors.background,
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           // ── Sliver App Bar ─────────────────────────────────────
@@ -258,7 +252,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
             expandedHeight: 220,
             floating: false,
             pinned: true,
-            backgroundColor: sageGreen,
+            backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
             actions: [
               // Quick call
@@ -299,7 +293,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                             : Icons.check_circle,
                         size: 20,
                         color:
-                            trainer.isActive ? Colors.orange : sageGreen,
+                            trainer.isActive ? AppColors.warning : AppColors.success,
                       ),
                       const SizedBox(width: 12),
                       Text(trainer.isActive ? 'Deactivate' : 'Activate'),
@@ -325,7 +319,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [sageGreen, tealAqua],
+                    colors: [AppColors.success, AppColors.turquoise],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -377,8 +371,8 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                   height: 18,
                                   decoration: BoxDecoration(
                                     color: trainer.isActive
-                                        ? Colors.green
-                                        : Colors.red,
+                                        ? AppColors.success
+                                        : AppColors.error,
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                         color: Colors.white, width: 2),
@@ -428,7 +422,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
         style: const TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.bold,
-            color: sageGreen),
+            color: AppColors.success),
       );
 
   // ── Tab 1: Overview ───────────────────────────────────────────────
@@ -451,11 +445,11 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                     horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: trainer.isActive
-                      ? sageGreen.withValues(alpha: 0.1)
-                      : Colors.red.withValues(alpha: 0.1),
+                      ? AppColors.success.withValues(alpha: 0.1)
+                      : AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: trainer.isActive ? sageGreen : Colors.red,
+                    color: trainer.isActive ? AppColors.success : AppColors.error,
                     width: 2,
                   ),
                 ),
@@ -464,14 +458,14 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                       trainer.isActive
                           ? Icons.check_circle
                           : Icons.block,
-                      color: trainer.isActive ? sageGreen : Colors.red,
+                      color: trainer.isActive ? AppColors.success : AppColors.error,
                       size: 20),
                   const SizedBox(width: 8),
                   Text(
                     trainer.isActive ? 'Active Trainer' : 'Inactive',
                     style: TextStyle(
                         color:
-                            trainer.isActive ? sageGreen : Colors.red,
+                            trainer.isActive ? AppColors.success : AppColors.error,
                         fontWeight: FontWeight.bold,
                         fontSize: 14),
                   ),
@@ -486,13 +480,13 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                   Expanded(
                     child: buildStatCard(
                         'Members', '$memberCount',
-                        Icons.people, sageGreen),
+                        Icons.people, AppColors.success),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: buildStatCard(
                         'Experience', trainer.experience,
-                        Icons.timeline, tealAqua),
+                        Icons.timeline, AppColors.turquoise),
                   ),
                   const SizedBox(width: 12),
                   // Salary with eye toggle
@@ -518,7 +512,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                               _salaryVisible
                                   ? Icons.currency_rupee
                                   : Icons.visibility_off,
-                              color: navyBlue,
+                              color: AppColors.info,
                               size: 28),
                           const SizedBox(height: 8),
                           Text(
@@ -528,13 +522,13 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                             style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: navyBlue),
+                                color: AppColors.info),
                           ),
                           const SizedBox(height: 4),
                           const Text('Salary',
                               style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey)),
+                                  color: AppColors.textSecondary)),
                         ]),
                       ),
                     ),
@@ -552,7 +546,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                     child: _contactButton(
                       icon: Icons.call_rounded,
                       label: 'Call',
-                      color: sageGreen,
+                      color: AppColors.success,
                       onTap: () => _callTrainer(trainer.phone),
                     ),
                   ),
@@ -561,7 +555,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                     child: _contactButton(
                       icon: Icons.chat_rounded,
                       label: 'WhatsApp',
-                      color: const Color(0xFF25D366),
+                      color: AppColors.whatsApp,
                       onTap: () => _whatsappTrainer(trainer.phone),
                     ),
                   ),
@@ -624,7 +618,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: sageGreen));
+              child: CircularProgressIndicator(color: AppColors.success));
         }
         final members = snapshot.data ?? [];
 
@@ -633,7 +627,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
             // Header bar
             Container(
               padding: const EdgeInsets.all(16),
-              color: sageGreen.withValues(alpha: 0.06),
+              color: AppColors.success.withValues(alpha: 0.06),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -642,7 +636,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [sageGreen, tealAqua]),
+                            colors: [AppColors.success, AppColors.turquoise]),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.people,
@@ -660,7 +654,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                     icon: const Icon(Icons.add, size: 18),
                     label: const Text('Assign'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: sageGreen,
+                      backgroundColor: AppColors.success,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
@@ -710,16 +704,16 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                   horizontal: 12, vertical: 6),
                           leading: CircleAvatar(
                             backgroundColor: isActive
-                                ? sageGreen.withValues(alpha: 0.1)
-                                : Colors.red.withValues(alpha: 0.1),
+                                ? AppColors.success.withValues(alpha: 0.1)
+                                : AppColors.error.withValues(alpha: 0.1),
                             child: Text(
                               member.name
                                   .substring(0, 1)
                                   .toUpperCase(),
                               style: TextStyle(
                                   color: isActive
-                                      ? sageGreen
-                                      : Colors.red,
+                                      ? AppColors.success
+                                      : AppColors.error,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -738,9 +732,9 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                     horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: isActive
-                                      ? sageGreen
+                                      ? AppColors.success
                                           .withValues(alpha: 0.1)
-                                      : Colors.red
+                                      : AppColors.error
                                           .withValues(alpha: 0.1),
                                   borderRadius:
                                       BorderRadius.circular(8),
@@ -751,14 +745,14 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isActive
-                                          ? sageGreen
-                                          : Colors.red),
+                                          ? AppColors.success
+                                          : AppColors.error),
                                 ),
                               ),
                               IconButton(
                                 icon: const Icon(
                                     Icons.remove_circle,
-                                    color: Colors.red),
+                                    color: AppColors.error),
                                 iconSize: 20,
                                 onPressed: () =>
                                     removeMember(trainer, member),
@@ -782,7 +776,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: sageGreen));
+              child: CircularProgressIndicator(color: AppColors.success));
         }
         final feedbacks = snapshot.data ?? [];
 
@@ -801,7 +795,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [sageGreen, tealAqua],
+                  colors: [AppColors.success, AppColors.turquoise],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -825,7 +819,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                           i < avgRating.round()
                               ? Icons.star_rounded
                               : Icons.star_outline_rounded,
-                          color: warmYellow,
+                          color: AppColors.warning,
                           size: 24,
                         );
                       }),
@@ -880,7 +874,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                     Row(children: [
                                       CircleAvatar(
                                         radius: 18,
-                                        backgroundColor: sageGreen
+                                        backgroundColor: AppColors.success
                                             .withValues(alpha: 0.1),
                                         child: Text(
                                           (fb.memberName.isNotEmpty
@@ -889,7 +883,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                               .substring(0, 1)
                                               .toUpperCase(),
                                           style: const TextStyle(
-                                              color: sageGreen,
+                                              color: AppColors.success,
                                               fontWeight:
                                                   FontWeight.bold),
                                         ),
@@ -927,7 +921,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                                           i < fb.rating
                                               ? Icons.star_rounded
                                               : Icons.star_outline_rounded,
-                                          color: warmYellow,
+                                          color: AppColors.warning,
                                           size: 16,
                                         );
                                       }),
@@ -1015,7 +1009,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
             overflow: TextOverflow.ellipsis),
         const SizedBox(height: 4),
         Text(label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
       ]),
     );
   }
@@ -1045,7 +1039,7 @@ class _TrainerDetailScreenState extends State<TrainerDetailScreen>
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                      colors: [sageGreen, tealAqua]),
+                      colors: [AppColors.success, AppColors.turquoise]),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: Colors.white, size: 20),

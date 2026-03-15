@@ -4,6 +4,7 @@ import '../../models/trainer_model.dart';
 import '../../services/firestore_service.dart';
 import 'add_trainer_screen.dart';
 import 'trainer_detail_screen.dart';
+import '../../theme/app_colors.dart';
 
 class TrainersListScreen extends StatefulWidget {
   final String? branch;
@@ -20,11 +21,6 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
 
   String _searchQuery = '';
   String _selectedSpecialization = 'All';
-
-  // Colors
-  static const Color sageGreen = Color(0xFF10B981);
-  static const Color tealAqua = Color(0xFF14B8A6);
-  static const Color warmYellow = Color(0xFFFCD34D);
 
   @override
   void dispose() {
@@ -45,13 +41,13 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(widget.branch != null ? '${widget.branch} Trainers' : 'All Trainers'),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [sageGreen, tealAqua],
+              colors: [AppColors.success, AppColors.turquoise],
             ),
           ),
         ),
@@ -80,7 +76,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                   controller: _searchController,
                   decoration: InputDecoration(
                     hintText: 'Search trainers by name or phone...',
-                    prefixIcon: const Icon(Icons.search, color: sageGreen),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.success),
                     suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
                       icon: const Icon(Icons.clear),
@@ -102,10 +98,10 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: sageGreen, width: 2),
+                      borderSide: const BorderSide(color: AppColors.success, width: 2),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: AppColors.background,
                   ),
                   onChanged: (value) {
                     setState(() => _searchQuery = value);
@@ -141,7 +137,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: sageGreen),
+                    child: CircularProgressIndicator(color: AppColors.success),
                   );
                 }
 
@@ -212,7 +208,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
             // Refresh handled by StreamBuilder
           }
         },
-        backgroundColor: sageGreen,
+        backgroundColor: AppColors.success,
         foregroundColor: Colors.white,
           icon: const Icon(Icons.person_add),
           label: const Text('Add Trainer'),
@@ -232,16 +228,16 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
             _selectedSpecialization = label;
           });
         },
-        selectedColor: sageGreen.withValues(alpha: 0.2),
-        checkmarkColor: sageGreen,
+        selectedColor: AppColors.success.withValues(alpha: 0.2),
+        checkmarkColor: AppColors.success,
         backgroundColor: Colors.white,
         labelStyle: TextStyle(
           fontSize: 12,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? sageGreen : Colors.grey[700],
+          color: isSelected ? AppColors.success : AppColors.textSecondary,
         ),
         side: BorderSide(
-          color: isSelected ? sageGreen : Colors.grey[300]!,
+          color: isSelected ? AppColors.success : AppColors.border,
         ),
       ),
     );
@@ -271,7 +267,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
               // Avatar
               CircleAvatar(
                 radius: 32,
-                backgroundColor: sageGreen.withValues(alpha: 0.1),
+                backgroundColor: AppColors.success.withValues(alpha: 0.1),
                 child: trainer.photoUrl != null
                 ? ClipOval(
                   child: Image.network(
@@ -285,7 +281,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: sageGreen,
+                          color: AppColors.success,
                         ),
                       );
                     },
@@ -296,7 +292,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: sageGreen,
+                    color: AppColors.success,
                   ),
                 ),
               ),
@@ -323,8 +319,8 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: trainer.isActive
-                            ? sageGreen.withValues(alpha: 0.1)
-                            : Colors.red.withValues(alpha: 0.1),
+                            ? AppColors.success.withValues(alpha: 0.1)
+                            : AppColors.error.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -332,7 +328,7 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: trainer.isActive ? sageGreen : Colors.red,
+                              color: trainer.isActive ? AppColors.success : AppColors.error,
                             ),
                           ),
                         ),
@@ -370,13 +366,13 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: tealAqua),
+                        const Icon(Icons.location_on, size: 14, color: AppColors.turquoise),
                         const SizedBox(width: 4),
                         Text(
                           trainer.branch,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: tealAqua,
+                            color: AppColors.turquoise,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -384,19 +380,19 @@ class _TrainersListScreenState extends State<TrainersListScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: warmYellow.withValues(alpha: 0.2),
+                            color: AppColors.warning.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.people, size: 12, color: Colors.orange),
+                              const Icon(Icons.people, size: 12, color: AppColors.warning),
                               const SizedBox(width: 4),
                               Text(
                                 '${trainer.assignedMembers.length} members',
                                 style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.orange,
+                                  color: AppColors.warning,
                                 ),
                               ),
                             ],

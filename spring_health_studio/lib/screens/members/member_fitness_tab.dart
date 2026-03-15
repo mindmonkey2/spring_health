@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/workout_summary_model.dart';
 import '../../services/member_fitness_service.dart';
+import '../../theme/app_colors.dart';
 
 class MemberFitnessTab extends StatefulWidget {
   const MemberFitnessTab({super.key, required this.memberId});
@@ -15,9 +16,6 @@ class MemberFitnessTab extends StatefulWidget {
 }
 
 class _MemberFitnessTabState extends State<MemberFitnessTab> {
-  static const Color _green  = Color(0xFF10B981);
-  static const Color _teal   = Color(0xFF14B8A6);
-  //static const Color _yellow = Color(0xFFFCD34D);
 
   final _svc = MemberFitnessService();
 
@@ -34,7 +32,7 @@ class _MemberFitnessTabState extends State<MemberFitnessTab> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      color: _green,
+      color: AppColors.success,
       onRefresh: () async {
         setState(() {
           _workoutsFuture = _svc.getWorkouts(widget.memberId);
@@ -84,14 +82,14 @@ class _MemberFitnessTabState extends State<MemberFitnessTab> {
         return Container(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [_green, _teal],
+              colors: [AppColors.success, AppColors.turquoise],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: _green.withValues(alpha: 0.35),
+                color: AppColors.success.withValues(alpha: 0.35),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
@@ -239,7 +237,7 @@ class _MemberFitnessTabState extends State<MemberFitnessTab> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [_green, _teal]),
+                        colors: [AppColors.success, AppColors.turquoise]),
                         borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.fitness_center_rounded,
@@ -255,12 +253,12 @@ class _MemberFitnessTabState extends State<MemberFitnessTab> {
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _green.withValues(alpha: 0.1),
+                        color: AppColors.success.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text('${workouts.length} sessions',
                                   style: const TextStyle(
-                                    color: _green,
+                                    color: AppColors.success,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12)),
                   ),
@@ -328,9 +326,6 @@ class _WorkoutTile extends StatelessWidget {
 
   final WorkoutSummaryModel workout;
 
-  static const Color _green = Color(0xFF10B981);
-  static const Color _teal  = Color(0xFF14B8A6);
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -353,7 +348,7 @@ class _WorkoutTile extends StatelessWidget {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_green, _teal]),
+                            colors: [AppColors.success, AppColors.turquoise]),
                             borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -378,15 +373,15 @@ class _WorkoutTile extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFCD34D).withValues(alpha: 0.2),
+                          color: AppColors.warning.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFFFCD34D),
+                            color: AppColors.warning,
                             width: 1.2),
                         ),
                         child: Text('+${workout.xpEarned} XP',
                                     style: const TextStyle(
-                                      color: Color(0xFFD97706),
+                                      color: AppColors.warning,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12)),
                     ),
@@ -427,7 +422,7 @@ class _WorkoutTile extends StatelessWidget {
 
   Widget _stat(IconData icon, String value, String label) {
     return Column(children: [
-      Icon(icon, size: 18, color: _green),
+      Icon(icon, size: 18, color: AppColors.success),
       const SizedBox(height: 3),
       Text(value,
            style: const TextStyle(
@@ -460,7 +455,7 @@ class _LoadingCard extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Color(0xFF10B981)),
+                  color: AppColors.success),
               ),
               const SizedBox(width: 14),
               Text(label,

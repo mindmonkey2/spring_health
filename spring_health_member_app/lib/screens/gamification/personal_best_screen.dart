@@ -14,14 +14,14 @@ class _Rank {
 }
 
 const _ranks = [
-  _Rank('E',   Color(0xFF9E9E9E), 0),
-  _Rank('D',   Color(0xFF66BB6A), 500),
-  _Rank('C',   Color(0xFF29B6F6), 1500),
-  _Rank('B',   Color(0xFFAB47BC), 3500),
-  _Rank('A',   Color(0xFFFFCA28), 7000),
-  _Rank('S',   Color(0xFFFF7043), 13000),
-  _Rank('SS',  Color(0xFFFF1744), 25000),
-  _Rank('SSS', Color(0xFFD500F9), 50000),
+  _Rank('E',   AppColors.rankE, 0),
+  _Rank('D',   AppColors.rankD, 500),
+  _Rank('C',   AppColors.rankC, 1500),
+  _Rank('B',   AppColors.rankB, 3500),
+  _Rank('A',   AppColors.rankA, 7000),
+  _Rank('S',   AppColors.rankS, 13000),
+  _Rank('SS',  AppColors.rankSS, 25000),
+  _Rank('SSS', AppColors.rankSSS, 50000),
 ];
 
 _Rank _rankForXp(int xp) {
@@ -339,12 +339,12 @@ class _ChecklistBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isComplete
-              ? [const Color(0xFFFFD700).withValues(alpha: 0.2), const Color(0xFFFF8C00).withValues(alpha: 0.1)]
+              ? [AppColors.gold.withValues(alpha: 0.2), AppColors.warning.withValues(alpha: 0.1)]
               : [accentColor.withValues(alpha: 0.15), accentColor.withValues(alpha: 0.05)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isComplete ? const Color(0xFFFFD700) : accentColor.withValues(alpha: 0.4),
+          color: isComplete ? AppColors.gold : accentColor.withValues(alpha: 0.4),
         ),
       ),
       child: Row(
@@ -361,7 +361,7 @@ class _ChecklistBanner extends StatelessWidget {
                 Text(
                   isComplete ? 'Daily Checklist Complete!' : 'Daily Checklist',
                   style: TextStyle(
-                    color: isComplete ? const Color(0xFFFFD700) : AppColors.textPrimary,
+                    color: isComplete ? AppColors.gold : AppColors.textPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
@@ -513,7 +513,7 @@ class _ExerciseCardState extends State<_ExerciseCard> {
   void _showXpToast(int xp, bool isPB) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: isPB ? const Color(0xFFFFD700) : AppColors.neonLime,
+        backgroundColor: isPB ? AppColors.gold : AppColors.neonLime,
         content: Row(
           children: [
             Text(isPB ? '🏆 NEW PERSONAL BEST! ' : '✅ Logged! ',
@@ -675,7 +675,7 @@ class _ProgressTabState extends State<_ProgressTab> {
               const SizedBox(width: 10),
               _StatChip(label: 'Entries', value: '${record.history.length}', color: AppColors.neonLime),
               const SizedBox(width: 10),
-              _StatChip(label: 'XP', value: '${record.totalXpEarned}', color: const Color(0xFFFFD700)),
+              _StatChip(label: 'XP', value: '${record.totalXpEarned}', color: AppColors.gold),
             ],
           ),
 
@@ -849,7 +849,7 @@ class _ChartPainter extends CustomPainter {
       final x = xStep * i;
       final y = size.height - ((entries[i].value - minVal) / range) * size.height * 0.85 - 10;
       dotPaint.color = entries[i].isPersonalBest
-          ? const Color(0xFFFFD700)
+          ? AppColors.gold
           : color.withValues(alpha: 0.7);
       canvas.drawCircle(Offset(x, y), entries[i].isPersonalBest ? 6 : 4, dotPaint);
     }

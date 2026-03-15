@@ -14,6 +14,19 @@ class AppColors {
   static const Color turquoise = Color(0xFF14B8A6);  // ⬅️ ADD THIS
   static const Color textPrimary = Color(0xFFFFFFFF); // ⬅️ ADD THIS
 
+  static const Color gold    = Color(0xFFFFD700);
+  static const Color silver  = Color(0xFFC0C0C0);
+  static const Color bronze  = Color(0xFFCD7F32);
+  static const Color rankSSS = Color(0xFFFF6B35);
+  static const Color rankSS  = Color(0xFFFF9500);
+  static const Color rankS   = Color(0xFFFFD700);
+  static const Color rankA   = Color(0xFF4ADE80);
+  static const Color rankB   = Color(0xFF38BDF8);
+  static const Color rankC   = Color(0xFF818CF8);
+  static const Color rankD   = Color(0xFFA1A1AA);
+  static const Color rankE   = Color(0xFF52525B);
+  static const Color whatsApp = Color(0xFF25D366);
+
   // Functional Colors
   static const Color white = Color(0xFFFAFAFA);              // Off-white for text
   static const Color gray100 = Color(0xFFF4F4F5);

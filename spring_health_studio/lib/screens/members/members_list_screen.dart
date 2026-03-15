@@ -27,11 +27,6 @@ class _MembersListScreenState extends State<MembersListScreen> {
   String _selectedFilter = 'All';
   String _searchQuery = '';
 
-  // Using centralized theme colors
-  static const Color sageGreen = AppColors.success;
-  static const Color tealAqua = AppColors.turquoise;
-  static const Color warmYellow = AppColors.warning;
-
   @override
   void initState() {
     super.initState();
@@ -123,7 +118,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [sageGreen, tealAqua],
+              colors: [AppColors.success, AppColors.turquoise],
             ),
           ),
         ),
@@ -196,8 +191,8 @@ class _MembersListScreenState extends State<MembersListScreen> {
                           });
                         }
                       },
-                      selectedColor: sageGreen.withValues(alpha: 0.2), // ✅ Updated
-                      checkmarkColor: sageGreen, // ✅ Updated
+                      selectedColor: AppColors.success.withValues(alpha: 0.2), // ✅ Updated
+                      checkmarkColor: AppColors.success, // ✅ Updated
                     ),
                   );
                 }).toList(),
@@ -284,7 +279,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                     // Count Banner - ✅ Updated color
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      color: sageGreen.withValues(alpha: 0.1),
+                      color: AppColors.success.withValues(alpha: 0.1),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -315,7 +310,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                         onRefresh: () async {
                           setState(() {});
                         },
-                        color: sageGreen, // ✅ Updated
+                        color: AppColors.success, // ✅ Updated
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
                           itemCount: filteredMembers.length,
@@ -349,14 +344,14 @@ class _MembersListScreenState extends State<MembersListScreen> {
                                       CircleAvatar(
                                         radius: 28,
                                         backgroundColor: isActive
-                                        ? sageGreen.withValues(alpha: 0.2)
-                                        : Colors.red.withValues(alpha: 0.2),
+                                        ? AppColors.success.withValues(alpha: 0.2)
+                                        : AppColors.error.withValues(alpha: 0.2),
                                         child: Text(
                                           member.name.substring(0, 1).toUpperCase(),
                                           style: TextStyle(
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
-                                            color: isActive ? sageGreen : Colors.red,
+                                            color: isActive ? AppColors.success : AppColors.error,
                                           ),
                                         ),
                                       ),
@@ -387,7 +382,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                                                       vertical: 2,
                                                     ),
                                                     decoration: BoxDecoration(
-                                                      color: warmYellow, // ✅ Updated
+                                                      color: AppColors.warning, // ✅ Updated
                                                       borderRadius: BorderRadius.circular(8),
                                                     ),
                                                     child: const Text(
@@ -429,14 +424,14 @@ class _MembersListScreenState extends State<MembersListScreen> {
                                                 Icon(
                                                   Icons.calendar_today,
                                                   size: 12,
-                                                  color: isActive ? sageGreen : Colors.red, // ✅ Updated
+                                                  color: isActive ? AppColors.success : AppColors.error, // ✅ Updated
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   'Expiry: ${app_date_utils.DateUtils.formatDate(member.expiryDate)}',
                                                   style: TextStyle(
                                                     fontSize: 12,
-                                                    color: isActive ? sageGreen : Colors.red[700], // ✅ Updated
+                                                    color: isActive ? AppColors.success : AppColors.error, // ✅ Updated
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -473,8 +468,8 @@ class _MembersListScreenState extends State<MembersListScreen> {
                                             ),
                                             decoration: BoxDecoration(
                                               color: isActive
-                                              ? sageGreen.withValues(alpha: 0.2)
-                                              : Colors.red.withValues(alpha: 0.2),
+                                              ? AppColors.success.withValues(alpha: 0.2)
+                                              : AppColors.error.withValues(alpha: 0.2),
                                               borderRadius: BorderRadius.circular(12),
                                             ),
                                             child: Text(
@@ -482,7 +477,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.bold,
-                                                color: isActive ? sageGreen : Colors.red[700],
+                                                color: isActive ? AppColors.success : AppColors.error,
                                               ),
                                             ),
                                           ),
@@ -522,7 +517,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
         },
         icon: const Icon(Icons.person_add),
         label: const Text('Add Member'),
-        backgroundColor: sageGreen,
+        backgroundColor: AppColors.success,
         foregroundColor: Colors.white,
       ),
     );

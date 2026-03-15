@@ -81,7 +81,7 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
             ],
             currentIndex: currentIndex,
             selectedItemColor: AppColors.primaryDark,
-            unselectedItemColor: Colors.grey,
+            unselectedItemColor: AppColors.textSecondary,
             onTap: _onItemTapped,
           );
         },
@@ -210,7 +210,7 @@ class _FeedbackTab extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
+                            const Icon(Icons.star, color: AppColors.warning, size: 16),
                             const SizedBox(width: 4),
                             Text(feedback.rating.toString()),
                           ],
@@ -225,7 +225,7 @@ class _FeedbackTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: AppColors.background,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(

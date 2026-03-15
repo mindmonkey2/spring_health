@@ -276,7 +276,7 @@ with SingleTickerProviderStateMixin {
         children: [
           // Crown above 1st
           Icon(Icons.auto_awesome_rounded,
-               color: Colors.amber, size: 28)
+               color: AppColors.warning, size: 28)
           .animate(onPlay: (c) => c.repeat(reverse: true))
           .scale(
             begin: const Offset(1, 1),
@@ -296,7 +296,7 @@ with SingleTickerProviderStateMixin {
                   second,
                   rank: 2,
                   height: 130,
-                  color: const Color(0xFFC0C0C0), // silver
+                  color: AppColors.silver, // silver
                   sortBy: sortBy,
                   delay: 200,
                 ),
@@ -308,7 +308,7 @@ with SingleTickerProviderStateMixin {
                   first,
                   rank: 1,
                   height: 170,
-                  color: Colors.amber,
+                  color: AppColors.gold,
                   sortBy: sortBy,
                   delay: 0,
                 ),
@@ -320,7 +320,7 @@ with SingleTickerProviderStateMixin {
                   third,
                   rank: 3,
                   height: 110,
-                  color: const Color(0xFFCD7F32), // bronze
+                  color: AppColors.bronze, // bronze
                   sortBy: sortBy,
                   delay: 400,
                 ),
@@ -480,11 +480,11 @@ with SingleTickerProviderStateMixin {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.military_tech_rounded,
-                         size: 10, color: Colors.amber),
+                         size: 10, color: AppColors.warning),
                     Text(
                       ' ${entry.earnedBadgeCount}',
                       style: const TextStyle(
-                        color: Colors.amber,
+                        color: AppColors.warning,
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
@@ -703,11 +703,11 @@ with SingleTickerProviderStateMixin {
                         if (entry.earnedBadgeCount > 0) ...[
                           const SizedBox(width: 8),
                           Icon(Icons.military_tech_rounded,
-                               size: 10, color: Colors.amber),
+                               size: 10, color: AppColors.warning),
                         Text(
                           ' ${entry.earnedBadgeCount}',
                           style: const TextStyle(
-                            color: Colors.amber,
+                            color: AppColors.warning,
                             fontSize: 10,
                           ),
                         ),

@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../models/admin_leaderboard_entry.dart';
 import '../../services/admin_gamification_service.dart';
+import '../../theme/app_colors.dart';
 
 class AdminGamificationDashboardScreen extends StatefulWidget {
   const AdminGamificationDashboardScreen({super.key});
@@ -17,15 +18,6 @@ class AdminGamificationDashboardScreen extends StatefulWidget {
 class _AdminGamificationDashboardScreenState
     extends State<AdminGamificationDashboardScreen>
     with SingleTickerProviderStateMixin {
-  // ── Theme ──────────────────────────────────────────────────────────────────
-  static const green = Color(0xFF10B981);
-  static const teal = Color(0xFF14B8A6);
-  static const orange = Color(0xFFF59E0B);
-  static const bg = Color(0xFFF1F5F9);
-  static const card = Colors.white;
-  static const textDark = Color(0xFF1E293B);
-  static const textMid = Color(0xFF64748B);
-
   late final TabController tab;
   final service = AdminGamificationService();
 
@@ -70,7 +62,7 @@ class _AdminGamificationDashboardScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: AppColors.background,
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [
           SliverAppBar(
@@ -80,7 +72,7 @@ class _AdminGamificationDashboardScreenState
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [green, teal]),
+                  gradient: LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
                 ),
                 child: const SafeArea(
                   child: Padding(
@@ -106,7 +98,7 @@ class _AdminGamificationDashboardScreenState
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
               child: Container(
-                color: teal,
+                color: AppColors.turquoise,
                 child: TabBar(
                   controller: tab,
                   indicatorColor: Colors.white,
@@ -126,7 +118,7 @@ class _AdminGamificationDashboardScreenState
           ),
         ],
         body: RefreshIndicator(
-          color: green,
+          color: AppColors.success,
           onRefresh: () async => refresh(),
           child: Column(
             children: [
@@ -134,14 +126,14 @@ class _AdminGamificationDashboardScreenState
                 challengesFuture: challengesFuture,
                 entriesFuture: entriesFuture,
                 gymStatsFuture: gymStatsFuture,
-                green: green,
-                teal: teal,
-                orange: orange,
+                green: AppColors.success,
+                teal: AppColors.turquoise,
+                orange: AppColors.warning,
               ),
               _BranchFilter(
                 selected: branchFilter,
                 branches: branches,
-                green: green,
+                green: AppColors.success,
                 onChanged: (b) => setState(() => branchFilter = b),
               ),
               const SizedBox(height: 6),
@@ -153,12 +145,12 @@ class _AdminGamificationDashboardScreenState
                     (i) => _LeaderboardTab(
                       future: futureForTab(i),
                       tabIndex: i,
-                      green: green,
-                      teal: teal,
-                      orange: orange,
-                      card: card,
-                      textDark: textDark,
-                      textMid: textMid,
+                      green: AppColors.success,
+                      teal: AppColors.turquoise,
+                      orange: AppColors.warning,
+                      card: AppColors.surface,
+                      textDark: AppColors.textPrimary,
+                      textMid: AppColors.textSecondary,
                       service: service,
                       onActionDone: refresh,
                     ),
@@ -466,9 +458,9 @@ class _LeaderboardTile extends StatelessWidget {
   });
 
   Color rankColor(int rank) {
-    if (rank == 1) return const Color(0xFFFFD700);
-    if (rank == 2) return const Color(0xFFC0C0C0);
-    if (rank == 3) return const Color(0xFFCD7F32);
+    if (rank == 1) return AppColors.gold;
+    if (rank == 2) return AppColors.silver;
+    if (rank == 3) return AppColors.bronze;
     return green;
   }
 
@@ -949,11 +941,11 @@ class _MemberGamificationSheet extends StatelessWidget {
   Widget _detailGrid() {
     final stats = [
       ('Total XP', '${entry.totalXp}', orange),
-      ('Current Streak', '${entry.currentStreak} days', Colors.deepOrange),
+      ('Current Streak', '${entry.currentStreak} days', AppColors.warning),
       ('Best Streak', '${entry.longestStreak} days', teal),
       ('Workouts', '${entry.totalWorkouts}', green),
-      ('Check-ins', '${entry.totalCheckIns}', Colors.indigo),
-      ('Badges', '${entry.badgeCount}', const Color(0xFFFFD700)),
+      ('Check-ins', '${entry.totalCheckIns}', AppColors.info),
+      ('Badges', '${entry.badgeCount}', AppColors.gold),
     ];
 
     return GridView.count(

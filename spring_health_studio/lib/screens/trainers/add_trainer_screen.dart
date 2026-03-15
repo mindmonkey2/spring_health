@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/trainer_model.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
 
 class AddTrainerScreen extends StatefulWidget {
   final String? branch;
@@ -35,10 +36,6 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
   DateTime? _dateOfBirth;
   DateTime _joiningDate = DateTime.now();
   bool _isProcessing = false;
-
-  // Colors
-  static const Color sageGreen = Color(0xFF10B981);
-  static const Color tealAqua = Color(0xFF14B8A6);
 
   // Specialization options
   final List<String> _specializations = [
@@ -104,7 +101,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: sageGreen,
+              primary: AppColors.success,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -128,7 +125,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: sageGreen,
+              primary: AppColors.success,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -182,7 +179,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
           content: Text(widget.trainer != null
           ? 'Trainer updated successfully!'
           : 'Trainer added successfully!'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
 
@@ -192,7 +189,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     } finally {
@@ -210,7 +207,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [sageGreen, tealAqua],
+              colors: [AppColors.success, AppColors.turquoise],
             ),
           ),
         ),
@@ -434,7 +431,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
                   child: ElevatedButton(
                     onPressed: _isProcessing ? null : _saveTrainer,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: sageGreen,
+                      backgroundColor: AppColors.success,
                       foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -477,7 +474,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [sageGreen, tealAqua],
+              colors: [AppColors.success, AppColors.turquoise],
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -498,7 +495,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  sageGreen.withValues(alpha: 0.4),
+                  AppColors.success.withValues(alpha: 0.4),
                   Colors.transparent,
                 ],
               ),

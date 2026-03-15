@@ -6,6 +6,7 @@ import '../../services/whatsapp_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/date_utils.dart' as app_date_utils;
 import 'member_detail_screen.dart';
+import '../../theme/app_colors.dart';
 
 class RejoinMemberScreen extends StatefulWidget {
   final MemberModel member;
@@ -37,11 +38,6 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
   late DateTime _expiryDate;
   bool _isProcessing = false;
   bool _hasSubmitted = false;
-
-  // Colors
-  static const Color sageGreen = Color(0xFF10B981);
-  static const Color tealAqua = Color(0xFF14B8A6);
-  static const Color warmYellow = Color(0xFFFCD34D);
 
   @override
   void initState() {
@@ -142,7 +138,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: sageGreen,
+              primary: AppColors.success,
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: Colors.black,
@@ -436,7 +432,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: sageGreen),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
             child: const Text('Continue'),
           ),
         ],
@@ -517,7 +513,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
           title: const Text('Rejoin Member'),
           flexibleSpace: Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [sageGreen, tealAqua]),
+            gradient: LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
             ),
           ),
           foregroundColor: Colors.white,
@@ -699,7 +695,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
         Card(
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          color: sageGreen.withValues(alpha: 0.05),
+          color: AppColors.success.withValues(alpha: 0.05),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -724,7 +720,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: sageGreen,
+                            color: AppColors.success,
                           ),
                         ),
                       ],
@@ -734,7 +730,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                       icon: const Icon(Icons.calendar_today, size: 18),
                       label: const Text('Change Date'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: sageGreen,
+                        backgroundColor: AppColors.success,
                         foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -750,11 +746,11 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: sageGreen.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 20, color: sageGreen),
+                      const Icon(Icons.info_outline, size: 20, color: AppColors.success),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -771,12 +767,12 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
         ),
         const SizedBox(height: 16),
         Card(
-          color: sageGreen.withValues(alpha: 0.1),
+          color: AppColors.success.withValues(alpha: 0.1),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                const Icon(Icons.event_available, size: 20, color: sageGreen),
+                const Icon(Icons.event_available, size: 20, color: AppColors.success),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -791,7 +787,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: sageGreen,
+                        color: AppColors.success,
                       ),
                     ),
                   ],
@@ -865,7 +861,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [sageGreen, tealAqua]),
+            gradient: const LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -900,8 +896,8 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
               label: Text(mode),
               selected: _paymentMode == mode,
               onSelected: _isProcessing ? null : (_) => _onPaymentModeChanged(mode),
-              selectedColor: sageGreen.withValues(alpha: 0.2),
-              checkmarkColor: sageGreen,
+              selectedColor: AppColors.success.withValues(alpha: 0.2),
+              checkmarkColor: AppColors.success,
             );
           }).toList(),
         ),
@@ -934,16 +930,16 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: warmYellow.withValues(alpha: 0.2),
+                    color: AppColors.warning.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: warmYellow, width: 2),
+                    border: Border.all(color: AppColors.warning, width: 2),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.warning, color: Color(0xFFF59E0B)),
+                          Icon(Icons.warning, color: AppColors.warningDark),
                           SizedBox(width: 8),
                           Text(
                             'Due Amount',
@@ -956,7 +952,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFF59E0B),
+                          color: AppColors.warningDark,
                         ),
                       ),
                     ],
@@ -973,9 +969,9 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
       child: ElevatedButton(
         onPressed: (_isProcessing || _hasSubmitted) ? null : _rejoinMember,
         style: ElevatedButton.styleFrom(
-          backgroundColor: sageGreen,
+          backgroundColor: AppColors.success,
           foregroundColor: Colors.white,
-            disabledBackgroundColor: Colors.grey,
+            disabledBackgroundColor: AppColors.textSecondary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 3,
         ),
@@ -1009,7 +1005,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [sageGreen, tealAqua]),
+            gradient: const LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: Colors.white, size: 20),
@@ -1025,7 +1021,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
             height: 2,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [sageGreen.withValues(alpha: 0.4), Colors.transparent],
+                colors: [AppColors.success.withValues(alpha: 0.4), Colors.transparent],
               ),
             ),
           ),

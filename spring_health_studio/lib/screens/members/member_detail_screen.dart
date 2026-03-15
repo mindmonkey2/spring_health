@@ -15,6 +15,7 @@ import 'rejoin_member_screen.dart';
 import 'member_fitness_tab.dart'; // NEW
 import '../../../services/whatsapp_service.dart';
 import '../../../widgets/document_send_dialog.dart';
+import '../../../theme/app_colors.dart';
 
 class MemberDetailScreen extends StatefulWidget {
   final MemberModel member;
@@ -32,12 +33,6 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
   late TabController _tabController;
   MemberModel? currentMember;
   bool isLoading = true;
-
-  // ── Palette ──────────────────────────────────────────────────────
-  static const Color sageGreen  = Color(0xFF10B981);
-  static const Color tealAqua   = Color(0xFF14B8A6);
-  static const Color warmYellow = Color(0xFFFCD34D);
-  static const Color coralRed   = Color(0xFFEF4444);
 
   @override
   void initState() {
@@ -86,22 +81,22 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                   borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 16),
-            _optionTile(Icons.edit_rounded,       'Edit Member',           tealAqua,   'edit'),
+            _optionTile(Icons.edit_rounded,       'Edit Member',           AppColors.turquoise,   'edit'),
             if ((currentMember?.dueAmount ?? 0) > 0)
-              _optionTile(Icons.currency_rupee,   'Collect Dues',          sageGreen,  'collectdues',
+              _optionTile(Icons.currency_rupee,   'Collect Dues',          AppColors.success,  'collectdues',
                   subtitle: 'Due: Rs. ${currentMember!.dueAmount.toStringAsFixed(0)}'),
             if (!_isActive)
-              _optionTile(Icons.refresh_rounded,  'Rejoin Membership',     sageGreen,  'rejoin',
+              _optionTile(Icons.refresh_rounded,  'Rejoin Membership',     AppColors.success,  'rejoin',
                   subtitle: 'Renew expired membership'),
-            _optionTile(Icons.message_rounded,    'Send WhatsApp Reminder', const Color(0xFF25D366), 'whatsapp'),
+            _optionTile(Icons.message_rounded,    'Send WhatsApp Reminder', AppColors.whatsApp, 'whatsapp'),
             _optionTile(
               currentMember?.isArchived == true ? Icons.unarchive_rounded : Icons.archive_rounded,
               currentMember?.isArchived == true ? 'Restore Member' : 'Archive Member',
-              warmYellow, 'archive',
+              AppColors.warning, 'archive',
             ),
-            _optionTile(Icons.qr_code_rounded,    'Show QR Code',          tealAqua,   'showqr'),
-            _optionTile(Icons.share_rounded,      'Share Membership Card', sageGreen,  'sharecard'),
-            _optionTile(Icons.picture_as_pdf,     'Download Invoice',      coralRed,   'downloadinvoice'),
+            _optionTile(Icons.qr_code_rounded,    'Show QR Code',          AppColors.turquoise,   'showqr'),
+            _optionTile(Icons.share_rounded,      'Share Membership Card', AppColors.success,  'sharecard'),
+            _optionTile(Icons.picture_as_pdf,     'Download Invoice',      AppColors.error,   'downloadinvoice'),
             const SizedBox(height: 8),
           ],
         ),
@@ -165,7 +160,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: sageGreen),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
             child: const Text('Confirm'),
           ),
         ],
@@ -179,12 +174,12 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
       _loadMemberData();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(updated.isArchived ? 'Member archived.' : 'Member restored.'),
-        backgroundColor: sageGreen,
+        backgroundColor: AppColors.success,
       ));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: coralRed));
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
       }
     }
   }
@@ -206,7 +201,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: tealAqua.withValues(alpha: 0.4), width: 2),
+                border: Border.all(color: AppColors.turquoise.withValues(alpha: 0.4), width: 2),
               ),
               child: QrImageView(
                   data: currentMember!.qrCode,
@@ -223,7 +218,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(backgroundColor: sageGreen),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
                 child: const Text('Close'),
               ),
             ),
@@ -242,7 +237,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sharing card: $e'), backgroundColor: coralRed));
+          SnackBar(content: Text('Error sharing card: $e'), backgroundColor: AppColors.error));
       }
     }
   }
@@ -255,12 +250,12 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
       await Share.shareXFiles([XFile(file.path)]);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invoice downloaded!'), backgroundColor: sageGreen));
+          const SnackBar(content: Text('Invoice downloaded!'), backgroundColor: AppColors.success));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: coralRed));
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
       }
     }
   }
@@ -292,11 +287,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
   }
 
   Widget _waOption(IconData icon, String title, String subtitle, VoidCallback onTap) {
-    const wa = Color(0xFF25D366);
     return ListTile(
       leading: CircleAvatar(
-          backgroundColor: wa.withValues(alpha: 0.1),
-          child: Icon(icon, color: wa)),
+          backgroundColor: AppColors.whatsApp.withValues(alpha: 0.1),
+          child: Icon(icon, color: AppColors.whatsApp)),
       title: Text(title),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -327,13 +321,13 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(sent ? 'WhatsApp opened successfully!' : 'Could not open WhatsApp'),
-        backgroundColor: sent ? sageGreen : coralRed,
+        backgroundColor: sent ? AppColors.success : AppColors.error,
       ));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: coralRed));
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error));
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -367,11 +361,11 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(sent ? 'WhatsApp opened!' : 'Could not open WhatsApp'),
-                backgroundColor: sent ? sageGreen : coralRed,
+                backgroundColor: sent ? AppColors.success : AppColors.error,
               ));
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: sageGreen),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
             child: const Text('Send'),
           ),
         ],
@@ -439,10 +433,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           title: const Text('Member Details'),
           flexibleSpace: Container(
               decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [sageGreen, tealAqua]))),
+                  gradient: LinearGradient(colors: [AppColors.success, AppColors.turquoise]))),
           foregroundColor: Colors.white,
         ),
-        body: const Center(child: CircularProgressIndicator(color: sageGreen)),
+        body: const Center(child: CircularProgressIndicator(color: AppColors.success)),
       );
     }
     if (currentMember == null) {
@@ -459,10 +453,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           Container(
             width: 10, height: 10,
             decoration: BoxDecoration(
-              color: _isActive ? Colors.greenAccent : coralRed,
+              color: _isActive ? AppColors.success : AppColors.error,
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(
-                  color: (_isActive ? Colors.greenAccent : coralRed)
+                  color: (_isActive ? AppColors.success : AppColors.error)
                       .withValues(alpha: 0.6),
                   blurRadius: 6)],
             ),
@@ -478,7 +472,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
         ]),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [sageGreen, tealAqua]),
+            gradient: LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
           ),
         ),
         foregroundColor: Colors.white,
@@ -540,12 +534,12 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: _isActive
-                      ? [sageGreen, tealAqua]
-                      : [coralRed, const Color(0xFFFF8E53)],
+                      ? [AppColors.success, AppColors.turquoise]
+                      : [AppColors.error, AppColors.warning],
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [BoxShadow(
-                  color: (_isActive ? sageGreen : coralRed).withValues(alpha: 0.4),
+                  color: (_isActive ? AppColors.success : AppColors.error).withValues(alpha: 0.4),
                   blurRadius: 20, offset: const Offset(0, 8),
                 )],
               ),
@@ -570,8 +564,8 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: _isActive
-                      ? [sageGreen, tealAqua]
-                      : [coralRed, const Color(0xFFFF8E53)],
+                      ? [AppColors.success, AppColors.turquoise]
+                      : [AppColors.error, AppColors.warning],
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -605,11 +599,11 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: _showWhatsAppOptions,
-            icon: const Icon(Icons.chat_rounded, color: Color(0xFF25D366)),
+            icon: const Icon(Icons.chat_rounded, color: AppColors.whatsApp),
             label: const Text('Send WhatsApp Message',
-                style: TextStyle(color: Color(0xFF25D366))),
+                style: TextStyle(color: AppColors.whatsApp)),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFF25D366)),
+              side: const BorderSide(color: AppColors.whatsApp),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -643,9 +637,9 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
             gradient: LinearGradient(
               colors: _isActive
                   ? (daysLeft <= 7
-                      ? [warmYellow, const Color(0xFFF59E0B)]
-                      : [sageGreen, tealAqua])
-                  : [coralRed, const Color(0xFFFF8E53)],
+                      ? [AppColors.warning, AppColors.warningDark]
+                      : [AppColors.success, AppColors.turquoise])
+                  : [AppColors.error, AppColors.warning],
             ),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -685,10 +679,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           _buildInfoRow(Icons.calendar_today_rounded, 'Plan',     currentMember!.plan),
           _buildInfoRow(Icons.event_rounded,     'Joining Date', app_date_utils.DateUtils.formatDate(currentMember!.joiningDate)),
           _buildInfoRow(Icons.event_busy_rounded, 'Expiry Date', app_date_utils.DateUtils.formatDate(currentMember!.expiryDate),
-              valueColor: _isActive ? sageGreen : coralRed),
+              valueColor: _isActive ? AppColors.success : AppColors.error),
           _buildInfoRow(Icons.verified_rounded,   'Status',
               _isActive ? 'Active' : 'Expired',
-              valueColor: _isActive ? sageGreen : coralRed),
+              valueColor: _isActive ? AppColors.success : AppColors.error),
         ]),
         const SizedBox(height: 16),
 
@@ -701,7 +695,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           if (currentMember!.discount > 0) ...[
             _buildInfoRow(Icons.discount_rounded, 'Discount',
                 '- Rs. ${currentMember!.discount.toStringAsFixed(2)}',
-                valueColor: sageGreen),
+                valueColor: AppColors.success),
             if (currentMember!.discountDescription.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(left: 48, top: 2, bottom: 4),
@@ -718,11 +712,11 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               isHighlighted: true),
           _buildInfoRow(Icons.check_circle_rounded, 'Paid',
               'Rs. ${(currentMember!.finalAmount - currentMember!.dueAmount).toStringAsFixed(2)}',
-              valueColor: tealAqua),
+              valueColor: AppColors.turquoise),
           if (currentMember!.dueAmount > 0)
             _buildInfoRow(Icons.warning_rounded, 'Due',
                 'Rs. ${currentMember!.dueAmount.toStringAsFixed(2)}',
-                valueColor: coralRed),
+                valueColor: AppColors.error),
         ]),
       ]),
     );
@@ -736,7 +730,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           currentMember!.id, branch: currentMember!.branch),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: sageGreen));
+          return const Center(child: CircularProgressIndicator(color: AppColors.success));
         }
         final payments = snapshot.data ?? [];
         if (payments.isEmpty) {
@@ -760,7 +754,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [sageGreen, tealAqua]),
+              gradient: const LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -796,11 +790,11 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                     padding: const EdgeInsets.all(14),
                     child: Row(children: [
                       CircleAvatar(
-                        backgroundColor: (isInitial ? tealAqua : warmYellow)
+                        backgroundColor: (isInitial ? AppColors.turquoise : AppColors.warning)
                             .withValues(alpha: 0.2),
                         child: Icon(
                           isInitial ? Icons.person_add_rounded : Icons.refresh_rounded,
-                          color: isInitial ? tealAqua : const Color(0xFFF59E0B),
+                          color: isInitial ? AppColors.turquoise : AppColors.warningDark,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -836,11 +830,11 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: (isInitial ? tealAqua : const Color(0xFFF59E0B))
+                              color: (isInitial ? AppColors.turquoise : AppColors.warningDark)
                                   .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                  color: isInitial ? tealAqua : const Color(0xFFF59E0B),
+                                  color: isInitial ? AppColors.turquoise : AppColors.warningDark,
                                   width: 1.2),
                             ),
                             child: Text(
@@ -848,7 +842,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: isInitial ? tealAqua : const Color(0xFFF59E0B),
+                                color: isInitial ? AppColors.turquoise : AppColors.warningDark,
                               ),
                             ),
                           ),
@@ -857,8 +851,8 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                             payment: p,
                             member: currentMember!,
                             pdfService: pdfService,
-                            tealAqua: tealAqua,
-                            coralRed: coralRed,
+                            tealAqua: AppColors.turquoise,
+                            coralRed: AppColors.error,
                           ),
                         ],
                       ),
@@ -889,9 +883,9 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
   Widget _modeBadge(String mode) {
     Color c;
     switch (mode.toLowerCase()) {
-      case 'cash':  c = sageGreen; break;
-      case 'upi':   c = tealAqua;  break;
-      default:      c = warmYellow;
+      case 'cash':  c = AppColors.success; break;
+      case 'upi':   c = AppColors.turquoise;  break;
+      default:      c = AppColors.warning;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -914,7 +908,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           currentMember!.id, branch: currentMember!.branch),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: sageGreen));
+          return const Center(child: CircularProgressIndicator(color: AppColors.success));
         }
 
         final records = snapshot.data ?? [];
@@ -942,7 +936,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [sageGreen, tealAqua]),
+              gradient: const LinearGradient(colors: [AppColors.success, AppColors.turquoise]),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -978,10 +972,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                       borderRadius: BorderRadius.circular(14)),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: sageGreen.withValues(alpha: 0.15),
+                      backgroundColor: AppColors.success.withValues(alpha: 0.15),
                       child: Text('${i + 1}',
                           style: const TextStyle(
-                              color: sageGreen, fontWeight: FontWeight.bold)),
+                              color: AppColors.success, fontWeight: FontWeight.bold)),
                     ),
                     title: Text(
                       app_date_utils.DateUtils.formatDateTime(r.checkInTime),
@@ -992,11 +986,11 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: tealAqua.withValues(alpha: 0.12),
+                        color: AppColors.turquoise.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.login_rounded,
-                          color: tealAqua, size: 18),
+                          color: AppColors.turquoise, size: 18),
                     ),
                   ),
                 );
@@ -1026,7 +1020,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
             icon: const Icon(Icons.send_rounded),
             label: const Text('Send Documents via WhatsApp'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: sageGreen,
+              backgroundColor: AppColors.success,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
@@ -1061,23 +1055,23 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               switch (doc.type) {
                 case 'welcome':
                   icon = Icons.celebration_rounded;
-                  color = Colors.green;
+                  color = AppColors.success;
                   displayType = 'Welcome Package';
                 case 'rejoin':
                   icon = Icons.refresh_rounded;
-                  color = Colors.orange;
+                  color = AppColors.warning;
                   displayType = 'Rejoin Package';
                 case 'receipt':
                   icon = Icons.receipt_long_rounded;
-                  color = Colors.blue;
+                  color = AppColors.info;
                   displayType = 'Payment Receipt';
                 case 'resend':
                   icon = Icons.send_rounded;
-                  color = tealAqua;
+                  color = AppColors.turquoise;
                   displayType = 'Documents Resent';
                 default:
                   icon = Icons.description_rounded;
-                  color = Colors.grey;
+                  color = AppColors.textSecondary;
                   displayType = doc.type;
               }
 
@@ -1088,10 +1082,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                     borderRadius: BorderRadius.circular(14)),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: (doc.success ? color : coralRed)
+                    backgroundColor: (doc.success ? color : AppColors.error)
                         .withValues(alpha: 0.15),
                     child: Icon(icon,
-                        color: doc.success ? color : coralRed, size: 22),
+                        color: doc.success ? color : AppColors.error, size: 22),
                   ),
                   title: Text(displayType,
                       style: const TextStyle(
@@ -1135,7 +1129,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (doc.success ? Colors.green : coralRed)
+                      color: (doc.success ? AppColors.success : AppColors.error)
                           .withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -1145,7 +1139,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                             ? Icons.check_circle_rounded
                             : Icons.error_rounded,
                         size: 14,
-                        color: doc.success ? Colors.green : coralRed,
+                        color: doc.success ? AppColors.success : AppColors.error,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -1153,7 +1147,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: doc.success ? Colors.green : coralRed,
+                          color: doc.success ? AppColors.success : AppColors.error,
                         ),
                       ),
                     ]),

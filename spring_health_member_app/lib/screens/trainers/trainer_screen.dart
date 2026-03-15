@@ -25,7 +25,7 @@ Color specColor(String spec) {
 
 Color mealColor(String mealType) {
   switch (mealType.toLowerCase()) {
-    case 'breakfast':   return Colors.amber;
+    case 'breakfast':   return AppColors.warning;
     case 'lunch':       return AppColors.neonLime;
     case 'dinner':      return AppColors.neonTeal;
     case 'pre-workout': return AppColors.neonOrange;
@@ -452,7 +452,7 @@ class _TrainerScreenState extends State<TrainerScreen>
         child: _actionBtn(
           icon: Icons.chat_rounded,
           label: 'WHATSAPP',
-          color: const Color(0xFF25D366),
+          color: AppColors.whatsApp,
           onTap: () => _launch('https://wa.me/${_formatWa(trainer.phone)}'),
         ),
       ),
@@ -735,7 +735,7 @@ class _TrainerScreenState extends State<TrainerScreen>
                           _macro('💪', meal.protein!, 'prot',
                               AppColors.neonLime),
                         if (meal.carbs != null)
-                          _macro('🌾', meal.carbs!, 'carbs', Colors.amber),
+                          _macro('🌾', meal.carbs!, 'carbs', AppColors.warning),
                         if (meal.fats != null)
                           _macro('🥑', meal.fats!, 'fats',
                               AppColors.neonOrange),
@@ -1371,7 +1371,7 @@ class TrainerProfileSheet extends StatelessWidget {
                 onPressed: () => onLaunch(
                     'https://wa.me/${_formatWa(trainer.phone)}'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
+                  backgroundColor: AppColors.whatsApp,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),

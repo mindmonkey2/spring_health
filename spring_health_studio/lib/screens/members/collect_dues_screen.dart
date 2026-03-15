@@ -5,6 +5,7 @@ import '../../services/firestore_service.dart';
 import '../../utils/validators.dart';
 import '../../widgets/document_send_dialog.dart';
 import '../../widgets/payment_mode_selector.dart';
+import '../../theme/app_colors.dart';
 
 class CollectDuesScreen extends StatefulWidget {
   final MemberModel member;
@@ -23,10 +24,6 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
   final _upiAmountController = TextEditingController(text: '0');
   String _selectedPaymentMode = 'Cash';
   bool _isLoading = false;
-
-  // Colors
-  static const Color primaryPurple = Color(0xFF6366F1);
-  static const Color accentPink = Color(0xFFEC4899);
 
   @override
   void initState() {
@@ -246,7 +243,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [primaryPurple, Color(0xFF8B5CF6), accentPink],
+              colors: [AppColors.primary, AppColors.turquoise],
             ),
           ),
         ),
@@ -485,7 +482,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
         onPressed: _collectDues,
         icon: const Icon(Icons.check_circle),
         label: const Text('Collect Dues'),
-        backgroundColor: primaryPurple,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

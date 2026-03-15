@@ -72,11 +72,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   double _dueAmount = 0;
   bool _isProcessing = false;
 
-  // Colors - using centralized theme
-  static const Color sageGreen = AppColors.success;
-  static const Color tealAqua = AppColors.turquoise;
-  static const Color warmYellow = AppColors.warning;
-
   @override
   void initState() {
     super.initState();
@@ -142,7 +137,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: sageGreen,
+              primary: AppColors.success,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -168,7 +163,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: sageGreen,
+              primary: AppColors.success,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -212,7 +207,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('A member with phone ${_phoneController.text} already exists!'),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
         setState(() => _isProcessing = false);
@@ -304,7 +299,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       _buildSummaryRow(
                         'Due Amount:',
                         '₹${member.dueAmount.toStringAsFixed(0)}',
-                        valueColor: Colors.red,
+                        valueColor: AppColors.error,
                       ),
                   ],
                 ),
@@ -313,16 +308,16 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.picture_as_pdf, color: Colors.green, size: 20),
+                        Icon(Icons.picture_as_pdf, color: AppColors.success, size: 20),
                         SizedBox(width: 8),
                         Text(
                           'Send Welcome Package?',
@@ -352,7 +347,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Firebase Error: ${e.message}'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     } catch (e) {
@@ -360,7 +355,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     } finally {
@@ -378,7 +373,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [sageGreen, tealAqua],
+              colors: [AppColors.success, AppColors.turquoise],
             ),
           ),
         ),
@@ -574,14 +569,14 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                           labelText: 'Expiry Date',
                           prefixIcon: const Icon(Icons.event_busy),
                           border: const OutlineInputBorder(),
-                          fillColor: sageGreen.withValues(alpha: 0.1),
+                          fillColor: AppColors.success.withValues(alpha: 0.1),
                           filled: true,
                         ),
                         child: Text(
                           app_date_utils.DateUtils.formatDate(_expiryDate),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: sageGreen,
+                            color: AppColors.success,
                           ),
                         ),
                       ),
@@ -639,7 +634,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [sageGreen, tealAqua],
+                      colors: [AppColors.success, AppColors.turquoise],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -694,8 +689,8 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                           }
                         });
                       },
-                      selectedColor: sageGreen.withValues(alpha: 0.2),
-                      checkmarkColor: sageGreen,
+                      selectedColor: AppColors.success.withValues(alpha: 0.2),
+                      checkmarkColor: AppColors.success,
                     );
                   }).toList(),
                 ),
@@ -726,16 +721,16 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: warmYellow.withValues(alpha: 0.2),
+                            color: AppColors.warning.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: warmYellow, width: 2),
+                            border: Border.all(color: AppColors.warning, width: 2),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Row(
                                 children: [
-                                  Icon(Icons.warning, color: Color(0xFFF59E0B)),
+                                  Icon(Icons.warning, color: AppColors.warningDark),
                                   SizedBox(width: 8),
                                   Text(
                                     'Due Amount',
@@ -751,7 +746,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFF59E0B),
+                                  color: AppColors.warningDark,
                                 ),
                               ),
                             ],
@@ -765,7 +760,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                           child: ElevatedButton(
                             onPressed: _isProcessing ? null : _addMember,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: sageGreen,
+                              backgroundColor: AppColors.success,
                               foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -808,7 +803,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [sageGreen, tealAqua],
+              colors: [AppColors.success, AppColors.turquoise],
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -829,7 +824,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  sageGreen.withValues(alpha: 0.4),
+                  AppColors.success.withValues(alpha: 0.4),
                   Colors.transparent,
                 ],
               ),

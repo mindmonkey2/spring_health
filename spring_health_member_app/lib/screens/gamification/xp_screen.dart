@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/gamification_model.dart';
 import '../../services/gamification_service.dart';
+import 'personal_best_screen.dart';
 
 class XpScreen extends StatelessWidget {
   final String memberId;
@@ -44,6 +45,10 @@ class XpScreen extends StatelessWidget {
               children: [
                 // ✅ Hero XP Card
                 _buildXpHeroCard(data, level),
+                const SizedBox(height: 24),
+
+                // ✅ Personal Best Banner
+                _buildPersonalBestBanner(context),
                 const SizedBox(height: 24),
 
                 // ✅ Stats Row
@@ -714,6 +719,72 @@ class XpScreen extends StatelessWidget {
             ),
           ),
         );
+        }
+
+        // ─────────────────────────────────────────
+        // PERSONAL BEST BANNER
+        // ─────────────────────────────────────────
+        Widget _buildPersonalBestBanner(BuildContext context) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PersonalBestScreen()),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.cardSurface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.neonLime.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.neonLime.withValues(alpha: 0.15),
+                    ),
+                    child: const Icon(
+                      Icons.emoji_events_rounded,
+                      color: AppColors.neonLime,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Personal Bests 🏆',
+                          style: AppTextStyles.heading3.copyWith(
+                            color: AppColors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Track your reps, beat your limits',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.gray400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.neonLime,
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 100.ms).slideX(begin: 0.05, end: 0),
+          );
         }
 
         // ─────────────────────────────────────────

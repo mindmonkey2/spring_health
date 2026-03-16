@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:527678863150:android:2dbc3d2b5111e7caeaecbf",
         "android_client_info": {
-          "package_name": "com.springhealthtech.spring_health_member"
+          "package_name": "com.springhealth.member"
         }
       },
       "oauth_client": [],

@@ -5,10 +5,30 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+val keyPropertiesFile = rootProject.file("key.properties")
+val keyProperties = Properties()
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(FileInputStream(keyPropertiesFile))
+}
+
 android {
     namespace   = "com.springhealthtech.spring_health_member"
     compileSdk  = 36
     ndkVersion  = flutter.ndkVersion
+
+    signingConfigs {
+        create("release") {
+            if (keyPropertiesFile.exists()) {
+                keyAlias = keyProperties.getProperty("keyAlias")
+                keyPassword = keyProperties.getProperty("keyPassword")
+                storeFile = file(keyProperties.getProperty("storeFile"))
+                storePassword = keyProperties.getProperty("storePassword")
+            }
+        }
+    }
 
     compileOptions {
         sourceCompatibility             = JavaVersion.VERSION_17
@@ -22,7 +42,7 @@ android {
     }
 
     defaultConfig {
-        applicationId   = "com.springhealthtech.spring_health_member"
+        applicationId   = "com.springhealth.member"
 
         // ✅ FIX: health package (Health Connect) requires minSdk 26
         // Android 8.0 Oreo — covers 97%+ of active Android devices (2026)
@@ -36,12 +56,13 @@ android {
 
     buildTypes {
         release {
-            // TODO: Replace with your own keystore before Play Store submission
-            signingConfig = signingConfigs.getByName("debug")
-
-            // Optional: enable R8 shrinking for smaller APK
-            isMinifyEnabled   = false
-            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
         debug {
             signingConfig = signingConfigs.getByName("debug")

@@ -162,7 +162,7 @@ class FirebaseAuthService {
           codeSent: (String verificationId, int? resendToken) async {
             debugPrint('📨 OTP sent successfully');
             _resendToken = resendToken;
-            // FIX: save BEFORE calling onCodeSent so verificationId is
+            // Save BEFORE calling onCodeSent so verificationId is
             // guaranteed to be in memory when verifyOTP() is called
             await _saveVerificationId(verificationId);
             onCodeSent(verificationId);
@@ -181,7 +181,7 @@ class FirebaseAuthService {
 
   // ─── Verify OTP ───────────────────────────────────────────────────────────
 
-  /// FIX: accepts verificationId explicitly so the screen's widget.verificationId
+  /// Accepts verificationId explicitly so the screen's widget.verificationId
   /// is used as primary source, with _loadVerificationId() as fallback.
   Future<UserCredential> verifyOTP(
     String otp, {
@@ -191,7 +191,7 @@ class FirebaseAuthService {
         final cleanOtp = otp.replaceAll(RegExp(r'[^0-9]'), '');
         debugPrint('🔐 Verifying OTP: $cleanOtp');
 
-        // FIX: prefer the verificationId passed from the screen widget
+        // Prefer the verificationId passed from the screen widget
         final resolvedId = verificationId ?? await _loadVerificationId();
 
         if (resolvedId == null || resolvedId.isEmpty) {

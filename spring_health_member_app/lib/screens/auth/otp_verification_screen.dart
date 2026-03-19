@@ -30,7 +30,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   bool _isLoading = false;
   bool _isResending = false;
 
-  // FIX: track the latest verificationId locally — updated on resend
   late String _currentVerificationId;
 
   @override
@@ -88,7 +87,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         phoneNumber: widget.phoneNumber,
         onCodeSent: (newVerificationId) {
           if (!mounted) return;
-          // FIX: update local verificationId on resend
           setState(() {
             _currentVerificationId = newVerificationId;
             _isResending = false;

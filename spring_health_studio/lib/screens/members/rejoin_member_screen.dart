@@ -6,6 +6,7 @@ import '../../services/whatsapp_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/date_utils.dart' as app_date_utils;
 import 'member_detail_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_colors.dart';
 
 class RejoinMemberScreen extends StatefulWidget {
@@ -231,6 +232,28 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
       );
 
       await _firestoreService.addPayment(payment);
+
+      final DateTime joinDate = renewedMember.joiningDate;
+      final int monthsActive = DateTime.now().difference(joinDate).inDays ~/ 30;
+
+      String? loyaltyEvent;
+      if (monthsActive >= 12) {
+        loyaltyEvent = 'loyalty_1y';
+      } else if (monthsActive >= 6) {
+        loyaltyEvent = 'loyalty_6m';
+      } else if (monthsActive >= 3) {
+        loyaltyEvent = 'loyalty_3m';
+      }
+
+      if (loyaltyEvent != null) {
+        await FirebaseFirestore.instance.collection('gamification_events').add({
+          'memberId': renewedMember.id,
+          'event': loyaltyEvent,
+          'triggeredBy': 'rejoin',
+          'timestamp': Timestamp.now(),
+          'processed': false,
+        });
+      }
 
       if (!mounted) return;
 

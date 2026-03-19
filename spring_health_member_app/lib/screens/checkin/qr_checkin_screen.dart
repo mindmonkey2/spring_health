@@ -142,20 +142,15 @@ with SingleTickerProviderStateMixin {
   // ─────────────────────────────────────────────────────────
   Future<void> _awardCheckInXp() async {
     try {
-      final badges = await GamificationService().awardXp(
-        widget.member.id,
-        'Gym Check-in 📍',
-        50,
-        isCheckIn: true,
-      );
+      await GamificationService.instance.processEvent('check_in', widget.member.id);
       if (mounted) {
         setState(() {
-          _earnedXp = 50;
-          _newBadges = badges;
+          _earnedXp = 20; // Changed according to processEvent check_in
+          _newBadges = []; // processEvent handles badge notifications directly now
         });
       }
     } catch (e) {
-      debugPrint('⚠️ QrCheckInScreen awardXp error: $e');
+      debugPrint('⚠️ QrCheckInScreen processEvent error: $e');
     }
   }
 

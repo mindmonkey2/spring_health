@@ -24,6 +24,26 @@ class InAppNotificationService {
   }
 
   // ── Write ────────────────────────────────────────────────
+  Future<void> addNotificationForMember({
+    required String uid,
+    required NotificationType type,
+    required String title,
+    required String body,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final col = _firestore.collection('notifications').doc(uid).collection('items');
+    final id = _uuid.v4();
+    await col.doc(id).set(AppNotification(
+      id: id,
+      type: type,
+      title: title,
+      body: body,
+      isRead: false,
+      createdAt: DateTime.now(),
+      metadata: metadata,
+    ).toFirestore());
+  }
+
   Future<void> addNotification({
     required NotificationType type,
     required String title,

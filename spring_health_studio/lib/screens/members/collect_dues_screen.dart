@@ -5,6 +5,7 @@ import '../../services/firestore_service.dart';
 import '../../utils/validators.dart';
 import '../../widgets/document_send_dialog.dart';
 import '../../widgets/payment_mode_selector.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_colors.dart';
 
 class CollectDuesScreen extends StatefulWidget {
@@ -111,6 +112,28 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
       );
 
       await _firestoreService.addPayment(payment);
+
+      final DateTime joinDate = updatedMember.joiningDate;
+      final int monthsActive = DateTime.now().difference(joinDate).inDays ~/ 30;
+
+      String? loyaltyEvent;
+      if (monthsActive >= 12) {
+        loyaltyEvent = 'loyalty_1y';
+      } else if (monthsActive >= 6) {
+        loyaltyEvent = 'loyalty_6m';
+      } else if (monthsActive >= 3) {
+        loyaltyEvent = 'loyalty_3m';
+      }
+
+      if (loyaltyEvent != null) {
+        await FirebaseFirestore.instance.collection('gamification_events').add({
+          'memberId': updatedMember.id,
+          'event': loyaltyEvent,
+          'triggeredBy': 'dues_collection',
+          'timestamp': Timestamp.now(),
+          'processed': false,
+        });
+      }
 
       if (!mounted) return;
 

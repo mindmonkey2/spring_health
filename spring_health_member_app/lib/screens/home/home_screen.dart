@@ -13,7 +13,7 @@ import 'widgets/stats_overview_widget.dart';
 import '../workout/workout_logger_screen.dart';
 import '../gamification/xp_screen.dart';
 import '../checkin/qr_checkin_screen.dart';
-import '../clash/clash_screen.dart';
+import '../clash/war_screen.dart';
 import '../fitness/body_metrics_screen.dart';
 import '../social/social_coming_soon_screen.dart';
 
@@ -540,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) =>
-                ClashScreen(memberId: _memberId!, memberName: _member!.name),
+                WarScreen(memberId: _memberId!, memberName: _member!.name),
               ),
             );
           },

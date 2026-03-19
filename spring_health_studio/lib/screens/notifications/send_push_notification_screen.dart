@@ -69,6 +69,12 @@ class _SendPushNotificationScreenState
       return;
     }
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _showSnack('You must be logged in to send notifications', Colors.red);
+      return;
+    }
+
     setState(() => _isSending = true);
     try {
       final payload = <String, dynamic>{
@@ -76,7 +82,7 @@ class _SendPushNotificationScreenState
         'body': _bodyCtrl.text.trim(),
         'targetType': _targetType,
         'type': _notifType,
-        'sentBy': FirebaseAuth.instance.currentUser?.uid ?? 'admin',
+        'sentBy': user.uid,
         'createdAt': FieldValue.serverTimestamp(),
         'sent': false,
         'sentAt': null,

@@ -330,7 +330,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         ),
         actions: [
           TextButton(
-            // FIX: removed setState here — _resetScanner() handles it
             onPressed: () => Navigator.pop(context),
             child: const Text('TRY AGAIN'),
           ),

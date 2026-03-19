@@ -61,10 +61,14 @@ class BodyMetricsModel {
       arms: map['arms'] != null ? (map['arms']).toDouble() : null,
       thighs: map['thighs'] != null ? (map['thighs']).toDouble() : null,
       notes: map['notes'],
-      recordedAt: map['recordedAt'] is Timestamp
-      ? (map['recordedAt'] as Timestamp).toDate()
-      : DateTime.now(),
+      recordedAt: _toDateTime(map['recordedAt']),
     );
+  }
+
+  static DateTime _toDateTime(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return DateTime.now();
   }
 
   Map<String, dynamic> toMap() {

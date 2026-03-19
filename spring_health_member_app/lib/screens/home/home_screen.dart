@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       final gamification = await _gamService.getOrCreate(memberId);
+      _gamService.listenToEvents(memberId);
 
       if (mounted) {
         setState(() {

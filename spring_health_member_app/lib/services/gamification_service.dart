@@ -4,8 +4,12 @@ import '../models/gamification_model.dart';
 // 🆕 Notification feed imports
 import '../models/notification_model.dart';
 import 'in_app_notification_service.dart';
+import 'badge_service.dart';
 
 class GamificationService {
+  static final GamificationService instance = GamificationService._internal();
+  factory GamificationService() => instance;
+  GamificationService._internal();
   final _db = FirebaseFirestore.instance;
 
   // ─────────────────────────────────────────────
@@ -23,6 +27,152 @@ class GamificationService {
     .doc(memberId)
     .set(empty.toMap());
     return empty;
+  }
+
+  // ─────────────────────────────────────────────
+  // LOYALTY HELPERS
+  // ─────────────────────────────────────────────
+  Future<bool> _isMilestoneAlreadyAwarded(String memberId, String event) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('gamification')
+        .doc(memberId)
+        .get();
+    if (!doc.exists) return false;
+    final awarded = List<String>.from(
+      doc.data()?['loyaltyMilestonesAwarded'] ?? [],
+    );
+    return awarded.contains(event);
+  }
+
+  String _loyaltyLabel(String event) {
+    switch (event) {
+      case 'loyalty_3m': return '3-month loyalty bonus';
+      case 'loyalty_6m': return '6-month loyalty bonus';
+      case 'loyalty_1y': return '1-year loyalty bonus';
+      default: return 'Loyalty bonus';
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // PROCESS EVENT
+  // ─────────────────────────────────────────────
+  Future<void> processEvent(String event, String memberId, {int? customXP}) async {
+    int xp = 0;
+    String reason = '';
+    switch (event) {
+      case 'check_in':        xp = 20;  reason = 'Gym check-in'; break;
+      case 'workout':         xp = customXP ?? 30; reason = 'Workout complete'; break;
+      case 'personal_best':   xp = 50;  reason = 'New personal best'; break;
+      case 'streak_milestone':xp = customXP ?? 100; reason = 'Streak milestone'; break;
+      case 'loyalty_3m':
+      case 'loyalty_6m':
+      case 'loyalty_1y':
+        final alreadyAwarded = await _isMilestoneAlreadyAwarded(memberId, event);
+        if (alreadyAwarded) return;
+        xp = event == 'loyalty_3m' ? 100 : event == 'loyalty_6m' ? 250 : 500;
+        reason = _loyaltyLabel(event);
+        await awardXp(memberId, reason, xp);
+        await FirebaseFirestore.instance
+            .collection('gamification')
+            .doc(memberId)
+            .update({
+          'loyaltyMilestonesAwarded': FieldValue.arrayUnion([event]),
+        });
+        await calculateStreak(memberId);
+        await BadgeService.instance.checkAndAward(memberId);
+        return; // early return — XP already awarded above, skip fall-through
+      case 'war_participate': xp = 20;  reason = 'Weekly War participation'; break;
+      case 'war_top3':        xp = customXP ?? 150; reason = 'Weekly War podium'; break;
+      case 'war_winner':      xp = 500; reason = 'Weekly War champion'; break;
+      case 'challenge_win':   xp = 20;  reason = '1v1 Challenge win bonus'; break;
+      case 'challenge_lose':  xp = -10; reason = '1v1 Challenge loss'; break;
+      case 'challenge_participate': xp = 5; reason = '1v1 Challenge participation'; break;
+      default: return;
+    }
+    await awardXp(
+      memberId,
+      reason,
+      xp,
+      isCheckIn: event == 'check_in',
+      isWorkout: event == 'workout',
+    );
+    await calculateStreak(memberId);
+    await BadgeService.instance.checkAndAward(memberId);
+  }
+
+  // ─────────────────────────────────────────────
+  // CALCULATE STREAK
+  // ─────────────────────────────────────────────
+  Future<int> calculateStreak(String memberId) async {
+    final snap = await _db
+        .collection('attendance')
+        .where('memberId', isEqualTo: memberId)
+        .orderBy('checkInTime', descending: true)
+        .get();
+
+    if (snap.docs.isEmpty) {
+      await _db.collection('gamification').doc(memberId).update({
+        'currentStreak': 0,
+        'longestStreak': 0,
+      });
+      return 0;
+    }
+
+    final dates = snap.docs.map((doc) {
+      final t = doc.data()['checkInTime'] as Timestamp;
+      final dt = t.toDate();
+      return DateTime(dt.year, dt.month, dt.day);
+    }).toSet().toList();
+
+    int currentStreak = 0;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    if (dates.contains(today) || dates.contains(yesterday)) {
+      DateTime checkDate = dates.contains(today) ? today : yesterday;
+      while (dates.contains(checkDate)) {
+        currentStreak++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      }
+    }
+
+    final gamDoc = await _db.collection('gamification').doc(memberId).get();
+    int longestStreak = currentStreak;
+    if (gamDoc.exists) {
+      final data = gamDoc.data()!;
+      longestStreak = data['longestStreak'] ?? 0;
+      if (currentStreak > longestStreak) {
+        longestStreak = currentStreak;
+      }
+    }
+
+    await _db.collection('gamification').doc(memberId).update({
+      'currentStreak': currentStreak,
+      'longestStreak': longestStreak,
+    });
+
+    return currentStreak;
+  }
+
+  // ─────────────────────────────────────────────
+  // EVENT LISTENER
+  // ─────────────────────────────────────────────
+  void listenToEvents(String memberId) {
+    FirebaseFirestore.instance
+        .collection('gamification_events')
+        .where('memberId', isEqualTo: memberId)
+        .where('processed', isEqualTo: false)
+        .snapshots()
+        .listen((snapshot) async {
+      for (final doc in snapshot.docs) {
+        final event = doc.data()['event'] as String?;
+        if (event != null) {
+          await processEvent(event, memberId);
+          await doc.reference.update({'processed': true});
+        }
+      }
+    });
   }
 
   // ─────────────────────────────────────────────

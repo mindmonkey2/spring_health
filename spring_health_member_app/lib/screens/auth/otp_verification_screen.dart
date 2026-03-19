@@ -5,7 +5,6 @@ import 'package:pinput/pinput.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../services/firebase_auth_service.dart';
-// ← ADD
 import '../main_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -95,6 +94,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           });
           _showSuccess('New OTP sent to +91 ${widget.phoneNumber}');
           _focusNode.requestFocus();
+        },
+        onCodeAutoRetrievalTimeout: (newVerificationId) {
+          if (!mounted) return;
+          // FIX: update local verificationId on timeout
+          setState(() {
+            _currentVerificationId = newVerificationId;
+          });
+        },
+        onAutoVerify: () {
+          if (!mounted) return;
+          // Already verified & signed in by service (Android auto-retrieval)
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+            (route) => false,
+          );
         },
         onError: (error) {
           if (!mounted) return;

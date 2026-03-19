@@ -31,13 +31,9 @@ class AnnouncementModel {
       message: map['message'] ?? map['content'] ?? '',
       imageUrl: map['imageUrl'],
       targetBranches: List<String>.from(map['targetBranches'] ?? ['all']),
-      createdAt: map['createdAt'] is Timestamp
-      ? (map['createdAt'] as Timestamp).toDate()
-      : DateTime.now(),
+      createdAt: _toDateTime(map['createdAt']),
       createdByUid: map['createdByUid'],
-      expiresAt: map['expiresAt'] != null && map['expiresAt'] is Timestamp
-      ? (map['expiresAt'] as Timestamp).toDate()
-      : null,
+      expiresAt: _toDateTimeNullable(map['expiresAt']),
       readBy: List<String>.from(map['readBy'] ?? []),
     );
   }
@@ -53,15 +49,24 @@ class AnnouncementModel {
       message: map['message'] ?? map['content'] ?? '',
       imageUrl: map['imageUrl'],
       targetBranches: List<String>.from(map['targetBranches'] ?? ['all']),
-      createdAt: map['createdAt'] is Timestamp
-      ? (map['createdAt'] as Timestamp).toDate()
-      : DateTime.now(),
+      createdAt: _toDateTime(map['createdAt']),
       createdByUid: map['createdByUid'],
-      expiresAt: map['expiresAt'] != null && map['expiresAt'] is Timestamp
-      ? (map['expiresAt'] as Timestamp).toDate()
-      : null,
+      expiresAt: _toDateTimeNullable(map['expiresAt']),
       readBy: List<String>.from(map['readBy'] ?? []),
     );
+  }
+
+  static DateTime _toDateTime(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return DateTime.now();
+  }
+
+  static DateTime? _toDateTimeNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return null;
   }
 
   // ✅ Convert to Map for Firestore

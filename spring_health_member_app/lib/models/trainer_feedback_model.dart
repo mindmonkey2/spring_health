@@ -32,10 +32,14 @@ class TrainerFeedbackModel {
       workoutType: map['workoutType'] as String? ?? '',
       message: map['message'] as String? ?? '',
       rating: (map['rating'] as num?)?.toInt() ?? 3,
-      createdAt: map['createdAt'] is Timestamp
-      ? (map['createdAt'] as Timestamp).toDate()
-      : DateTime.now(),
+      createdAt: _toDateTime(map['createdAt']),
     );
+    }
+
+    static DateTime _toDateTime(dynamic value) {
+      if (value is Timestamp) return value.toDate();
+      if (value is DateTime) return value;
+      return DateTime.now();
     }
 
     Map<String, dynamic> toMap() => {

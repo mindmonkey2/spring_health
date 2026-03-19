@@ -652,12 +652,22 @@ Future<void> updateTrainerProfile(
         throw Exception('Member has already checked in today');
       }
 
-      await _firestore.collection('attendance').doc(attendance.id).set(attendance.toMap());
+      final batch = _firestore.batch();
+
+      batch.set(
+        _firestore.collection('attendance').doc(attendance.id),
+        attendance.toMap()
+      );
 
       // Update member's last check-in
-      await _firestore.collection('members').doc(attendance.memberId).update({
-        'lastCheckIn': Timestamp.fromDate(attendance.checkInTime),
-      });
+      batch.update(
+        _firestore.collection('members').doc(attendance.memberId),
+        {
+          'lastCheckIn': Timestamp.fromDate(attendance.checkInTime),
+        }
+      );
+
+      await batch.commit();
     } catch (e) {
       debugPrint('Error adding attendance: $e');
       rethrow;

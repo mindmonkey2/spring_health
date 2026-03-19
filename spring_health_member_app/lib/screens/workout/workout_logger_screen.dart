@@ -9,11 +9,14 @@ import '../../models/workout_model.dart';
 import '../../models/gamification_model.dart';
 import '../../services/workout_service.dart';
 import '../../services/gamification_service.dart';
+import '../../services/weekly_war_service.dart';
+import '../../services/member_service.dart';
 
 class WorkoutLoggerScreen extends StatefulWidget {
   final String memberId;
+  final String? initialExercise;
 
-  const WorkoutLoggerScreen({super.key, required this.memberId});
+  const WorkoutLoggerScreen({super.key, required this.memberId, this.initialExercise});
 
   @override
   State<WorkoutLoggerScreen> createState() => // ✅ FIX: generic
@@ -24,6 +27,8 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
 with SingleTickerProviderStateMixin { // ✅ for live timer
   final _workoutService = WorkoutService();
   final _gamService = GamificationService();
+  final _weeklyWarService = WeeklyWarService.instance;
+  final _memberService = MemberService();
   final _uuid = const Uuid();
 
   final _titleController =
@@ -81,6 +86,14 @@ with SingleTickerProviderStateMixin { // ✅ for live timer
       const Duration(seconds: 1),
       (tick) => tick,
     );
+    if (widget.initialExercise != null) {
+      _exercises.add(WorkoutExercise(
+        id: _uuid.v4(),
+        name: widget.initialExercise!,
+        category: 'War',
+        sets: [ExerciseSet(setNumber: 1, weight: 0, reps: 0)],
+      ));
+    }
   }
 
   @override
@@ -1250,6 +1263,21 @@ with SingleTickerProviderStateMixin { // ✅ for live timer
 
                                        try {
                                          await _workoutService.saveWorkout(workout);
+
+                                         // ✅ Record to Weekly War
+                                         final member = await _memberService.getMemberData(widget.memberId);
+                                         if (member != null) {
+                                           for (final ex in workout.exercises) {
+                                              int totalReps = 0;
+                                              for (final set in ex.sets) {
+                                                if (set.isCompleted) totalReps += set.reps;
+                                              }
+                                              if (totalReps > 0) {
+                                                await _weeklyWarService.recordWorkoutEntry(
+                                                    widget.memberId, member.branch, ex.name, totalReps);
+                                              }
+                                           }
+                                         }
 
                                          // ✅ Award XP + check badges
                                          final badges = await _gamService.awardXp(

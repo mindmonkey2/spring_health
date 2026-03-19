@@ -4,9 +4,9 @@ import 'package:mailer/smtp_server.dart';
 import 'package:flutter/foundation.dart';
 
 class EmailService {
-  // Configure your SMTP settings here
-  static const String _username = 'springhealthstudio12@gmail.com';
-  static const String _password = 'sqlj ipyx avpe kfag'; // Your app password
+  // Configure your SMTP settings here using String.fromEnvironment for security
+  static const String _username = String.fromEnvironment('SMTP_USERNAME');
+  static const String _password = String.fromEnvironment('SMTP_PASSWORD');
 
   Future<bool> sendInvoiceEmail({
     required String recipientEmail,
@@ -15,6 +15,13 @@ class EmailService {
     required File invoicePdf,
     required File membershipCardPdf,
   }) async {
+    if (_username.isEmpty || _password.isEmpty) {
+      if (kDebugMode) {
+        debugPrint('❌ SMTP credentials not configured. Please build with --dart-define=SMTP_USERNAME=... and --dart-define=SMTP_PASSWORD=...');
+      }
+      return false;
+    }
+
     try {
       // Configure SMTP server (Gmail)
       final smtpServer = gmail(_username, _password);

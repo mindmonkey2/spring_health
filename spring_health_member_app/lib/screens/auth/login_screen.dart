@@ -1,10 +1,11 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../services/firebase_auth_service.dart';
+import '../../widgets/spring_health_logo_animated.dart';
 import 'otp_verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,279 +15,363 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _phoneController = TextEditingController();
+class _LoginScreenState extends State<LoginScreen>
+with SingleTickerProviderStateMixin {
+  final _phoneController = TextEditingController();
   final _authService = FirebaseAuthService();
+  final _formKey = GlobalKey<FormState>();
+
   bool _isLoading = false;
+
+  late AnimationController _shakeController;
+  late Animation<double> _shakeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _shakeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
+    );
+  }
 
   @override
   void dispose() {
     _phoneController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
-  void _onLoginPressed() async {
-    final phoneNumber = _phoneController.text.trim();
+  void _triggerShake() {
+    _shakeController.forward(from: 0);
+    HapticFeedback.mediumImpact();
+  }
 
-    // Validation
-    if (phoneNumber.length != 10) {
-      _showError('Please enter a valid 10-digit phone number');
+  Future<void> _onSendOtp() async {
+    if (!_formKey.currentState!.validate()) {
+      _triggerShake();
       return;
     }
 
     setState(() => _isLoading = true);
 
-    try {
-      // Check if member exists in Firestore
-      final memberData = await _authService.checkMemberExists(phoneNumber);
+    final phone = _phoneController.text.trim();
 
-      if (memberData == null) {
+    // ── Send OTP directly — member validation happens after OTP verify ──
+    // Pre-checking checkMemberExists() here fails because the user is
+    // not yet authenticated and Firestore rules block the read.
+    await _authService.sendOTP(
+      phoneNumber: phone,
+      onCodeSent: (verificationId) {
+        if (!mounted) return;
         setState(() => _isLoading = false);
-        _showError('Phone number not registered.\nPlease contact gym reception.');
-        return;
-      }
-
-      // Check if app is enabled for this member
-      if (memberData['app_enabled'] == false) {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+            OtpVerificationScreen(
+              phoneNumber: phone,
+              verificationId: verificationId,
+            ),
+            transitionsBuilder:
+            (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1.0, 0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
+              );
+            },
+          ),
+        );
+      },
+      onError: (error) {
+        if (!mounted) return;
         setState(() => _isLoading = false);
-        _showError('Your app access is disabled.\nContact gym reception.');
-        return;
-      }
-
-      // Send OTP via Firebase
-      await _authService.sendOTP(
-        phoneNumber: phoneNumber,
-        onCodeSent: (verificationId) {
-          setState(() => _isLoading = false);
-          if (mounted) {
-            // Navigate to OTP screen with verification ID
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OtpVerificationScreen(
-                  phoneNumber: phoneNumber,
-                  verificationId: verificationId,
-                ),
-              ),
-            );
-          }
-        },
-        onError: (error) {
-          setState(() => _isLoading = false);
-          _showError(error);
-        },
-        onAutoVerify: (credential) async {
-          // Auto-verification (Android only)
-          setState(() => _isLoading = false);
-          _showSuccess('Phone verified automatically!');
-          // Auto-verification will sign in automatically
-        },
-      );
-    } catch (e) {
-      setState(() => _isLoading = false);
-      _showError('An error occurred. Please try again.');
-    }
+        _triggerShake();
+        _showError(error);
+      },
+    );
   }
 
   void _showError(String message) {
     if (!mounted) return;
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-      ),
-    );
-  }
-
-  void _showSuccess(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.neonLime,
-        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenH = MediaQuery.of(context).size.height;
+    final logoSize = screenH * 0.20;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
-      body: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        child: Stack(
-          children: [
-            // Background Orbs
-            Positioned(
-              top: -100,
-              right: -50,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.neonLime.withValues(alpha: 0.1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neonLime.withValues(alpha: 0.2),
-                      blurRadius: 100,
-                      spreadRadius: 20,
-                    ),
-                  ],
-                ),
-              )
-              .animate(onPlay: (controller) => controller.repeat(reverse: true))
-              .scale(
-                begin: const Offset(1, 1),
-                end: const Offset(1.2, 1.2),
-                duration: 4.seconds,
-              ),
-            ),
-
-            Positioned(
-              bottom: 100,
-              left: -50,
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.neonTeal.withValues(alpha: 0.1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neonTeal.withValues(alpha: 0.2),
-                      blurRadius: 80,
-                      spreadRadius: 20,
-                    ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: screenH),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    _buildLogoSection(logoSize),
+                    Expanded(child: _buildFormCard()),
                   ],
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
 
-            // Main Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Spacer(flex: 2),
+  Widget _buildLogoSection(double logoSize) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: logoSize * 0.15),
+      color: AppColors.backgroundBlack,
+      child: Center(
+        child: SpringHealthLogoAnimated(
+          size: logoSize,
+          showText: true,
+        ),
+      ),
+    );
+  }
 
-                  // Header
-                  const Icon(
-                    Icons.bolt_rounded,
-                    size: 64,
-                    color: AppColors.neonLime,
-                  )
-                  .animate()
-                  .fadeIn(duration: 600.ms)
-                  .scale(),
+  Widget _buildFormCard() {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFF141414),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 36, 28, 28),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('WELCOME BACK', style: AppTextStyles.heading1)
+              .animate()
+              .fadeIn(delay: 300.ms)
+              .slideX(begin: -0.2, end: 0),
 
-                  const SizedBox(height: 24),
+              const SizedBox(height: 6),
 
-                  Text(
-                    'WELCOME BACK',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.heading1,
-                  )
-                  .animate()
-                  .fadeIn(delay: 200.ms)
-                  .slideY(begin: 0.2, end: 0),
+              Text(
+                'Enter your registered mobile number\nto access your membership.',
+                style: AppTextStyles.bodyMedium,
+              ).animate().fadeIn(delay: 450.ms).slideX(begin: -0.2, end: 0),
 
-                  const SizedBox(height: 8),
+              const SizedBox(height: 36),
 
-                  Text(
-                    'Access your premium fitness hub',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMedium,
-                  )
-                  .animate()
-                  .fadeIn(delay: 400.ms)
-                  .slideY(begin: 0.2, end: 0),
-
-                  const Spacer(),
-
-                  // Glassmorphism Login Card
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceDark.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.05),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Phone Number',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.gray400,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              style: const TextStyle(color: Colors.white),
-                              maxLength: 10,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              decoration: const InputDecoration(
-                                hintText: 'Enter your phone number',
-                                prefixIcon: Icon(
-                                  Icons.phone_iphone_rounded,
-                                  color: AppColors.neonLime,
-                                ),
-                                counterText: '', // Hide character counter
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-
-                            // Neon Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _onLoginPressed,
-                                child: _isLoading
-                                ? const SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.black,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : const Text('GET ACCESS'),
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(delay: 600.ms)
-                            .slideY(begin: 0.2, end: 0),
-                          ],
-                        ),
+              // Shake wrapper on invalid input
+              AnimatedBuilder(
+                animation: _shakeAnimation,
+                builder: (context, child) {
+                  final dx = _shakeController.isAnimating
+                  ? 8 *
+                  (0.5 - _shakeAnimation.value).abs() *
+                  (1 - _shakeAnimation.value)
+                  : 0.0;
+                  return Transform.translate(
+                    offset: Offset(dx * 4, 0),
+                    child: child,
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'MOBILE NUMBER',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.neonLime,
+                        letterSpacing: 1.5,
                       ),
                     ),
-                  )
-                  .animate()
-                  .fadeIn(delay: 400.ms)
-                  .slideY(begin: 0.4, end: 0),
-
-                  const Spacer(flex: 3),
-                ],
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      maxLength: 10,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.white,
+                        letterSpacing: 3,
+                      ),
+                      cursorColor: AppColors.neonLime,
+                      decoration: InputDecoration(
+                        counterText: '',
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 18),
+                            child: Text(
+                              '+91',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.neonLime,
+                              ),
+                            ),
+                        ),
+                        prefixIconConstraints:
+                        const BoxConstraints(minWidth: 0, minHeight: 0),
+                        filled: true,
+                        fillColor: AppColors.surfaceDark,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: AppColors.neonLime, width: 2),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: AppColors.error, width: 1.5),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide:
+                          BorderSide(color: AppColors.error, width: 2),
+                        ),
+                        hintText: '98765 43210',
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: 18,
+                          color: AppColors.gray800,
+                          letterSpacing: 2,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 20),
+                      ),
+                      validator: (value) {
+                        final v = value?.trim() ?? '';
+                    if (v.isEmpty) {
+                      return 'Please enter your mobile number';
+                    }
+                    if (v.length != 10) {
+                      return 'Enter a valid 10-digit number';
+                    }
+                    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(v)) {
+                      return 'Enter a valid Indian mobile number';
+                    }
+                    return null;
+                      },
+                    )
+                    .animate()
+                    .fadeIn(delay: 600.ms)
+                    .slideY(begin: 0.1, end: 0),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 32),
+
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _onSendOtp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.neonLime,
+                    foregroundColor: Colors.black,
+                      disabledBackgroundColor:
+                      AppColors.neonLime.withValues(alpha: 0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                  ),
+                  child: _isLoading
+                  ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.black.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'SENDING OTP...',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black.withValues(alpha: 0.6),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  )
+                  : Text(
+                    'SEND OTP',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                )
+                .animate()
+                .fadeIn(delay: 750.ms)
+                .slideY(begin: 0.2, end: 0),
+              ),
+
+              const SizedBox(height: 28),
+
+              Center(
+                child: Text(
+                  'Only registered Spring Health members can log in.\nContact your branch for access.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppColors.gray800,
+                    height: 1.6,
+                  ),
+                ),
+              ).animate().fadeIn(delay: 900.ms),
+            ],
+          ),
         ),
       ),
     );

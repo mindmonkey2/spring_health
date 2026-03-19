@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../widgets/spring_health_logo_animated.dart';
 import 'package:pinput/pinput.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../services/firebase_auth_service.dart';
+// ← ADD
 import '../main_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -55,7 +57,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.verifyOTP(otp, verificationId: _currentVerificationId);
+      await _authService.verifyOTP(otp,
+          verificationId: _currentVerificationId);
 
       if (!mounted) return;
 
@@ -67,7 +70,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     } on Exception catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-
       _showError(e.toString().replaceFirst('Exception: ', ''));
     } catch (e) {
       if (!mounted) return;
@@ -91,7 +93,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             _currentVerificationId = newVerificationId;
             _isResending = false;
           });
-          _showSuccess('New OTP sent to +91 \${widget.phoneNumber}');
+          _showSuccess('New OTP sent to +91 ${widget.phoneNumber}');
           _focusNode.requestFocus();
         },
         onError: (error) {
@@ -133,9 +135,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_outline, color: Colors.black, size: 18),
+            const Icon(Icons.check_circle_outline,
+                color: Colors.black, size: 18),
             const SizedBox(width: 8),
-            Expanded(child: Text(message, style: const TextStyle(color: Colors.black))),
+            Expanded(
+              child: Text(message,
+                  style: const TextStyle(color: Colors.black)),
+            ),
           ],
         ),
         backgroundColor: AppColors.neonLime,
@@ -181,7 +187,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         backgroundColor: AppColors.backgroundBlack,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -191,6 +198,27 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
+              // ════════════════════════════════════════════
+              // ✅ ADDED — Animated running logo (icon only)
+              // ════════════════════════════════════════════
+              Center(
+                child: SpringHealthLogoAnimated(
+                  size: 80,
+                  showText: false,
+                ),
+              ).animate().fadeIn(duration: 500.ms).scale(
+                    begin: const Offset(0.7, 0.7),
+                    end: const Offset(1.0, 1.0),
+                    curve: Curves.elasticOut,
+                  ),
+
+              const SizedBox(height: 20), // ← was 0, added spacing after logo
+
+              // ════════════════════════════════════════════
+              // Everything below is YOUR code, unchanged ✅
+              // ════════════════════════════════════════════
+
               Text(
                 'VERIFY IDENTITY',
                 style: AppTextStyles.heading1,
@@ -213,7 +241,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ),
               ).animate().fadeIn(delay: 150.ms),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: 24), // ← reduced from 48 to balance logo
 
               Center(
                 child: Pinput(

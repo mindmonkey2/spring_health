@@ -1,5 +1,5 @@
 const {onDocumentCreated} = require("firebase-functions/v2/firestore");
-const {onCall} = require("firebase-functions/v2/https");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
@@ -80,22 +80,48 @@ exports.sendAnnouncementNotification = onDocumentCreated(
 
 // Optional: Send notification to specific member
 exports.sendPersonalNotification = onCall(async (request) => {
+  // 1. Authentication check
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
+  }
+
+  // 2. Authorization check (Only staff can send personal notifications)
+  const callerUid = request.auth.uid;
+  const userDoc = await admin.firestore().collection("users").doc(callerUid).get();
+  const userData = userDoc.data();
+  const role = userData ? userData.role : null;
+
+  if (role !== "owner" && role !== "receptionist") {
+    throw new HttpsError("permission-denied", "Only staff members can send personal notifications.");
+  }
+
+  // 3. Input validation
   const memberId = request.data.memberId;
   const title = request.data.title;
   const body = request.data.body;
 
+  if (!memberId || typeof memberId !== "string") {
+    throw new HttpsError("invalid-argument", "The 'memberId' must be a non-empty string.");
+  }
+  if (!title || typeof title !== "string") {
+    throw new HttpsError("invalid-argument", "The 'title' must be a non-empty string.");
+  }
+  if (!body || typeof body !== "string") {
+    throw new HttpsError("invalid-argument", "The 'body' must be a non-empty string.");
+  }
+
   try {
     // Get member's FCM token
     const memberDoc = await admin.firestore()
-    .collection("members")
-    .doc(memberId)
-    .get();
+      .collection("members")
+      .doc(memberId)
+      .get();
 
     const memberData = memberDoc.data();
     const fcmToken = memberData ? memberData.fcmToken : null;
 
     if (!fcmToken) {
-      throw new Error("Member does not have FCM token");
+      throw new HttpsError("not-found", "Member does not have an FCM token.");
     }
 
     const message = {
@@ -111,6 +137,9 @@ exports.sendPersonalNotification = onCall(async (request) => {
     return {success: true, messageId: response};
   } catch (error) {
     console.error("❌ Error sending personal notification:", error);
-    throw error;
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+    throw new HttpsError("internal", "An internal error occurred while sending the notification.");
   }
 });

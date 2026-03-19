@@ -3,7 +3,14 @@ import '../models/trainer_model.dart';
 import '../models/diet_plan_model.dart';
 
 class TrainerService {
-  final _db = FirebaseFirestore.instance;
+  static final TrainerService instance = TrainerService._internal();
+  TrainerService._internal() : _db = FirebaseFirestore.instance;
+
+  // Dependency injection constructor — for tests only
+  TrainerService({FirebaseFirestore? db})
+      : _db = db ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _db;
 
   // ── Member's assigned trainer ─────────────────────────────────────────────
 

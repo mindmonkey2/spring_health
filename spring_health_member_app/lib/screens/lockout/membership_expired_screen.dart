@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/config/app_config.dart';
 import '../../models/member_model.dart';
 import '../../services/firebase_auth_service.dart';
 import '../auth/login_screen.dart';
@@ -404,7 +405,7 @@ class MembershipExpiredScreen extends StatelessWidget {
                   Icons.access_time_rounded, 'Mon–Sat: 6AM – 10PM'),
                   const SizedBox(height: 12),
                   _buildContactRow(
-                    Icons.phone_rounded, '+91 XXXXX XXXXX'),
+                    Icons.phone_rounded, AppConfig.supportPhone),
             ],
           ),
           actions: [

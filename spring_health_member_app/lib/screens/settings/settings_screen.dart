@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/member_model.dart';
+import '../../core/config/app_config.dart';
 import '../../services/firebase_auth_service.dart';
 import '../auth/login_screen.dart';
 
@@ -692,10 +693,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _buildContactRow(
                               Icons.access_time_rounded, 'Mon–Sat: 6:00 AM – 10:00 PM'),
                             const SizedBox(height: 14),
-                            _buildContactRow(Icons.phone_rounded, '+91 XXXXX XXXXX'),
+                            _buildContactRow(Icons.phone_rounded, AppConfig.supportPhone),
                             const SizedBox(height: 14),
                             _buildContactRow(
-                              Icons.email_rounded, 'support@springhealth.in'),
+                              Icons.email_rounded, AppConfig.supportEmail),
                             const SizedBox(height: 28),
                             SizedBox(
                               width: double.infinity,

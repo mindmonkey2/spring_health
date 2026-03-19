@@ -149,6 +149,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
 
       final trainer = TrainerModel(
         id: trainerId,
+        userId: '',
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),

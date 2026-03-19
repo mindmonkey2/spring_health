@@ -1,15 +1,15 @@
-// lib/models/trainer_feedback_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TrainerFeedbackModel {
   final String id;
-  final String trainerId;
-  final String memberId;
+  final String trainerId;    // TRN001
+  final String memberId;     // Member Firestore doc ID
   final String memberName;
-  final double rating;          // 1.0 – 5.0
+  final double rating;       // 1.0 – 5.0
   final String? comment;
   final String? trainerReply;
   final DateTime createdAt;
+  final DateTime? repliedAt;
 
   const TrainerFeedbackModel({
     required this.id,
@@ -20,18 +20,24 @@ class TrainerFeedbackModel {
     this.comment,
     this.trainerReply,
     required this.createdAt,
+    this.repliedAt,
   });
 
-  factory TrainerFeedbackModel.fromMap(Map<String, dynamic> data, String id) {
+  factory TrainerFeedbackModel.fromMap(Map<String, dynamic> map, String id) {
     return TrainerFeedbackModel(
       id: id,
-      trainerId: data['trainerId'] as String? ?? '',
-      memberId: data['memberId'] as String? ?? '',
-      memberName: data['memberName'] as String? ?? '',
-      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
-      comment: data['comment'] as String?,
-      trainerReply: data['trainerReply'] as String?,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      trainerId: map['trainerId'] as String? ?? '',
+      memberId: map['memberId'] as String? ?? '',
+      memberName: map['memberName'] as String? ?? 'Unknown',
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      comment: map['comment'] as String?,
+      trainerReply: map['trainerReply'] as String?,
+      createdAt: map['createdAt'] != null
+      ? (map['createdAt'] as Timestamp).toDate()
+      : DateTime.now(),
+      repliedAt: map['repliedAt'] != null
+      ? (map['repliedAt'] as Timestamp).toDate()
+      : null,
     );
   }
 
@@ -40,14 +46,18 @@ class TrainerFeedbackModel {
     'memberId': memberId,
     'memberName': memberName,
     'rating': rating,
-    if (comment != null) 'comment': comment,
-    if (trainerReply != null) 'trainerReply': trainerReply,
+    'comment': comment,
+    'trainerReply': trainerReply,
     'createdAt': Timestamp.fromDate(createdAt),
+    'repliedAt': repliedAt != null ? Timestamp.fromDate(repliedAt!) : null,
   };
 
-  /// Average rating helper — used by detail screen
-  static double averageRating(List<TrainerFeedbackModel> list) {
-    if (list.isEmpty) return 0.0;
-    return list.map((f) => f.rating).reduce((a, b) => a + b) / list.length;
+  bool get hasReply => trainerReply != null && trainerReply!.isNotEmpty;
+
+  String get ratingLabel {
+    if (rating >= 4.5) return 'Excellent';
+    if (rating >= 3.5) return 'Good';
+    if (rating >= 2.5) return 'Average';
+    return 'Needs Improvement';
   }
 }

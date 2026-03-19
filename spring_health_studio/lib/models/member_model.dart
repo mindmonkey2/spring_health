@@ -60,6 +60,33 @@ class MemberModel {
     this.photoUrl,
   });
 
+  // ═══════════════════════════════════════════════════════
+  //  COMPUTED GETTERS
+  // ═══════════════════════════════════════════════════════
+
+  /// True if membership has passed its expiry date
+  bool get isExpired => DateTime.now().isAfter(expiryDate);
+
+  /// True if expiry is within the next 7 days and not yet expired
+  bool get isExpiringSoon {
+    if (isExpired) return false;
+    final daysLeft = expiryDate.difference(DateTime.now()).inDays;
+    return daysLeft <= 7;
+  }
+
+  /// Days remaining until expiry — 0 if already expired
+  int get daysRemaining {
+    final diff = expiryDate.difference(DateTime.now()).inDays;
+    return diff < 0 ? 0 : diff;
+  }
+
+  /// True if member has an outstanding due amount
+  bool get hasDues => dueAmount > 0;
+
+  // ═══════════════════════════════════════════════════════
+  //  SERIALIZATION
+  // ═══════════════════════════════════════════════════════
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -88,7 +115,9 @@ class MemberModel {
       'qrCode': qrCode,
       'createdAt': Timestamp.fromDate(createdAt),
       'trainerId': trainerId,
-      'documentHistory': documentHistory.map((doc) => doc.toMap()).toList(),
+      'photoUrl': photoUrl,  // ✅ FIXED: was missing from toMap
+      'documentHistory':
+          documentHistory.map((doc) => doc.toMap()).toList(),
     };
   }
 
@@ -123,6 +152,7 @@ class MemberModel {
       qrCode: map['qrCode'] as String,
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       trainerId: map['trainerId'] as String?,
+      photoUrl: map['photoUrl'] as String?,  // ✅ FIXED: was missing from fromMap
       documentHistory: (map['documentHistory'] as List<dynamic>?)
               ?.map((item) =>
                   DocumentSentModel.fromMap(item as Map<String, dynamic>))
@@ -131,7 +161,6 @@ class MemberModel {
     );
   }
 
-  // Alias for compatibility
   factory MemberModel.fromJson(Map<String, dynamic> json, {String? id}) {
     return MemberModel.fromMap(json, id: id);
   }
@@ -162,6 +191,7 @@ class MemberModel {
     String? qrCode,
     DateTime? createdAt,
     String? trainerId,
+    String? photoUrl,  // ✅ FIXED: was missing from copyWith
     List<DocumentSentModel>? documentHistory,
   }) {
     return MemberModel(
@@ -190,114 +220,89 @@ class MemberModel {
       qrCode: qrCode ?? this.qrCode,
       createdAt: createdAt ?? this.createdAt,
       trainerId: trainerId ?? this.trainerId,
+      photoUrl: photoUrl ?? this.photoUrl,  // ✅ FIXED
       documentHistory: documentHistory ?? this.documentHistory,
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // DOCUMENT HISTORY HELPER METHODS
-  // ═══════════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════
+  //  DOCUMENT HISTORY HELPERS
+  // ═══════════════════════════════════════════════════════
 
-  /// Check if a specific document type has been successfully sent
   bool hasDocumentBeenSent(String type) {
     return documentHistory.any((doc) => doc.type == type && doc.success);
   }
 
-  /// Get the last successfully sent document of a specific type
   DocumentSentModel? getLastSentDocument(String type) {
     try {
       final filtered = documentHistory
           .where((doc) => doc.type == type && doc.success)
           .toList();
-
       if (filtered.isEmpty) return null;
-
       return filtered.reduce((a, b) => a.sentAt.isAfter(b.sentAt) ? a : b);
     } catch (e) {
       return null;
     }
   }
 
-  /// Get all documents of a specific type
-  List<DocumentSentModel> getDocumentsByType(String type) {
-    return documentHistory.where((doc) => doc.type == type).toList();
-  }
+  List<DocumentSentModel> getDocumentsByType(String type) =>
+      documentHistory.where((doc) => doc.type == type).toList();
 
-  /// Get documents sent via a specific method (whatsapp/email)
-  List<DocumentSentModel> getDocumentsByMethod(String method) {
-    return documentHistory.where((doc) => doc.method == method).toList();
-  }
+  List<DocumentSentModel> getDocumentsByMethod(String method) =>
+      documentHistory.where((doc) => doc.method == method).toList();
 
-  /// Count total successfully sent documents
   int get totalDocumentsSent =>
       documentHistory.where((doc) => doc.success).length;
 
-  /// Count failed document sends
   int get totalFailedDocuments =>
       documentHistory.where((doc) => !doc.success).length;
 
-  /// Get recent documents (last 5)
   List<DocumentSentModel> get recentDocuments {
     final sorted = List<DocumentSentModel>.from(documentHistory)
       ..sort((a, b) => b.sentAt.compareTo(a.sentAt));
     return sorted.take(5).toList();
   }
 
-  /// Get the most recently sent document (any type)
   DocumentSentModel? get lastSentDocument {
     if (documentHistory.isEmpty) return null;
-    return documentHistory.reduce(
-      (a, b) => a.sentAt.isAfter(b.sentAt) ? a : b,
-    );
+    return documentHistory
+        .reduce((a, b) => a.sentAt.isAfter(b.sentAt) ? a : b);
   }
 
-  /// Check if welcome package was sent
   bool get welcomePackageSent => hasDocumentBeenSent('welcome');
 
-  /// Check if any documents were sent in the last N days
   bool hasDocumentsSentInLastDays(int days) {
     final cutoffDate = DateTime.now().subtract(Duration(days: days));
-    return documentHistory.any(
-      (doc) => doc.success && doc.sentAt.isAfter(cutoffDate),
-    );
+    return documentHistory
+        .any((doc) => doc.success && doc.sentAt.isAfter(cutoffDate));
   }
 
-  /// Get documents sent by a specific user
-  List<DocumentSentModel> getDocumentsBySentBy(String sentBy) {
-    return documentHistory.where((doc) => doc.sentBy == sentBy).toList();
-  }
+  List<DocumentSentModel> getDocumentsBySentBy(String sentBy) =>
+      documentHistory.where((doc) => doc.sentBy == sentBy).toList();
 
-  /// Format document history summary for display
   String get documentHistorySummary {
     if (documentHistory.isEmpty) return 'No documents sent';
-
-    final successful = totalDocumentsSent;
-    final failed = totalFailedDocuments;
     final lastSent = lastSentDocument;
-
     if (lastSent != null) {
       final timeAgo = _getTimeAgo(lastSent.sentAt);
-      return '$successful sent, $failed failed. Last: ${lastSent.type} ($timeAgo)';
+      return '$totalDocumentsSent sent, $totalFailedDocuments failed. '
+          'Last: ${lastSent.type} ($timeAgo)';
     }
-
-    return '$successful sent, $failed failed';
+    return '$totalDocumentsSent sent, $totalFailedDocuments failed';
   }
 
-  // Helper to format time ago
   String _getTimeAgo(DateTime dateTime) {
-    final difference = DateTime.now().difference(dateTime);
-
-    if (difference.inDays > 30) {
-      final months = (difference.inDays / 30).floor();
-      return '$months ${months == 1 ? 'month' : 'months'} ago';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'} ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} ${difference.inHours == 1 ? 'hour' : 'hours'} ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'minute' : 'minutes'} ago';
-    } else {
-      return 'Just now';
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inDays > 30) {
+      final m = (diff.inDays / 30).floor();
+      return '$m ${m == 1 ? 'month' : 'months'} ago';
+    } else if (diff.inDays > 0) {
+      return '${diff.inDays} ${diff.inDays == 1 ? 'day' : 'days'} ago';
+    } else if (diff.inHours > 0) {
+      return '${diff.inHours} ${diff.inHours == 1 ? 'hour' : 'hours'} ago';
+    } else if (diff.inMinutes > 0) {
+      return '${diff.inMinutes} ${diff.inMinutes == 1 ? 'minute' : 'minutes'} ago';
     }
+    return 'Just now';
   }
 }

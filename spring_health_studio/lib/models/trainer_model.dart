@@ -1,26 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TrainerModel {
-  final String id;
+  final String id;           // Firestore doc ID e.g. "TRN001"
+  final String userId;       // ✅ NEW — Firebase Auth UID for login linkage
   final String name;
   final String phone;
   final String email;
   final String gender;
   final DateTime? dateOfBirth;
   final String branch;
-  final String specialization; // Gym, Yoga, Cardio, etc.
-  final String experience; // Years of experience
+  final String specialization;
+  final String experience;
   final double salary;
   final String qualification;
   final String? photoUrl;
   final DateTime joiningDate;
   final bool isActive;
-  final List<String> assignedMembers; // List of member IDs
+  final List<String> assignedMembers;
   final DateTime createdAt;
   final String? address;
 
   const TrainerModel({
     required this.id,
+    required this.userId,
     required this.name,
     required this.phone,
     required this.email,
@@ -39,15 +41,16 @@ class TrainerModel {
     this.address,
   });
 
-  // Convert to Map for Firestore
   Map<String, dynamic> toMap() {
     return {
-      'id': id, // ✅ FIXED: Added id to map
+      // ✅ REMOVED 'id' — redundant, Firestore doc ID is set via .doc(id).set()
+      'userId': userId,
       'name': name,
       'phone': phone,
       'email': email,
       'gender': gender,
-      'dateOfBirth': dateOfBirth != null ? Timestamp.fromDate(dateOfBirth!) : null,
+      'dateOfBirth':
+          dateOfBirth != null ? Timestamp.fromDate(dateOfBirth!) : null,
       'branch': branch,
       'specialization': specialization,
       'experience': experience,
@@ -58,38 +61,46 @@ class TrainerModel {
       'isActive': isActive,
       'assignedMembers': assignedMembers,
       'createdAt': Timestamp.fromDate(createdAt),
-      'address': address ?? '', // ✅ FIXED: Handle null address
+      'address': address ?? '',
     };
   }
 
-  // Create from Firestore Map
   factory TrainerModel.fromMap(Map<String, dynamic> map, String id) {
     return TrainerModel(
       id: id,
-      name: map['name'] ?? '',
-      phone: map['phone'] ?? '',
-      email: map['email'] ?? '',
-      gender: map['gender'] ?? 'Male',
+      userId: map['userId'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      phone: map['phone'] as String? ?? '',
+      email: map['email'] as String? ?? '',
+      gender: map['gender'] as String? ?? 'Male',
       dateOfBirth: map['dateOfBirth'] != null
-      ? (map['dateOfBirth'] as Timestamp).toDate()
-      : null,
-      branch: map['branch'] ?? '',
-      specialization: map['specialization'] ?? '',
-      experience: map['experience'] ?? '',
-      salary: (map['salary'] as num?)?.toDouble() ?? 0.0, // ✅ FIXED: Better type handling
-      qualification: map['qualification'] ?? '',
+          ? (map['dateOfBirth'] as Timestamp).toDate()
+          : null,
+      branch: map['branch'] as String? ?? '',
+      specialization: map['specialization'] as String? ?? '',
+      experience: map['experience'] as String? ?? '',
+      salary: (map['salary'] as num?)?.toDouble() ?? 0.0,
+      qualification: map['qualification'] as String? ?? '',
       photoUrl: map['photoUrl'] as String?,
-      joiningDate: (map['joiningDate'] as Timestamp).toDate(),
+      // ✅ FIXED: null-safe joiningDate — falls back to createdAt or now
+      joiningDate: map['joiningDate'] != null
+          ? (map['joiningDate'] as Timestamp).toDate()
+          : map['createdAt'] != null
+              ? (map['createdAt'] as Timestamp).toDate()
+              : DateTime.now(),
       isActive: map['isActive'] as bool? ?? true,
-      assignedMembers: List<String>.from(map['assignedMembers'] ?? []), // ✅ FIXED: Explicit type
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      assignedMembers:
+          List<String>.from(map['assignedMembers'] ?? []),
+      createdAt: map['createdAt'] != null
+          ? (map['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
       address: map['address'] as String?,
     );
   }
 
-  // Create a copy with updated fields
   TrainerModel copyWith({
     String? id,
+    String? userId,
     String? name,
     String? phone,
     String? email,
@@ -108,6 +119,7 @@ class TrainerModel {
   }) {
     return TrainerModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       name: name ?? this.name,
       phone: phone ?? this.phone,
       email: email ?? this.email,
@@ -126,4 +138,10 @@ class TrainerModel {
       address: address ?? this.address,
     );
   }
+
+  // ── Helpers ──────────────────────────────────────────────
+  int get totalAssigned => assignedMembers.length;
+
+  String get experienceLabel =>
+      experience.isEmpty ? 'Not specified' : '$experience yrs exp';
 }

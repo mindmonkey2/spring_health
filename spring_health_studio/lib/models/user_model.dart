@@ -5,33 +5,46 @@ class UserModel {
   final String email;
   final String role;
   final String? branch;
+  final String? trainerId; // ✅ NEW — "TRN001" style ID, only set for Trainer role
+  final String? name;
   final DateTime createdAt;
 
-  UserModel({
+  const UserModel({
     required this.uid,
     required this.email,
     required this.role,
     this.branch,
+    this.trainerId,
+    this.name,
     required this.createdAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'email': email,
-      'role': role,
-      'branch': branch,
-      'createdAt': Timestamp.fromDate(createdAt),
-    };
-  }
-
-  factory UserModel.fromMap(Map<String, dynamic> map) {
+  factory UserModel.fromMap(Map<String, dynamic> map, String uid) {
     return UserModel(
-      uid: map['uid'] as String,
-      email: map['email'] as String,
-      role: map['role'] as String,
+      uid: uid,
+      email: map['email'] as String? ?? '',
+      role: map['role'] as String? ?? '',
       branch: map['branch'] as String?,
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      trainerId: map['trainer_id'] as String?,
+      name: map['name'] as String?,
+      createdAt: map['createdAt'] != null
+      ? (map['createdAt'] as Timestamp).toDate()
+      : DateTime.now(),
     );
   }
+
+  Map<String, dynamic> toMap() => {
+    'uid': uid,
+    'email': email,
+    'role': role,
+    'branch': branch,
+    'trainer_id': trainerId,
+    'name': name,
+    'createdAt': Timestamp.fromDate(createdAt),
+  };
+
+  bool get isOwner => role == 'Owner';
+  bool get isReceptionist => role == 'Receptionist';
+  bool get isTrainer => role == 'Trainer';
+  bool get isMember => role == 'member';
 }

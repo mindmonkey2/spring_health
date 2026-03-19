@@ -374,8 +374,6 @@ class FirestoreService {
     }
   }
 
-
-  // Add this method
   Stream<List<MemberModel>> getArchivedMembers({String? branch}) {
     try {
       Query query = _firestore
@@ -386,7 +384,6 @@ class FirestoreService {
         query = query.where('branch', isEqualTo: branch);
       }
 
-      // IMPORTANT: NO .orderBy() here!
       return query.snapshots().map((snapshot) {
         var members = snapshot.docs.map((doc) {
           return MemberModel.fromMap(
@@ -409,155 +406,236 @@ class FirestoreService {
 
 
 
-  // ==================== TRAINER METHODS ====================
+// ══════════════════════════════════════════════════════════
+//  TRAINER METHODS
+// ══════════════════════════════════════════════════════════
 
-  Future<void> addTrainer(TrainerModel trainer) async {
-    try {
-      await _firestore.collection('trainers').doc(trainer.id).set(trainer.toMap());
-    } catch (e) {
-      debugPrint('Error adding trainer: $e');
-      rethrow;
-    }
+Future<void> addTrainer(TrainerModel trainer) async {
+  try {
+    await _firestore
+        .collection('trainers')
+        .doc(trainer.id)
+        .set(trainer.toMap());
+  } catch (e) {
+    debugPrint('addTrainer error: $e');
+    rethrow;
   }
+}
 
-  Future<void> updateTrainer(TrainerModel trainer) async {
-    try {
-      await _firestore.collection('trainers').doc(trainer.id).update(trainer.toMap());
-    } catch (e) {
-      debugPrint('Error updating trainer: $e');
-      rethrow;
-    }
+Future<void> updateTrainer(TrainerModel trainer) async {
+  try {
+    await _firestore
+        .collection('trainers')
+        .doc(trainer.id)
+        .update(trainer.toMap());
+  } catch (e) {
+    debugPrint('updateTrainer error: $e');
+    rethrow;
   }
+}
 
-  Future<TrainerModel?> getTrainerById(String id) async {
-    try {
-      final doc = await _firestore.collection('trainers').doc(id).get();
-      if (doc.exists) {
-        return TrainerModel.fromMap({...doc.data()!}, doc.id);
-      }
-      return null;
-    } catch (e) {
-      debugPrint('Error getting trainer: $e');
-      return null;
-    }
+/// Fetch by custom doc ID e.g. "TRN001"
+Future<TrainerModel?> getTrainerById(String id) async {
+  try {
+    final doc =
+        await _firestore.collection('trainers').doc(id).get();
+    if (!doc.exists || doc.data() == null) return null;
+    return TrainerModel.fromMap(doc.data()!, doc.id);
+  } catch (e) {
+    debugPrint('getTrainerById error: $e');
+    return null;
   }
+}
 
-  Stream<List<TrainerModel>> getAllTrainers({String? branch}) {
-    try {
-      Query query = _firestore
-      .collection('trainers')
-      .where('isActive', isEqualTo: true)
-      .orderBy('name');
-
-      if (branch != null) {
-        query = query.where('branch', isEqualTo: branch);
-      }
-
-      return query.snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return TrainerModel.fromMap({...doc.data() as Map<String, dynamic>}, doc.id);
-        }).toList();
-      });
-    } catch (e) {
-      debugPrint('Error getting trainers: $e');
-      return Stream.value([]);
-    }
+/// ✅ NEW — Fetch by Firebase Auth UID — used at login
+Future<TrainerModel?> getTrainerByUserId(String authUid) async {
+  try {
+    final snap = await _firestore
+        .collection('trainers')
+        .where('userId', isEqualTo: authUid)
+        .limit(1)
+        .get();
+    if (snap.docs.isEmpty) return null;
+    return TrainerModel.fromMap(
+        snap.docs.first.data(), snap.docs.first.id);
+  } catch (e) {
+    debugPrint('getTrainerByUserId error: $e');
+    return null;
   }
+}
 
-  Stream<List<TrainerModel>> getTrainersByBranch(String branch) {
-    try {
-      return _firestore
-      .collection('trainers')
-      .where('branch', isEqualTo: branch)
-      .where('isActive', isEqualTo: true)
-      .orderBy('name')
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return TrainerModel.fromMap({...doc.data()}, doc.id);
-        }).toList();
-      });
-    } catch (e) {
-      debugPrint('Error getting trainers by branch: $e');
-      return Stream.value([]);
+/// All active trainers — Owner sees all, pass branch for Receptionist
+Stream<List<TrainerModel>> getAllTrainers({String? branch}) {
+  try {
+    Query<Map<String, dynamic>> query = _firestore
+        .collection('trainers')
+        .where('isActive', isEqualTo: true)
+        .orderBy('name');
+
+    if (branch != null) {
+      query = query.where('branch', isEqualTo: branch);
     }
+
+    return query.snapshots().map((snap) => snap.docs
+        .map((doc) => TrainerModel.fromMap(doc.data(), doc.id))
+        .toList());
+  } catch (e) {
+    debugPrint('getAllTrainers error: $e');
+    return Stream.value([]);
   }
+}
 
-  // Assign a member to a trainer
-  Future<void> assignMemberToTrainer(String trainerId, String memberId) async {
-    try {
-      await _firestore.collection('trainers').doc(trainerId).update({
-        'assignedMembers': FieldValue.arrayUnion([memberId]),
-      });
-
-      // Also update member with trainer info
-      await _firestore.collection('members').doc(memberId).update({
-        'trainerId': trainerId,
-      });
-    } catch (e) {
-      debugPrint('Error assigning member to trainer: $e');
-      rethrow;
-    }
+Stream<List<TrainerModel>> getTrainersByBranch(String branch) {
+  try {
+    return _firestore
+        .collection('trainers')
+        .where('branch', isEqualTo: branch)
+        .where('isActive', isEqualTo: true)
+        .orderBy('name')
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((doc) => TrainerModel.fromMap(doc.data(), doc.id))
+            .toList());
+  } catch (e) {
+    debugPrint('getTrainersByBranch error: $e');
+    return Stream.value([]);
   }
+}
 
-  // Remove a member from trainer
-  Future<void> removeMemberFromTrainer(String trainerId, String memberId) async {
-    try {
-      await _firestore.collection('trainers').doc(trainerId).update({
-        'assignedMembers': FieldValue.arrayRemove([memberId]),
-      });
+/// Assign member to trainer — updates BOTH trainer and member docs atomically
+Future<void> assignMemberToTrainer(
+    String trainerId, String memberId) async {
+  try {
+    final batch = _firestore.batch();
 
-      // Remove trainer from member
-      await _firestore.collection('members').doc(memberId).update({
-        'trainerId': null,
-      });
-    } catch (e) {
-      debugPrint('Error removing member from trainer: $e');
-      rethrow;
-    }
+    batch.update(
+      _firestore.collection('trainers').doc(trainerId),
+      {'assignedMembers': FieldValue.arrayUnion([memberId])},
+    );
+    batch.update(
+      _firestore.collection('members').doc(memberId),
+      {'trainerId': trainerId},
+    );
+
+    await batch.commit();
+  } catch (e) {
+    debugPrint('assignMemberToTrainer error: $e');
+    rethrow;
   }
+}
 
-  // Get members assigned to a trainer
-  Stream<List<MemberModel>> getMembersByTrainer(String trainerId) {
-    try {
-      return _firestore
-      .collection('members')
+/// Remove member from trainer — updates BOTH docs atomically
+Future<void> removeMemberFromTrainer(
+    String trainerId, String memberId) async {
+  try {
+    final batch = _firestore.batch();
+
+    batch.update(
+      _firestore.collection('trainers').doc(trainerId),
+      {'assignedMembers': FieldValue.arrayRemove([memberId])},
+    );
+    batch.update(
+      _firestore.collection('members').doc(memberId),
+      {'trainerId': FieldValue.delete()},
+    );
+
+    await batch.commit();
+  } catch (e) {
+    debugPrint('removeMemberFromTrainer error: $e');
+    rethrow;
+  }
+}
+
+/// Real-time stream of members assigned to a trainer
+/// Queries by 'trainerId' field on member doc — clean and indexed
+Stream<List<MemberModel>> getMembersByTrainer(String trainerId) {
+  try {
+    return _firestore
+        .collection('members')
+        .where('trainerId', isEqualTo: trainerId)
+        .where('isArchived', isEqualTo: false)
+        .orderBy('name')
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((doc) => MemberModel.fromMap(doc.data(), id: doc.id))
+            .toList());
+  } catch (e) {
+    debugPrint('getMembersByTrainer error: $e');
+    return Stream.value([]);
+  }
+}
+
+/// Trainer stats — uses stream.first for a one-shot async read
+Future<Map<String, dynamic>> getTrainerStats(
+    String trainerId) async {
+  try {
+    final trainer = await getTrainerById(trainerId);
+    if (trainer == null) return {};
+
+    // ✅ Single Firestore query — no stream overhead
+    final snap = await _firestore
+        .collection('members')
+        .where('trainerId', isEqualTo: trainerId)
+        .where('isArchived', isEqualTo: false)
+        .get();
+
+    final members = snap.docs
+        .map((doc) => MemberModel.fromMap(doc.data(), id: doc.id))
+        .toList();
+
+    final activeCount = members.where((m) => m.isActive).length;
+    final expiringSoon =
+        members.where((m) => m.isExpiringSoon).length;
+
+    return {
+      'totalAssigned': members.length,
+      'activeMembers': activeCount,
+      'inactiveMembers': members.length - activeCount,
+      'expiringSoon': expiringSoon,
+      'specialization': trainer.specialization,
+      'branch': trainer.branch,
+    };
+  } catch (e) {
+    debugPrint('getTrainerStats error: $e');
+    return {};
+  }
+}
+
+// ── Feedback Methods ──────────────────────────────────────
+
+/// Real-time stream of feedback for a trainer (by trainer doc ID)
+Stream<List<TrainerFeedbackModel>> getTrainerFeedback(
+    String trainerId) {
+  return _firestore
+      .collection('trainerFeedback')
       .where('trainerId', isEqualTo: trainerId)
-      .where('isArchived', isEqualTo: false)
-      .orderBy('name')
+      .orderBy('createdAt', descending: true)
       .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return MemberModel.fromMap({...doc.data()}, id: doc.id);
-        }).toList();
-      });
-    } catch (e) {
-      debugPrint('Error getting members by trainer: $e');
-      return Stream.value([]);
-    }
-  }
+      .map((snap) => snap.docs
+          .map((doc) =>
+              TrainerFeedbackModel.fromMap(doc.data(), doc.id))
+          .toList());
+}
 
-  // Get trainer statistics
-  Future<Map<String, dynamic>> getTrainerStats(String trainerId) async {
-    try {
-      final trainer = await getTrainerById(trainerId);
-      if (trainer == null) return {};
+Future<void> replyToFeedback(
+    String trainerId, String feedbackId, String reply) async {
+  await _firestore
+      .collection('trainerFeedback')
+      .doc(feedbackId)
+      .update({
+    'trainerReply': reply,
+    'repliedAt': Timestamp.fromDate(DateTime.now()),
+  });
+}
 
-      final members = await getMembersByTrainer(trainerId).first;
-      final activeMembers = members.where((m) => m.isActive).length;
-      final totalMembers = members.length;
-
-      return {
-        'totalAssigned': totalMembers,
-        'activeMembers': activeMembers,
-        'inactiveMembers': totalMembers - activeMembers,
-        'specialization': trainer.specialization,
-      };
-    } catch (e) {
-      debugPrint('Error getting trainer stats: $e');
-      return {};
-    }
-  }
+/// Update trainer profile fields selectively (e.g. photoUrl)
+Future<void> updateTrainerProfile(
+    String trainerId, Map<String, dynamic> updates) async {
+  await _firestore
+      .collection('trainers')
+      .doc(trainerId)
+      .update(updates);
+}
 
   // ==================== ATTENDANCE METHODS ====================
 
@@ -1261,31 +1339,6 @@ class FirestoreService {
             .toList());
   }
 
-  /// Fetch trainer feedback
-  Stream<List<TrainerFeedbackModel>> getTrainerFeedback(String trainerId) {
-    return _firestore.collection('trainers')
-        .doc(trainerId)
-        .collection('feedback')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => TrainerFeedbackModel.fromMap(doc.data(), doc.id))
-            .toList());
-  }
-
-  /// Reply to trainer feedback
-  Future<void> replyToFeedback(String trainerId, String feedbackId, String reply) async {
-    try {
-      await _firestore.collection('trainers')
-          .doc(trainerId)
-          .collection('feedback')
-          .doc(feedbackId)
-          .update({'trainerReply': reply});
-    } catch (e) {
-      debugPrint('Error replying to feedback: $e');
-      rethrow;
-    }
-  }
 
 
   Future<Map<String, dynamic>> getProfitLoss(

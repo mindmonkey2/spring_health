@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FirebaseAuthService {
   static final FirebaseAuthService instance = FirebaseAuthService._internal();
@@ -22,9 +22,9 @@ class FirebaseAuthService {
   Future<void> _saveVerificationId(String verificationId) async {
     try {
       _verificationId = verificationId;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('verification_id', verificationId);
-      await prefs.setInt('verification_time', DateTime.now().millisecondsSinceEpoch);
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.write(key: 'verification_id', value: verificationId);
+      await secureStorage.write(key: 'verification_time', value: DateTime.now().millisecondsSinceEpoch.toString());
       debugPrint('💾 Verification ID saved: ${verificationId.substring(0, 10)}...');
     } catch (e) {
       debugPrint('⚠️ Error saving verification ID: $e');
@@ -33,15 +33,16 @@ class FirebaseAuthService {
 
   Future<String?> _loadVerificationId() async {
     try {
-      // Use in-memory cache first — avoids SharedPreferences async delay
+      // Use in-memory cache first — avoids async storage delay
       if (_verificationId != null) {
         debugPrint('✅ Using cached verification ID');
         return _verificationId;
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      final savedId = prefs.getString('verification_id');
-      final savedTime = prefs.getInt('verification_time') ?? 0;
+      const secureStorage = FlutterSecureStorage();
+      final savedId = await secureStorage.read(key: 'verification_id');
+      final savedTimeString = await secureStorage.read(key: 'verification_time');
+      final savedTime = savedTimeString != null ? int.tryParse(savedTimeString) ?? 0 : 0;
 
       final age = (DateTime.now().millisecondsSinceEpoch - savedTime) / 1000;
 
@@ -51,8 +52,8 @@ class FirebaseAuthService {
         return savedId;
       } else if (savedId != null) {
         debugPrint('⚠️ Verification ID expired (age: ${age.toInt()}s)');
-        await prefs.remove('verification_id');
-        await prefs.remove('verification_time');
+        await secureStorage.delete(key: 'verification_id');
+        await secureStorage.delete(key: 'verification_time');
       }
       return null;
     } catch (e) {
@@ -64,9 +65,9 @@ class FirebaseAuthService {
   Future<void> _clearVerificationId() async {
     try {
       _verificationId = null;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('verification_id');
-      await prefs.remove('verification_time');
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.delete(key: 'verification_id');
+      await secureStorage.delete(key: 'verification_time');
       debugPrint('🗑️ Verification ID cleared');
     } catch (e) {
       debugPrint('⚠️ Error clearing verification ID: $e');

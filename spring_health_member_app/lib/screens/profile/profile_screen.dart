@@ -137,8 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _uploadProfilePhoto(File imageFile) async {
     try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid == null) return;
+      final uid = FirebaseAuth.instance.currentUser!.uid;
 
       setState(() => _isUploadingPhoto = true);
 
@@ -175,9 +174,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _showSuccess('Profile photo updated');
 
     } on FirebaseException catch (e) {
+      final errCode = e.code;
+      debugPrint('Storage upload failed: $errCode — ${e.message}');
       if (!mounted) return;
       setState(() => _isUploadingPhoto = false);
-      _showError('Upload failed: ${e.message ?? e.code}');
+      _showError('Upload failed. Please try again.');
     } catch (e) {
       if (!mounted) return;
       setState(() => _isUploadingPhoto = false);

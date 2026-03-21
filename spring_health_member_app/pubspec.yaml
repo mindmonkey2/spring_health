@@ -50,6 +50,7 @@ dependencies:
   firebase_storage: ^13.0.6
   flutter_local_notifications: ^20.1.0
   permission_handler: ^12.0.1
+  flutter_secure_storage: ^9.2.4    # ← add this line
   uuid: ^4.5.2
   url_launcher: ^6.3.2
   health: ^13.3.1

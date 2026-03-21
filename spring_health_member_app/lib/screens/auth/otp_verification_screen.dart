@@ -5,7 +5,6 @@ import 'package:pinput/pinput.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../services/firebase_auth_service.dart';
-// ← ADD
 import '../main_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -25,11 +24,14 @@ class OtpVerificationScreen extends StatefulWidget {
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final TextEditingController _otpController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final _authService = FirebaseAuthService();
+
+  // ✅ FIXED — singleton, not new instance
+  final _authService = FirebaseAuthService.instance;
 
   bool _isLoading = false;
   bool _isResending = false;
 
+  // Track latest verificationId locally — updated on resend
   late String _currentVerificationId;
 
   @override
@@ -56,8 +58,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.verifyOTP(otp,
-          verificationId: _currentVerificationId);
+      await _authService.verifyOTP(
+        otp,
+        verificationId: _currentVerificationId,
+      );
 
       if (!mounted) return;
 
@@ -93,6 +97,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           });
           _showSuccess('New OTP sent to +91 ${widget.phoneNumber}');
           _focusNode.requestFocus();
+        },
+        onCodeAutoRetrievalTimeout: (newVerificationId) {
+          if (!mounted) return;
+          setState(() {
+            _currentVerificationId = newVerificationId;
+          });
+        },
+        onAutoVerify: () {
+          if (!mounted) return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+            (route) => false,
+          );
         },
         onError: (error) {
           if (!mounted) return;
@@ -137,8 +155,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 color: Colors.black, size: 18),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(message,
-                  style: const TextStyle(color: Colors.black)),
+              child: Text(
+                message,
+                style: const TextStyle(color: Colors.black),
+              ),
             ),
           ],
         ),
@@ -197,9 +217,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // ════════════════════════════════════════════
-              // ✅ ADDED — Animated running logo (icon only)
-              // ════════════════════════════════════════════
+              // Animated running logo (icon only, no text)
               Center(
                 child: SpringHealthLogoAnimated(
                   size: 80,
@@ -211,11 +229,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     curve: Curves.elasticOut,
                   ),
 
-              const SizedBox(height: 20), // ← was 0, added spacing after logo
-
-              // ════════════════════════════════════════════
-              // Everything below is YOUR code, unchanged ✅
-              // ════════════════════════════════════════════
+              const SizedBox(height: 20),
 
               Text(
                 'VERIFY IDENTITY',
@@ -239,7 +253,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ),
               ).animate().fadeIn(delay: 150.ms),
 
-              const SizedBox(height: 24), // ← reduced from 48 to balance logo
+              const SizedBox(height: 24),
 
               Center(
                 child: Pinput(

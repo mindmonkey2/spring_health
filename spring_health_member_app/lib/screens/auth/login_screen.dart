@@ -16,9 +16,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen>
-with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   final _phoneController = TextEditingController();
-  final _authService = FirebaseAuthService();
+  final _authService = FirebaseAuthService.instance; // ✅ FIX 1
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
@@ -60,9 +60,6 @@ with SingleTickerProviderStateMixin {
 
     final phone = _phoneController.text.trim();
 
-    // ── Send OTP directly — member validation happens after OTP verify ──
-    // Pre-checking checkMemberExists() here fails because the user is
-    // not yet authenticated and Firestore rules block the read.
     await _authService.sendOTP(
       phoneNumber: phone,
       onCodeSent: (verificationId) {
@@ -72,12 +69,12 @@ with SingleTickerProviderStateMixin {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-            OtpVerificationScreen(
+                OtpVerificationScreen(
               phoneNumber: phone,
               verificationId: verificationId,
             ),
             transitionsBuilder:
-            (context, animation, secondaryAnimation, child) {
+                (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1.0, 0),
@@ -180,28 +177,27 @@ with SingleTickerProviderStateMixin {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('WELCOME BACK', style: AppTextStyles.heading1)
-              .animate()
-              .fadeIn(delay: 300.ms)
-              .slideX(begin: -0.2, end: 0),
+                  .animate()
+                  .fadeIn(delay: 300.ms)
+                  .slideX(begin: -0.2, end: 0),
 
               const SizedBox(height: 6),
 
               Text(
-                'Enter your registered mobile number\nto access your membership.',
+                'Enter your registered mobile number\nto access your membership.', // ✅ FIX 2
                 style: AppTextStyles.bodyMedium,
               ).animate().fadeIn(delay: 450.ms).slideX(begin: -0.2, end: 0),
 
               const SizedBox(height: 36),
 
-              // Shake wrapper on invalid input
               AnimatedBuilder(
                 animation: _shakeAnimation,
                 builder: (context, child) {
                   final dx = _shakeController.isAnimating
-                  ? 8 *
-                  (0.5 - _shakeAnimation.value).abs() *
-                  (1 - _shakeAnimation.value)
-                  : 0.0;
+                      ? 8 *
+                          (0.5 - _shakeAnimation.value).abs() *
+                          (1 - _shakeAnimation.value)
+                      : 0.0;
                   return Transform.translate(
                     offset: Offset(dx * 4, 0),
                     child: child,
@@ -238,18 +234,18 @@ with SingleTickerProviderStateMixin {
                         counterText: '',
                         prefixIcon: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 18),
-                            child: Text(
-                              '+91',
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.neonLime,
-                              ),
+                              horizontal: 16, vertical: 18),
+                          child: Text(
+                            '+91',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.neonLime,
                             ),
+                          ),
                         ),
                         prefixIconConstraints:
-                        const BoxConstraints(minWidth: 0, minHeight: 0),
+                            const BoxConstraints(minWidth: 0, minHeight: 0),
                         filled: true,
                         fillColor: AppColors.surfaceDark,
                         border: OutlineInputBorder(
@@ -258,18 +254,18 @@ with SingleTickerProviderStateMixin {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: AppColors.neonLime, width: 2),
+                          borderSide:
+                              BorderSide(color: AppColors.neonLime, width: 2),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: AppColors.error, width: 1.5),
+                          borderSide:
+                              BorderSide(color: AppColors.error, width: 1.5),
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide:
-                          BorderSide(color: AppColors.error, width: 2),
+                              BorderSide(color: AppColors.error, width: 2),
                         ),
                         hintText: '98765 43210',
                         hintStyle: GoogleFonts.poppins(
@@ -278,25 +274,25 @@ with SingleTickerProviderStateMixin {
                           letterSpacing: 2,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 20),
+                            horizontal: 20, vertical: 20),
                       ),
                       validator: (value) {
                         final v = value?.trim() ?? '';
-                    if (v.isEmpty) {
-                      return 'Please enter your mobile number';
-                    }
-                    if (v.length != 10) {
-                      return 'Enter a valid 10-digit number';
-                    }
-                    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(v)) {
-                      return 'Enter a valid Indian mobile number';
-                    }
-                    return null;
+                        if (v.isEmpty) {
+                          return 'Please enter your mobile number';
+                        }
+                        if (v.length != 10) {
+                          return 'Enter a valid 10-digit number';
+                        }
+                        if (!RegExp(r'^[6-9]\d{9}$').hasMatch(v)) { // ✅ FIX 3
+                          return 'Enter a valid Indian mobile number';
+                        }
+                        return null;
                       },
                     )
-                    .animate()
-                    .fadeIn(delay: 600.ms)
-                    .slideY(begin: 0.1, end: 0),
+                        .animate()
+                        .fadeIn(delay: 600.ms)
+                        .slideY(begin: 0.1, end: 0),
                   ],
                 ),
               ),
@@ -311,57 +307,57 @@ with SingleTickerProviderStateMixin {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neonLime,
                     foregroundColor: Colors.black,
-                      disabledBackgroundColor:
-                      AppColors.neonLime.withValues(alpha: 0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
+                    disabledBackgroundColor:
+                        AppColors.neonLime.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
                   ),
                   child: _isLoading
-                  ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.black.withValues(alpha: 0.6),
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.black.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'SENDING OTP...',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black.withValues(alpha: 0.6),
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          'SEND OTP',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black,
+                            letterSpacing: 1.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'SENDING OTP...',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black.withValues(alpha: 0.6),
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ],
-                  )
-                  : Text(
-                    'SEND OTP',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
                 )
-                .animate()
-                .fadeIn(delay: 750.ms)
-                .slideY(begin: 0.2, end: 0),
+                    .animate()
+                    .fadeIn(delay: 750.ms)
+                    .slideY(begin: 0.2, end: 0),
               ),
 
               const SizedBox(height: 28),
 
               Center(
                 child: Text(
-                  'Only registered Spring Health members can log in.\nContact your branch for access.',
+                  'Only registered Spring Health members can log in.\nContact your branch for access.', // ✅ FIX 4
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 12,

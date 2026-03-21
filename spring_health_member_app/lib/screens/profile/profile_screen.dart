@@ -34,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = FirebaseAuthService();
   final _picker = ImagePicker();
   final _isUploading = ValueNotifier<bool>(false);
+  bool _isUploadingPhoto = false;
   late MemberModel _member;
 
   @override
@@ -123,59 +124,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickAndUpload(ImageSource source) async {
+    final XFile? picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 75,
+      maxWidth: 800,
+    );
+    if (picked == null || !mounted) return;
+
+    final file = File(picked.path);
+    await _uploadProfilePhoto(file);
+  }
+
+  Future<void> _uploadProfilePhoto(File imageFile) async {
     try {
-      final XFile? picked = await _picker.pickImage(
-        source: source,
-        imageQuality: 75,
-        maxWidth: 800,
-      );
-      if (picked == null || !mounted) return;
+      final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      _isUploading.value = true;
-      final file = File(picked.path);
+      setState(() => _isUploadingPhoto = true);
 
-      // ── Upload to Firebase Storage ───────────────────────────────────────
-      final uid = FirebaseAuth.instance.currentUser?.uid ?? _member.id;
+      // Path must match storage rules exactly: member_photos/{uid}.jpg
       final ref = FirebaseStorage.instance
           .ref()
-          .child('member_photos/$uid.jpg');
+          .child('member_photos')
+          .child('$uid.jpg');
 
-      final task = await ref.putFile(
-        file,
+      final uploadTask = ref.putFile(
+        imageFile,
         SettableMetadata(contentType: 'image/jpeg'),
       );
-      final downloadUrl = await task.ref.getDownloadURL();
 
-      // ── Update Firestore ─────────────────────────────────────────────────
+      await uploadTask;
+      final downloadUrl = await ref.getDownloadURL();
+
+      // Save URL to Firestore members collection
       await FirebaseFirestore.instance
           .collection('members')
-          .doc(_member.id)
+          .doc(uid)
           .update({'photoUrl': downloadUrl});
 
-      // ── Rebuild local state ──────────────────────────────────────────────
-      if (mounted) {
-        setState(() {
-          _member = MemberModel.fromMap(
-            {..._member.toMap(), 'photoUrl': downloadUrl},
-            id: _member.id,
-          );
-        });
-        _showSnack('Profile photo updated! 📸', AppColors.success);
-      }
-    } on FirebaseException catch (e) {
-      if (mounted) {
-        _showSnack(
-          e.code == 'unauthorized'
-              ? 'Storage permission denied — check Firebase rules.'
-              : 'Upload failed: ${e.message}',
-          AppColors.error,
+      if (!mounted) return;
+      setState(() => _isUploadingPhoto = false);
+
+      // Update local member state to immediately reflect change
+      setState(() {
+        _member = MemberModel.fromMap(
+          {..._member.toMap(), 'photoUrl': downloadUrl},
+          id: _member.id,
         );
-      }
+      });
+      _showSuccess('Profile photo updated');
+
+    } on FirebaseException catch (e) {
+      final errCode = e.code;
+      debugPrint('Storage upload failed: $errCode — ${e.message}');
+      if (!mounted) return;
+      setState(() => _isUploadingPhoto = false);
+      _showError('Upload failed. Please try again.');
     } catch (e) {
-      if (mounted) _showSnack('Upload failed. Try again.', AppColors.error);
-    } finally {
-      if (mounted) _isUploading.value = false;
+      if (!mounted) return;
+      setState(() => _isUploadingPhoto = false);
+      _showError('Upload failed. Please try again.');
     }
+  }
+
+  void _showSuccess(String message) {
+    _showSnack(message, AppColors.success);
+  }
+
+  void _showError(String message) {
+    _showSnack(message, AppColors.error);
   }
 
   void _showSnack(String message, Color color) {
@@ -336,25 +352,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 // Upload spinner overlay
-                ValueListenableBuilder<bool>(
-                  valueListenable: _isUploading,
-                  builder: (_, uploading, _) => uploading
-                      ? Container(
-                          width: 100, height: 100,
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundBlack
-                                .withValues(alpha: 0.65),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.neonLime,
-                              strokeWidth: 3,
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                if (_isUploadingPhoto)
+                  Container(
+                    width: 100, height: 100,
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundBlack
+                          .withValues(alpha: 0.65),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.neonLime,
+                        strokeWidth: 3,
+                      ),
+                    ),
+                  ),
               ],
             ),
           )

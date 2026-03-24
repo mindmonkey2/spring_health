@@ -17,6 +17,7 @@ import '../fitness/body_metrics_screen.dart';
 import '../gamification/personal_best_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
+import '../health/health_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final MemberModel member;
@@ -554,6 +555,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildAccountActions() {
     return Column(
       children: [
+        _buildActionTile(
+          'Health Profile & AI Goals',
+          Icons.monitor_heart_outlined,
+          AppColors.neonOrange,
+          subtitle: 'Metrics, BP, goals — powers your AI coach',
+          onTap: () => _push(HealthProfileScreen(memberId: _member.id)),
+        ),
+        const SizedBox(height: 12),
         _buildActionTile(
           'Payment History',
           Icons.receipt_long_rounded,

@@ -32,7 +32,7 @@
   - **Auth**: Login, OTP Verification (`screens/auth/`).
   - **Dashboard**: Main Screen, Home (`screens/home/`), Settings (`screens/settings/`).
   - **Profile Management**: Profile, Membership Info, Settings Tile (`screens/profile/`).
-  - **Fitness & Tracking**: Body Metrics, Fitness Dashboard, Workout Logger, History, Detail (`screens/fitness/`, `screens/workout/`).
+  - **Fitness & Tracking**: Body Metrics, Fitness Dashboard, Workout Logger, History, Detail (`screens/fitness/`, `screens/workout/`). Health Profile Screen (HealthProfileModel with BP classification and BMI calculation, BodyMetricsLogModel for time-series metrics tracking, FitnessTestModel with 8-test battery and auto-derived fitness level, HealthProfileScreen with two tabs, BP warning system, Trend charts).
   - **Engagement**: Gamification (Leaderboard, XP) (`screens/gamification/`), Clash Screen (`screens/clash/`), Announcements (`screens/announcements/`), Notifications (`screens/notifications/`), Social Coming Soon (`screens/social/`).
   - **Trainers**: Trainer List, Feedback (`screens/trainers/`).
   - **Check-in/Attendance**: QR Check-in, Member Attendance (`screens/checkin/`, `screens/attendance/`).
@@ -40,7 +40,7 @@
 - **Backend Services**:
   - Announcements (`announcement_service.dart`)
   - Attendance (`attendance_service.dart`)
-  - Body Metrics & Health (`body_metrics_service.dart`, `health_service.dart`)
+  - Body Metrics & Health (`body_metrics_service.dart`, `health_service.dart`, `health_profile_service.dart`)
   - Challenges & Gamification (`challenge_service.dart`, `gamification_service.dart`)
   - Firebase Auth (`firebase_auth_service.dart`)
   - Firestore (`firestore_service.dart`)
@@ -63,6 +63,9 @@ Mapped from `services/` across both applications:
 - `fcmTokens`
 - `feedback`
 - `fitnessData`
+- `healthProfiles/{memberId}`           — current health profile and goals
+- `bodyMetricsLogs/{memberId}/logs/`    — time-series metrics history
+- `fitnessTests/{memberId}/tests/`      — fitness test battery results
 - `gamification`
 - `items`
 - `memberAlerts`
@@ -96,3 +99,8 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 - **Strict Code Generation Rules (`AGENTS.md` 3)**: Code MUST pass `flutter analyze` with 0 errors and 0 warnings.
   - *Current Status*: **CRITICAL FAILURE**. `flutter analyze spring_health_member_app` returns 8,304 issues. `flutter analyze spring_health_studio` returns 10,691 issues. Most issues relate to undefined identifiers, undefined classes/methods, uri not existing (like `cloud_firestore`, `flutter/material.dart`, etc.), and const initialization errors. This suggests a severely broken build state or missing dependency fetching steps (`flutter pub get`).
 - **Deprecations/Print Statements**: Did not deeply verify all occurrences, but given the severe compilation errors, the general health of the codebase requires an immediate dependency resolution and code correction pass.
+
+## 5. Known Rules
+- **Member IDs in Health Collections**: `memberId` in `healthProfiles`, `bodyMetricsLogs`, and `fitnessTests` collections is the Firebase Auth UID (not Firestore member doc ID). Verify via `FirebaseAuthService.instance.currentUser.uid`.
+- **BP Warnings**: BP Stage 2 or Crisis must always show a non-dismissible warning.
+- **BMI Calculation**: BMI is always auto-calculated — never stored as a raw input field.

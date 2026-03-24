@@ -19,6 +19,7 @@ import 'profile/profile_screen.dart';
 import 'lockout/membership_expired_screen.dart';
 import '../screens/gamification/xp_screen.dart';
 import '../screens/gamification/leaderboard_screen.dart';
+import '../services/wearable_snapshot_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -68,6 +69,20 @@ class _MainScreenState extends State<MainScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this); // ✅ lifecycle observer
     _init();
+
+    // Silently sync wearable data in background — no loading state shown
+    Future.microtask(() async {
+      try {
+        final memberId = await FirebaseAuthService.instance.getCurrentMemberId();
+        if (memberId != null) {
+          await WearableSnapshotService.instance.syncTodaySnapshot(memberId);
+          debugPrint('✅ Wearable snapshot synced');
+        }
+      } catch (e) {
+        debugPrint('⚠️ Wearable sync skipped: $e');
+        // Silent fail — never block app startup
+      }
+    });
   }
 
   @override

@@ -34,6 +34,14 @@
   - **Profile Management**: Profile, Membership Info, Settings Tile (`screens/profile/`).
   - **Fitness & Tracking**: Body Metrics, Fitness Dashboard, Workout Logger, History, Detail (`screens/fitness/`, `screens/workout/`). Health Profile Screen (HealthProfileModel with BP classification and BMI calculation, BodyMetricsLogModel for time-series metrics tracking, FitnessTestModel with 8-test battery and auto-derived fitness level, HealthProfileScreen with two tabs, BP warning system, Trend charts).
   - **Engagement**: Gamification (Leaderboard, XP) (`screens/gamification/`), Clash Screen (`screens/clash/`), Announcements (`screens/announcements/`), Notifications (`screens/notifications/`), Social Coming Soon (`screens/social/`).
+  - **Phase 3 — AI Personal Trainer Engine**:
+    - WearableSnapshotModel: full daily wearable data snapshot with auto-derived recoveryStatus and sleepQuality
+    - WearableSnapshotService: reads 25 health data types from Health Connect / HealthKit, writes daily snapshot to Firestore, auto-updates HealthProfileModel with latest vitals
+    - AiCoachService: Gemini 2.0 Flash integration via firebase_ai, reads full wearable + health + fitness context, generates 7-day workout plans and 5-meal Indian diet plans
+    - Three-tier safety gate: BP crisis / cardiac event / fever all blocked before Gemini call (rule-based, never AI)
+    - 24-hour plan cache: prevents redundant Gemini calls
+    - syncWearablesAndGenerate: convenience method for refresh flow
+    - Auto wearable sync on every app open (silent, non-blocking)
   - **Trainers**: Trainer List, Feedback (`screens/trainers/`).
   - **Check-in/Attendance**: QR Check-in, Member Attendance (`screens/checkin/`, `screens/attendance/`).
   - **Payments & Lockout**: Payment History, Renewal, Membership Expired Lockout (`screens/payments/`, `screens/renewal/`, `screens/lockout/`).
@@ -67,6 +75,9 @@ Mapped from `services/` across both applications:
 - `bodyMetricsLogs/{memberId}/logs/`    — time-series metrics history
 - `fitnessTests/{memberId}/tests/`      — fitness test battery results
 - `gamification`
+- `wearableSnapshots/{memberId}/daily/{YYYY-MM-DD}` — daily wearable data snapshots
+- `aiPlans/{memberId}/current`          — active AI workout plan (7 days)
+- `dietPlans/{memberId}/current`        — active AI diet plan (5 meals)
 - `items`
 - `memberAlerts`
 - `members`
@@ -104,3 +115,10 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 - **Member IDs in Health Collections**: `memberId` in `healthProfiles`, `bodyMetricsLogs`, and `fitnessTests` collections is the Firebase Auth UID (not Firestore member doc ID). Verify via `FirebaseAuthService.instance.currentUser.uid`.
 - **BP Warnings**: BP Stage 2 or Crisis must always show a non-dismissible warning.
 - **BMI Calculation**: BMI is always auto-calculated — never stored as a raw input field.
+- **WearableSnapshotService must NEVER block app startup**: Always call from Future.microtask() or compute()
+- **Three conditions block Gemini entirely (never adjust)**: BP > 180/120, irregular heart rate event, body temp > 37.5°C
+- **All other health flags (Stage 1/2 HTN, low HRV, poor sleep)**: are passed to Gemini as context — AI adjusts the plan
+- **responseMimeType: 'application/json' is mandatory in GenerationConfig**: Without it, Gemini may return markdown-wrapped JSON that breaks jsonDecode()
+- **temperature: 0.4**: keep low for medical/fitness context; higher temperature causes hallucinated exercise names
+- **WearableSnapshotService.syncTodaySnapshot() also updates HealthProfileModel**: do not manually update BP/weight/RHR from wearables elsewhere, let the service handle it
+- **firebase_ai package version must stay in sync with firebase_core**: Check pub.dev for compatible versions before updating

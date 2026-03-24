@@ -213,10 +213,26 @@ service cloud.firestore {
     // DIETPLANS COLLECTION
     // -------------------------------------------------------------------------
     // - Owner/Trainer: full read/write
-    // - Member: read only
+    // - Member: read own plans and write directly (AI generation)
     match /dietPlans/{planId} {
       allow read: if isSignedIn();
-      allow write: if isOwner() || isTrainer();
+      allow write: if isOwner() || isTrainer() || (request.auth != null && request.auth.uid == planId);
+
+      match /current/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == planId;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // AI PLANS COLLECTION (Phase 3 AI Workout Engine)
+    // -------------------------------------------------------------------------
+    // - Member reads/writes own plans directly from the app
+    match /aiPlans/{memberId} {
+      allow read, write: if request.auth != null && request.auth.uid == memberId;
+
+      match /current/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == memberId;
+      }
     }
 
     // -------------------------------------------------------------------------

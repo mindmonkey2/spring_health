@@ -104,3 +104,25 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 - **Member IDs in Health Collections**: `memberId` in `healthProfiles`, `bodyMetricsLogs`, and `fitnessTests` collections is the Firebase Auth UID (not Firestore member doc ID). Verify via `FirebaseAuthService.instance.currentUser.uid`.
 - **BP Warnings**: BP Stage 2 or Crisis must always show a non-dismissible warning.
 - **BMI Calculation**: BMI is always auto-calculated — never stored as a raw input field.
+
+## 6. AI Personal Trainer Engine — Phase 3
+
+AI Stack:
+  - Package: `firebase_ai` (NOT `google_generative_ai` — deprecated)
+  - Model: `gemini-2.0-flash` via GoogleAI backend
+  - Architecture: Direct Flutter → Firebase proxy → Gemini
+  - No Cloud Functions required for AI calls
+  - Plans written to Firestore by the Flutter app after parsing
+  - Caching: plans older than 24 hours trigger regeneration
+
+Collections:
+  - `aiPlans/{memberId}/current/plan`   — AI workout plan (7 days)
+  - `dietPlans/{memberId}/current/plan` — AI diet plan (5 meals/day)
+
+Rules:
+  - BP > 180/120 → throw exception before calling Gemini, never call AI
+  - Always validate Gemini JSON response before writing to Firestore
+  - `responseMimeType`: `'application/json'` enforces structured output
+  - `temperature`: 0.4 — consistent, not too creative for medical context
+  - `getCachedPlan()` always called first — never regenerate within 24h
+  - `firebase_ai` package version must stay in sync with `firebase_core`

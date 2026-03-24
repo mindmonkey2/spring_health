@@ -151,6 +151,25 @@ service cloud.firestore {
                          && request.auth.uid == memberId;
     }
 
+    // AI Plans
+    match /aiPlans/{memberId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == memberId;
+      match /current/{docId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == memberId;
+      }
+    }
+
+    match /wearableSnapshots/{memberId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == memberId;
+      match /daily/{date} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == memberId;
+      }
+    }
+
     // Body metrics logs
     match /bodyMetricsLogs/{memberId}/logs/{logId} {
       allow read, write: if request.auth != null
@@ -213,10 +232,13 @@ service cloud.firestore {
     // DIETPLANS COLLECTION
     // -------------------------------------------------------------------------
     // - Owner/Trainer: full read/write
-    // - Member: read only
-    match /dietPlans/{planId} {
+    // - Member: read only, full access to own AI diet plans
+    match /dietPlans/{memberId} {
       allow read: if isSignedIn();
-      allow write: if isOwner() || isTrainer();
+      allow write: if isOwner() || isTrainer() || (request.auth != null && request.auth.uid == memberId);
+      match /current/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == memberId;
+      }
     }
 
     // -------------------------------------------------------------------------

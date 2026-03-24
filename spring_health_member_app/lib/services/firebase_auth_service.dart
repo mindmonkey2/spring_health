@@ -13,12 +13,13 @@ class FirebaseAuthService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   static const String _verificationKey = 'otp_verification_id';
+  static const String _memberIdKey     = 'member_id';
   int? _resendToken;
 
   User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // ─── Verification ID persistence ─────────────────────────────────────────
+  // ─── Verification ID helpers ──────────────────────────────────────────────
 
   Future<void> _saveVerificationId(String verificationId) async {
     try {
@@ -32,9 +33,7 @@ class FirebaseAuthService {
   Future<String?> _loadVerificationId() async {
     try {
       final saved = await _secureStorage.read(key: _verificationKey);
-      if (saved != null) {
-        debugPrint('✅ Loaded verification ID from secure storage');
-      }
+      if (saved != null) debugPrint('✅ Loaded verification ID from secure storage');
       return saved;
     } catch (e) {
       debugPrint('⚠️ Error loading verification ID: $e');
@@ -48,6 +47,34 @@ class FirebaseAuthService {
       debugPrint('🗑️ Verification ID cleared');
     } catch (e) {
       debugPrint('⚠️ Error clearing verification ID: $e');
+    }
+  }
+
+  // ─── Member ID helpers (secure storage) ──────────────────────────────────
+
+  Future<void> _saveMemberId(String memberId) async {
+    try {
+      await _secureStorage.write(key: _memberIdKey, value: memberId);
+      debugPrint('💾 Member ID saved to secure storage: $memberId');
+    } catch (e) {
+      debugPrint('⚠️ Error saving member ID: $e');
+    }
+  }
+
+  Future<String?> _loadMemberId() async {
+    try {
+      return await _secureStorage.read(key: _memberIdKey);
+    } catch (e) {
+      debugPrint('⚠️ Error loading member ID: $e');
+      return null;
+    }
+  }
+
+  Future<void> _clearMemberId() async {
+    try {
+      await _secureStorage.delete(key: _memberIdKey);
+    } catch (e) {
+      debugPrint('⚠️ Error clearing member ID: $e');
     }
   }
 
@@ -77,9 +104,9 @@ class FirebaseAuthService {
         }
 
         if (snap.docs.isNotEmpty) {
-          final doc = snap.docs.first;
+          final doc  = snap.docs.first;
           final data = doc.data() as Map<String, dynamic>;
-          final memberName = data['name'] ?? 'Unknown';
+          final memberName = data['name'] as String? ?? 'Unknown';
           debugPrint('✅ Member found: $memberName (${doc.id})');
           return {'id': doc.id, ...data};
         }
@@ -103,7 +130,7 @@ class FirebaseAuthService {
     Function(String verificationId)? onCodeAutoRetrievalTimeout,
   }) async {
     try {
-      final clean = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+      final clean     = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
       final fullPhone = '+91$clean';
       debugPrint('📱 Sending OTP to: $fullPhone');
 
@@ -114,12 +141,19 @@ class FirebaseAuthService {
         timeout: const Duration(seconds: 120),
         forceResendingToken: _resendToken,
 
+        // ── Auto-verify (Android) ──────────────────────────────────────────
         verificationCompleted: (PhoneAuthCredential credential) async {
           debugPrint('✅ Auto verification completed');
           try {
-            await _auth.signInWithCredential(credential);
+            final userCredential = await _auth.signInWithCredential(credential);
             await _clearVerificationId();
             debugPrint('✅ Auto sign-in successful');
+
+            // Store memberId immediately after auto sign-in
+            if (userCredential.user != null) {
+              await _createOrUpdateUserDocument(userCredential.user!);
+            }
+
             onAutoVerify?.call();
           } catch (e) {
             debugPrint('❌ Auto sign-in failed: $e');
@@ -128,17 +162,13 @@ class FirebaseAuthService {
         },
 
         verificationFailed: (FirebaseAuthException e) {
-          final code = e.code;
-          final msg = e.message;
-          debugPrint('❌ Verification failed: $code - $msg');
-          onError(_friendlyAuthError(code, msg));
+          debugPrint('❌ Verification failed: \${e.code} - \${e.message}');
+          onError(_friendlyAuthError(e.code, e.message));
         },
 
         codeSent: (String verificationId, int? resendToken) async {
           debugPrint('📨 OTP sent successfully');
           _resendToken = resendToken;
-          // Save BEFORE calling onCodeSent so verificationId is guaranteed
-          // to be in storage when verifyOTP() is called
           await _saveVerificationId(verificationId);
           onCodeSent(verificationId);
         },
@@ -159,25 +189,22 @@ class FirebaseAuthService {
 
   /// Accepts verificationId explicitly so the screen's _currentVerificationId
   /// is used as primary source, with _loadVerificationId() as fallback only.
-  Future<UserCredential> verifyOTP(
+  Future<UserCredential?> verifyOTP(
     String otp, {
     String? verificationId,
   }) async {
     try {
-      final cleanOtp = otp.replaceAll(RegExp(r'[^0-9]'), '');
-      debugPrint('🔐 Verifying OTP: $cleanOtp');
+      final cleanOtp    = otp.replaceAll(RegExp(r'[^0-9]'), '');
+      final resolvedId  = verificationId ?? await _loadVerificationId();
 
-      // Prefer the verificationId passed from the screen
-      final resolvedId = verificationId ?? await _loadVerificationId();
+      debugPrint('🔐 Verifying OTP: $cleanOtp');
 
       if (resolvedId == null || resolvedId.isEmpty) {
         debugPrint('❌ No verification ID found');
-        throw Exception(
-            'Verification session expired. Please request a new OTP.');
+        throw Exception('Verification session expired. Please request a new OTP.');
       }
 
-      final idPreview = resolvedId.substring(0, 10);
-      debugPrint('🔑 Using verification ID: $idPreview...');
+      debugPrint('🔑 Using verification ID: \${resolvedId.substring(0, 10)}...');
 
       final credential = PhoneAuthProvider.credential(
         verificationId: resolvedId,
@@ -186,22 +213,19 @@ class FirebaseAuthService {
 
       debugPrint('🔓 Attempting sign in...');
       final userCredential = await _auth.signInWithCredential(credential);
-
       await _clearVerificationId();
 
       if (userCredential.user != null) {
-        final uid = userCredential.user!.uid;
-        debugPrint('✅ Sign in successful! UID: $uid');
+        debugPrint('✅ Sign in successful! UID: \${userCredential.user!.uid}');
+        // Create/update user doc AND store memberId in secure storage
         await _createOrUpdateUserDocument(userCredential.user!);
       }
 
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      final code = e.code;
-      final msg = e.message;
-      debugPrint('❌ Firebase Auth Error: $code - $msg');
+      debugPrint('❌ Firebase Auth Error: \${e.code} - \${e.message}');
       await _clearVerificationId();
-      throw Exception(_friendlyAuthError(code, msg));
+      throw Exception(_friendlyAuthError(e.code, e.message));
     } catch (e) {
       debugPrint('❌ Error verifying OTP: $e');
       await _clearVerificationId();
@@ -209,7 +233,7 @@ class FirebaseAuthService {
     }
   }
 
-  // ─── User document ────────────────────────────────────────────────────────
+  // ─── User document + member linking ──────────────────────────────────────
 
   Future<void> _createOrUpdateUserDocument(User user) async {
     try {
@@ -223,32 +247,38 @@ class FirebaseAuthService {
       final memberData = await checkMemberExists(phone);
 
       if (memberData != null) {
-        final memberId = memberData['id'];
+        final memberId   = memberData['id'] as String;
         final memberName = memberData['name'] ?? 'Unknown';
         debugPrint('✅ Found member: $memberName (ID: $memberId)');
 
+        // 1. Write to users collection
         await _firestore.collection('users').doc(user.uid).set({
-          'role': 'member',
+          'role'        : 'Member',
           'phone_number': phone,
-          'member_id': memberId,
-          'created_at': FieldValue.serverTimestamp(),
-          'last_login': FieldValue.serverTimestamp(),
+          'member_id'   : memberId,
+          'created_at'  : FieldValue.serverTimestamp(),
+          'last_login'  : FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
 
+        // 2. Link auth UID back to member document
         await _firestore.collection('members').doc(memberId).update({
-          'user_id': user.uid,
+          'user_id'       : user.uid,
           'last_app_login': FieldValue.serverTimestamp(),
         });
 
-        debugPrint('✅ User + member documents updated');
+        // 3. Save to secure storage — the fast path for future logins
+        await _saveMemberId(memberId);
+
+        debugPrint('✅ User + member documents updated, memberId cached');
       } else {
         debugPrint('⚠️ No member record found for phone: $phone');
+        // Write minimal users doc so getCurrentMemberId can detect pending state
         await _firestore.collection('users').doc(user.uid).set({
-          'role': 'pending',
+          'role'        : 'pending',
           'phone_number': phone,
-          'created_at': FieldValue.serverTimestamp(),
-          'last_login': FieldValue.serverTimestamp(),
-          'error': 'Member not found in database',
+          'created_at'  : FieldValue.serverTimestamp(),
+          'last_login'  : FieldValue.serverTimestamp(),
+          'error'       : 'Member not found in database',
         }, SetOptions(merge: true));
       }
     } catch (e) {
@@ -256,12 +286,24 @@ class FirebaseAuthService {
     }
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  // ─── Get current member ID ────────────────────────────────────────────────
 
+  /// Resolution order:
+  /// 1. Secure storage (instant, no network — set during login/auto-verify)
+  /// 2. Firestore users/{uid}.member_id (one network call, allowed by rules)
+  /// 3. Phone-based lookup fallback (authenticated phone query)
   Future<String?> getCurrentMemberId() async {
     try {
       if (currentUser == null) return null;
 
+      // ── 1. Secure storage (fastest) ──────────────────────────────────────
+      final cached = await _loadMemberId();
+      if (cached != null && cached.isNotEmpty) {
+        debugPrint('✅ memberId from secure storage: $cached');
+        return cached;
+      }
+
+      // ── 2. Firestore users/{uid} doc ──────────────────────────────────────
       final doc = await _firestore
           .collection('users')
           .doc(currentUser!.uid)
@@ -269,15 +311,45 @@ class FirebaseAuthService {
 
       if (doc.exists) {
         final memberId = doc.data()?['member_id'];
-        debugPrint('✅ Current member ID: $memberId');
-        return memberId;
+        if (memberId != null && memberId.toString().isNotEmpty) {
+          debugPrint('✅ memberId from users doc: $memberId');
+          await _saveMemberId(memberId as String); // cache for next time
+          return memberId as String;
+        }
       }
-      return null;
+
+      // ── 3. Phone fallback (user is authenticated at this point) ───────────
+      final phone = currentUser!.phoneNumber;
+      if (phone == null || phone.isEmpty) {
+        debugPrint('❌ No phone on authenticated user');
+        return null;
+      }
+
+      debugPrint('🔄 Falling back to phone lookup: $phone');
+      final memberData = await checkMemberExists(phone);
+      if (memberData == null) {
+        debugPrint('❌ Member not found via phone fallback');
+        return null;
+      }
+
+      final memberId = memberData['id'] as String;
+
+      // Cache in both places so fallback is never needed again
+      await _saveMemberId(memberId);
+      await _firestore.collection('users').doc(currentUser!.uid).set({
+        'member_id' : memberId,
+        'last_login': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      debugPrint('✅ memberId found via fallback and cached: $memberId');
+      return memberId;
     } catch (e) {
       debugPrint('❌ Error getting member ID: $e');
       return null;
     }
   }
+
+  // ─── Friendly error messages ──────────────────────────────────────────────
 
   String _friendlyAuthError(String code, String? message) {
     switch (code) {
@@ -298,9 +370,12 @@ class FirebaseAuthService {
     }
   }
 
+  // ─── Sign out ─────────────────────────────────────────────────────────────
+
   Future<void> signOut() async {
     try {
       await _clearVerificationId();
+      await _clearMemberId();        // ← clear cached memberId on logout
       await _auth.signOut();
       debugPrint('✅ User signed out successfully');
     } catch (e) {

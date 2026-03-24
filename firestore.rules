@@ -5,11 +5,15 @@
 //   ✓ Read /attendance/{anyId}
 //   ✓ Read /users/{ownUid}
 //
-// MEMBER (member role):
+// MEMBER (phone OTP user — NO users collection document):
 //   ✓ Read /members/{ownMemberId}
 //   ✓ Read /attendance/{ownAttendanceId}
 //   ✓ Read /workouts/{ownWorkoutId}
 //   ✗ Read /members/{otherMemberId}  ← must DENY
+//
+// CRITICAL: isMember() always returns false for phone OTP users.
+//           Member-side rules use isSignedIn() + isOwnRecord() instead.
+//           Role values are Title Case: 'Owner','Receptionist','Trainer','Member'
 
 rules_version = '2';
 service cloud.firestore {
@@ -25,32 +29,36 @@ service cloud.firestore {
 
     function isOwner() {
       return isSignedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Owner';
     }
 
     function isReceptionist() {
       return isSignedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'receptionist';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Receptionist';
     }
 
     function isTrainer() {
       return isSignedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trainer';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Trainer';
     }
 
     function isStaff() {
       return isOwner() || isReceptionist();
     }
 
+    // NOTE: isMember() is intentionally NOT used for member-side collection rules.
+    // Phone OTP members have no users/{uid} document, so this always returns false
+    // for them. Kept only for future use if member docs are added to users collection.
     function isMember() {
       return isSignedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'member';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Member';
     }
 
     function isOwnDocument(uid) {
       return request.auth.uid == uid;
     }
 
+    // Checks uid, memberId, or user_id fields — covers all member doc patterns
     function isOwnRecord(docData) {
       return ('uid' in docData && docData.uid == request.auth.uid) ||
              ('memberId' in docData && docData.memberId == request.auth.uid) ||
@@ -62,7 +70,6 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
     // - Any authenticated user can read their own document
     // - Owner can read/write all user documents
-    // - No one else can write user documents
     match /users/{userId} {
       allow read: if isSignedIn() && (isOwnDocument(userId) || isOwner());
       allow write: if isOwner();
@@ -71,82 +78,112 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
     // MEMBERS COLLECTION
     // -------------------------------------------------------------------------
-    // - Owner: full read/write
-    // - Receptionist: full read/write
+    // - Owner/Receptionist: full read/write
     // - Trainer: read only (their assigned members)
-    // - Member: can only read their OWN document
-    //   (where resource.data.uid == request.auth.uid OR document ID == request.auth.uid)
-    // - Member: can update only their photoUrl field
+    // - Member (phone OTP): read own doc by uid field or doc ID
+    // - Member: update only photoUrl, uid, fcmToken fields
     match /members/{memberId} {
       allow read: if isStaff() ||
-                     (isTrainer() && 'trainerId' in resource.data && resource.data.trainerId == request.auth.uid) ||
-                     (isMember() && (isOwnDocument(memberId) || ('uid' in resource.data && resource.data.uid == request.auth.uid) || ('user_id' in resource.data && resource.data.user_id == request.auth.uid)));
+                     (isTrainer() && 'trainerId' in resource.data &&
+                      resource.data.trainerId == request.auth.uid) ||
+                     (isSignedIn() && (
+                       isOwnDocument(memberId) ||
+                       ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+                       ('user_id' in resource.data && resource.data.user_id == request.auth.uid)
+                     ));
       allow create: if isStaff();
       allow update: if isStaff() ||
-                       (isMember() && (isOwnDocument(memberId) || ('uid' in resource.data && resource.data.uid == request.auth.uid) || ('user_id' in resource.data && resource.data.user_id == request.auth.uid)) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['photoUrl']));
+                       (isSignedIn() && (
+                         isOwnDocument(memberId) ||
+                         ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+                         ('user_id' in resource.data && resource.data.user_id == request.auth.uid)
+                       ) &&
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['photoUrl', 'uid', 'fcmToken']));
       allow delete: if isStaff();
     }
 
     // -------------------------------------------------------------------------
     // ATTENDANCE COLLECTION
     // -------------------------------------------------------------------------
-    // - Owner: full read/write
-    // - Receptionist: full read/write
+    // - Owner/Receptionist: full read/write
     // - Trainer: read only
-    // - Member: can read own records, can create new check-in
+    // - Member: read own records, create new check-in
     match /attendance/{attendanceId} {
-      allow read: if isStaff() || isTrainer() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isStaff() || (isMember() && isOwnRecord(request.resource.data));
+      allow read: if isStaff() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isStaff() || (isSignedIn() && isOwnRecord(request.resource.data));
       allow update, delete: if isStaff();
     }
 
     // -------------------------------------------------------------------------
     // PAYMENTS COLLECTION
     // -------------------------------------------------------------------------
-    // - Owner: full read/write
-    // - Receptionist: full read/write
-    // - Trainer: no access
-    // - Member: can read own payment records only
+    // - Owner/Receptionist: full read/write
+    // - Member: read own payment records only
     match /payments/{paymentId} {
-      allow read: if isStaff() || (isMember() && isOwnRecord(resource.data));
+      allow read: if isStaff() || (isSignedIn() && isOwnRecord(resource.data));
       allow write: if isStaff();
     }
 
     // -------------------------------------------------------------------------
     // WORKOUTS COLLECTION
     // -------------------------------------------------------------------------
-    // - Member: full read/write on own documents only
-    // - Owner/Receptionist: read only
+    // - Owner/Receptionist/Trainer: read only
+    // - Member: full read/write on own documents
     match /workouts/{workoutId} {
-      allow read: if isStaff() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isMember() && isOwnRecord(request.resource.data);
-      allow update, delete: if isMember() && isOwnRecord(resource.data);
+      allow read: if isStaff() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isSignedIn() && isOwnRecord(request.resource.data);
+      allow update, delete: if isSignedIn() && isOwnRecord(resource.data);
     }
 
     // -------------------------------------------------------------------------
     // GAMIFICATION COLLECTION
     // -------------------------------------------------------------------------
-    // - Member: read/write own document only
     // - Owner: full read/write
-    // - Receptionist: read only
+    // - Receptionist/Trainer: read only
+    // - Member: read/write own document
     match /gamification/{gamificationId} {
-      allow read: if isOwner() || isReceptionist() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isOwner() || (isMember() && isOwnRecord(request.resource.data));
-      allow update, delete: if isOwner() || (isMember() && isOwnRecord(resource.data));
+      allow read: if isOwner() || isReceptionist() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isOwner() || (isSignedIn() && isOwnRecord(request.resource.data));
+      allow update, delete: if isOwner() || (isSignedIn() && isOwnRecord(resource.data));
     }
 
+    // -------------------------------------------------------------------------
+    // GAMIFICATION EVENTS — Studio fires, member app reads + marks processed
+    // Both collection name variants kept for compatibility
+    // -------------------------------------------------------------------------
     match /gamification_events/{eventId} {
-      allow read: if isStaff();
+      allow read: if isStaff() ||
+                     (isSignedIn() && 'memberId' in resource.data &&
+                      resource.data.memberId == request.auth.uid);
       allow create: if isStaff();
+      allow update: if isStaff() ||
+                       (isSignedIn() && 'memberId' in resource.data &&
+                        resource.data.memberId == request.auth.uid &&
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['processed']));
     }
 
     match /gamificationEvents/{eventId} {
-      allow read: if isStaff();
+      allow read: if isStaff() ||
+                     (isSignedIn() && 'memberId' in resource.data &&
+                      resource.data.memberId == request.auth.uid);
       allow create: if isStaff();
+      allow update: if isStaff() ||
+                       (isSignedIn() && 'memberId' in resource.data &&
+                        resource.data.memberId == request.auth.uid &&
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['processed']));
     }
 
+    // -------------------------------------------------------------------------
+    // WEEKLY WARS COLLECTION
+    // -------------------------------------------------------------------------
     match /weekly_wars/{warId} {
-      allow read: if isOwner() || isReceptionist() || isMember();
+      allow read: if isOwner() || isReceptionist() || isSignedIn();
       allow create: if isOwner() || isReceptionist();
       allow update, delete: if isOwner() || isReceptionist();
     }
@@ -159,81 +196,110 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
     // PERSONAL_BESTS COLLECTION
     // -------------------------------------------------------------------------
-    // - Member: read/write own documents only
-    // - Owner: read only
+    // - Owner/Trainer: read only
+    // - Member: read/write own documents
     match /personal_bests/{pbId} {
-      allow read: if isOwner() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isMember() && isOwnRecord(request.resource.data);
-      allow update, delete: if isMember() && isOwnRecord(resource.data);
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isSignedIn() && isOwnRecord(request.resource.data);
+      allow update, delete: if isSignedIn() && isOwnRecord(resource.data);
     }
 
     // -------------------------------------------------------------------------
     // ANNOUNCEMENTS COLLECTION
     // -------------------------------------------------------------------------
-    // - Owner/Receptionist: full read/write
-    // - Member/Trainer: read only
+    // - Owner/Receptionist: full create/delete
+    // - Any signed-in user: read
+    // - Member: can update readBy array only (mark as read)
     match /announcements/{announcementId} {
       allow read: if isSignedIn();
-      allow write: if isStaff();
+      allow create, delete: if isStaff();
+      allow update: if isStaff() ||
+                       (isSignedIn() &&
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['readBy']));
     }
 
     // -------------------------------------------------------------------------
-    // HEALTH & AI METRICS (Phase 1 AI Foundation)
+    // HEALTH & AI METRICS (Phase 1–3 AI Foundation)
     // -------------------------------------------------------------------------
-    // Health profiles — member reads/writes own only
+    // Note: memberId here is the Firebase Auth UID (set during health profile creation)
     match /healthProfiles/{memberId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == memberId;
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && request.auth.uid == memberId);
+      allow write: if isSignedIn() && request.auth.uid == memberId;
     }
 
-    // AI Plans
     match /aiPlans/{memberId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == memberId;
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && request.auth.uid == memberId);
+      allow write: if isSignedIn() && request.auth.uid == memberId;
       match /current/{docId} {
-        allow read, write: if request.auth != null
-                           && request.auth.uid == memberId;
+        allow read: if isOwner() || isTrainer() ||
+                       (isSignedIn() && request.auth.uid == memberId);
+        allow write: if isSignedIn() && request.auth.uid == memberId;
       }
     }
 
     match /wearableSnapshots/{memberId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == memberId;
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && request.auth.uid == memberId);
+      allow write: if isSignedIn() && request.auth.uid == memberId;
       match /daily/{date} {
-        allow read, write: if request.auth != null
-                           && request.auth.uid == memberId;
+        allow read: if isOwner() || isTrainer() ||
+                       (isSignedIn() && request.auth.uid == memberId);
+        allow write: if isSignedIn() && request.auth.uid == memberId;
       }
     }
 
-    // Body metrics logs
-    match /bodyMetricsLogs/{memberId}/logs/{logId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == memberId;
+    match /bodyMetricsLogs/{memberId} {
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && request.auth.uid == memberId);
+      allow write: if isSignedIn() && request.auth.uid == memberId;
+      match /logs/{logId} {
+        allow read: if isOwner() || isTrainer() ||
+                       (isSignedIn() && request.auth.uid == memberId);
+        allow write: if isSignedIn() && request.auth.uid == memberId;
+      }
     }
 
-    // Fitness tests
-    match /fitnessTests/{memberId}/tests/{testId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == memberId;
+    match /fitnessTests/{memberId} {
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && request.auth.uid == memberId);
+      allow write: if isSignedIn() && request.auth.uid == memberId;
+      match /tests/{testId} {
+        allow read: if isOwner() || isTrainer() ||
+                       (isSignedIn() && request.auth.uid == memberId);
+        allow write: if isSignedIn() && request.auth.uid == memberId;
+      }
+    }
+
+    match /bodyMetrics/{docId} {
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isSignedIn() && isOwnRecord(request.resource.data);
+      allow update, delete: if isSignedIn() && isOwnRecord(resource.data);
     }
 
     // -------------------------------------------------------------------------
     // NOTIFICATIONS & NOTIFICATION HISTORY COLLECTIONS
     // -------------------------------------------------------------------------
-    // - Owner: full read/write
-    // - Member: read only own notifications (and manage own local subcollection)
-    // - Receptionist: read/write
+    // - Owner/Receptionist: full read/write
+    // - Member: read own notifications, manage own items subcollection
     match /notifications/{notificationId} {
-      allow read: if isStaff() || (isMember() && (isOwnDocument(notificationId) || isOwnRecord(resource.data)));
+      allow read: if isStaff() ||
+                     (isSignedIn() && (isOwnDocument(notificationId) ||
+                      isOwnRecord(resource.data)));
       allow write: if isStaff();
 
-      // Allow subcollections for notifications/{uid}/items/{notifId} per AGENTS.md
       match /items/{itemId} {
-        allow read, write: if isStaff() || (isMember() && isOwnDocument(notificationId));
+        allow read, write: if isStaff() ||
+                              (isSignedIn() && isOwnDocument(notificationId));
       }
     }
+
     match /notificationHistory/{historyId} {
-      allow read: if isStaff() || (isMember() && isOwnRecord(resource.data));
+      allow read: if isStaff() || (isSignedIn() && isOwnRecord(resource.data));
       allow write: if isStaff();
     }
 
@@ -241,9 +307,8 @@ service cloud.firestore {
     // TRAINERS COLLECTION
     // -------------------------------------------------------------------------
     // - Owner: full read/write
-    // - Receptionist: read only
-    // - Trainer: can read/update own document only
-    // - Member: read only
+    // - Receptionist/Member/Trainer: read only
+    // - Trainer: can update own document
     match /trainers/{trainerId} {
       allow read: if isSignedIn();
       allow create, delete: if isOwner();
@@ -253,13 +318,17 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
     // TRAINERFEEDBACK COLLECTION
     // -------------------------------------------------------------------------
-    // - Member: create only (submit feedback)
-    // - Trainer: read own feedback, write replies
+    // - Any signed-in user: create (submit feedback)
+    // - Trainer: read and update own feedback
     // - Owner: full read/write
     match /trainerFeedback/{feedbackId} {
-      allow read: if isOwner() || (isTrainer() && 'trainerId' in resource.data && resource.data.trainerId == request.auth.uid);
-      allow create: if isOwner() || isMember();
-      allow update: if isOwner() || (isTrainer() && 'trainerId' in resource.data && resource.data.trainerId == request.auth.uid);
+      allow read: if isOwner() ||
+                     (isTrainer() && 'trainerId' in resource.data &&
+                      resource.data.trainerId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isOwner() ||
+                       (isTrainer() && 'trainerId' in resource.data &&
+                        resource.data.trainerId == request.auth.uid);
       allow delete: if isOwner();
     }
 
@@ -267,12 +336,13 @@ service cloud.firestore {
     // DIETPLANS COLLECTION
     // -------------------------------------------------------------------------
     // - Owner/Trainer: full read/write
-    // - Member: read only, full access to own AI diet plans
+    // - Member: read only (global), read/write own AI diet plans
     match /dietPlans/{memberId} {
       allow read: if isSignedIn();
-      allow write: if isOwner() || isTrainer() || (request.auth != null && request.auth.uid == memberId);
+      allow write: if isOwner() || isTrainer() ||
+                      (isSignedIn() && request.auth.uid == memberId);
       match /current/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == memberId;
+        allow read, write: if isSignedIn() && request.auth.uid == memberId;
       }
     }
 
@@ -290,51 +360,61 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
     // SESSIONS & FITNESSDATA COLLECTIONS
     // -------------------------------------------------------------------------
-    // - Member: read/write own documents only
-    // - Owner: read only
+    // - Owner/Trainer: read only
+    // - Member: read/write own documents
     match /sessions/{sessionId} {
-      allow read: if isOwner() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isMember() && isOwnRecord(request.resource.data);
-      allow update, delete: if isMember() && isOwnRecord(resource.data);
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isSignedIn() && isOwnRecord(request.resource.data);
+      allow update, delete: if isSignedIn() && isOwnRecord(resource.data);
     }
+
     match /fitnessData/{dataId} {
-      allow read: if isOwner() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isMember() && isOwnRecord(request.resource.data);
-      allow update, delete: if isMember() && isOwnRecord(resource.data);
+      allow read: if isOwner() || isTrainer() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isSignedIn() && isOwnRecord(request.resource.data);
+      allow update, delete: if isSignedIn() && isOwnRecord(resource.data);
     }
 
     // -------------------------------------------------------------------------
     // FCMTOKENS COLLECTION
     // -------------------------------------------------------------------------
-    // - Any authenticated user: write own token
     // - Owner: read all
+    // - Any authenticated user: write own token
     match /fcmTokens/{tokenId} {
       allow read: if isOwner();
-      allow write: if isSignedIn() && (isOwnDocument(tokenId) || ('uid' in request.resource.data && request.resource.data.uid == request.auth.uid) || ('memberId' in request.resource.data && request.resource.data.memberId == request.auth.uid));
+      allow write: if isSignedIn() && (
+        isOwnDocument(tokenId) ||
+        ('uid' in request.resource.data && request.resource.data.uid == request.auth.uid) ||
+        ('memberId' in request.resource.data && request.resource.data.memberId == request.auth.uid)
+      );
     }
 
     // -------------------------------------------------------------------------
     // CHALLENGES & CHALLENGEENTRIES COLLECTIONS
     // -------------------------------------------------------------------------
     // - Owner: full read/write
-    // - Member: read challenges, read/write own entries
+    // - Any signed-in user: read challenges
+    // - Member: read/write own entries
     match /challenges/{challengeId} {
-      allow read: if isOwner() || isMember();
+      allow read: if isSignedIn();
       allow write: if isOwner();
     }
+
     match /challengeEntries/{entryId} {
-      allow read: if isOwner() || (isMember() && isOwnRecord(resource.data));
-      allow create: if isOwner() || (isMember() && isOwnRecord(request.resource.data));
-      allow update, delete: if isOwner() || (isMember() && isOwnRecord(resource.data));
+      allow read: if isOwner() || isReceptionist() ||
+                     (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isOwner() || (isSignedIn() && isOwnRecord(request.resource.data));
+      allow update, delete: if isOwner() || (isSignedIn() && isOwnRecord(resource.data));
     }
 
     // -------------------------------------------------------------------------
     // REMINDER_LOGS COLLECTION
     // -------------------------------------------------------------------------
     // - Owner/Receptionist: full read/write
-    // - Others: no access
     match /reminder_logs/{logId} {
       allow read, write: if isStaff();
     }
+
   }
 }

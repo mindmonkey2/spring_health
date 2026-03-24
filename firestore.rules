@@ -1,3 +1,16 @@
+// EXPECTED ACCESS MATRIX:
+// ADMIN (owner role):
+//   ✓ Read /members/{anyId}
+//   ✓ Read /payments/{anyId}
+//   ✓ Read /attendance/{anyId}
+//   ✓ Read /users/{ownUid}
+//
+// MEMBER (member role):
+//   ✓ Read /members/{ownMemberId}
+//   ✓ Read /attendance/{ownAttendanceId}
+//   ✓ Read /workouts/{ownWorkoutId}
+//   ✗ Read /members/{otherMemberId}  ← must DENY
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -40,7 +53,8 @@ service cloud.firestore {
 
     function isOwnRecord(docData) {
       return ('uid' in docData && docData.uid == request.auth.uid) ||
-             ('memberId' in docData && docData.memberId == request.auth.uid);
+             ('memberId' in docData && docData.memberId == request.auth.uid) ||
+             ('user_id' in docData && docData.user_id == request.auth.uid);
     }
 
     // -------------------------------------------------------------------------
@@ -66,10 +80,10 @@ service cloud.firestore {
     match /members/{memberId} {
       allow read: if isStaff() ||
                      (isTrainer() && 'trainerId' in resource.data && resource.data.trainerId == request.auth.uid) ||
-                     (isMember() && (isOwnDocument(memberId) || ('uid' in resource.data && resource.data.uid == request.auth.uid)));
+                     (isMember() && (isOwnDocument(memberId) || ('uid' in resource.data && resource.data.uid == request.auth.uid) || ('user_id' in resource.data && resource.data.user_id == request.auth.uid)));
       allow create: if isStaff();
       allow update: if isStaff() ||
-                       (isMember() && (isOwnDocument(memberId) || ('uid' in resource.data && resource.data.uid == request.auth.uid)) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['photoUrl']));
+                       (isMember() && (isOwnDocument(memberId) || ('uid' in resource.data && resource.data.uid == request.auth.uid) || ('user_id' in resource.data && resource.data.user_id == request.auth.uid)) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['photoUrl']));
       allow delete: if isStaff();
     }
 
@@ -119,6 +133,27 @@ service cloud.firestore {
       allow read: if isOwner() || isReceptionist() || (isMember() && isOwnRecord(resource.data));
       allow create: if isOwner() || (isMember() && isOwnRecord(request.resource.data));
       allow update, delete: if isOwner() || (isMember() && isOwnRecord(resource.data));
+    }
+
+    match /gamification_events/{eventId} {
+      allow read: if isStaff();
+      allow create: if isStaff();
+    }
+
+    match /gamificationEvents/{eventId} {
+      allow read: if isStaff();
+      allow create: if isStaff();
+    }
+
+    match /weekly_wars/{warId} {
+      allow read: if isOwner() || isReceptionist() || isMember();
+      allow create: if isOwner() || isReceptionist();
+      allow update, delete: if isOwner() || isReceptionist();
+    }
+
+    match /notificationsQueue/{queueId} {
+      allow read: if isOwner();
+      allow create: if isStaff();
     }
 
     // -------------------------------------------------------------------------

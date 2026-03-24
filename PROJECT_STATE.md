@@ -122,3 +122,22 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 - **temperature: 0.4**: keep low for medical/fitness context; higher temperature causes hallucinated exercise names
 - **WearableSnapshotService.syncTodaySnapshot() also updates HealthProfileModel**: do not manually update BP/weight/RHR from wearables elsewhere, let the service handle it
 - **firebase_ai package version must stay in sync with firebase_core**: Check pub.dev for compatible versions before updating
+
+## 6. Known Pitfalls and Rules
+
+  16. Firestore rules deploy may silently skip upload
+      if CLI detects no file change on disk.
+      Always verify rules are live via Firebase Console
+      after deploy. If "already up to date, skipping" —
+      open Console → Firestore → Rules and compare
+      manually. Use firebase firestore:rules:release
+      or paste directly in Console to force update.
+
+  17. Never delete live Firestore indexes via CLI prompt.
+      When firebase deploy asks "Would you like to delete
+      these indexes?" — always answer NO.
+      Add missing indexes to firestore.indexes.json
+      instead of deleting live ones.
+
+  18. Member document lookup pattern:
+      The Member App looks up a member's document by first finding the `member_id` from the current user's document in the `users` collection. It then looks up the `members` collection using that `member_id` as the document ID. The `user_id` field on the member document links back to the Firebase Auth `uid`. This is a critical architectural rule — must match exactly what Studio writes when creating members.

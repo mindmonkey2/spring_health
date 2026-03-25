@@ -18,23 +18,19 @@ import '../gamification/personal_best_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../health/health_profile_screen.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final MemberModel member;
 
-  const ProfileScreen({
-    super.key,
-    required this.member,
-  });
+  const ProfileScreen({super.key, required this.member});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _auth = FirebaseAuthService();
   final _picker = ImagePicker();
-  final _isUploading = ValueNotifier<bool>(false);
   bool _isUploadingPhoto = false;
   late MemberModel _member;
 
@@ -44,13 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _member = widget.member;
   }
 
-  @override
-  void dispose() {
-    _isUploading.dispose();
-    super.dispose();
-  }
-
-  // ─── Photo Upload ─────────────────────────────────────────────────────────
+  // ─── Photo Upload ──────────────────────────────────────────────────────────
 
   void _showPhotoSourceSheet() {
     showModalBottomSheet(
@@ -66,19 +56,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: AppColors.gray600,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Text('Update Profile Photo',
-                  style: AppTextStyles.heading3),
+              Text('Update Profile Photo', style: AppTextStyles.heading3),
               const SizedBox(height: 16),
               ListTile(
                 leading: Container(
-                  width: 44, height: 44,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: AppColors.neonLime.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -89,8 +80,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: Text('Choose from Gallery',
                     style: AppTextStyles.bodyLarge),
                 subtitle: Text('Pick an existing photo',
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.gray400)),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.gray400)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickAndUpload(ImageSource.gallery);
@@ -98,7 +89,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ListTile(
                 leading: Container(
-                  width: 44, height: 44,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: AppColors.neonTeal.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -106,11 +98,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: const Icon(Icons.camera_alt_rounded,
                       color: AppColors.neonTeal),
                 ),
-                title: Text('Take a Photo',
-                    style: AppTextStyles.bodyLarge),
+                title:
+                    Text('Take a Photo', style: AppTextStyles.bodyLarge),
                 subtitle: Text('Use your camera',
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.gray400)),
+                    style: AppTextStyles.caption
+                        .copyWith(color: AppColors.gray400)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickAndUpload(ImageSource.camera);
@@ -131,105 +123,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
       maxWidth: 800,
     );
     if (picked == null || !mounted) return;
-
-    final file = File(picked.path);
-    await _uploadProfilePhoto(file);
+    await _uploadProfilePhoto(File(picked.path));
   }
 
   Future<void> _uploadProfilePhoto(File imageFile) async {
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
-
       setState(() => _isUploadingPhoto = true);
 
-      // Path must match storage rules exactly: member_photos/{uid}.jpg
       final ref = FirebaseStorage.instance
           .ref()
           .child('member_photos')
           .child('$uid.jpg');
 
-      final uploadTask = ref.putFile(
-        imageFile,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-
-      await uploadTask;
+      await ref.putFile(
+          imageFile, SettableMetadata(contentType: 'image/jpeg'));
       final downloadUrl = await ref.getDownloadURL();
 
-      // Save URL to Firestore members collection
       await FirebaseFirestore.instance
           .collection('members')
           .doc(uid)
           .update({'photoUrl': downloadUrl});
 
       if (!mounted) return;
-      setState(() => _isUploadingPhoto = false);
-
-      // Update local member state to immediately reflect change
       setState(() {
+        _isUploadingPhoto = false;
         _member = MemberModel.fromMap(
           {..._member.toMap(), 'photoUrl': downloadUrl},
           id: _member.id,
         );
       });
       _showSuccess('Profile photo updated');
-
     } on FirebaseException catch (e) {
-      final errCode = e.code;
-      debugPrint('Storage upload failed: $errCode — ${e.message}');
+      debugPrint('Storage upload failed: ${e.code} — ${e.message}');
       if (!mounted) return;
       setState(() => _isUploadingPhoto = false);
       _showError('Upload failed. Please try again.');
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() => _isUploadingPhoto = false);
       _showError('Upload failed. Please try again.');
     }
   }
 
-  void _showSuccess(String message) {
-    _showSnack(message, AppColors.success);
-  }
+  // ─── Snack helpers ─────────────────────────────────────────────────────────
 
-  void _showError(String message) {
-    _showSnack(message, AppColors.error);
-  }
+  void _showSuccess(String msg) => _showSnack(msg, AppColors.success);
+  void _showError(String msg) => _showSnack(msg, AppColors.error);
 
   void _showSnack(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ));
   }
 
-  // ─── Navigation ───────────────────────────────────────────────────────────
+  // ─── Navigation ────────────────────────────────────────────────────────────
 
   Future<void> _handleLogout() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: AppColors.neonLime.withValues(alpha: 0.3)),
+          side: BorderSide(
+              color: AppColors.neonLime.withValues(alpha: 0.3)),
         ),
         title: Text('Logout', style: AppTextStyles.heading3),
         content: Text(
           'Are you sure you want to logout?',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          style: AppTextStyles.bodyMedium
+              .copyWith(color: AppColors.gray400),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
                 style: TextStyle(color: AppColors.gray400)),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.neonLime,
               foregroundColor: AppColors.backgroundBlack,
@@ -240,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
     if (confirmed == true && mounted) {
-      await _auth.signOut();
+      await FirebaseAuthService.instance.signOut();
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -253,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _push(Widget screen) =>
       Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
 
-  // ─── Build ────────────────────────────────────────────────────────────────
+  // ─── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -283,43 +260,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ─── Profile Header ───────────────────────────────────────────────────────
+  // ─── Profile Header ────────────────────────────────────────────────────────
 
   Widget _buildProfileHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.neonLime.withValues(alpha: 0.15),
-            AppColors.turquoise.withValues(alpha: 0.15),
-          ],
-        ),
+        gradient: LinearGradient(colors: [
+          AppColors.neonLime.withValues(alpha: 0.15),
+          AppColors.turquoise.withValues(alpha: 0.15),
+        ]),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: AppColors.neonLime.withValues(alpha: 0.3)),
+        border:
+            Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
-          // ── Tappable Avatar with upload overlay ─────────────────────────
           GestureDetector(
             onTap: _showPhotoSourceSheet,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Avatar ring
                 Hero(
                   tag: '${_member.id}_avatar',
                   child: Container(
-                    width: 100, height: 100,
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                          color: AppColors.neonLime, width: 3),
+                      border:
+                          Border.all(color: AppColors.neonLime, width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.neonLime.withValues(alpha: 0.3),
-                          blurRadius: 20, spreadRadius: 5,
+                          color:
+                              AppColors.neonLime.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          spreadRadius: 5,
                         ),
                       ],
                     ),
@@ -328,17 +304,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ? Image.network(
                               _member.photoUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) =>
+                              // fix: single underscores → no unnecessary_underscores lint
+                              errorBuilder: (_, e, s) =>
                                   _buildDefaultAvatar(),
                             )
                           : _buildDefaultAvatar(),
                     ),
                   ),
                 ),
-
-                // Camera badge (bottom-right)
                 Positioned(
-                  bottom: 0, right: 0,
+                  bottom: 0,
+                  right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
@@ -351,11 +327,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: AppColors.neonLime, size: 16),
                   ),
                 ),
-
-                // Upload spinner overlay
                 if (_isUploadingPhoto)
                   Container(
-                    width: 100, height: 100,
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       color: AppColors.backgroundBlack
                           .withValues(alpha: 0.65),
@@ -363,30 +338,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: const Center(
                       child: CircularProgressIndicator(
-                        color: AppColors.neonLime,
-                        strokeWidth: 3,
-                      ),
+                          color: AppColors.neonLime, strokeWidth: 3),
                     ),
                   ),
               ],
             ),
-          )
-              .animate()
-              .fadeIn()
-              .scale(begin: const Offset(0.8, 0.8)),
-
+          ).animate().fadeIn().scale(begin: const Offset(0.8, 0.8)),
           const SizedBox(height: 16),
-
-          // Name
           Text(
             _member.name.toUpperCase(),
-            style: AppTextStyles.heading2.copyWith(color: AppColors.neonLime),
+            style: AppTextStyles.heading2
+                .copyWith(color: AppColors.neonLime),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 100.ms),
-
           const SizedBox(height: 8),
-
-          // Member ID
           Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -398,11 +363,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Text(
               'ID: ${_member.id}',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.gray400, letterSpacing: 1.2),
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.gray400, letterSpacing: 1.2),
             ),
           ).animate().fadeIn(delay: 200.ms),
-
           const SizedBox(height: 16),
           _buildStatusBadge(),
         ],
@@ -416,8 +380,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Center(
         child: Text(
           _member.name.isNotEmpty ? _member.name[0].toUpperCase() : '?',
-          style: AppTextStyles.heading1.copyWith(
-              color: AppColors.neonLime, fontSize: 40),
+          style: AppTextStyles.heading1
+              .copyWith(color: AppColors.neonLime, fontSize: 40),
         ),
       ),
     );
@@ -456,16 +420,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(width: 8),
           Text(text,
               style: AppTextStyles.bodyLarge.copyWith(
-                color: badgeColor,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              )),
+                  color: badgeColor,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2)),
         ],
       ),
     ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0);
   }
 
-  // ─── Membership Info Card ─────────────────────────────────────────────────
+  // ─── Membership Info Card ──────────────────────────────────────────────────
 
   Widget _buildMembershipInfoCard() {
     return Container(
@@ -517,7 +480,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1, end: 0);
   }
 
-  // ─── Personal Info Card ───────────────────────────────────────────────────
+  // ─── Personal Info Card ────────────────────────────────────────────────────
 
   Widget _buildPersonalInfoCard() {
     return Container(
@@ -531,36 +494,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCardHeader(
-              'PERSONAL INFORMATION', Icons.person_rounded, AppColors.turquoise),
+          _buildCardHeader('PERSONAL INFORMATION', Icons.person_rounded,
+              AppColors.turquoise),
           const SizedBox(height: 20),
           _buildInfoRow('Phone', _member.phone, Icons.phone_rounded),
           const SizedBox(height: 16),
+          // email is non-nullable String — no null check needed
           _buildInfoRow(
             'Email',
             _member.email.isNotEmpty ? _member.email : 'Not provided',
             Icons.email_rounded,
           ),
-          if (_member.address != null && _member.address!.isNotEmpty) ...[
+          if (_member.address != null &&
+              _member.address!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildInfoRow('Address', _member.address!, Icons.home_rounded),
+            _buildInfoRow(
+                'Address', _member.address!, Icons.home_rounded),
+          ],
+          if (_member.emergencyContactName != null &&
+              _member.emergencyContactName!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Emergency Contact',
+                _member.emergencyContactName!, Icons.emergency_rounded,
+                valueColor: AppColors.neonOrange),
+          ],
+          if (_member.emergencyContactPhone != null &&
+              _member.emergencyContactPhone!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoRow('Emergency Phone',
+                _member.emergencyContactPhone!,
+                Icons.phone_forwarded_rounded,
+                valueColor: AppColors.neonOrange),
           ],
         ],
       ),
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0);
   }
 
-  // ─── Account Actions ──────────────────────────────────────────────────────
+  // ─── Account Actions ───────────────────────────────────────────────────────
 
   Widget _buildAccountActions() {
     return Column(
       children: [
+        // Edit Profile navigates with the full MemberModel object
+        _buildActionTile(
+          'Edit Profile',
+          Icons.edit_rounded,
+          AppColors.neonLime,
+          subtitle: 'Update email & emergency contact',
+          onTap: () => _push(EditProfileScreen(member: _member)),
+        ),
+        const SizedBox(height: 12),
         _buildActionTile(
           'Health Profile & AI Goals',
           Icons.monitor_heart_outlined,
           AppColors.neonOrange,
           subtitle: 'Metrics, BP, goals — powers your AI coach',
-          onTap: () => _push(HealthProfileScreen(memberId: _member.id)),
+          onTap: () =>
+              _push(HealthProfileScreen(memberId: _member.id)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -569,9 +560,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AppColors.neonLime,
           subtitle: 'View transactions & receipts',
           onTap: () => _push(PaymentHistoryScreen(
-            memberId: _member.id,
-            memberName: _member.name,
-          )),
+              memberId: _member.id, memberName: _member.name)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -587,7 +576,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.monitor_weight_rounded,
           AppColors.neonTeal,
           subtitle: 'Track weight, BMI & measurements',
-          onTap: () => _push(BodyMetricsScreen(memberId: _member.id)),
+          onTap: () =>
+              _push(BodyMetricsScreen(memberId: _member.id)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -596,9 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AppColors.turquoise,
           subtitle: 'View your check-in records',
           onTap: () => _push(MemberAttendanceScreen(
-            memberId: _member.id,
-            memberName: _member.name,
-          )),
+              memberId: _member.id, memberName: _member.name)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -620,7 +608,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ).animate().fadeIn(delay: 300.ms);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  // ─── Shared helpers ────────────────────────────────────────────────────────
 
   Widget _buildCardHeader(String title, IconData icon, Color color) {
     return Row(
@@ -628,8 +616,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Icon(icon, color: color, size: 22),
         const SizedBox(width: 12),
         Text(title,
-            style: AppTextStyles.heading3.copyWith(
-                fontSize: 15, letterSpacing: 1.2)),
+            style: AppTextStyles.heading3
+                .copyWith(fontSize: 15, letterSpacing: 1.2)),
       ],
     );
   }
@@ -639,7 +627,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       children: [
         Container(
-          width: 40, height: 40,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
             color: AppColors.backgroundBlack,
             borderRadius: BorderRadius.circular(10),
@@ -657,9 +646,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 4),
               Text(value,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: valueColor ?? AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  )),
+                      color: valueColor ?? AppColors.textPrimary,
+                      fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -690,7 +678,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 44, height: 44,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -703,8 +692,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(label,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w600)),
+                          style: AppTextStyles.bodyLarge
+                              .copyWith(fontWeight: FontWeight.w600)),
                       if (subtitle != null) ...[
                         const SizedBox(height: 2),
                         Text(subtitle,

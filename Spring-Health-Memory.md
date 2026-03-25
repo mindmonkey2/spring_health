@@ -439,10 +439,27 @@ match /memberPhotos/{filename}
 - Trainer commission calculation
 - Email-based summary reports (daily/weekly)
 
-### 6.2 Member App — 82%
+### 6.2 Member App — 90%
+
+**Implemented Features:**
+- Phase 4 AI Coach Screen UI (March 25, 2026):
+  - AiCoachScreen with 3 tabs: Today, Week, Diet
+  - Recovery status card with 6 states and 2x3 wearable metric grid
+  - Coach note card with bpNote (orange chip), recoveryNote (yellow chip)
+  - Medical hold cards: bpcrisis/fever/cardiacevent
+    → medical hold hides ALL exercise content (safety rule)
+  - Today's day index derived from plan.generatedAt offset, NOT hardcoded
+  - isRestDay: hides exercise list, shows Active Recovery message
+  - Start Workout → WorkoutLoggerScreen with preloadedExercises
+  - Regenerate Plan: 24h cooldown with live countdown, confirmation dialog
+  - Week tab: 7-day expandable cards, current day neonLime border
+  - Diet tab: macro targets, 5 meal cards, own 24h cooldown,
+    empty state with generation button
+  - AiLoadingOverlay: barrierDismissible false, shown during all AI calls
+  - AI Coach tab at index 2 (Home/Fitness/AICoach/Announcements/Profile)
+  - Home screen AI banner: recoveryStatus chip + coachNote preview + button
 
 **Remaining:**
-- AI Coach Screen UI (Phase 4 — in Jules)
 - Razorpay online renewal
 - Trainer interaction
 - Body measurements + progress photos
@@ -567,6 +584,18 @@ Planned features: member list by branch, attendance marking, workout assignment,
 - `isMember()` in rules (which does `get(users/{uid})`) will **always return false** for members
 - All member-side collection rules must use `isSignedIn() && isOwnRecord()` not `isMember()`
 - Fixed: March 25, 2026
+
+**21. Medical hold hides ALL exercise content**
+- Medical hold states (`bpcrisis`/`fever`/`cardiacevent`) hide ALL exercise content.
+- Never render a workout list alongside a medical card.
+
+**22. Dynamic day index based on generation time**
+- Today's workout index = `daysSinceGenerated.clamp(0,6)`.
+- Never hardcode Day 1 or `weeklyPlan[0]`.
+
+**23. Explicit plan generation only**
+- AiCoachScreen never calls `generateWorkoutPlan()` on screen load.
+- Always reads cached plan. Generation is an explicit user action only.
 
 ### Build and Deployment Safeguards
 

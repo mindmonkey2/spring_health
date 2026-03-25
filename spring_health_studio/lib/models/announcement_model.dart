@@ -53,13 +53,8 @@ class AnnouncementModel {
       branch: map['branch'] as String? ?? 'All',
       priority: map['priority'] as String? ?? 'normal',
       createdBy: map['createdBy'] as String? ?? 'Admin',
-      createdAt: map['createdAt'] is Timestamp
-      ? (map['createdAt'] as Timestamp).toDate()
-      : DateTime.tryParse(map['createdAt']?.toString() ?? '') ??
-      DateTime.now(),
-      scheduledAt: map['scheduledAt'] is Timestamp
-      ? (map['scheduledAt'] as Timestamp).toDate()
-      : null,
+      createdAt: _toDateTime(map['createdAt']),
+      scheduledAt: _toDateTimeNullable(map['scheduledAt']),
       isActive: map['isActive'] as bool? ?? true,
       imageUrl: map['imageUrl'] as String?,
       readBy: List<String>.from(map['readBy'] ?? []),
@@ -81,6 +76,21 @@ class AnnouncementModel {
         if (imageUrl != null) 'imageUrl': imageUrl,
           'readBy': readBy,
     };
+  }
+
+  static DateTime _toDateTime(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
+
+  static DateTime? _toDateTimeNullable(dynamic value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   AnnouncementModel copyWith({

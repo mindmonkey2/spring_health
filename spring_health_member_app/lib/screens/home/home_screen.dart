@@ -16,6 +16,9 @@ import '../checkin/qr_checkin_screen.dart';
 import '../clash/war_screen.dart';
 import '../fitness/body_metrics_screen.dart';
 import '../social/social_coming_soon_screen.dart';
+import '../../services/wearable_snapshot_service.dart';
+import '../../services/ai_coach_service.dart';
+import '../ai_coach/ai_coach_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,12 +31,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final _authService  = FirebaseAuthService();
   final _memberService = MemberService();
   final _gamService   = GamificationService();
+  final _wearableService = WearableSnapshotService.instance;
+  final _aiCoachService = AiCoachService();
 
   String?           _memberId;
   MemberModel?      _member;
   MemberGamification? _gamification;
   bool              _isLoading = true;
   String?           _error;
+
+  String? _recoveryStatus;
+  String? _coachNoteSnippet;
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -68,11 +76,30 @@ class _HomeScreenState extends State<HomeScreen> {
       final gamification = await _gamService.getOrCreate(memberId);
       _gamService.listenToEvents(memberId);
 
+      // Load AI data concurrently
+      String? recoveryStatus;
+      String? coachNoteSnippet;
+      try {
+        final snapshot = await _wearableService.getTodaySnapshot(memberId);
+        recoveryStatus = snapshot?.recoveryStatus;
+
+        final aiPlan = await _aiCoachService.getCachedWorkoutPlan(memberId);
+        if (aiPlan != null && aiPlan['coachNote'] != null) {
+          final note = aiPlan['coachNote'] as String;
+          final firstSentence = note.split('.').first;
+          coachNoteSnippet = firstSentence.length > 60 ? '${firstSentence.substring(0, 60)}...' : '$firstSentence.';
+        }
+      } catch (e) {
+        debugPrint('Error loading AI data for home screen banner: $e');
+      }
+
       if (mounted) {
         setState(() {
           _memberId     = memberId;
           _member       = member;
           _gamification = gamification;
+          _recoveryStatus = recoveryStatus;
+          _coachNoteSnippet = coachNoteSnippet;
           _isLoading    = false;
         });
       }
@@ -265,6 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 .animate()
                 .fadeIn(delay: 200.ms)
                 .slideY(begin: 0.2, end: 0),
+                const SizedBox(height: 24),
+
+                // ── AI Personal Trainer Banner ───────────────────────
+                _buildAiCoachBanner().animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 28),
 
                 // ── Today's Metrics ──────────────────────────────────
@@ -299,6 +330,106 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // ── AI Coach Banner ───────────────────────────────────────────────────────
+
+  Widget _buildAiCoachBanner() {
+    Color chipColor = AppColors.neonLime;
+    String chipText = '🟢 Ready to Train';
+
+    if (_recoveryStatus != null) {
+      switch (_recoveryStatus) {
+        case 'fully_recovered':
+          chipColor = AppColors.neonLime;
+          chipText = '🟢 Fully Recovered';
+          break;
+        case 'recovered':
+          chipColor = AppColors.neonLime;
+          chipText = '✅ Recovered';
+          break;
+        case 'moderate':
+          chipColor = const Color(0xFFFF9800);
+          chipText = '🟡 Moderate';
+          break;
+        case 'fatigued':
+          chipColor = AppColors.error;
+          chipText = '🔴 Fatigued';
+          break;
+        case 'sick':
+          chipColor = AppColors.error;
+          chipText = '🤒 Rest Today';
+          break;
+        case 'cardiac_flag':
+          chipColor = AppColors.error;
+          chipText = '⚠️ Cardiac Alert';
+          break;
+      }
+    }
+
+    return GestureDetector(
+      onTap: () {
+        // Navigate directly to AiCoachScreen via push to keep Bottom Nav
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AiCoachScreen(memberId: _memberId!)),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceDark.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.neonLime.withValues(alpha: 0.05),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.smart_toy_rounded, color: AppColors.neonLime, size: 24),
+                const SizedBox(width: 8),
+                Text('AI Personal Trainer', style: AppTextStyles.heading3),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: chipColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: chipColor.withValues(alpha: 0.5)),
+              ),
+              child: Text(
+                chipText,
+                style: AppTextStyles.caption.copyWith(color: chipColor, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _coachNoteSnippet ?? 'Generate your first AI plan.',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text('View Today\'s Plan', style: AppTextStyles.link),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_forward_rounded, color: AppColors.neonLime, size: 16),
+              ],
+            ),
+          ],
         ),
       ),
     );

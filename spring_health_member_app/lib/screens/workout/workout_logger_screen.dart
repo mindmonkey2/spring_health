@@ -15,8 +15,14 @@ import '../../services/member_service.dart';
 class WorkoutLoggerScreen extends StatefulWidget {
   final String memberId;
   final String? initialExercise;
+  final List<Map<String, dynamic>>? preloadedExercises;
 
-  const WorkoutLoggerScreen({super.key, required this.memberId, this.initialExercise});
+  const WorkoutLoggerScreen({
+    super.key,
+    required this.memberId,
+    this.initialExercise,
+    this.preloadedExercises,
+  });
 
   @override
   State<WorkoutLoggerScreen> createState() => // ✅ FIX: generic
@@ -93,6 +99,30 @@ with SingleTickerProviderStateMixin { // ✅ for live timer
         category: 'War',
         sets: [ExerciseSet(setNumber: 1, weight: 0, reps: 0)],
       ));
+    } else if (widget.preloadedExercises != null && widget.preloadedExercises!.isNotEmpty) {
+      for (final exMap in widget.preloadedExercises!) {
+        final name = exMap['name'] as String? ?? 'Exercise';
+        final setsCount = exMap['sets'] as int? ?? 1;
+        final targetRepsStr = exMap['reps'] as String? ?? '0';
+        int targetReps = 0;
+        final parts = targetRepsStr.split('-');
+        if (parts.isNotEmpty) {
+          targetReps = int.tryParse(parts.last.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        }
+
+        final sets = List.generate(
+          setsCount,
+          (index) => ExerciseSet(setNumber: index + 1, weight: 0, reps: targetReps),
+        );
+
+        _exercises.add(WorkoutExercise(
+          id: _uuid.v4(),
+          name: name,
+          category: 'AI Coach',
+          sets: sets,
+          notes: exMap['coachingCue'] as String?,
+        ));
+      }
     }
   }
 
@@ -240,9 +270,36 @@ with SingleTickerProviderStateMixin { // ✅ for live timer
                   ? _buildEmptyState()
                   : ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: _exercises.length,
-                    itemBuilder: (context, index) =>
-                    _buildExerciseCard(index),
+                    itemCount: _exercises.length + (widget.preloadedExercises != null && widget.preloadedExercises!.isNotEmpty ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (widget.preloadedExercises != null && widget.preloadedExercises!.isNotEmpty) {
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.neonLime.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.smart_toy_rounded, color: AppColors.neonLime, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '🤖 AI Plan loaded — modify as needed',
+                                    style: AppTextStyles.caption.copyWith(color: AppColors.neonLime),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        return _buildExerciseCard(index - 1);
+                      }
+                      return _buildExerciseCard(index);
+                    },
                   ),
                 ),
 

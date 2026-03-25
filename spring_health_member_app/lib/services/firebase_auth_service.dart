@@ -313,8 +313,8 @@ class FirebaseAuthService {
         final memberId = doc.data()?['member_id'];
         if (memberId != null && memberId.toString().isNotEmpty) {
           debugPrint('✅ memberId from users doc: $memberId');
-          await _saveMemberId(memberId as String); // cache for next time
-          return memberId as String;
+          await _saveMemberId(memberId); // cache for next time
+          return memberId;
         }
       }
 

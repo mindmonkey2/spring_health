@@ -17,8 +17,7 @@ import 'fitness/fitness_dashboard_screen.dart';
 import 'announcements/announcements_screen.dart';
 import 'profile/profile_screen.dart';
 import 'lockout/membership_expired_screen.dart';
-import '../screens/gamification/xp_screen.dart';
-import '../screens/gamification/leaderboard_screen.dart';
+import '../screens/ai_coach/ai_coach_screen.dart';
 import '../services/wearable_snapshot_service.dart';
 
 class MainScreen extends StatefulWidget {
@@ -54,9 +53,8 @@ class _MainScreenState extends State<MainScreen>
   static const _navItems = [
     _NavItem(Icons.grid_view_rounded,     Icons.grid_view_outlined,       'Home'),
     _NavItem(Icons.fitness_center_rounded, Icons.fitness_center_outlined,  'Train'),
+    _NavItem(Icons.smart_toy_rounded,      Icons.smart_toy_outlined,       'AI Coach'),
     _NavItem(Icons.notifications_rounded,  Icons.notifications_outlined,   'Alerts'),
-    _NavItem(Icons.emoji_events_rounded,   Icons.emoji_events_outlined,    'XP'),
-    _NavItem(Icons.leaderboard_rounded,    Icons.leaderboard_outlined,     'Ranks'),
     _NavItem(Icons.person_rounded,         Icons.person_outline_rounded,   'Profile'),
   ];
 
@@ -178,9 +176,8 @@ class _MainScreenState extends State<MainScreen>
       return [
         const HomeScreen(),
         const FitnessDashboardScreen(),
+        const SizedBox(), // AI Coach placeholder
         const AnnouncementsScreen(),
-        const SizedBox(), // XP placeholder
-        const SizedBox(), // Ranks placeholder
         _buildProfileErrorState(),
       ];
     }
@@ -191,9 +188,8 @@ class _MainScreenState extends State<MainScreen>
       _cachedScreens = [
         const HomeScreen(),
         FitnessDashboardScreen(memberId: _member!.id),
+        AiCoachScreen(memberId: _member!.id),
         const AnnouncementsScreen(),
-        XpScreen(memberId: _member!.id, memberName: _member!.name),
-        LeaderboardScreen(memberId: _member!.id),
         ProfileScreen(member: _member!),
       ];
     }
@@ -259,8 +255,8 @@ class _MainScreenState extends State<MainScreen>
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             children: List.generate(_navItems.length, (i) {
-              // ✅ Only Alerts tab (index 2) gets a badge
-              final badge = i == 2 ? _unreadCount : 0;
+              // ✅ Only Alerts tab (index 3) gets a badge
+              final badge = i == 3 ? _unreadCount : 0;
               return _buildNavItem(index: i, item: _navItems[i], badgeCount: badge);
             }),
           ),

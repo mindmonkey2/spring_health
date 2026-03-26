@@ -537,7 +537,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   // ═══════════════════════════════════════════════════════════════
 
   Future<void> _sendSingleBirthday(MemberModel member) async {
-    await WhatsAppService.sendBirthdayWish(member);
+    await WhatsAppService.instance.sendBirthdayWish(member);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -549,7 +549,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   }
 
   Future<void> _sendSingleExpiring(MemberModel member, int daysLeft) async {
-    await WhatsAppService.sendExpiryReminder(member, daysLeft);
+    await WhatsAppService.instance.sendExpiryReminder(member, daysLeft);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -561,7 +561,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   }
 
   Future<void> _sendSingleDue(MemberModel member) async {
-    await WhatsAppService.sendDuePaymentReminder(member);
+    await WhatsAppService.instance.sendDuePaymentReminder(member);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -573,7 +573,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   }
 
   Future<void> _sendSingleRejoin(MemberModel member) async {
-    await WhatsAppService.sendRejoinMessage(member);
+    await WhatsAppService.instance.sendRejoinMessage(member);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

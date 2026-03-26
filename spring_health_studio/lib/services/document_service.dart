@@ -111,16 +111,17 @@ class DocumentService {
     try {
       switch (documentType) {
         case 'welcome':
-          return await WhatsAppService.sendWelcomePackage(member);
+          return await WhatsAppService.instance.sendWelcomePackage(member);
         case 'rejoin':
-          return await WhatsAppService.sendRejoinPackage(member);
+          return await WhatsAppService.instance.sendRejoinPackage(member);
         case 'receipt':
           if (payment != null) {
-            return await WhatsAppService.sendPaymentReceiptWithInvoice(member, payment);
+            return await WhatsAppService.instance
+                .sendPaymentReceiptWithInvoice(member, payment);
           }
           return false;
         case 'resend':
-          return await WhatsAppService.resendDocuments(member);
+          return await WhatsAppService.instance.resendDocuments(member);
         default:
           return false;
       }

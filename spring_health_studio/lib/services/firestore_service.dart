@@ -11,7 +11,13 @@ import '../models/document_sent_model.dart';
 
 
 class FirestoreService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirestoreService instance = FirestoreService._internal();
+  final FirebaseFirestore _firestore;
+
+  FirestoreService({FirebaseFirestore? db})
+      : _firestore = db ?? FirebaseFirestore.instance;
+
+  FirestoreService._internal() : _firestore = FirebaseFirestore.instance;
 
   // ==================== USER METHODS ====================
 

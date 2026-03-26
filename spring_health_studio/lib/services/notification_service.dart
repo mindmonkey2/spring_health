@@ -31,7 +31,17 @@ class DailyReminderSummary {
 }
 
 class NotificationService {
-  final _firestoreService = FirestoreService();
+  static final NotificationService instance = NotificationService._internal();
+  final FirestoreService _firestoreService;
+  final WhatsAppService _whatsAppService;
+
+  NotificationService({FirestoreService? firestoreService, WhatsAppService? whatsAppService})
+      : _firestoreService = firestoreService ?? FirestoreService.instance,
+        _whatsAppService = whatsAppService ?? WhatsAppService.instance;
+
+  NotificationService._internal()
+      : _firestoreService = FirestoreService.instance,
+        _whatsAppService = WhatsAppService.instance;
 
   // FIX 1: Centralized delay constant — easy to tune without hunting the file
   static const _kRateLimitDelay = Duration(seconds: 2);
@@ -47,9 +57,12 @@ class NotificationService {
 
   // ─── Birthday Wishes ────────────────────────────────────────────────────────
 
-  Future<List<String>> sendBirthdayWishes({String? branch}) async {
+  Future<List<String>> sendBirthdayWishes({
+    String? branch,
+    List<MemberModel>? membersList,
+  }) async {
     try {
-      final members = await _getMembers(branch);
+      final members = membersList ?? await _getMembers(branch);
       final today = _dateOnly(DateTime.now());
 
       final birthdayMembers = members.where((m) {
@@ -60,12 +73,13 @@ class NotificationService {
 
       final sentTo = <String>[];
       for (final member in birthdayMembers) {
-        final sent = await WhatsAppService.sendBirthdayWish(member);
+        final sent = await _whatsAppService.sendBirthdayWish(member);
         if (sent) sentTo.add(member.name);
         await Future.delayed(_kRateLimitDelay);
       }
 
-      debugPrint('Birthday wishes sent: ${sentTo.length}/${birthdayMembers.length}');
+      debugPrint(
+          'Birthday wishes sent: ${sentTo.length}/${birthdayMembers.length}');
       return sentTo;
     } catch (e) {
       debugPrint('Error sending birthday wishes: $e');
@@ -75,9 +89,12 @@ class NotificationService {
 
   // ─── Expiry Reminders ───────────────────────────────────────────────────────
 
-  Future<ExpiryReminderResult> sendExpiryReminders({String? branch}) async {
+  Future<ExpiryReminderResult> sendExpiryReminders({
+    String? branch,
+    List<MemberModel>? membersList,
+  }) async {
     try {
-      final members = await _getMembers(branch);
+      final members = membersList ?? await _getMembers(branch);
       final today = _dateOnly(DateTime.now());
 
       final expiring7 = <MemberModel>[];
@@ -101,11 +118,11 @@ class NotificationService {
         }
       }
 
-      Future<List<String>> sendBatch(
-          List<MemberModel> batch, int days) async {
+      // FIX 6: Send in priority order — most urgent first
+      Future<List<String>> sendBatch(List<MemberModel> batch, int days) async {
         final sent = <String>[];
         for (final m in batch) {
-          if (await WhatsAppService.sendExpiryReminder(m, days)) {
+          if (await _whatsAppService.sendExpiryReminder(m, days)) {
             sent.add(m.name);
           }
           await Future.delayed(_kRateLimitDelay);
@@ -113,7 +130,6 @@ class NotificationService {
         return sent;
       }
 
-      // FIX 6: Send in priority order — most urgent first
       final oneDay = await sendBatch(expiring1, 1);
       final threeDays = await sendBatch(expiring3, 3);
       final sevenDays = await sendBatch(expiring7, 7);
@@ -134,19 +150,23 @@ class NotificationService {
 
   // ─── Due Payment Reminders ──────────────────────────────────────────────────
 
-  Future<List<String>> sendDuePaymentReminders({String? branch}) async {
+  Future<List<String>> sendDuePaymentReminders({
+    String? branch,
+    List<MemberModel>? membersList,
+  }) async {
     try {
-      final members = await _getMembers(branch);
+      final members = membersList ?? await _getMembers(branch);
       final membersWithDues = members.where((m) => m.dueAmount > 0).toList();
 
       final sentTo = <String>[];
       for (final member in membersWithDues) {
-        final sent = await WhatsAppService.sendDuePaymentReminder(member);
+        final sent = await _whatsAppService.sendDuePaymentReminder(member);
         if (sent) sentTo.add(member.name);
         await Future.delayed(_kRateLimitDelay);
       }
 
-      debugPrint('Due reminders sent: ${sentTo.length}/${membersWithDues.length}');
+      debugPrint(
+          'Due reminders sent: ${sentTo.length}/${membersWithDues.length}');
       return sentTo;
     } catch (e) {
       debugPrint('Error sending due payment reminders: $e');
@@ -156,14 +176,23 @@ class NotificationService {
 
   // ─── Combined Daily Runner ──────────────────────────────────────────────────
 
+
+  // ─── Combined Daily Runner ──────────────────────────────────────────────────
+
   // FIX 7: runDailyReminders() — single entry point for the daily cron-style run
   // Call this from app startup or a manual "Run All" button in the dashboard
   Future<DailyReminderSummary> runDailyReminders({String? branch}) async {
     debugPrint('--- Running daily reminders [branch: ${branch ?? "all"}] ---');
 
-    final birthdays = await sendBirthdayWishes(branch: branch);
-    final expiry = await sendExpiryReminders(branch: branch);
-    final dues = await sendDuePaymentReminders(branch: branch);
+    // Optimization: fetch members once
+    final members = await _getMembers(branch);
+
+    final birthdays =
+        await sendBirthdayWishes(branch: branch, membersList: members);
+    final expiry =
+        await sendExpiryReminders(branch: branch, membersList: members);
+    final dues =
+        await sendDuePaymentReminders(branch: branch, membersList: members);
 
     final summary = DailyReminderSummary(
       birthdaysSent: birthdays,

@@ -315,7 +315,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
     );
 
     try {
-      await WhatsAppService.sendRejoinPackage(member);
+      await WhatsAppService.instance.sendRejoinPackage(member);
 
       if (mounted) {
         Navigator.pop(context); // Close loading

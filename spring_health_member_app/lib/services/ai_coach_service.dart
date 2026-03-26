@@ -7,6 +7,7 @@ import '../services/wearable_snapshot_service.dart';
 import '../services/health_profile_service.dart';
 import '../services/member_service.dart';
 import '../models/health_profile_model.dart'; // need to import for static methods if any
+import 'rpe_service.dart';
 
 class AiCoachService {
   final FirebaseFirestore _db;
@@ -335,6 +336,11 @@ Joint Restrictions: $jointRestrictions
       prompt += "For each restriction, substitute exercises that do not directly load the affected joint.\n";
     }
 
+    final rpeContext = context['rpeContext'] as String? ?? '';
+    if (rpeContext.isNotEmpty) {
+      prompt += "\n$rpeContext\n";
+    }
+
     prompt += """
 
 ═══ EQUIPMENT AT $branchName BRANCH ═══
@@ -535,6 +541,21 @@ Use Indian foods exclusively or predominantly:
 
     // 2. Build context
     final context = await _buildMemberContext(memberId);
+
+    final recentRpe = await RpeService.instance.getRecentRpe(limit: 5);
+    String rpeContext = '';
+    if (recentRpe.isNotEmpty) {
+      final values = recentRpe.map((e) => e['rpe'] as int).toList();
+      final avg = values.reduce((a, b) => a + b) / values.length;
+      if (avg <= 2.0) {
+        rpeContext = 'The member has rated recent sessions as very easy (average RPE ${avg.toStringAsFixed(1)}/5). Increase workout volume and intensity by approximately 10 percent. Add one extra set per exercise where appropriate.';
+      } else if (avg <= 3.5) {
+        rpeContext = 'The member has rated recent sessions at a comfortable level (average RPE ${avg.toStringAsFixed(1)}/5). Maintain current intensity and volume.';
+      } else {
+        rpeContext = 'The member has rated recent sessions as difficult (average RPE ${avg.toStringAsFixed(1)}/5). Reduce total volume by 10 to 15 percent. Shorten sessions if needed and add one additional rest day this week.';
+      }
+    }
+    context['rpeContext'] = rpeContext;
 
     // 3. Safety gate
     try {

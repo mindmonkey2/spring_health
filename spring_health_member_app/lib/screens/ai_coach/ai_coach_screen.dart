@@ -8,6 +8,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../models/wearable_snapshot_model.dart';
 import '../../services/wearable_snapshot_service.dart';
 import '../../services/ai_coach_service.dart';
+import '../diet/diet_plan_screen.dart';
 import '../../widgets/ai_loading_overlay.dart';
 import '../workout/workout_logger_screen.dart';
 import '../health/health_profile_screen.dart';
@@ -168,51 +169,6 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     }
   }
 
-  Future<void> _generateDietPlan() async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surfaceDark,
-        title: Text('Regenerate Diet Plan?', style: AppTextStyles.heading3),
-        content: Text(
-          'Generate a new diet plan? This will replace your current plan.',
-          style: AppTextStyles.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: AppTextStyles.button.copyWith(color: AppColors.gray400)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.neonLime),
-            child: const Text('Confirm', style: TextStyle(color: Colors.black)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    if (!mounted) return;
-    AiLoadingOverlay.show(context, message: '🥗 Crafting your meal plan...');
-
-    try {
-      await _aiCoachService.generateDietPlan(widget.memberId);
-      if (mounted) {
-        AiLoadingOverlay.hide(context);
-        _loadDietPlan();
-      }
-    } catch (e) {
-      if (mounted) {
-        AiLoadingOverlay.hide(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -274,13 +230,18 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _generateDietPlan,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DietPlanScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neonLime,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Get My AI Diet Plan', style: TextStyle(color: Colors.black)),
+                  child: const Text('Get My AI Diet Plan', style: TextStyle(color: AppColors.backgroundBlack)),
                 ),
               ),
             ],
@@ -291,12 +252,14 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
 
     final plan = _cachedDietPlan!;
     final targets = plan['dailyTargets'] as Map<String, dynamic>? ?? {};
-    final meals = plan['meals'] as List<dynamic>? ?? [];
+    // deleted
 
-    final nutritionNotes = plan['nutritionNotes'] as String?;
-    final bpDietNote = plan['bpDietNote'] as String?;
-    final glucoseNote = plan['glucoseNote'] as String?;
-    final supplementNote = plan['supplementNote'] as String?;
+    // deleted
+    // deleted
+    // deleted
+    // deleted
+
+    final coachNote = _cachedWorkoutPlan?['coachNote'] as String?;
 
     return RefreshIndicator(
       color: AppColors.neonLime,
@@ -309,13 +272,35 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildDailyTargetsCard(targets),
-            const SizedBox(height: 24),
-            ...meals.map((m) => _buildMealCard(m as Map<String, dynamic>)),
+            if (coachNote != null && coachNote.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Chip(
+                label: Text(coachNote),
+                backgroundColor: AppColors.neonTeal.withValues(alpha: 0.15),
+                labelStyle: const TextStyle(color: AppColors.neonTeal),
+                avatar: const Icon(Icons.tips_and_updates_rounded, color: AppColors.neonTeal, size: 14),
+              ),
+            ],
             const SizedBox(height: 16),
-            if (nutritionNotes != null || bpDietNote != null || glucoseNote != null || supplementNote != null)
-              _buildDietNotesSection(nutritionNotes, bpDietNote, glucoseNote, supplementNote),
-            const SizedBox(height: 24),
-            _buildDietActionButtons(),
+            const Divider(color: Colors.white12, height: 24),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DietPlanScreen()),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.neonLime),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text('View Full Diet Plan →', style: AppTextStyles.button.copyWith(color: AppColors.neonLime)),
+              ),
+            ),
             const SizedBox(height: 48),
           ],
         ),
@@ -324,284 +309,13 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
   }
 
   Widget _buildMealCard(Map<String, dynamic> meal) {
-    final mealName = meal['mealName'] as String? ?? 'Meal';
-    final timing = meal['timing'] as String? ?? '';
-    final totalCalories = meal['totalCalories'] as int? ?? 0;
-    final mealNote = meal['mealNote'] as String?;
-    final foods = meal['foods'] as List<dynamic>? ?? [];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    '🍽️ $mealName',
-                    style: AppTextStyles.heading3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  timing,
-                  style: AppTextStyles.caption.copyWith(color: AppColors.neonLime),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: Colors.white.withValues(alpha: 0.1), height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...foods.map((f) {
-                  final food = f as Map<String, dynamic>;
-                  final name = food['name'] as String? ?? '';
-                  final qty = food['quantity'] as String? ?? '';
-                  final cal = food['approxCalories'] as int? ?? 0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('• ', style: TextStyle(color: AppColors.gray400)),
-                        Expanded(
-                          child: Text(
-                            '$name — $qty',
-                            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-                          ),
-                        ),
-                        Text('~$cal kcal', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-                      ],
-                    ),
-                  );
-                }),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Total: ~$totalCalories kcal',
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.neonLime, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                if (mealNote != null && mealNote.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('💡 '),
-                      Expanded(
-                        child: Text(
-                          mealNote,
-                          style: AppTextStyles.caption.copyWith(color: AppColors.gray400, fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
-  Widget _buildDietNotesSection(String? notes, String? bpNote, String? glucoseNote, String? suppNote) {
-    return _buildGlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.lightbulb_outline, color: AppColors.neonLime),
-              const SizedBox(width: 8),
-              Text('Nutrition Coach Notes', style: AppTextStyles.heading3),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (notes != null) ...[
-            Text(notes, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white)),
-            const SizedBox(height: 16),
-          ],
-          if (bpNote != null) ...[
-            _buildNoteChip(Icons.favorite_border, bpNote, const Color(0xFFFF9800)),
-            const SizedBox(height: 8),
-          ],
-          if (glucoseNote != null) ...[
-            _buildNoteChip(Icons.water_drop_outlined, glucoseNote, Colors.yellow),
-            const SizedBox(height: 8),
-          ],
-          if (suppNote != null) ...[
-            _buildNoteChip(Icons.medication_liquid, suppNote, Colors.blue),
-            const SizedBox(height: 8),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoteChip(IconData icon, String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(text, style: AppTextStyles.caption.copyWith(color: color)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDailyTargetsCard(Map<String, dynamic> targets) {
-    final calories = targets['calories'] as int? ?? 0;
-    final protein = targets['proteinG'] as int? ?? 0;
-    final carbs = targets['carbsG'] as int? ?? 0;
-    final fat = targets['fatG'] as int? ?? 0;
-    final waterLitres = targets['waterLitres'] as double? ?? 0.0;
-
-    return _buildGlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.restaurant, color: AppColors.neonLime),
-              const SizedBox(width: 8),
-              Text('Daily Targets', style: AppTextStyles.heading3),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMacroMacro('🔥 Calories', '$calories kcal'),
-              _buildMacroMacro('💪 Protein', '${protein}g'),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMacroMacro('🌾 Carbs', '${carbs}g'),
-              _buildMacroMacro('🥑 Fat', '${fat}g'),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              const Icon(Icons.water_drop, color: Colors.blue, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Drink ${waterLitres.toStringAsFixed(1)}L water today',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildMacroProgressBars(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMacroMacro(String title, String value) {
-    return Row(
-      children: [
-        Text('$title: ', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-        Text(value, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _buildMacroProgressBars() {
-    return Column(
-      children: [
-        _buildProgressBar(AppColors.neonLime, 0.0), // Always 0% as logging happens elsewhere
-        const SizedBox(height: 8),
-        _buildProgressBar(Colors.blue, 0.0),
-        const SizedBox(height: 8),
-        _buildProgressBar(Colors.orange, 0.0),
-        const SizedBox(height: 8),
-        _buildProgressBar(Colors.purple, 0.0),
-      ],
-    );
-  }
-
-  Widget _buildProgressBar(Color color, double progress) {
-    return Container(
-      height: 4,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(2),
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          width: progress * MediaQuery.of(context).size.width, // Assuming parent is constrained
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildDietNotesSection(String? notes, String? bpNote, String? glucoseNote, String? suppNote) { return const SizedBox.shrink(); }
 
   Widget _buildDietActionButtons() {
-    final generatedAt = _cachedDietPlan?['generatedAt'] as Timestamp?;
-    bool canRegenerate = true;
-    String regenText = 'Regenerate Diet Plan';
-
-    if (generatedAt != null) {
-      final generated = generatedAt.toDate();
-      final diff = generated.add(const Duration(hours: 24)).difference(DateTime.now());
-      if (!diff.isNegative) {
-        canRegenerate = false;
-        final h = diff.inHours;
-        final m = diff.inMinutes.remainder(60);
-        regenText = 'Regenerate in ${h}h ${m}m';
-      }
-    }
-
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: canRegenerate ? _generateDietPlan : null,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: canRegenerate ? AppColors.neonLime : AppColors.gray600),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: Text(
-          regenText,
-          style: AppTextStyles.button.copyWith(color: canRegenerate ? AppColors.neonLime : AppColors.gray600),
-        ),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildTodayTab(Map<String, dynamic>? plan) {

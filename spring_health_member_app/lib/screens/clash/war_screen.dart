@@ -101,8 +101,7 @@ class _WarScreenState extends State<WarScreen>
     final h = (diff.inHours % 24).toString().padLeft(2, '0');
     final m = (diff.inMinutes % 60).toString().padLeft(2, '0');
     final s = (diff.inSeconds % 60).toString().padLeft(2, '0');
-    _countdown.value =
-        d > 0 ? '${d}d ${h}h ${m}m ${s}s' : '${h}h ${m}m ${s}s';
+    _countdown.value = d > 0 ? '${d}d ${h}h ${m}m ${s}s' : '${h}h ${m}m ${s}s';
   }
 
   // ── UI BUILDERS ─────────────────────────────────────────────────────────────
@@ -114,8 +113,10 @@ class _WarScreenState extends State<WarScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('BRANCH WARS',
-            style: AppTextStyles.heading2.copyWith(color: AppColors.textPrimary)),
+        title: Text(
+          'BRANCH WARS',
+          style: AppTextStyles.heading2.copyWith(color: AppColors.textPrimary),
+        ),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
@@ -131,7 +132,8 @@ class _WarScreenState extends State<WarScreen>
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.neonLime))
+              child: CircularProgressIndicator(color: AppColors.neonLime),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
@@ -148,9 +150,11 @@ class _WarScreenState extends State<WarScreen>
   Widget _buildThisWeekTab() {
     if (_activeWar == null) {
       return Center(
-        child: Text('No active war this week.\nStay tuned!',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400)),
+        child: Text(
+          'No active war this week.\nStay tuned!',
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400),
+        ),
       );
     }
 
@@ -167,8 +171,12 @@ class _WarScreenState extends State<WarScreen>
           const SizedBox(height: 20),
           _buildMyEntryCard(_activeWar!),
           const SizedBox(height: 24),
-          Text('LIVE LEADERBOARD',
-              style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
+          Text(
+            'LIVE LEADERBOARD',
+            style: AppTextStyles.heading3.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 12),
           _buildLeaderboard(_activeWar!.id),
         ].animate(interval: 50.ms).fadeIn().slideY(begin: 0.1),
@@ -185,9 +193,10 @@ class _WarScreenState extends State<WarScreen>
         border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-              color: AppColors.neonLime.withValues(alpha: 0.1),
-              blurRadius: 20,
-              spreadRadius: -5)
+            color: AppColors.neonLime.withValues(alpha: 0.1),
+            blurRadius: 20,
+            spreadRadius: -5,
+          ),
         ],
       ),
       child: Column(
@@ -195,33 +204,49 @@ class _WarScreenState extends State<WarScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-                color: AppColors.neonLime.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20)),
-            child: Text('WEEK ${war.weekNumber}',
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neonLime, fontWeight: FontWeight.bold)),
+              color: AppColors.neonLime.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'WEEK ${war.weekNumber}',
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.neonLime,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
-          Text(war.exercise.toUpperCase(),
-              style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
-                  letterSpacing: 2)),
-          Text('Total ${war.unit}',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400)),
+          Text(
+            war.exercise.toUpperCase(),
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: 2,
+            ),
+          ),
+          Text(
+            'Total ${war.unit}',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.timer_outlined,
-                  color: AppColors.neonOrange, size: 20),
+              const Icon(
+                Icons.timer_outlined,
+                color: AppColors.neonOrange,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               ValueListenableBuilder<String>(
                 valueListenable: _countdown,
-                builder: (context, val, child) => Text(val,
-                    style: AppTextStyles.heading3
-                        .copyWith(color: AppColors.neonOrange)),
+                builder: (context, val, child) => Text(
+                  val,
+                  style: AppTextStyles.heading3.copyWith(
+                    color: AppColors.neonOrange,
+                  ),
+                ),
               ),
             ],
           ),
@@ -229,24 +254,28 @@ class _WarScreenState extends State<WarScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) =>
-                          WorkoutLoggerScreen(
-                              memberId: widget.memberId,
-                              initialExercise: war.exercise,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WorkoutLoggerScreen(
+                    memberId: widget.memberId,
+                    initialExercise: war.exercise,
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.neonLime,
               foregroundColor: AppColors.backgroundBlack,
               minimumSize: const Size(double.infinity, 54),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                borderRadius: BorderRadius.circular(16),
+              ),
               elevation: 0,
             ),
-            child: const Text('LOG IT NOW',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'LOG IT NOW',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -263,9 +292,13 @@ class _WarScreenState extends State<WarScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('PRIZE POOL (XP)',
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.gray400, letterSpacing: 1)),
+          Text(
+            'PRIZE POOL (XP)',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.gray400,
+              letterSpacing: 1,
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -273,7 +306,11 @@ class _WarScreenState extends State<WarScreen>
               _prizeItem('🥇', '1st', '${war.prizePool['1st'] ?? 500}'),
               _prizeItem('🥈', '2nd', '${war.prizePool['2nd'] ?? 300}'),
               _prizeItem('🥉', '3rd', '${war.prizePool['3rd'] ?? 150}'),
-              _prizeItem('🏅', 'Part.', '${war.prizePool['participation'] ?? 20}'),
+              _prizeItem(
+                '🏅',
+                'Part.',
+                '${war.prizePool['participation'] ?? 20}',
+              ),
             ],
           ),
         ],
@@ -286,10 +323,17 @@ class _WarScreenState extends State<WarScreen>
       children: [
         Text(emoji, style: const TextStyle(fontSize: 24)),
         const SizedBox(height: 4),
-        Text(rank, style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-        Text(xp,
-            style: AppTextStyles.bodyMedium
-                .copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        Text(
+          rank,
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+        ),
+        Text(
+          xp,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -301,7 +345,9 @@ class _WarScreenState extends State<WarScreen>
         if (!snapshot.hasData) return const SizedBox.shrink();
 
         final entries = snapshot.data!;
-        final myIndex = entries.indexWhere((e) => e.memberId == widget.memberId);
+        final myIndex = entries.indexWhere(
+          (e) => e.memberId == widget.memberId,
+        );
 
         if (myIndex == -1) {
           return Container(
@@ -309,15 +355,21 @@ class _WarScreenState extends State<WarScreen>
             decoration: BoxDecoration(
               color: AppColors.cardSurface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.neonOrange.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppColors.neonOrange.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
                 const Icon(Icons.info_outline, color: AppColors.neonOrange),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('You haven\'t logged any ${war.unit} yet. Log a workout to join!',
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary)),
+                  child: Text(
+                    'You haven\'t logged any ${war.unit} yet. Log a workout to join!',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -333,13 +385,15 @@ class _WarScreenState extends State<WarScreen>
             gradient: LinearGradient(
               colors: [
                 AppColors.neonLime.withValues(alpha: 0.2),
-                AppColors.neonLime.withValues(alpha: 0.05)
+                AppColors.neonLime.withValues(alpha: 0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.5)),
+            border: Border.all(
+              color: AppColors.neonLime.withValues(alpha: 0.5),
+            ),
           ),
           child: Row(
             children: [
@@ -352,28 +406,48 @@ class _WarScreenState extends State<WarScreen>
                   border: Border.all(color: AppColors.neonLime),
                 ),
                 alignment: Alignment.center,
-                child: Text('#$rank',
-                    style: AppTextStyles.heading3.copyWith(color: AppColors.neonLime)),
+                child: Text(
+                  '#$rank',
+                  style: AppTextStyles.heading3.copyWith(
+                    color: AppColors.neonLime,
+                  ),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('MY PROGRESS',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-                    Text('${myEntry.totalReps} ${war.unit}',
-                        style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
+                    Text(
+                      'MY PROGRESS',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                      ),
+                    ),
+                    Text(
+                      '${myEntry.totalReps} ${war.unit}',
+                      style: AppTextStyles.heading3.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Sessions',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-                  Text('${myEntry.sessionCount}',
-                      style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary)),
+                  Text(
+                    'Sessions',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.gray400,
+                    ),
+                  ),
+                  Text(
+                    '${myEntry.sessionCount}',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -389,7 +463,8 @@ class _WarScreenState extends State<WarScreen>
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(
-              child: CircularProgressIndicator(color: AppColors.neonLime));
+            child: CircularProgressIndicator(color: AppColors.neonLime),
+          );
         }
 
         final entries = snapshot.data!;
@@ -397,9 +472,13 @@ class _WarScreenState extends State<WarScreen>
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(32.0),
-              child: Text('No entries yet.\nBe the first to dominate!',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400)),
+              child: Text(
+                'No entries yet.\nBe the first to dominate!',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.gray400,
+                ),
+              ),
             ),
           );
         }
@@ -436,35 +515,55 @@ class _WarScreenState extends State<WarScreen>
                     : AppColors.cardSurface,
                 borderRadius: BorderRadius.circular(12),
                 border: isMe
-                    ? Border.all(color: AppColors.neonLime.withValues(alpha: 0.5))
+                    ? Border.all(
+                        color: AppColors.neonLime.withValues(alpha: 0.5),
+                      )
                     : null,
               ),
               child: Row(
                 children: [
                   SizedBox(
                     width: 32,
-                    child: Text('#$rank',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                            color: rankColor, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      '#$rank',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: rankColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   CircleAvatar(
                     radius: 16,
                     backgroundColor: AppColors.backgroundBlack,
-                    child: Text(entry.memberName.isNotEmpty ? entry.memberName[0] : '?',
-                        style: const TextStyle(color: AppColors.neonLime)),
+                    child: Text(
+                      entry.memberName.isNotEmpty ? entry.memberName[0] : '?',
+                      style: const TextStyle(color: AppColors.neonLime),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                        isMe ? 'You' : (entry.memberName.isEmpty ? 'Unknown' : entry.memberName),
-                        style: AppTextStyles.bodyLarge.copyWith(
-                            color: isMe ? AppColors.neonLime : AppColors.textPrimary,
-                            fontWeight: isMe ? FontWeight.bold : FontWeight.normal)),
+                      isMe
+                          ? 'You'
+                          : (entry.memberName.isEmpty
+                                ? 'Unknown'
+                                : entry.memberName),
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: isMe
+                            ? AppColors.neonLime
+                            : AppColors.textPrimary,
+                        fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
                   ),
-                  Text('${entry.totalReps}',
-                      style: AppTextStyles.heading3.copyWith(
-                          color: AppColors.textPrimary, fontSize: 18)),
+                  Text(
+                    '${entry.totalReps}',
+                    style: AppTextStyles.heading3.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -481,15 +580,19 @@ class _WarScreenState extends State<WarScreen>
       stream: _challengeService.getActiveChallengeStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.neonLime));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.neonLime),
+          );
         }
 
         final challenge = snapshot.data;
         if (challenge == null) {
           return Center(
-            child: Text('No active duels.\nChallenges coming soon!',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400)),
+            child: Text(
+              'No active duels.\nChallenges coming soon!',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400),
+            ),
           );
         }
 
@@ -499,35 +602,53 @@ class _WarScreenState extends State<WarScreen>
             Card(
               color: AppColors.cardSurface,
               margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: ListTile(
-                title: Text(challenge.title, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary)),
-                subtitle: Text('Ends in ${challenge.endDate.difference(DateTime.now()).inDays} days', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-                trailing: const Icon(Icons.chevron_right, color: AppColors.neonLime),
+                title: Text(
+                  challenge.title,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                subtitle: Text(
+                  'Ends in ${challenge.endDate.difference(DateTime.now()).inDays} days',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: AppColors.neonLime,
+                ),
                 onTap: () {
                   // Re-use logic for Challenge Details if you wish.
                   // For now just empty placeholder or simple alert.
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Duels view opening...'),
-                    behavior: SnackBarBehavior.floating,
-                  ));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Duels view opening...'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 },
               ),
-            )
-          ]
+            ),
+          ],
         );
       },
     );
   }
-
 
   // ── HISTORY TAB ───────────────────────────────────────────────────────────
 
   Widget _buildHistoryTab() {
     if (_pastWars.isEmpty) {
       return Center(
-        child: Text('No past wars found.',
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400)),
+        child: Text(
+          'No past wars found.',
+          style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400),
+        ),
       );
     }
 
@@ -539,7 +660,9 @@ class _WarScreenState extends State<WarScreen>
         return Card(
           color: AppColors.cardSurface,
           margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -548,35 +671,66 @@ class _WarScreenState extends State<WarScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('WEEK ${war.weekNumber}',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.neonLime)),
-                    Text(war.status.toUpperCase(),
-                        style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+                    Text(
+                      'WEEK ${war.weekNumber}',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.neonLime,
+                      ),
+                    ),
+                    Text(
+                      war.status.toUpperCase(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(war.exercise,
-                    style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
+                Text(
+                  war.exercise,
+                  style: AppTextStyles.heading3.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 if (war.winnerName != null)
                   Row(
                     children: [
-                      const Icon(Icons.emoji_events, color: Colors.amber, size: 20),
+                      const Icon(
+                        Icons.emoji_events,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
-                      Text('Winner: ${war.winnerName}',
-                          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary)),
+                      Text(
+                        'Winner: ${war.winnerName}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ],
                   ),
                 const SizedBox(height: 12),
                 FutureBuilder<WarEntryModel?>(
-                  future: _weeklyWarService.getMemberWarEntry(war.id, widget.memberId),
+                  future: _weeklyWarService.getMemberWarEntry(
+                    war.id,
+                    widget.memberId,
+                  ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2));
+                      return const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      );
                     }
                     if (!snapshot.hasData || snapshot.data == null) {
-                      return Text('You did not participate.',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.gray400));
+                      return Text(
+                        'You did not participate.',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray400,
+                        ),
+                      );
                     }
                     final entry = snapshot.data!;
                     return Container(
@@ -588,10 +742,18 @@ class _WarScreenState extends State<WarScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Your Rank: ${entry.rank ?? '-'}',
-                              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.neonLime)),
-                          Text('${entry.totalReps} ${war.unit}',
-                              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary)),
+                          Text(
+                            'Your Rank: ${entry.rank ?? '-'}',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.neonLime,
+                            ),
+                          ),
+                          Text(
+                            '${entry.totalReps} ${war.unit}',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                         ],
                       ),
                     );

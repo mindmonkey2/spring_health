@@ -28,8 +28,7 @@ class ExerciseSet {
     int? reps,
     bool? isCompleted,
     bool? isPersonalRecord,
-  }) =>
-  ExerciseSet(
+  }) => ExerciseSet(
     setNumber: setNumber ?? this.setNumber,
     weight: weight ?? this.weight,
     reps: reps ?? this.reps,
@@ -74,7 +73,7 @@ class WorkoutExercise {
 
   // ✅ Computed getters
   int get totalVolume =>
-  sets.fold<int>(0, (total, s) => total + s.volume); // ✅ explicit <int>
+      sets.fold<int>(0, (total, s) => total + s.volume); // ✅ explicit <int>
 
   int get completedSets => sets.where((s) => s.weight > 0 && s.reps > 0).length;
 
@@ -82,11 +81,13 @@ class WorkoutExercise {
 
   bool get hasPersonalRecord => sets.any((s) => s.isPersonalRecord);
 
-  double get maxWeight =>
-  sets.isEmpty ? 0 : sets.map((s) => s.weight).reduce((a, b) => a > b ? a : b);
+  double get maxWeight => sets.isEmpty
+      ? 0
+      : sets.map((s) => s.weight).reduce((a, b) => a > b ? a : b);
 
-  int get maxReps =>
-  sets.isEmpty ? 0 : sets.map((s) => s.reps).reduce((a, b) => a > b ? a : b);
+  int get maxReps => sets.isEmpty
+      ? 0
+      : sets.map((s) => s.reps).reduce((a, b) => a > b ? a : b);
 
   // ✅ copyWith
   WorkoutExercise copyWith({
@@ -95,8 +96,7 @@ class WorkoutExercise {
     String? category,
     List<ExerciseSet>? sets,
     String? notes,
-  }) =>
-  WorkoutExercise(
+  }) => WorkoutExercise(
     id: id ?? this.id,
     name: name ?? this.name,
     category: category ?? this.category,
@@ -117,8 +117,8 @@ class WorkoutExercise {
     name: map['name'] as String? ?? '',
     category: map['category'] as String? ?? '',
     sets: (map['sets'] as List<dynamic>? ?? [])
-    .map((s) => ExerciseSet.fromMap(s as Map<String, dynamic>))
-    .toList(),
+        .map((s) => ExerciseSet.fromMap(s as Map<String, dynamic>))
+        .toList(),
     notes: map['notes'] as String?,
   );
 }
@@ -134,7 +134,7 @@ class WorkoutLog {
   final int durationMinutes;
   final List<WorkoutExercise> exercises;
   final String? notes;
-  final int totalVolume;   // total kg lifted
+  final int totalVolume; // total kg lifted
   final int totalSets;
   final int caloriesBurned; // ✅ NEW — fixes undefined_named_parameter error
 
@@ -155,7 +155,7 @@ class WorkoutLog {
   int get totalExercises => exercises.length;
 
   int get completedSetsCount =>
-  exercises.fold<int>(0, (total, e) => total + e.completedSets);
+      exercises.fold<int>(0, (total, e) => total + e.completedSets);
 
   bool get hasNotes => notes != null && notes!.isNotEmpty;
 
@@ -173,9 +173,7 @@ class WorkoutLog {
     for (final e in exercises) {
       counts[e.category] = (counts[e.category] ?? 0) + 1;
     }
-    return counts.entries
-    .reduce((a, b) => a.value >= b.value ? a : b)
-    .key;
+    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
   // ✅ copyWith
@@ -190,8 +188,7 @@ class WorkoutLog {
     int? totalVolume,
     int? totalSets,
     int? caloriesBurned,
-  }) =>
-  WorkoutLog(
+  }) => WorkoutLog(
     id: id ?? this.id,
     memberId: memberId ?? this.memberId,
     title: title ?? this.title,
@@ -226,12 +223,13 @@ class WorkoutLog {
       date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
       durationMinutes: data['durationMinutes'] as int? ?? 0,
       exercises: (data['exercises'] as List<dynamic>? ?? [])
-      .map((e) => WorkoutExercise.fromMap(e as Map<String, dynamic>))
-      .toList(),
+          .map((e) => WorkoutExercise.fromMap(e as Map<String, dynamic>))
+          .toList(),
       notes: data['notes'] as String?,
       totalVolume: data['totalVolume'] as int? ?? 0,
       totalSets: data['totalSets'] as int? ?? 0,
-      caloriesBurned: data['caloriesBurned'] as int? ?? 0, // ✅ reads from Firestore
+      caloriesBurned:
+          data['caloriesBurned'] as int? ?? 0, // ✅ reads from Firestore
     );
   }
 

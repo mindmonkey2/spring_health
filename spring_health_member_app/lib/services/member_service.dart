@@ -10,7 +10,7 @@ class MemberService {
       final doc = await _firestore.collection('members').doc(memberId).get();
 
       if (doc.exists && doc.data() != null) {
-        return MemberModel.fromFirestore(doc.data()!, doc.id);  // ⬅️ FIXED
+        return MemberModel.fromFirestore(doc.data()!, doc.id); // ⬅️ FIXED
       }
 
       return null;
@@ -23,14 +23,14 @@ class MemberService {
   Future<MemberModel?> getMemberByPhone(String phone) async {
     try {
       final snapshot = await _firestore
-      .collection('members')
-      .where('phone', isEqualTo: phone)
-      .limit(1)
-      .get();
+          .collection('members')
+          .where('phone', isEqualTo: phone)
+          .limit(1)
+          .get();
 
       if (snapshot.docs.isNotEmpty) {
         final doc = snapshot.docs.first;
-        return MemberModel.fromFirestore(doc.data(), doc.id);  // ⬅️ FIXED
+        return MemberModel.fromFirestore(doc.data(), doc.id); // ⬅️ FIXED
       }
 
       return null;
@@ -45,7 +45,7 @@ class MemberService {
       final member = await getMemberData(memberId);
       if (member == null) return false;
 
-      return !member.isExpired && member.isActive;  // ⬅️ FIXED
+      return !member.isExpired && member.isActive; // ⬅️ FIXED
     } catch (e) {
       debugPrint('Error checking membership status: $e');
       return false;
@@ -53,11 +53,9 @@ class MemberService {
   }
 
   Stream<MemberModel?> getMemberStream(String memberId) {
-    return _firestore
-    .collection('members')
-    .doc(memberId)
-    .snapshots()
-    .map((doc) {
+    return _firestore.collection('members').doc(memberId).snapshots().map((
+      doc,
+    ) {
       if (doc.exists && doc.data() != null) {
         return MemberModel.fromFirestore(doc.data()!, doc.id);
       }

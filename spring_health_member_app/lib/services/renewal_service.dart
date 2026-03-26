@@ -2,7 +2,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RenewalService {
-
   /// Writes a renewal payment record and extends member expiry.
   /// [memberId]    — Firestore doc ID in `members`
   /// [memberPhone] — member phone (used as branch-agnostic identifier)
@@ -47,7 +46,9 @@ class RenewalService {
     });
 
     // 2. Update member expiry + isActive
-    final memberRef = FirebaseFirestore.instance.collection('members').doc(memberId);
+    final memberRef = FirebaseFirestore.instance
+        .collection('members')
+        .doc(memberId);
     batch.update(memberRef, {
       'expiryDate': Timestamp.fromDate(newExpiry),
       'isActive': true,

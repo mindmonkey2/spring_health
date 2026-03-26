@@ -18,43 +18,63 @@ Color specColor(String spec) {
   }
   if (s.contains('yoga')) return AppColors.neonTeal;
   if (s.contains('cardio')) return AppColors.neonOrange;
-  if (s.contains('zumba') || s.contains('dance')) return const Color(0xFFFF4081);
+  if (s.contains('zumba') || s.contains('dance'))
+    return const Color(0xFFFF4081);
   if (s.contains('cross') || s.contains('hiit')) return const Color(0xFFFF5252);
   return AppColors.gray400;
 }
 
 Color mealColor(String mealType) {
   switch (mealType.toLowerCase()) {
-    case 'breakfast':   return AppColors.warning;
-    case 'lunch':       return AppColors.neonLime;
-    case 'dinner':      return AppColors.neonTeal;
-    case 'pre-workout': return AppColors.neonOrange;
-    case 'post-workout':return const Color(0xFFAB47BC);
-    case 'snack':       return const Color(0xFFFF4081);
-    default:            return AppColors.gray400;
+    case 'breakfast':
+      return AppColors.warning;
+    case 'lunch':
+      return AppColors.neonLime;
+    case 'dinner':
+      return AppColors.neonTeal;
+    case 'pre-workout':
+      return AppColors.neonOrange;
+    case 'post-workout':
+      return const Color(0xFFAB47BC);
+    case 'snack':
+      return const Color(0xFFFF4081);
+    default:
+      return AppColors.gray400;
   }
 }
 
 IconData mealIcon(String mealType) {
   switch (mealType.toLowerCase()) {
-    case 'breakfast':   return Icons.free_breakfast_rounded;
-    case 'lunch':       return Icons.lunch_dining_rounded;
-    case 'dinner':      return Icons.dinner_dining_rounded;
-    case 'pre-workout': return Icons.bolt_rounded;
-    case 'post-workout':return Icons.fitness_center_rounded;
-    case 'snack':       return Icons.cookie_rounded;
-    default:            return Icons.restaurant_rounded;
+    case 'breakfast':
+      return Icons.free_breakfast_rounded;
+    case 'lunch':
+      return Icons.lunch_dining_rounded;
+    case 'dinner':
+      return Icons.dinner_dining_rounded;
+    case 'pre-workout':
+      return Icons.bolt_rounded;
+    case 'post-workout':
+      return Icons.fitness_center_rounded;
+    case 'snack':
+      return Icons.cookie_rounded;
+    default:
+      return Icons.restaurant_rounded;
   }
 }
 
 // Enum-based goal colour — exhaustive + compiler-checked
 Color goalColor(DietGoal goal) {
   switch (goal) {
-    case DietGoal.weightLoss:  return AppColors.neonOrange;
-    case DietGoal.muscleGain:  return AppColors.neonLime;
-    case DietGoal.bulking:     return const Color(0xFF42A5F5);
-    case DietGoal.cutting:     return const Color(0xFFFF5252);
-    case DietGoal.maintenance: return AppColors.neonTeal;
+    case DietGoal.weightLoss:
+      return AppColors.neonOrange;
+    case DietGoal.muscleGain:
+      return AppColors.neonLime;
+    case DietGoal.bulking:
+      return const Color(0xFF42A5F5);
+    case DietGoal.cutting:
+      return const Color(0xFFFF5252);
+    case DietGoal.maintenance:
+      return AppColors.neonTeal;
   }
 }
 
@@ -113,11 +133,13 @@ class _TrainerScreenState extends State<TrainerScreen>
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Could not open $url'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open $url'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -145,8 +167,10 @@ class _TrainerScreenState extends State<TrainerScreen>
         backgroundColor: AppColors.backgroundBlack,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppColors.neonLime),
+          icon: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: AppColors.neonLime,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -162,9 +186,10 @@ class _TrainerScreenState extends State<TrainerScreen>
           unselectedLabelColor: AppColors.gray400,
           dividerColor: Colors.white12,
           labelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              letterSpacing: 1.5),
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            letterSpacing: 1.5,
+          ),
           tabs: const [
             Tab(text: 'MY TRAINER'),
             Tab(text: 'GYM TRAINERS'),
@@ -176,8 +201,7 @@ class _TrainerScreenState extends State<TrainerScreen>
         stream: service.getMyTrainerStream(widget.memberId),
         builder: (context, mySnap) {
           final myTrainer = mySnap.data;
-          final loading =
-              mySnap.connectionState == ConnectionState.waiting;
+          final loading = mySnap.connectionState == ConnectionState.waiting;
           return TabBarView(
             controller: tabController,
             children: [
@@ -209,27 +233,31 @@ class _TrainerScreenState extends State<TrainerScreen>
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _buildHeroCard(trainer, true)
-              .animate()
-              .fadeIn(duration: 600.ms)
-              .slideY(begin: 0.2, end: 0),
+          _buildHeroCard(
+            trainer,
+            true,
+          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0),
           const SizedBox(height: 16),
-          _buildActionButtons(trainer)
-              .animate()
-              .fadeIn(delay: 100.ms),
+          _buildActionButtons(trainer).animate().fadeIn(delay: 100.ms),
           const SizedBox(height: 24),
-          Row(children: [
-            const Icon(Icons.restaurant_rounded,
-                color: AppColors.neonTeal, size: 16),
-            const SizedBox(width: 8),
-            Text(
-              'DIET PLAN',
-              style: AppTextStyles.caption.copyWith(
+          Row(
+            children: [
+              const Icon(
+                Icons.restaurant_rounded,
+                color: AppColors.neonTeal,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'DIET PLAN',
+                style: AppTextStyles.caption.copyWith(
                   color: AppColors.neonTeal,
                   letterSpacing: 2,
-                  fontWeight: FontWeight.bold),
-            ),
-          ]).animate().fadeIn(delay: 200.ms),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ).animate().fadeIn(delay: 200.ms),
           const SizedBox(height: 12),
           StreamBuilder<DietPlanModel?>(
             stream: service.getDietPlanStream(widget.memberId),
@@ -238,8 +266,7 @@ class _TrainerScreenState extends State<TrainerScreen>
                 return const Padding(
                   padding: EdgeInsets.all(20),
                   child: Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.neonTeal),
+                    child: CircularProgressIndicator(color: AppColors.neonTeal),
                   ),
                 );
               }
@@ -266,10 +293,7 @@ class _TrainerScreenState extends State<TrainerScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            sc.withValues(alpha: 0.15),
-            AppColors.cardSurface,
-          ],
+          colors: [sc.withValues(alpha: 0.15), AppColors.cardSurface],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: sc.withValues(alpha: 0.4)),
@@ -287,8 +311,9 @@ class _TrainerScreenState extends State<TrainerScreen>
                       border: Border.all(color: sc, width: 3),
                       boxShadow: [
                         BoxShadow(
-                            color: sc.withValues(alpha: 0.3),
-                            blurRadius: 12),
+                          color: sc.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                        ),
                       ],
                     ),
                     child: CircleAvatar(
@@ -301,9 +326,10 @@ class _TrainerScreenState extends State<TrainerScreen>
                           ? Text(
                               trainer.name.substring(0, 1).toUpperCase(),
                               style: TextStyle(
-                                  color: sc,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold),
+                                color: sc,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
                             )
                           : null,
                     ),
@@ -318,8 +344,10 @@ class _TrainerScreenState extends State<TrainerScreen>
                         decoration: BoxDecoration(
                           color: AppColors.neonLime,
                           shape: BoxShape.circle,
-                          border:
-                              Border.all(color: AppColors.cardSurface, width: 2),
+                          border: Border.all(
+                            color: AppColors.cardSurface,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -335,7 +363,9 @@ class _TrainerScreenState extends State<TrainerScreen>
                       Container(
                         margin: const EdgeInsets.only(bottom: 6),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: sc.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),
@@ -344,42 +374,55 @@ class _TrainerScreenState extends State<TrainerScreen>
                         child: Text(
                           'YOUR TRAINER',
                           style: TextStyle(
-                              color: sc,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1),
+                            color: sc,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
                         ),
                       ),
-                    Text(trainer.name,
-                        style: AppTextStyles.heading2
-                            .copyWith(fontSize: 20)),
+                    Text(
+                      trainer.name,
+                      style: AppTextStyles.heading2.copyWith(fontSize: 20),
+                    ),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: sc.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
-                        border:
-                            Border.all(color: sc.withValues(alpha: 0.5)),
+                        border: Border.all(color: sc.withValues(alpha: 0.5)),
                       ),
                       child: Text(
                         trainer.specialization,
                         style: TextStyle(
-                            color: sc,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold),
+                          color: sc,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(children: [
-                      const Icon(Icons.location_on_rounded,
-                          size: 12, color: AppColors.gray400),
-                      const SizedBox(width: 4),
-                      Text(trainer.branch,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 12,
+                          color: AppColors.gray400,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          trainer.branch,
                           style: AppTextStyles.caption.copyWith(
-                              color: AppColors.gray400, fontSize: 11)),
-                    ]),
+                            color: AppColors.gray400,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -393,28 +436,36 @@ class _TrainerScreenState extends State<TrainerScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _statItem(trainer.experience, 'Experience',
-                  Icons.schedule_rounded, sc),
-              Container(
-                  width: 1,
-                  height: 40,
-                  color: Colors.white.withValues(alpha: 0.1)),
               _statItem(
-                  trainer.qualification.length > 12
-                      ? '${trainer.qualification.substring(0, 12)}…'
-                      : trainer.qualification,
-                  'Qualification',
-                  Icons.school_rounded,
-                  AppColors.neonTeal),
+                trainer.experience,
+                'Experience',
+                Icons.schedule_rounded,
+                sc,
+              ),
               Container(
-                  width: 1,
-                  height: 40,
-                  color: Colors.white.withValues(alpha: 0.1)),
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
               _statItem(
-                  '${trainer.assignedMembers.length}',
-                  'Members',
-                  Icons.group_rounded,
-                  AppColors.neonOrange),
+                trainer.qualification.length > 12
+                    ? '${trainer.qualification.substring(0, 12)}…'
+                    : trainer.qualification,
+                'Qualification',
+                Icons.school_rounded,
+                AppColors.neonTeal,
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+              _statItem(
+                '${trainer.assignedMembers.length}',
+                'Members',
+                Icons.group_rounded,
+                AppColors.neonOrange,
+              ),
             ],
           ),
         ],
@@ -422,59 +473,72 @@ class _TrainerScreenState extends State<TrainerScreen>
     );
   }
 
-  Widget _statItem(
-      String value, String label, IconData icon, Color color) {
-    return Column(children: [
-      Icon(icon, color: color, size: 18),
-      const SizedBox(height: 4),
-      Text(value,
+  Widget _statItem(String value, String label, IconData icon, Color color) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(height: 4),
+        Text(
+          value,
           style: AppTextStyles.bodyMedium.copyWith(
-              color: color, fontWeight: FontWeight.bold, fontSize: 13)),
-      Text(label,
-          style: AppTextStyles.caption
-              .copyWith(color: AppColors.gray400, fontSize: 10)),
-    ]);
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
   }
 
   // ── Action Buttons ────────────────────────────────────────────────
   Widget _buildActionButtons(TrainerModel trainer) {
-    return Row(children: [
-      Expanded(
-        child: _actionBtn(
-          icon: Icons.call_rounded,
-          label: 'CALL',
-          color: AppColors.neonLime,
-          onTap: () => _launch('tel:${trainer.phone}'),
+    return Row(
+      children: [
+        Expanded(
+          child: _actionBtn(
+            icon: Icons.call_rounded,
+            label: 'CALL',
+            color: AppColors.neonLime,
+            onTap: () => _launch('tel:${trainer.phone}'),
+          ),
         ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: _actionBtn(
-          icon: Icons.chat_rounded,
-          label: 'WHATSAPP',
-          color: AppColors.whatsApp,
-          onTap: () => _launch('https://wa.me/${_formatWa(trainer.phone)}'),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _actionBtn(
+            icon: Icons.chat_rounded,
+            label: 'WHATSAPP',
+            color: AppColors.whatsApp,
+            onTap: () => _launch('https://wa.me/${_formatWa(trainer.phone)}'),
+          ),
         ),
-      ),
-      const SizedBox(width: 12),
-      // MESSAGE button — honest label, no misleading "SOON" chip
-      Expanded(
-        child: _actionBtn(
-          icon: Icons.message_rounded,
-          label: 'MESSAGE',
-          subLabel: 'Coming Soon',
-          color: AppColors.gray400,
-          isDisabled: true,
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  '📬 In-app messaging is planned for a future update!'),
-              behavior: SnackBarBehavior.floating,
+        const SizedBox(width: 12),
+        // MESSAGE button — honest label, no misleading "SOON" chip
+        Expanded(
+          child: _actionBtn(
+            icon: Icons.message_rounded,
+            label: 'MESSAGE',
+            subLabel: 'Coming Soon',
+            color: AppColors.gray400,
+            isDisabled: true,
+            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  '📬 In-app messaging is planned for a future update!',
+                ),
+                behavior: SnackBarBehavior.floating,
+              ),
             ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   Widget _actionBtn({
@@ -503,21 +567,26 @@ class _TrainerScreenState extends State<TrainerScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                color: isDisabled ? AppColors.gray400 : color, size: 22),
+            Icon(icon, color: isDisabled ? AppColors.gray400 : color, size: 22),
             const SizedBox(height: 4),
-            Text(label,
-                style: TextStyle(
-                    color: isDisabled ? AppColors.gray400 : color,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1)),
+            Text(
+              label,
+              style: TextStyle(
+                color: isDisabled ? AppColors.gray400 : color,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
             if (subLabel != null)
-              Text(subLabel,
-                  style: const TextStyle(
-                      color: AppColors.gray400,
-                      fontSize: 8,
-                      letterSpacing: 0.5)),
+              Text(
+                subLabel,
+                style: const TextStyle(
+                  color: AppColors.gray400,
+                  fontSize: 8,
+                  letterSpacing: 0.5,
+                ),
+              ),
           ],
         ),
       ),
@@ -563,14 +632,18 @@ class _TrainerScreenState extends State<TrainerScreen>
                           Text(
                             '${plan.totalCalories}',
                             style: TextStyle(
-                                color: gc,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold),
+                              color: gc,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          Text('kcal',
-                              style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.gray400,
-                                  fontSize: 8)),
+                          Text(
+                            'kcal',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.gray400,
+                              fontSize: 8,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -582,43 +655,52 @@ class _TrainerScreenState extends State<TrainerScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: gc.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: gc),
-                        ),
-                        child: Text(
-                          plan.goal.label.toUpperCase(),
-                          style: TextStyle(
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: gc.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: gc),
+                          ),
+                          child: Text(
+                            plan.goal.label.toUpperCase(),
+                            style: TextStyle(
                               color: gc,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 1),
+                              letterSpacing: 1,
+                            ),
+                          ),
                         ),
-                      ),
-                    ]),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       'By ${plan.trainerName}',
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppColors.gray400),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Updated ${DateFormat('dd MMM yyyy').format(displayDate)}',
                       style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray400, fontSize: 10),
+                        color: AppColors.gray400,
+                        fontSize: 10,
+                      ),
                     ),
                     if (plan.notes != null && plan.notes!.isNotEmpty) ...[
                       const SizedBox(height: 6),
                       Text(
                         plan.notes!,
-                        style: AppTextStyles.caption
-                            .copyWith(color: AppColors.gray400),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray400,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -631,10 +713,12 @@ class _TrainerScreenState extends State<TrainerScreen>
         ),
         const SizedBox(height: 16),
         // Meal cards
-        ...plan.meals.asMap().entries.map((e) => _buildMealCard(e.value)
-            .animate()
-            .fadeIn(delay: (e.key * 80).ms)
-            .slideX(begin: 0.05, end: 0)),
+        ...plan.meals.asMap().entries.map(
+          (e) => _buildMealCard(e.value)
+              .animate()
+              .fadeIn(delay: (e.key * 80).ms)
+              .slideX(begin: 0.05, end: 0),
+        ),
       ],
     );
   }
@@ -673,32 +757,43 @@ class _TrainerScreenState extends State<TrainerScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(children: [
-                          Icon(mealIcon(meal.mealType),
-                              color: color, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            meal.mealType.toUpperCase(),
-                            style: TextStyle(
+                        Row(
+                          children: [
+                            Icon(
+                              mealIcon(meal.mealType),
+                              color: color,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              meal.mealType.toUpperCase(),
+                              style: TextStyle(
                                 color: color,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                letterSpacing: 1),
-                          ),
-                        ]),
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
                         if (meal.time.isNotEmpty)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Text(meal.time,
-                                style: TextStyle(
-                                    color: color,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold)),
+                            child: Text(
+                              meal.time,
+                              style: TextStyle(
+                                color: color,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -708,21 +803,28 @@ class _TrainerScreenState extends State<TrainerScreen>
                       spacing: 6,
                       runSpacing: 6,
                       children: meal.foods
-                          .map((food) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.backgroundBlack,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color:
-                                          color.withValues(alpha: 0.3)),
+                          .map(
+                            (food) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundBlack,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: color.withValues(alpha: 0.3),
                                 ),
-                                child: Text(food,
-                                    style: const TextStyle(
-                                        color: AppColors.white,
-                                        fontSize: 11)),
-                              ))
+                              ),
+                              child: Text(
+                                food,
+                                style: const TextStyle(
+                                  color: AppColors.white,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                     const SizedBox(height: 10),
@@ -732,31 +834,46 @@ class _TrainerScreenState extends State<TrainerScreen>
                       children: [
                         _macro('🔥', '${meal.calories}', 'kcal', color),
                         if (meal.protein != null)
-                          _macro('💪', meal.protein!, 'prot',
-                              AppColors.neonLime),
+                          _macro(
+                            '💪',
+                            meal.protein!,
+                            'prot',
+                            AppColors.neonLime,
+                          ),
                         if (meal.carbs != null)
                           _macro('🌾', meal.carbs!, 'carbs', AppColors.warning),
                         if (meal.fats != null)
-                          _macro('🥑', meal.fats!, 'fats',
-                              AppColors.neonOrange),
+                          _macro(
+                            '🥑',
+                            meal.fats!,
+                            'fats',
+                            AppColors.neonOrange,
+                          ),
                       ],
                     ),
                     if (meal.notes != null && meal.notes!.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Row(children: [
-                        const Icon(Icons.info_outline_rounded,
-                            size: 12, color: AppColors.gray400),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            meal.notes!,
-                            style: AppTextStyles.caption.copyWith(
-                                color: AppColors.gray400, fontSize: 11),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 12,
+                            color: AppColors.gray400,
                           ),
-                        ),
-                      ]),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              meal.notes!,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.gray400,
+                                fontSize: 11,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ],
                 ),
@@ -768,22 +885,28 @@ class _TrainerScreenState extends State<TrainerScreen>
     );
   }
 
-  Widget _macro(
-      String emoji, String value, String label, Color color) {
+  Widget _macro(String emoji, String value, String label, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(emoji, style: const TextStyle(fontSize: 10)),
         const SizedBox(width: 3),
-        Text(value,
-            style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 11)),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 11,
+          ),
+        ),
         const SizedBox(width: 2),
-        Text(label,
-            style: AppTextStyles.caption
-                .copyWith(color: AppColors.gray400, fontSize: 9)),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            fontSize: 9,
+          ),
+        ),
       ],
     );
   }
@@ -795,8 +918,7 @@ class _TrainerScreenState extends State<TrainerScreen>
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: AppColors.neonTeal.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -808,8 +930,7 @@ class _TrainerScreenState extends State<TrainerScreen>
           const SizedBox(height: 8),
           Text(
             '$trainerName hasn\'t assigned a diet plan yet.\nCheck with them at the gym!',
-            style:
-                AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
             textAlign: TextAlign.center,
           ),
         ],
@@ -831,8 +952,7 @@ class _TrainerScreenState extends State<TrainerScreen>
           const SizedBox(height: 8),
           Text(
             'Ask at the front desk or contact\ngym admin to get a trainer.',
-            style:
-                AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -840,17 +960,18 @@ class _TrainerScreenState extends State<TrainerScreen>
             onPressed: () => tabController.animateTo(1),
             style: OutlinedButton.styleFrom(
               side: BorderSide(
-                  color: AppColors.neonLime.withValues(alpha: 0.5)),
+                color: AppColors.neonLime.withValues(alpha: 0.5),
+              ),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            icon: const Icon(Icons.people_rounded,
-                color: AppColors.neonLime),
-            label: const Text('BROWSE TRAINERS',
-                style: TextStyle(
-                    color: AppColors.neonLime, letterSpacing: 1)),
+            icon: const Icon(Icons.people_rounded, color: AppColors.neonLime),
+            label: const Text(
+              'BROWSE TRAINERS',
+              style: TextStyle(color: AppColors.neonLime, letterSpacing: 1),
+            ),
           ),
         ],
       ).animate().fadeIn().scale(),
@@ -864,7 +985,8 @@ class _TrainerScreenState extends State<TrainerScreen>
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const Center(
-              child: CircularProgressIndicator(color: AppColors.neonLime));
+            child: CircularProgressIndicator(color: AppColors.neonLime),
+          );
         }
         final trainers = snap.data ?? [];
         if (trainers.isEmpty) {
@@ -878,8 +1000,9 @@ class _TrainerScreenState extends State<TrainerScreen>
                 const SizedBox(height: 8),
                 Text(
                   'No active trainers at ${widget.branch}.',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.gray400),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.gray400,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -888,11 +1011,15 @@ class _TrainerScreenState extends State<TrainerScreen>
         }
 
         // Unique spec list for filter chips
-        final specs = <String>['All', ...trainers.map((t) => t.specialization).toSet()];
+        final specs = <String>[
+          'All',
+          ...trainers.map((t) => t.specialization).toSet(),
+        ];
 
         // Local filter
         final filtered = trainers.where((t) {
-          final matchSearch = searchQuery.isEmpty ||
+          final matchSearch =
+              searchQuery.isEmpty ||
               t.name.toLowerCase().contains(searchQuery) ||
               t.specialization.toLowerCase().contains(searchQuery);
           final matchSpec =
@@ -910,10 +1037,11 @@ class _TrainerScreenState extends State<TrainerScreen>
                 style: const TextStyle(color: AppColors.white),
                 decoration: InputDecoration(
                   hintText: 'Search by name or specialization...',
-                  hintStyle:
-                      const TextStyle(color: AppColors.gray400),
-                  prefixIcon: const Icon(Icons.search_rounded,
-                      color: AppColors.gray400),
+                  hintStyle: const TextStyle(color: AppColors.gray400),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: AppColors.gray400,
+                  ),
                   // IMPROVEMENT: show live result count in suffix
                   suffixIcon: searchQuery.isNotEmpty
                       ? Row(
@@ -921,24 +1049,30 @@ class _TrainerScreenState extends State<TrainerScreen>
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               margin: const EdgeInsets.only(right: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.neonLime
-                                    .withValues(alpha: 0.15),
+                                color: AppColors.neonLime.withValues(
+                                  alpha: 0.15,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 '${filtered.length}',
                                 style: const TextStyle(
-                                    color: AppColors.neonLime,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold),
+                                  color: AppColors.neonLime,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close_rounded,
-                                  color: AppColors.gray400),
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                color: AppColors.gray400,
+                              ),
                               onPressed: searchCtrl.clear,
                             ),
                           ],
@@ -953,10 +1087,13 @@ class _TrainerScreenState extends State<TrainerScreen>
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(
-                        color: AppColors.neonLime.withValues(alpha: 0.5)),
+                      color: AppColors.neonLime.withValues(alpha: 0.5),
+                    ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ),
@@ -975,25 +1112,38 @@ class _TrainerScreenState extends State<TrainerScreen>
                       onTap: () => setState(() => selectedSpec = 'All'),
                       child: Container(
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 6),
+                          horizontal: 4,
+                          vertical: 6,
+                        ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 6),
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: Colors.red.withValues(alpha: 0.4)),
+                            color: Colors.red.withValues(alpha: 0.4),
+                          ),
                         ),
-                        child: const Row(children: [
-                          Icon(Icons.clear_rounded,
-                              size: 12, color: Colors.redAccent),
-                          SizedBox(width: 4),
-                          Text('Clear',
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.clear_rounded,
+                              size: 12,
+                              color: Colors.redAccent,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Clear',
                               style: TextStyle(
-                                  color: Colors.redAccent,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold)),
-                        ]),
+                                color: Colors.redAccent,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }
@@ -1006,9 +1156,13 @@ class _TrainerScreenState extends State<TrainerScreen>
                     onTap: () => setState(() => selectedSpec = spec),
                     child: Container(
                       margin: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 6),
+                        horizontal: 4,
+                        vertical: 6,
+                      ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? color.withValues(alpha: 0.2)
@@ -1023,11 +1177,12 @@ class _TrainerScreenState extends State<TrainerScreen>
                       child: Text(
                         spec,
                         style: TextStyle(
-                            color: isSelected ? color : AppColors.gray400,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            fontSize: 12),
+                          color: isSelected ? color : AppColors.gray400,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   );
@@ -1038,15 +1193,21 @@ class _TrainerScreenState extends State<TrainerScreen>
             // ── Results count bar ─────────────────────────────────
             if (searchQuery.isNotEmpty || selectedSpec != 'All')
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Row(children: [
-                  Text(
-                    '${filtered.length} trainer${filtered.length == 1 ? '' : 's'} found',
-                    style: AppTextStyles.caption.copyWith(
-                        color: AppColors.gray400, fontSize: 11),
-                  ),
-                ]),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      '${filtered.length} trainer${filtered.length == 1 ? '' : 's'} found',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
             // ── Trainer list ──────────────────────────────────────
@@ -1056,25 +1217,32 @@ class _TrainerScreenState extends State<TrainerScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.search_off_rounded,
-                              color: AppColors.gray400, size: 48),
+                          const Icon(
+                            Icons.search_off_rounded,
+                            color: AppColors.gray400,
+                            size: 48,
+                          ),
                           const SizedBox(height: 12),
-                          Text('No trainers match your search',
-                              style: AppTextStyles.bodyMedium
-                                  .copyWith(color: AppColors.gray400)),
+                          Text(
+                            'No trainers match your search',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.gray400,
+                            ),
+                          ),
                         ],
                       ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: filtered.length,
-                      itemBuilder: (ctx, i) => _buildDirectoryCard(
-                        filtered[i],
-                        filtered[i].id == myTrainerId,
-                      )
-                          .animate()
-                          .fadeIn(delay: (i * 60).ms)
-                          .slideX(begin: 0.05, end: 0),
+                      itemBuilder: (ctx, i) =>
+                          _buildDirectoryCard(
+                                filtered[i],
+                                filtered[i].id == myTrainerId,
+                              )
+                              .animate()
+                              .fadeIn(delay: (i * 60).ms)
+                              .slideX(begin: 0.05, end: 0),
                     ),
             ),
           ],
@@ -1117,9 +1285,10 @@ class _TrainerScreenState extends State<TrainerScreen>
                     ? Text(
                         trainer.name.substring(0, 1).toUpperCase(),
                         style: TextStyle(
-                            color: sc,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
+                          color: sc,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       )
                     : null,
               ),
@@ -1129,58 +1298,72 @@ class _TrainerScreenState extends State<TrainerScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [
-                    Flexible(
-                      child: Text(
-                        trainer.name,
-                        style: AppTextStyles.bodyLarge
-                            .copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          trainer.name,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    if (isMyTrainer) ...[
-                      const SizedBox(width: 6),
+                      if (isMyTrainer) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: sc,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'MINE',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: sc,
-                          borderRadius: BorderRadius.circular(6),
+                          horizontal: 8,
+                          vertical: 3,
                         ),
-                        child: const Text('MINE',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ]),
-                  const SizedBox(height: 4),
-                  Row(children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: sc.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: sc.withValues(alpha: 0.4)),
-                      ),
-                      child: Text(
-                        trainer.specialization,
-                        style: TextStyle(
+                        decoration: BoxDecoration(
+                          color: sc.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: sc.withValues(alpha: 0.4)),
+                        ),
+                        child: Text(
+                          trainer.specialization,
+                          style: TextStyle(
                             color: sc,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${trainer.experience} exp',
-                      style: AppTextStyles.caption
-                          .copyWith(color: AppColors.gray400),
-                    ),
-                  ]),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${trainer.experience} exp',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -1189,17 +1372,24 @@ class _TrainerScreenState extends State<TrainerScreen>
               children: [
                 Text(
                   '${trainer.assignedMembers.length}',
-                  style: AppTextStyles.heading3
-                      .copyWith(color: sc, fontSize: 18),
+                  style: AppTextStyles.heading3.copyWith(
+                    color: sc,
+                    fontSize: 18,
+                  ),
                 ),
                 Text(
                   'members',
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.gray400, fontSize: 10),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                    fontSize: 10,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                const Icon(Icons.arrow_forward_ios_rounded,
-                    size: 12, color: AppColors.gray400),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 12,
+                  color: AppColors.gray400,
+                ),
               ],
             ),
           ],
@@ -1254,8 +1444,7 @@ class TrainerProfileSheet extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: sc, width: 3),
               boxShadow: [
-                BoxShadow(
-                    color: sc.withValues(alpha: 0.3), blurRadius: 20),
+                BoxShadow(color: sc.withValues(alpha: 0.3), blurRadius: 20),
               ],
             ),
             child: CircleAvatar(
@@ -1268,9 +1457,10 @@ class TrainerProfileSheet extends StatelessWidget {
                   ? Text(
                       trainer.name.substring(0, 1).toUpperCase(),
                       style: TextStyle(
-                          color: sc,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold),
+                        color: sc,
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                      ),
                     )
                   : null,
             ),
@@ -1279,8 +1469,7 @@ class TrainerProfileSheet extends StatelessWidget {
 
           if (isMyTrainer)
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: sc.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
@@ -1289,19 +1478,22 @@ class TrainerProfileSheet extends StatelessWidget {
               child: Text(
                 'YOUR TRAINER',
                 style: TextStyle(
-                    color: sc,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1),
+                  color: sc,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
             ),
           const SizedBox(height: 8),
-          Text(trainer.name,
-              style: AppTextStyles.heading2, textAlign: TextAlign.center),
+          Text(
+            trainer.name,
+            style: AppTextStyles.heading2,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 6),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
               color: sc.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
@@ -1310,88 +1502,108 @@ class TrainerProfileSheet extends StatelessWidget {
             child: Text(
               trainer.specialization,
               style: TextStyle(
-                  color: sc, fontWeight: FontWeight.bold, fontSize: 12),
+                color: sc,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
           ),
           const SizedBox(height: 4),
-          Text(trainer.branch,
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.gray400)),
+          Text(
+            trainer.branch,
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          ),
           const SizedBox(height: 20),
 
           // Stats
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _sheetStat(trainer.experience, 'Experience',
-                  AppColors.neonLime),
+              _sheetStat(trainer.experience, 'Experience', AppColors.neonLime),
               Container(
-                  width: 1,
-                  height: 36,
-                  color: Colors.white.withValues(alpha: 0.1)),
+                width: 1,
+                height: 36,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
               _sheetStat(
-                  trainer.qualification.length > 14
-                      ? '${trainer.qualification.substring(0, 14)}…'
-                      : trainer.qualification,
-                  'Qualification',
-                  AppColors.neonTeal),
+                trainer.qualification.length > 14
+                    ? '${trainer.qualification.substring(0, 14)}…'
+                    : trainer.qualification,
+                'Qualification',
+                AppColors.neonTeal,
+              ),
               Container(
-                  width: 1,
-                  height: 36,
-                  color: Colors.white.withValues(alpha: 0.1)),
+                width: 1,
+                height: 36,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
               _sheetStat(
-                  '${trainer.assignedMembers.length} Members',
-                  'Training',
-                  AppColors.neonOrange),
+                '${trainer.assignedMembers.length} Members',
+                'Training',
+                AppColors.neonOrange,
+              ),
             ],
           ),
           const SizedBox(height: 20),
 
           // Action buttons — errors now handled via parent's _launch
-          Row(children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => onLaunch('tel:${trainer.phone}'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.neonLime,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                icon: const Icon(Icons.call_rounded),
-                label: const Text('CALL',
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => onLaunch('tel:${trainer.phone}'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.neonLime,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.call_rounded),
+                  label: const Text(
+                    'CALL',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, letterSpacing: 1)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => onLaunch(
-                    'https://wa.me/${_formatWa(trainer.phone)}'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.whatsApp,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
-                icon: const Icon(Icons.chat_rounded),
-                label: const Text('WHATSAPP',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, letterSpacing: 1)),
               ),
-            ),
-          ]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      onLaunch('https://wa.me/${_formatWa(trainer.phone)}'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.whatsApp,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.chat_rounded),
+                  label: const Text(
+                    'WHATSAPP',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('CLOSE',
-                  style: TextStyle(
-                      color: AppColors.gray400, letterSpacing: 1)),
+              child: const Text(
+                'CLOSE',
+                style: TextStyle(color: AppColors.gray400, letterSpacing: 1),
+              ),
             ),
           ),
         ],
@@ -1400,17 +1612,26 @@ class TrainerProfileSheet extends StatelessWidget {
   }
 
   Widget _sheetStat(String value, String label, Color color) {
-    return Column(children: [
-      Text(value,
+    return Column(
+      children: [
+        Text(
+          value,
           style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 12),
-          textAlign: TextAlign.center),
-      const SizedBox(height: 2),
-      Text(label,
-          style: AppTextStyles.caption
-              .copyWith(color: AppColors.gray400, fontSize: 10)),
-    ]);
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
   }
 }

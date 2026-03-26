@@ -67,8 +67,9 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
     _cooldownTimer?.cancel();
     if (_plan == null) return;
 
-    final cooldownEnd =
-        _plan!.generatedAt.toDate().add(const Duration(hours: 24));
+    final cooldownEnd = _plan!.generatedAt.toDate().add(
+      const Duration(hours: 24),
+    );
     final remaining = cooldownEnd.difference(DateTime.now());
 
     if (remaining.isNegative) {
@@ -80,8 +81,7 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
     _cooldownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       final r = cooldownEnd.difference(DateTime.now());
       if (mounted) {
-        setState(
-            () => _cooldownRemaining = r.isNegative ? Duration.zero : r);
+        setState(() => _cooldownRemaining = r.isNegative ? Duration.zero : r);
         if (r.isNegative) _cooldownTimer?.cancel();
       }
     });
@@ -115,15 +115,20 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel',
-                style: TextStyle(color: Colors.white60)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white60),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.neonLime),
+              backgroundColor: AppColors.neonLime,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Generate 🤖',
-                style: TextStyle(color: Colors.black)),
+            child: const Text(
+              'Generate 🤖',
+              style: TextStyle(color: Colors.black),
+            ),
           ),
         ],
       ),
@@ -161,19 +166,21 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
             title: const Text(
               'My Diet Plan',
               style: TextStyle(
-                  color: AppColors.neonLime, fontWeight: FontWeight.bold),
+                color: AppColors.neonLime,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             iconTheme: const IconThemeData(color: AppColors.neonLime),
           ),
           body: _loading
               ? const Center(
-                  child: CircularProgressIndicator(
-                      color: AppColors.neonLime))
+                  child: CircularProgressIndicator(color: AppColors.neonLime),
+                )
               : _error != null
-                  ? _buildErrorState()
-                  : _plan == null
-                      ? _buildEmptyState()
-                      : _buildPlanContent(),
+              ? _buildErrorState()
+              : _plan == null
+              ? _buildEmptyState()
+              : _buildPlanContent(),
         ),
         if (_generating)
           const AiLoadingOverlay(message: 'Generating your diet plan...'),
@@ -188,16 +195,18 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
         children: [
           const Icon(Icons.error_outline, color: AppColors.error, size: 48),
           const SizedBox(height: 12),
-          Text(_error!,
-              style: const TextStyle(color: Colors.white60),
-              textAlign: TextAlign.center),
+          Text(
+            _error!,
+            style: const TextStyle(color: Colors.white60),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.neonLime),
+              backgroundColor: AppColors.neonLime,
+            ),
             onPressed: _loadPlan,
-            child: const Text('Retry',
-                style: TextStyle(color: Colors.black)),
+            child: const Text('Retry', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -211,17 +220,19 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.restaurant_menu,
-                    color: AppColors.neonLime, size: 64)
-                .animate()
-                .scale(duration: 600.ms, curve: Curves.elasticOut),
+            const Icon(
+              Icons.restaurant_menu,
+              color: AppColors.neonLime,
+              size: 64,
+            ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
             const SizedBox(height: 20),
             const Text(
               'No diet plan yet',
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -234,14 +245,18 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.neonLime,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 14),
+                  horizontal: 24,
+                  vertical: 14,
+                ),
               ),
               onPressed: _onGenerateTapped,
               icon: const Icon(Icons.auto_awesome, color: Colors.black),
               label: const Text(
                 'Generate My Diet Plan',
                 style: TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.bold),
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -283,21 +298,38 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
           const Text(
             'Daily Targets',
             style: TextStyle(
-                color: AppColors.neonLime,
-                fontWeight: FontWeight.bold,
-                fontSize: 16),
+              color: AppColors.neonLime,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              _targetTile('Calories',
-                  '${targets['calories'] ?? '--'}', 'kcal', AppColors.neonLime),
-              _targetTile('Protein',
-                  '${targets['protein'] ?? '--'}', 'g', AppColors.neonTeal),
-              _targetTile('Carbs',
-                  '${targets['carbs'] ?? '--'}', 'g', AppColors.neonOrange),
-              _targetTile('Fat', '${targets['fat'] ?? '--'}', 'g',
-                  const Color(0xFFCE93D8)),
+              _targetTile(
+                'Calories',
+                '${targets['calories'] ?? '--'}',
+                'kcal',
+                AppColors.neonLime,
+              ),
+              _targetTile(
+                'Protein',
+                '${targets['protein'] ?? '--'}',
+                'g',
+                AppColors.neonTeal,
+              ),
+              _targetTile(
+                'Carbs',
+                '${targets['carbs'] ?? '--'}',
+                'g',
+                AppColors.neonOrange,
+              ),
+              _targetTile(
+                'Fat',
+                '${targets['fat'] ?? '--'}',
+                'g',
+                const Color(0xFFCE93D8),
+              ),
             ],
           ),
         ],
@@ -305,13 +337,11 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1);
   }
 
-  Widget _targetTile(
-      String label, String value, String unit, Color color) {
+  Widget _targetTile(String label, String value, String unit, Color color) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
@@ -319,18 +349,26 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
         ),
         child: Column(
           children: [
-            Text(value,
-                style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18)),
-            Text(unit,
-                style: TextStyle(
-                    color: color.withValues(alpha: 0.7), fontSize: 10)),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            Text(
+              unit,
+              style: TextStyle(
+                color: color.withValues(alpha: 0.7),
+                fontSize: 10,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(label,
-                style:
-                    const TextStyle(color: Colors.white60, fontSize: 10)),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white60, fontSize: 10),
+            ),
           ],
         ),
       ),
@@ -346,9 +384,10 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
           child: Text(
             'Meal Plan',
             style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
         ),
         ...meals.asMap().entries.map((e) => _buildMealCard(e.key, e.value)),
@@ -358,29 +397,29 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
 
   Widget _buildMealCard(int index, Map<String, dynamic> meal) {
     final isExpanded = _expandedMeals[index] ?? false;
-    final name = meal['name'] as String? ??
+    final name =
+        meal['name'] as String? ??
         meal['mealType'] as String? ??
         'Meal ${index + 1}';
-    final timing =
-        meal['timing'] as String? ?? meal['time'] as String? ?? '';
+    final timing = meal['timing'] as String? ?? meal['time'] as String? ?? '';
     final totalKcal = meal['totalKcal'] ?? meal['calories'] ?? 0;
-    final rawItems = meal['items'] as List<dynamic>? ??
+    final rawItems =
+        meal['items'] as List<dynamic>? ??
         meal['foods'] as List<dynamic>? ??
         [];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: _glassDecoration(
-          borderColor: AppColors.neonTeal.withValues(alpha: 0.4)),
+        borderColor: AppColors.neonTeal.withValues(alpha: 0.4),
+      ),
       child: Column(
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () =>
-                setState(() => _expandedMeals[index] = !isExpanded),
+            onTap: () => setState(() => _expandedMeals[index] = !isExpanded),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   Expanded(
@@ -390,27 +429,32 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
                         Text(
                           name,
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         if (timing.isNotEmpty)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.neonTeal
-                                  .withValues(alpha: 0.15),
+                              color: AppColors.neonTeal.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: AppColors.neonTeal
-                                      .withValues(alpha: 0.4)),
+                                color: AppColors.neonTeal.withValues(
+                                  alpha: 0.4,
+                                ),
+                              ),
                             ),
                             child: Text(
                               timing,
                               style: const TextStyle(
-                                  color: AppColors.neonTeal,
-                                  fontSize: 11),
+                                color: AppColors.neonTeal,
+                                fontSize: 11,
+                              ),
                             ),
                           ),
                       ],
@@ -418,7 +462,9 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.neonLime.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
@@ -426,16 +472,15 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
                     child: Text(
                       '$totalKcal kcal',
                       style: const TextStyle(
-                          color: AppColors.neonLime,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12),
+                        color: AppColors.neonLime,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Icon(
-                    isExpanded
-                        ? Icons.expand_less
-                        : Icons.expand_more,
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
                     color: Colors.white60,
                   ),
                 ],
@@ -445,18 +490,18 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
           if (isExpanded) ...[
             const Divider(color: Colors.white12, height: 1),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
-                children:
-                    rawItems.map((item) => _buildFoodItem(item)).toList(),
+                children: rawItems.map((item) => _buildFoodItem(item)).toList(),
               ),
             ),
           ],
         ],
       ),
     ).animate().fadeIn(
-        delay: Duration(milliseconds: 60 * index), duration: 350.ms);
+      delay: Duration(milliseconds: 60 * index),
+      duration: 350.ms,
+    );
   }
 
   Widget _buildFoodItem(dynamic item) {
@@ -477,8 +522,11 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          const Icon(Icons.fiber_manual_record,
-              color: AppColors.neonTeal, size: 8),
+          const Icon(
+            Icons.fiber_manual_record,
+            color: AppColors.neonTeal,
+            size: 8,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -503,12 +551,14 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
       chips.add(_noteChip(plan.nutritionNotes, AppColors.neonLime));
     }
     if (plan.bpDietNote != null) {
-      chips.add(_noteChip(
-          'DASH Diet: ${plan.bpDietNote!}', const Color(0xFFFF8A80)));
+      chips.add(
+        _noteChip('DASH Diet: ${plan.bpDietNote!}', const Color(0xFFFF8A80)),
+      );
     }
     if (plan.glucoseNote != null) {
-      chips.add(_noteChip(
-          'Blood Sugar: ${plan.glucoseNote!}', AppColors.neonTeal));
+      chips.add(
+        _noteChip('Blood Sugar: ${plan.glucoseNote!}', AppColors.neonTeal),
+      );
     }
 
     if (chips.isEmpty) return const SizedBox.shrink();
@@ -517,14 +567,17 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: _glassDecoration(
-          borderColor: AppColors.neonOrange.withValues(alpha: 0.3)),
+        borderColor: AppColors.neonOrange.withValues(alpha: 0.3),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Nutrition Notes',
             style: TextStyle(
-                color: AppColors.neonOrange, fontWeight: FontWeight.bold),
+              color: AppColors.neonOrange,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 8, children: chips),
@@ -549,7 +602,8 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: _glassDecoration(
-          borderColor: const Color(0xFF40C4FF).withValues(alpha: 0.4)),
+        borderColor: const Color(0xFF40C4FF).withValues(alpha: 0.4),
+      ),
       child: Row(
         children: [
           const Icon(Icons.water_drop, color: Color(0xFF40C4FF), size: 32),
@@ -561,8 +615,9 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
                 const Text(
                   'Hydration Target',
                   style: TextStyle(
-                      color: Color(0xFF40C4FF),
-                      fontWeight: FontWeight.bold),
+                    color: Color(0xFF40C4FF),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   'Drink at least ${litres.toStringAsFixed(1)} litres of water today',
@@ -574,9 +629,10 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
           Text(
             '${litres.toStringAsFixed(1)}L',
             style: const TextStyle(
-                color: Color(0xFF40C4FF),
-                fontWeight: FontWeight.bold,
-                fontSize: 20),
+              color: Color(0xFF40C4FF),
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
           ),
         ],
       ),
@@ -588,16 +644,17 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
       width: double.infinity,
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              _canGenerate ? AppColors.neonLime : const Color(0xFF1A1A1A),
+          backgroundColor: _canGenerate
+              ? AppColors.neonLime
+              : const Color(0xFF1A1A1A),
           foregroundColor: _canGenerate ? Colors.black : Colors.white60,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         onPressed: _canGenerate ? _onGenerateTapped : null,
-        icon: Icon(
-            _canGenerate ? Icons.auto_awesome : Icons.timer_outlined),
+        icon: Icon(_canGenerate ? Icons.auto_awesome : Icons.timer_outlined),
         label: Text(
           _canGenerate ? 'Refresh Plan 🤖' : _cooldownLabel,
           style: const TextStyle(fontWeight: FontWeight.bold),

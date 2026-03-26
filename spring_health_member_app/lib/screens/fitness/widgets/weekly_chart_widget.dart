@@ -7,14 +7,13 @@ import '../../../models/fitness_stats_model.dart';
 class WeeklyChartWidget extends StatelessWidget {
   final List<FitnessStats> weeklyData;
 
-  const WeeklyChartWidget({
-    super.key,
-    required this.weeklyData,
-  });
+  const WeeklyChartWidget({super.key, required this.weeklyData});
 
   @override
   Widget build(BuildContext context) {
-    final maxSteps = weeklyData.map((e) => e.steps).reduce((a, b) => a > b ? a : b);
+    final maxSteps = weeklyData
+        .map((e) => e.steps)
+        .reduce((a, b) => a > b ? a : b);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -41,10 +40,7 @@ class WeeklyChartWidget extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.neonLime.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -71,8 +67,9 @@ class WeeklyChartWidget extends StatelessWidget {
               children: weeklyData.map((stats) {
                 final heightPercentage = stats.steps / maxSteps;
                 final dayName = DateFormat('E').format(stats.date);
-                final isToday = DateFormat('yMd').format(stats.date) ==
-                DateFormat('yMd').format(DateTime.now());
+                final isToday =
+                    DateFormat('yMd').format(stats.date) ==
+                    DateFormat('yMd').format(DateTime.now());
 
                 return Expanded(
                   child: Padding(
@@ -85,8 +82,8 @@ class WeeklyChartWidget extends StatelessWidget {
                           '${(stats.steps / 1000).toStringAsFixed(1)}k',
                           style: AppTextStyles.caption.copyWith(
                             color: isToday
-                            ? AppColors.neonLime
-                            : AppColors.gray400,
+                                ? AppColors.neonLime
+                                : AppColors.gray400,
                             fontSize: 10,
                           ),
                         ),
@@ -100,14 +97,14 @@ class WeeklyChartWidget extends StatelessWidget {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: isToday
-                              ? [
-                                AppColors.neonLime,
-                                AppColors.neonLime.withValues(alpha: 0.6),
-                              ]
-                              : [
-                                AppColors.neonTeal.withValues(alpha: 0.5),
-                                AppColors.neonTeal.withValues(alpha: 0.2),
-                              ],
+                                  ? [
+                                      AppColors.neonLime,
+                                      AppColors.neonLime.withValues(alpha: 0.6),
+                                    ]
+                                  : [
+                                      AppColors.neonTeal.withValues(alpha: 0.5),
+                                      AppColors.neonTeal.withValues(alpha: 0.2),
+                                    ],
                             ),
                             borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(6),
@@ -121,11 +118,11 @@ class WeeklyChartWidget extends StatelessWidget {
                           dayName,
                           style: AppTextStyles.caption.copyWith(
                             color: isToday
-                            ? AppColors.neonLime
-                            : AppColors.gray600,
+                                ? AppColors.neonLime
+                                : AppColors.gray600,
                             fontWeight: isToday
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                       ],

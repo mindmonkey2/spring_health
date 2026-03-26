@@ -11,8 +11,16 @@ import 'renewal_confirmation_screen.dart';
 /// Kept inline to avoid coupling with Studio's constants.dart.
 const Map<String, _RenewalPlan> _kPlans = {
   '1 Month': _RenewalPlan(days: 30, hanamkondaPrice: 700, warangalPrice: 800),
-  '3 Months': _RenewalPlan(days: 90, hanamkondaPrice: 1950, warangalPrice: 2100),
-  '6 Months': _RenewalPlan(days: 180, hanamkondaPrice: 3600, warangalPrice: 3900),
+  '3 Months': _RenewalPlan(
+    days: 90,
+    hanamkondaPrice: 1950,
+    warangalPrice: 2100,
+  ),
+  '6 Months': _RenewalPlan(
+    days: 180,
+    hanamkondaPrice: 3600,
+    warangalPrice: 3900,
+  ),
   '1 Year': _RenewalPlan(days: 365, hanamkondaPrice: 6500, warangalPrice: 7000),
 };
 
@@ -50,8 +58,8 @@ class _RenewalScreenState extends State<RenewalScreen> {
   int _priceForPlan(String planKey) {
     final plan = _kPlans[planKey]!;
     return widget.member.branch == 'Hanamkonda'
-    ? plan.hanamkondaPrice
-    : plan.warangalPrice;
+        ? plan.hanamkondaPrice
+        : plan.warangalPrice;
   }
 
   void _openRazorpay() {
@@ -61,10 +69,7 @@ class _RenewalScreenState extends State<RenewalScreen> {
       'amount': price * 100, // paise
       'name': 'Spring Health Studio',
       'description': '$_selectedPlan Membership Renewal',
-      'prefill': {
-        'contact': widget.member.phone,
-        'name': widget.member.name,
-      },
+      'prefill': {'contact': widget.member.phone, 'name': widget.member.name},
       'theme': {'color': '#00C853'},
     };
     try {
@@ -114,7 +119,9 @@ class _RenewalScreenState extends State<RenewalScreen> {
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
-    debugPrint('Razorpay Error: code=${response.code} message=${response.message}');
+    debugPrint(
+      'Razorpay Error: code=${response.code} message=${response.message}',
+    );
     _showSnack('Payment failed: ${response.message ?? 'Unknown error'}');
   }
 
@@ -129,7 +136,10 @@ class _RenewalScreenState extends State<RenewalScreen> {
       SnackBar(
         content: Text(
           msg,
-          style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: AppColors.backgroundBlack,
         shape: RoundedRectangleBorder(
@@ -156,7 +166,10 @@ class _RenewalScreenState extends State<RenewalScreen> {
         title: const Text(
           'Renew Membership',
           style: TextStyle(
-            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
       ),
       body: ValueListenableBuilder<bool>(
@@ -169,8 +182,10 @@ class _RenewalScreenState extends State<RenewalScreen> {
                 children: [
                   CircularProgressIndicator(color: AppColors.neonLime),
                   SizedBox(height: 16),
-                  Text('Processing renewal...',
-                      style: TextStyle(color: Colors.white70)),
+                  Text(
+                    'Processing renewal...',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             );
@@ -178,35 +193,34 @@ class _RenewalScreenState extends State<RenewalScreen> {
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildMemberCard(),
-            const SizedBox(height: 24),
-            const Text(
-              'Select Plan',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            ..._kPlans.keys
-            .map((key) => _buildPlanTile(key))
-            ,
-            const SizedBox(height: 32),
-            _buildPayButton(),
-            const SizedBox(height: 12),
-              const Center(
-                child: Text(
-                  'Secured by Razorpay',
-                  style:
-                  TextStyle(color: Colors.white38, fontSize: 12),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMemberCard(),
+                const SizedBox(height: 24),
+                const Text(
+                  'Select Plan',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      }),
+                const SizedBox(height: 12),
+                ..._kPlans.keys.map((key) => _buildPlanTile(key)),
+                const SizedBox(height: 32),
+                _buildPayButton(),
+                const SizedBox(height: 12),
+                const Center(
+                  child: Text(
+                    'Secured by Razorpay',
+                    style: TextStyle(color: Colors.white38, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -235,12 +249,13 @@ class _RenewalScreenState extends State<RenewalScreen> {
             radius: 26,
             child: Text(
               widget.member.name.isNotEmpty
-              ? widget.member.name[0].toUpperCase()
-              : '?',
+                  ? widget.member.name[0].toUpperCase()
+                  : '?',
               style: const TextStyle(
                 color: AppColors.neonTeal,
                 fontWeight: FontWeight.bold,
-                fontSize: 20),
+                fontSize: 20,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -248,35 +263,39 @@ class _RenewalScreenState extends State<RenewalScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.member.name,
-                     style: const TextStyle(
-                       color: Colors.white,
-                       fontWeight: FontWeight.bold,
-                       fontSize: 16)),
-                       Text(widget.member.branch,
-                            style: const TextStyle(
-                              color: Colors.white60, fontSize: 12)),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                isExpired ? Icons.cancel : Icons.access_time,
-                                size: 13,
-                                color: isExpired ? Colors.red : Colors.orange,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                isExpired
-                                ? 'Expired · ${_formatDate(expiry)}'
-                              : 'Expires ${_formatDate(expiry)}',
-                              style: TextStyle(
-                                color: isExpired ? Colors.red : Colors.orange,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              ),
-                            ],
-                          ),
+                Text(
+                  widget.member.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  widget.member.branch,
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      isExpired ? Icons.cancel : Icons.access_time,
+                      size: 13,
+                      color: isExpired ? Colors.red : Colors.orange,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isExpired
+                          ? 'Expired · ${_formatDate(expiry)}'
+                          : 'Expires ${_formatDate(expiry)}',
+                      style: TextStyle(
+                        color: isExpired ? Colors.red : Colors.orange,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -297,13 +316,13 @@ class _RenewalScreenState extends State<RenewalScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: isSelected
-          ? AppColors.neonLime.withValues(alpha: 0.12)
-          : Colors.white.withValues(alpha: 0.04),
+              ? AppColors.neonLime.withValues(alpha: 0.12)
+              : Colors.white.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-            ? AppColors.neonLime
-            : Colors.white.withValues(alpha: 0.1),
+                ? AppColors.neonLime
+                : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 1.5 : 1.0,
           ),
         ),
@@ -316,35 +335,32 @@ class _RenewalScreenState extends State<RenewalScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected
-                  ? AppColors.neonLime
-                  : Colors.white38,
+                  color: isSelected ? AppColors.neonLime : Colors.white38,
                   width: 2,
                 ),
-                color: isSelected
-                ? AppColors.neonLime
-                : Colors.transparent,
+                color: isSelected ? AppColors.neonLime : Colors.transparent,
               ),
               child: isSelected
-              ? const Icon(Icons.check,
-                           color: Colors.black, size: 14)
-              : null,
+                  ? const Icon(Icons.check, color: Colors.black, size: 14)
+                  : null,
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(key,
-                       style: TextStyle(
-                         color: isSelected
-                         ? AppColors.neonLime
-                         : Colors.white,
-                         fontWeight: FontWeight.w600,
-                         fontSize: 15)),
-                         Text('${plan.days} days',
-                              style: const TextStyle(
-                                color: Colors.white54, fontSize: 12)),
+                  Text(
+                    key,
+                    style: TextStyle(
+                      color: isSelected ? AppColors.neonLime : Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                  Text(
+                    '${plan.days} days',
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
                 ],
               ),
             ),
@@ -372,9 +388,10 @@ class _RenewalScreenState extends State<RenewalScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.neonLime,
           foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
-              elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -383,8 +400,7 @@ class _RenewalScreenState extends State<RenewalScreen> {
             const SizedBox(width: 8),
             Text(
               'Pay Rs. $price',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ],
         ),
@@ -394,8 +410,18 @@ class _RenewalScreenState extends State<RenewalScreen> {
 
   String _formatDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }

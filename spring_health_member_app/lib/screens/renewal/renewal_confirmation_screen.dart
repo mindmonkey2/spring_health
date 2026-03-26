@@ -28,8 +28,18 @@ class RenewalConfirmationScreen extends StatelessWidget {
 
   String _formatDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
@@ -51,11 +61,13 @@ class RenewalConfirmationScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.neonLime.withValues(alpha: 0.12),
-                  border: Border.all(
-                    color: AppColors.neonLime, width: 2),
+                  border: Border.all(color: AppColors.neonLime, width: 2),
                 ),
-                child: const Icon(Icons.check_circle_outline,
-                                  color: AppColors.neonLime, size: 56),
+                child: const Icon(
+                  Icons.check_circle_outline,
+                  color: AppColors.neonLime,
+                  size: 56,
+                ),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -69,9 +81,8 @@ class RenewalConfirmationScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Hey $memberName, you\'re all set!',
-                style: const TextStyle(
-                  color: Colors.white60, fontSize: 14),
-                   textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white60, fontSize: 14),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               _buildDetailCard(),
@@ -82,20 +93,19 @@ class RenewalConfirmationScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // Pop back to home, removing renewal screens
-                    Navigator.of(context)
-                    .popUntil((route) => route.isFirst);
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neonLime,
                     foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                        elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
                   ),
                   child: const Text(
                     'Back to Home',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
               ),
@@ -118,16 +128,20 @@ class RenewalConfirmationScreen extends StatelessWidget {
         children: [
           _buildDetailRow('Plan', plan),
           _buildDivider(),
+          _buildDetailRow('Amount Paid', 'Rs. ${amountPaid.toInt()}'),
+          _buildDivider(),
           _buildDetailRow(
-            'Amount Paid', 'Rs. ${amountPaid.toInt()}'),
-            _buildDivider(),
-            _buildDetailRow(
-              'New Expiry', _formatDate(_newExpiry),
-              valueColor: AppColors.neonLime),
-              _buildDivider(),
-              _buildDetailRow('Payment ID', paymentId,
-                              valueColor: Colors.white54,
-                              valueFontSize: 11),
+            'New Expiry',
+            _formatDate(_newExpiry),
+            valueColor: AppColors.neonLime,
+          ),
+          _buildDivider(),
+          _buildDetailRow(
+            'Payment ID',
+            paymentId,
+            valueColor: Colors.white54,
+            valueFontSize: 11,
+          ),
         ],
       ),
     );
@@ -136,35 +150,35 @@ class RenewalConfirmationScreen extends StatelessWidget {
   Widget _buildDetailRow(
     String label,
     String value, {
-      Color valueColor = Colors.white,
-      double valueFontSize = 14,
-    }) {
+    Color valueColor = Colors.white,
+    double valueFontSize = 14,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-               style: const TextStyle(
-                 color: Colors.white54, fontSize: 13)),
-                 Flexible(
-                   child: Text(
-                     value,
-                     style: TextStyle(
-                       color: valueColor,
-                       fontSize: valueFontSize,
-                       fontWeight: FontWeight.w600,
-                     ),
-                     textAlign: TextAlign.right,
-                   ),
-                 ),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white54, fontSize: 13),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: valueColor,
+                fontSize: valueFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
       ),
     );
-    }
+  }
 
-    Widget _buildDivider() {
-      return Divider(
-        color: Colors.white.withValues(alpha: 0.07), height: 1);
-    }
+  Widget _buildDivider() {
+    return Divider(color: Colors.white.withValues(alpha: 0.07), height: 1);
+  }
 }

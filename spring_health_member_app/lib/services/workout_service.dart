@@ -12,26 +12,22 @@ class WorkoutService {
   // ✅ Real-time stream of member's workout history
   Future<List<WorkoutLog>> getWorkoutHistory(String memberId) async {
     final snap = await _db
-    .collection('workouts')
-    .where('memberId', isEqualTo: memberId)
-    .orderBy('date', descending: true)
-    .get();
+        .collection('workouts')
+        .where('memberId', isEqualTo: memberId)
+        .orderBy('date', descending: true)
+        .get();
 
-    return snap.docs
-    .map((doc) => WorkoutLog.fromFirestore(doc))
-    .toList();
+    return snap.docs.map((doc) => WorkoutLog.fromFirestore(doc)).toList();
   }
 
   // ✅ Get total workouts this week
   Future<int> getWeeklyWorkoutCount(String memberId) async {
-    final weekAgo =
-    DateTime.now().subtract(const Duration(days: 7));
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
     final snap = await _db
-    .collection('workouts')
-    .where('memberId', isEqualTo: memberId)
-    .where('date',
-           isGreaterThan: Timestamp.fromDate(weekAgo))
-    .get();
+        .collection('workouts')
+        .where('memberId', isEqualTo: memberId)
+        .where('date', isGreaterThan: Timestamp.fromDate(weekAgo))
+        .get();
     return snap.docs.length;
   }
 }

@@ -39,10 +39,7 @@ class AnnouncementModel {
   }
 
   // ✅ Create from Firestore document (with ID)
-  factory AnnouncementModel.fromFirestore(
-    Map<String, dynamic> map,
-    String id,
-  ) {
+  factory AnnouncementModel.fromFirestore(Map<String, dynamic> map, String id) {
     return AnnouncementModel(
       id: id,
       title: map['title'] ?? '',

@@ -10,7 +10,7 @@ class AttendanceModel {
   final DateTime? checkOutTime;
 
   const AttendanceModel({
-    required this.id,       // ✅ FIX 7: const constructor
+    required this.id, // ✅ FIX 7: const constructor
     required this.memberId,
     required this.memberName,
     required this.branch,
@@ -52,14 +52,14 @@ class AttendanceModel {
   // ✅ FIX 3: Does NOT write 'id' — Firestore doc ID is separate
   Map<String, dynamic> toMap() {
     return {
-      'memberId':    memberId,
-      'memberName':  memberName,
-      'branch':      branch,
+      'memberId': memberId,
+      'memberName': memberName,
+      'branch': branch,
       'checkInTime': Timestamp.fromDate(checkInTime),
-      'date':        Timestamp.fromDate(date),
+      'date': Timestamp.fromDate(date),
       'checkOutTime': checkOutTime != null
-      ? Timestamp.fromDate(checkOutTime!)
-      : null,
+          ? Timestamp.fromDate(checkOutTime!)
+          : null,
     };
   }
 
@@ -69,38 +69,39 @@ class AttendanceModel {
   factory AttendanceModel.fromMap(Map<String, dynamic> map, [String? docId]) {
     return AttendanceModel(
       // Prefer the explicit docId; fall back to map key (admin-written records)
-      id:          docId ?? map['id']?.toString() ?? '',
-      memberId:    map['memberId']?.toString()    ?? '',
-      memberName:  map['memberName']?.toString()  ?? 'Unknown',
-      branch:      map['branch']?.toString()      ?? '',
+      id: docId ?? map['id']?.toString() ?? '',
+      memberId: map['memberId']?.toString() ?? '',
+      memberName: map['memberName']?.toString() ?? 'Unknown',
+      branch: map['branch']?.toString() ?? '',
       checkInTime: _toDateTime(
-        map['checkInTime'] ?? map['timestamp'],   // also handles 'timestamp' alias
+        map['checkInTime'] ??
+            map['timestamp'], // also handles 'timestamp' alias
       ),
-      date: _toDateTime(
-        map['date'] ?? map['checkInTime'] ?? map['timestamp'],
-      ),
+      date: _toDateTime(map['date'] ?? map['checkInTime'] ?? map['timestamp']),
       checkOutTime: _toDateTimeNullable(map['checkOutTime']),
     );
   }
 
   // ✅ FIX 5: fromFirestore — clean Firestore DocumentSnapshot integration
-  factory AttendanceModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory AttendanceModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data() ?? {};
     return AttendanceModel.fromMap(data, doc.id);
   }
 
   // ✅ JSON (local storage / REST APIs)
   factory AttendanceModel.fromJson(Map<String, dynamic> json) =>
-  AttendanceModel.fromMap(json);
+      AttendanceModel.fromMap(json);
 
   Map<String, dynamic> toJson() {
     return {
-      'id':          id,
-      'memberId':    memberId,
-      'memberName':  memberName,
-      'branch':      branch,
+      'id': id,
+      'memberId': memberId,
+      'memberName': memberName,
+      'branch': branch,
       'checkInTime': checkInTime.toIso8601String(),
-      'date':        date.toIso8601String(),
+      'date': date.toIso8601String(),
       'checkOutTime': checkOutTime?.toIso8601String(),
     };
   }
@@ -111,24 +112,24 @@ class AttendanceModel {
 
   // ✅ FIX 6: Uses Object? sentinel so checkOutTime CAN be explicitly set to null
   AttendanceModel copyWith({
-    String?   id,
-    String?   memberId,
-    String?   memberName,
-    String?   branch,
+    String? id,
+    String? memberId,
+    String? memberName,
+    String? branch,
     DateTime? checkInTime,
     DateTime? date,
-    Object?   checkOutTime = _sentinel, // allows null to be passed explicitly
+    Object? checkOutTime = _sentinel, // allows null to be passed explicitly
   }) {
     return AttendanceModel(
-      id:          id          ?? this.id,
-      memberId:    memberId    ?? this.memberId,
-      memberName:  memberName  ?? this.memberName,
-      branch:      branch      ?? this.branch,
+      id: id ?? this.id,
+      memberId: memberId ?? this.memberId,
+      memberName: memberName ?? this.memberName,
+      branch: branch ?? this.branch,
       checkInTime: checkInTime ?? this.checkInTime,
-      date:        date        ?? this.date,
+      date: date ?? this.date,
       checkOutTime: checkOutTime == _sentinel
-      ? this.checkOutTime
-      : checkOutTime as DateTime?,
+          ? this.checkOutTime
+          : checkOutTime as DateTime?,
     );
   }
 
@@ -139,7 +140,6 @@ class AttendanceModel {
   bool get isCheckedOut => checkOutTime != null;
 
   Duration? get workoutDuration => checkOutTime?.difference(checkInTime);
-
 
   // ✅ FIX 8: Shows duration even for old sessions without checkout
   String get formattedDuration {
@@ -156,9 +156,9 @@ class AttendanceModel {
 
   bool get isToday {
     final now = DateTime.now();
-    return checkInTime.year  == now.year  &&
-    checkInTime.month == now.month &&
-    checkInTime.day   == now.day;
+    return checkInTime.year == now.year &&
+        checkInTime.month == now.month &&
+        checkInTime.day == now.day;
   }
 
   bool get isThisWeek {
@@ -174,7 +174,7 @@ class AttendanceModel {
   // Time of day label for stats
   String get timeOfDay {
     final h = checkInTime.hour;
-    if (h < 7)  return 'Early Bird 🌅';
+    if (h < 7) return 'Early Bird 🌅';
     if (h < 12) return 'Morning 🌤️';
     if (h < 17) return 'Afternoon ☀️';
     if (h < 20) return 'Evening 🌆';
@@ -189,32 +189,37 @@ class AttendanceModel {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is AttendanceModel &&
-    other.id          == id          &&
-    other.memberId    == memberId    &&
-    other.memberName  == memberName  &&
-    other.branch      == branch      &&
-    other.checkInTime == checkInTime &&
-    other.date        == date        &&
-    other.checkOutTime == checkOutTime;
+        other.id == id &&
+        other.memberId == memberId &&
+        other.memberName == memberName &&
+        other.branch == branch &&
+        other.checkInTime == checkInTime &&
+        other.date == date &&
+        other.checkOutTime == checkOutTime;
   }
 
   @override
   int get hashCode => Object.hash(
-    id, memberId, memberName, branch,
-    checkInTime, date, checkOutTime,
+    id,
+    memberId,
+    memberName,
+    branch,
+    checkInTime,
+    date,
+    checkOutTime,
   ); // ✅ Object.hash is safer than manual XOR chains
 
   @override
   String toString() =>
-  'AttendanceModel('
-  'id: $id, '
-  'memberId: $memberId, '
-  'memberName: $memberName, '
-  'branch: $branch, '
-  'checkInTime: $checkInTime, '
-  'date: $date, '
-  'checkOutTime: $checkOutTime'
-  ')';
+      'AttendanceModel('
+      'id: $id, '
+      'memberId: $memberId, '
+      'memberName: $memberName, '
+      'branch: $branch, '
+      'checkInTime: $checkInTime, '
+      'date: $date, '
+      'checkOutTime: $checkOutTime'
+      ')';
 }
 
 // Sentinel for copyWith null-clearing support

@@ -20,14 +20,16 @@ class BodyMetricsService {
   // Real-time stream — newest first, last 30 entries
   Stream<List<BodyMetricsModel>> getMetricsStream(String memberId) {
     return _db
-    .collection(_col)
-    .where('memberId', isEqualTo: memberId)
-    .orderBy('recordedAt', descending: true)
-    .limit(30)
-    .snapshots()
-    .map((snap) => snap.docs
-    .map((d) => BodyMetricsModel.fromFirestore(d.data(), d.id))
-    .toList());
+        .collection(_col)
+        .where('memberId', isEqualTo: memberId)
+        .orderBy('recordedAt', descending: true)
+        .limit(30)
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((d) => BodyMetricsModel.fromFirestore(d.data(), d.id))
+              .toList(),
+        );
   }
 
   // Delete a single entry

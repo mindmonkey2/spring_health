@@ -15,7 +15,7 @@ class LeaderboardScreen extends StatefulWidget {
 }
 
 class _LeaderboardScreenState extends State<LeaderboardScreen>
-with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _gamService = GamificationService();
 
@@ -25,11 +25,13 @@ with SingleTickerProviderStateMixin {
     _LeaderboardTab(
       label: 'STREAK',
       sortBy: 'currentStreak',
-      icon: Icons.local_fire_department_rounded),
-      _LeaderboardTab(
-        label: 'WORKOUTS',
-        sortBy: 'totalWorkouts',
-        icon: Icons.fitness_center_rounded),
+      icon: Icons.local_fire_department_rounded,
+    ),
+    _LeaderboardTab(
+      label: 'WORKOUTS',
+      sortBy: 'totalWorkouts',
+      icon: Icons.fitness_center_rounded,
+    ),
   ];
 
   // Cache results per tab
@@ -64,9 +66,7 @@ with SingleTickerProviderStateMixin {
       _errors[sortBy] = null;
     });
     try {
-      final entries = await _gamService.getLeaderboardWithNames(
-        sortBy: sortBy,
-      );
+      final entries = await _gamService.getLeaderboardWithNames(sortBy: sortBy);
       if (mounted) {
         setState(() {
           _cache[sortBy] = entries;
@@ -77,7 +77,7 @@ with SingleTickerProviderStateMixin {
       if (mounted) {
         setState(() {
           _errors[sortBy] = 'Failed to load leaderboard';
-        _loading[sortBy] = false;
+          _loading[sortBy] = false;
         });
       }
     }
@@ -109,8 +109,7 @@ with SingleTickerProviderStateMixin {
         actions: [
           IconButton(
             onPressed: _refresh,
-            icon: const Icon(Icons.refresh_rounded,
-                             color: AppColors.neonLime),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.neonLime),
           ),
         ],
         bottom: TabBar(
@@ -124,10 +123,9 @@ with SingleTickerProviderStateMixin {
             fontSize: 11,
             letterSpacing: 1.5,
           ),
-          tabs: _tabs.map((t) => Tab(
-            icon: Icon(t.icon, size: 16),
-            text: t.label,
-          )).toList(),
+          tabs: _tabs
+              .map((t) => Tab(icon: Icon(t.icon, size: 16), text: t.label))
+              .toList(),
         ),
       ),
       body: TabBarView(
@@ -171,22 +169,22 @@ with SingleTickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded,
-                 color: AppColors.error, size: 48),
-                 const SizedBox(height: 16),
-                 Text(error,
-                      style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.error)),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _refresh,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('RETRY'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.neonLime,
-                          foregroundColor: Colors.black,
-                        ),
-                      ),
+            Icon(Icons.error_outline_rounded, color: AppColors.error, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              error,
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.error),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _refresh,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('RETRY'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.neonLime,
+                foregroundColor: Colors.black,
+              ),
+            ),
           ],
         ),
       );
@@ -197,19 +195,20 @@ with SingleTickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.emoji_events_outlined,
-                 size: 64, color: AppColors.gray600),
-                 const SizedBox(height: 16),
-                 Text(
-                   'No data yet',
-                   style: AppTextStyles.heading3
-                   .copyWith(color: AppColors.gray400),
-                 ),
-                 Text(
-                   'Be the first to earn XP!',
-                   style: AppTextStyles.caption
-                   .copyWith(color: AppColors.gray600),
-                 ),
+            Icon(
+              Icons.emoji_events_outlined,
+              size: 64,
+              color: AppColors.gray600,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No data yet',
+              style: AppTextStyles.heading3.copyWith(color: AppColors.gray400),
+            ),
+            Text(
+              'Be the first to earn XP!',
+              style: AppTextStyles.caption.copyWith(color: AppColors.gray600),
+            ),
           ],
         ),
       );
@@ -226,36 +225,33 @@ with SingleTickerProviderStateMixin {
             const SizedBox(height: 20),
 
             // ✅ Podium — top 3
-            if (entries.length >= 3)
-              _buildPodium(entries, tab.sortBy),
+            if (entries.length >= 3) _buildPodium(entries, tab.sortBy),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-              // ✅ My rank banner
-              if (_myRank != null && _myRank! > 3)
-                _buildMyRankBanner(entries, tab.sortBy),
+            // ✅ My rank banner
+            if (_myRank != null && _myRank! > 3)
+              _buildMyRankBanner(entries, tab.sortBy),
 
-                // ✅ Full ranked list (4+)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: entries.skip(3).toList().asMap().entries.map(
-                      (entry) {
-                        final index = entry.key;
-                        final e = entry.value;
-                        final isMe = e.memberId == widget.memberId;
-                        return _buildRankRow(
-                          e,
-                          tab.sortBy,
-                          isMe: isMe,
-                          delay: (index * 60),
-                        );
-                      },
-                    ).toList(),
-                  ),
-                ),
+            // ✅ Full ranked list (4+)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: entries.skip(3).toList().asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final e = entry.value;
+                  final isMe = e.memberId == widget.memberId;
+                  return _buildRankRow(
+                    e,
+                    tab.sortBy,
+                    isMe: isMe,
+                    delay: (index * 60),
+                  );
+                }).toList(),
+              ),
+            ),
 
-                const SizedBox(height: 40),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -275,15 +271,14 @@ with SingleTickerProviderStateMixin {
       child: Column(
         children: [
           // Crown above 1st
-          Icon(Icons.auto_awesome_rounded,
-               color: AppColors.warning, size: 28)
-          .animate(onPlay: (c) => c.repeat(reverse: true))
-          .scale(
-            begin: const Offset(1, 1),
-            end: const Offset(1.15, 1.15),
-            duration: 1500.ms,
-            curve: Curves.easeInOut,
-          ),
+          Icon(Icons.auto_awesome_rounded, color: AppColors.warning, size: 28)
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .scale(
+                begin: const Offset(1, 1),
+                end: const Offset(1.15, 1.15),
+                duration: 1500.ms,
+                curve: Curves.easeInOut,
+              ),
           const SizedBox(height: 8),
 
           // Podium row: 2nd | 1st | 3rd
@@ -334,12 +329,12 @@ with SingleTickerProviderStateMixin {
 
   Widget _buildPodiumCard(
     LeaderboardEntry entry, {
-      required int rank,
-      required double height,
-      required Color color,
-      required String sortBy,
-      required int delay,
-    }) {
+    required int rank,
+    required double height,
+    required Color color,
+    required String sortBy,
+    required int delay,
+  }) {
     final isMe = entry.memberId == widget.memberId;
     final statValue = _getStatValue(entry, sortBy);
     final statLabel = _getStatLabel(sortBy);
@@ -368,14 +363,13 @@ with SingleTickerProviderStateMixin {
               ),
               child: ClipOval(
                 child: entry.photoUrl != null
-                ? Image.network(
-                  entry.photoUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) =>
-                  _buildAvatarFallback(
-                    entry.memberName, color),
-                )
-                : _buildAvatarFallback(entry.memberName, color),
+                    ? Image.network(
+                        entry.photoUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            _buildAvatarFallback(entry.memberName, color),
+                      )
+                    : _buildAvatarFallback(entry.memberName, color),
               ),
             ),
             // Rank badge
@@ -389,7 +383,9 @@ with SingleTickerProviderStateMixin {
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.backgroundBlack, width: 2),
+                    color: AppColors.backgroundBlack,
+                    width: 2,
+                  ),
                 ),
                 child: Center(
                   child: Text(
@@ -449,10 +445,7 @@ with SingleTickerProviderStateMixin {
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
-            border: Border.all(
-              color: color.withValues(alpha: 0.4),
-              width: 1,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -479,8 +472,11 @@ with SingleTickerProviderStateMixin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.military_tech_rounded,
-                         size: 10, color: AppColors.warning),
+                    Icon(
+                      Icons.military_tech_rounded,
+                      size: 10,
+                      color: AppColors.warning,
+                    ),
                     Text(
                       ' ${entry.earnedBadgeCount}',
                       style: const TextStyle(
@@ -497,298 +493,292 @@ with SingleTickerProviderStateMixin {
         ),
       ],
     ).animate().fadeIn(delay: delay.ms).slideY(begin: 0.3, end: 0);
-    }
+  }
 
-    // ─────────────────────────────────────
-    // MY RANK BANNER
-    // ─────────────────────────────────────
-    Widget _buildMyRankBanner(
-      List<LeaderboardEntry> entries, String sortBy) {
-      final myEntry = entries.firstWhere(
-        (e) => e.memberId == widget.memberId,
-        orElse: () => LeaderboardEntry(
-          rank: _myRank ?? 0,
-          memberId: widget.memberId,
-          memberName: 'You',
-          photoUrl: null,
-          totalXp: 0,
-          currentStreak: 0,
-          totalWorkouts: 0,
-          totalCheckIns: 0,
-          earnedBadgeCount: 0,
-          level: GymLevel.levels.first,
-        ),
-      );
+  // ─────────────────────────────────────
+  // MY RANK BANNER
+  // ─────────────────────────────────────
+  Widget _buildMyRankBanner(List<LeaderboardEntry> entries, String sortBy) {
+    final myEntry = entries.firstWhere(
+      (e) => e.memberId == widget.memberId,
+      orElse: () => LeaderboardEntry(
+        rank: _myRank ?? 0,
+        memberId: widget.memberId,
+        memberName: 'You',
+        photoUrl: null,
+        totalXp: 0,
+        currentStreak: 0,
+        totalWorkouts: 0,
+        totalCheckIns: 0,
+        earnedBadgeCount: 0,
+        level: GymLevel.levels.first,
+      ),
+    );
 
-      return Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.neonLime.withValues(alpha: 0.15),
-              AppColors.neonTeal.withValues(alpha: 0.08),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: AppColors.neonLime.withValues(alpha: 0.4),
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.neonLime.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.neonLime.withValues(alpha: 0.4),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '#${myEntry.rank}',
-                  style: TextStyle(
-                    color: AppColors.neonLime,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'YOUR RANK',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.neonLime,
-                      letterSpacing: 1.5,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-                  ),
-                  Text(
-                    '${_getStatValue(myEntry, sortBy)} ${_getStatLabel(sortBy)}',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(myEntry.level.icon,
-                 color: myEntry.level.color, size: 20),
-                 const SizedBox(width: 6),
-                 Text(
-                   myEntry.level.title,
-                   style: TextStyle(
-                     color: myEntry.level.color,
-                     fontWeight: FontWeight.bold,
-                     fontSize: 12,
-                   ),
-                 ),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.neonLime.withValues(alpha: 0.15),
+            AppColors.neonTeal.withValues(alpha: 0.08),
           ],
         ),
-      ).animate().fadeIn(delay: 300.ms).slideX(begin: -0.1, end: 0);
-      }
-
-      // ─────────────────────────────────────
-      // RANK ROW (4th place and below)
-      // ─────────────────────────────────────
-      Widget _buildRankRow(
-        LeaderboardEntry entry,
-        String sortBy, {
-          required bool isMe,
-          required int delay,
-        }) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: isMe
-            ? AppColors.neonLime.withValues(alpha: 0.08)
-            : AppColors.cardSurface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isMe
-              ? AppColors.neonLime.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.neonLime.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.neonLime.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.neonLime.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Center(
+              child: Text(
+                '#${myEntry.rank}',
+                style: TextStyle(
+                  color: AppColors.neonLime,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              // Rank number
-              SizedBox(
-                width: 36,
-                child: Text(
-                  '#${entry.rank}',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: isMe ? AppColors.neonLime : AppColors.gray400,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'YOUR RANK',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.neonLime,
+                    letterSpacing: 1.5,
                     fontWeight: FontWeight.bold,
+                    fontSize: 10,
                   ),
                 ),
-              ),
+                Text(
+                  '${_getStatValue(myEntry, sortBy)} ${_getStatLabel(sortBy)}',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(myEntry.level.icon, color: myEntry.level.color, size: 20),
+          const SizedBox(width: 6),
+          Text(
+            myEntry.level.title,
+            style: TextStyle(
+              color: myEntry.level.color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 300.ms).slideX(begin: -0.1, end: 0);
+  }
 
-              // Avatar
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isMe
+  // ─────────────────────────────────────
+  // RANK ROW (4th place and below)
+  // ─────────────────────────────────────
+  Widget _buildRankRow(
+    LeaderboardEntry entry,
+    String sortBy, {
+    required bool isMe,
+    required int delay,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isMe
+            ? AppColors.neonLime.withValues(alpha: 0.08)
+            : AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isMe
+              ? AppColors.neonLime.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.05),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Rank number
+          SizedBox(
+            width: 36,
+            child: Text(
+              '#${entry.rank}',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isMe ? AppColors.neonLime : AppColors.gray400,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // Avatar
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isMe
                     ? AppColors.neonLime
                     : entry.level.color.withValues(alpha: 0.4),
-                    width: isMe ? 2 : 1,
-                  ),
-                ),
-                child: ClipOval(
-                  child: entry.photoUrl != null
-                  ? Image.network(
-                    entry.photoUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) =>
-                    _buildAvatarFallback(
-                      entry.memberName, entry.level.color),
-                  )
-                  : _buildAvatarFallback(
-                    entry.memberName, entry.level.color),
-                ),
+                width: isMe ? 2 : 1,
               ),
+            ),
+            child: ClipOval(
+              child: entry.photoUrl != null
+                  ? Image.network(
+                      entry.photoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _buildAvatarFallback(
+                        entry.memberName,
+                        entry.level.color,
+                      ),
+                    )
+                  : _buildAvatarFallback(entry.memberName, entry.level.color),
+            ),
+          ),
 
-              const SizedBox(width: 12),
+          const SizedBox(width: 12),
 
-              // Name + Level
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Name + Level
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          isMe
-                          ? '${entry.memberName} (You)'
-                        : entry.memberName,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isMe
-                          ? AppColors.neonLime
-                          : AppColors.white,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(entry.level.icon,
-                             size: 10, color: entry.level.color),
-                        const SizedBox(width: 4),
-                        Text(
-                          'LV${entry.level.level} ${entry.level.title}',
-                          style: TextStyle(
-                            color: entry.level.color,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (entry.earnedBadgeCount > 0) ...[
-                          const SizedBox(width: 8),
-                          Icon(Icons.military_tech_rounded,
-                               size: 10, color: AppColors.warning),
-                        Text(
-                          ' ${entry.earnedBadgeCount}',
-                          style: const TextStyle(
-                            color: AppColors.warning,
-                            fontSize: 10,
-                          ),
-                        ),
-                        ],
-                      ],
+                    Text(
+                      isMe ? '${entry.memberName} (You)' : entry.memberName,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isMe ? AppColors.neonLime : AppColors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ),
+                Row(
+                  children: [
+                    Icon(entry.level.icon, size: 10, color: entry.level.color),
+                    const SizedBox(width: 4),
+                    Text(
+                      'LV${entry.level.level} ${entry.level.title}',
+                      style: TextStyle(
+                        color: entry.level.color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (entry.earnedBadgeCount > 0) ...[
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.military_tech_rounded,
+                        size: 10,
+                        color: AppColors.warning,
+                      ),
+                      Text(
+                        ' ${entry.earnedBadgeCount}',
+                        style: const TextStyle(
+                          color: AppColors.warning,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
 
-              // Stat value
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _getStatValue(entry, sortBy),
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: isMe
-                      ? AppColors.neonLime
-                      : AppColors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    _getStatLabel(sortBy),
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.gray600,
-                      fontSize: 9,
-                    ),
-                  ),
-                ],
+          // Stat value
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                _getStatValue(entry, sortBy),
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: isMe ? AppColors.neonLime : AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                _getStatLabel(sortBy),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.gray600,
+                  fontSize: 9,
+                ),
               ),
             ],
           ),
-        ).animate().fadeIn(delay: delay.ms).slideX(begin: 0.05, end: 0);
-        }
+        ],
+      ),
+    ).animate().fadeIn(delay: delay.ms).slideX(begin: 0.05, end: 0);
+  }
 
-        // ─────────────────────────────────────
-        // HELPERS
-        // ─────────────────────────────────────
-        Widget _buildAvatarFallback(String name, Color color) {
-          return Container(
-            color: color.withValues(alpha: 0.15),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          );
-        }
+  // ─────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────
+  Widget _buildAvatarFallback(String name, Color color) {
+    return Container(
+      color: color.withValues(alpha: 0.15),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
 
-        String _getStatValue(LeaderboardEntry entry, String sortBy) {
-          switch (sortBy) {
-            case 'totalXp':
-              return '${entry.totalXp} XP';
-            case 'currentStreak':
-              return '${entry.currentStreak}🔥';
-            case 'totalWorkouts':
-              return '${entry.totalWorkouts}';
-            default:
-              return '${entry.totalXp} XP';
-          }
-        }
+  String _getStatValue(LeaderboardEntry entry, String sortBy) {
+    switch (sortBy) {
+      case 'totalXp':
+        return '${entry.totalXp} XP';
+      case 'currentStreak':
+        return '${entry.currentStreak}🔥';
+      case 'totalWorkouts':
+        return '${entry.totalWorkouts}';
+      default:
+        return '${entry.totalXp} XP';
+    }
+  }
 
-        String _getStatLabel(String sortBy) {
-          switch (sortBy) {
-            case 'totalXp':
-              return 'XP';
-            case 'currentStreak':
-              return 'day streak';
-            case 'totalWorkouts':
-              return 'workouts';
-            default:
-              return 'XP';
-          }
-        }
+  String _getStatLabel(String sortBy) {
+    switch (sortBy) {
+      case 'totalXp':
+        return 'XP';
+      case 'currentStreak':
+        return 'day streak';
+      case 'totalWorkouts':
+        return 'workouts';
+      default:
+        return 'XP';
+    }
+  }
 }
 
 // ─────────────────────────────────────

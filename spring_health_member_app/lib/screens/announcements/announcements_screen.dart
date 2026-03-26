@@ -31,8 +31,6 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     loadMemberData();
 
     _subscribeToNotifications();
-
-
   }
 
   Future<void> _subscribeToNotifications() async {
@@ -57,18 +55,18 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         setState(() {
           currentMemberId = memberId; // ✅ Store it
           memberBranch = member?.branch ?? 'Hanamkonda';
-        isLoadingBranch = false;
+          isLoadingBranch = false;
         });
       } else {
         setState(() {
           memberBranch = 'Hanamkonda'; // Default
-        isLoadingBranch = false;
+          isLoadingBranch = false;
         });
       }
     } catch (e) {
       setState(() {
         memberBranch = 'Hanamkonda'; // Default fallback
-      isLoadingBranch = false;
+        isLoadingBranch = false;
       });
     }
   }
@@ -97,51 +95,51 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         elevation: 0,
       ),
       body: isLoadingBranch
-      ? _buildLoadingState()
-      : StreamBuilder<List<AnnouncementModel>>(
-        stream: announcementService.getAnnouncementsStream(memberBranch!),
-        builder: (context, snapshot) {
-          // Loading state
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoadingState();
-          }
+          ? _buildLoadingState()
+          : StreamBuilder<List<AnnouncementModel>>(
+              stream: announcementService.getAnnouncementsStream(memberBranch!),
+              builder: (context, snapshot) {
+                // Loading state
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildLoadingState();
+                }
 
-          // Error state
-          if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error.toString());
-          }
+                // Error state
+                if (snapshot.hasError) {
+                  return _buildErrorState(snapshot.error.toString());
+                }
 
-          // Empty state
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return _buildEmptyState();
-          }
+                // Empty state
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return _buildEmptyState();
+                }
 
-          final announcements = snapshot.data!;
+                final announcements = snapshot.data!;
 
-          // Success - Display announcements
-          return RefreshIndicator(
-            onRefresh: () async {
-              // Stream automatically refreshes
-              await Future.delayed(const Duration(seconds: 1));
-            },
-            color: AppColors.neonLime,
-            backgroundColor: AppColors.cardSurface,
-            child: ListView.separated(
-              padding: const EdgeInsets.all(24),
-              itemCount: announcements.length,
-              separatorBuilder: (context, index) =>
-              const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final announcement = announcements[index];
-                return _buildAnnouncementCard(
-                  announcement: announcement,
-                  delay: index * 100 + 100,
+                // Success - Display announcements
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    // Stream automatically refreshes
+                    await Future.delayed(const Duration(seconds: 1));
+                  },
+                  color: AppColors.neonLime,
+                  backgroundColor: AppColors.cardSurface,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(24),
+                    itemCount: announcements.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final announcement = announcements[index];
+                      return _buildAnnouncementCard(
+                        announcement: announcement,
+                        delay: index * 100 + 100,
+                      );
+                    },
+                  ),
                 );
               },
             ),
-          );
-        },
-      ),
     );
   }
 
@@ -151,8 +149,8 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   }) {
     // ✅ FIXED: Check if current user has read this
     final isNew = currentMemberId != null
-    ? !announcement.isReadBy(currentMemberId!)
-    : false;
+        ? !announcement.isReadBy(currentMemberId!)
+        : false;
     final timeAgo = formatTimeAgo(announcement.createdAt).toUpperCase();
 
     return GestureDetector(
@@ -171,8 +169,8 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isNew
-            ? AppColors.neonLime.withValues(alpha: 0.5)
-            : Colors.white.withValues(alpha: 0.05),
+                ? AppColors.neonLime.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.05),
             width: isNew ? 2 : 1,
           ),
           boxShadow: [
@@ -273,9 +271,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         backgroundColor: AppColors.cardSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: BorderSide(
-            color: AppColors.neonLime.withValues(alpha: 0.3),
-          ),
+          side: BorderSide(color: AppColors.neonLime.withValues(alpha: 0.3)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -303,11 +299,11 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
               const SizedBox(height: 8),
               Text(
                 formatTimeAgo(announcement.createdAt).toUpperCase(),
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neonLime,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.neonLime,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -329,10 +325,10 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neonLime,
                     foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: const Text(
                     'CLOSE',
@@ -356,10 +352,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: AppColors.neonLime,
-            strokeWidth: 3,
-          ),
+          CircularProgressIndicator(color: AppColors.neonLime, strokeWidth: 3),
           const SizedBox(height: 16),
           Text(
             'LOADING ANNOUNCEMENTS...',
@@ -386,16 +379,12 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
           const SizedBox(height: 16),
           Text(
             'NO ANNOUNCEMENTS',
-            style: AppTextStyles.heading3.copyWith(
-              color: AppColors.gray400,
-            ),
+            style: AppTextStyles.heading3.copyWith(color: AppColors.gray400),
           ),
           const SizedBox(height: 8),
           Text(
             'Check back later for updates',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.gray600,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray600),
           ),
         ],
       ),
@@ -407,24 +396,16 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: AppColors.neonOrange,
-          ),
+          Icon(Icons.error_outline, size: 64, color: AppColors.neonOrange),
           const SizedBox(height: 16),
           Text(
             'ERROR LOADING',
-            style: AppTextStyles.heading3.copyWith(
-              color: AppColors.neonOrange,
-            ),
+            style: AppTextStyles.heading3.copyWith(color: AppColors.neonOrange),
           ),
           const SizedBox(height: 8),
           Text(
             error,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.gray600,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray600),
             textAlign: TextAlign.center,
           ),
         ],

@@ -11,9 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // ✅ Initialize push notifications
   try {
@@ -28,8 +26,8 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,         // 🔧 was Brightness.dark
-      systemNavigationBarColor: Color(0xFF0A0A0A),       // 🆕 match backgroundBlack
+      statusBarIconBrightness: Brightness.light, // 🔧 was Brightness.dark
+      systemNavigationBarColor: Color(0xFF0A0A0A), // 🆕 match backgroundBlack
       systemNavigationBarIconBrightness: Brightness.light, // 🆕 white nav icons
     ),
   );

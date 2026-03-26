@@ -13,7 +13,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen>
-with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final _service = InAppNotificationService();
 
@@ -179,17 +179,12 @@ with SingleTickerProviderStateMixin {
         indicator: BoxDecoration(
           color: AppColors.neonLime.withValues(alpha: 0.13),
           borderRadius: BorderRadius.circular(11),
-          border: Border.all(
-            color: AppColors.neonLime.withValues(alpha: 0.35),
-          ),
+          border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.35)),
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         labelColor: AppColors.neonLime,
         unselectedLabelColor: Colors.white.withValues(alpha: 0.38),
-        labelStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,

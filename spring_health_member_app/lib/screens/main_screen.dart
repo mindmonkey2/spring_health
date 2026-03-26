@@ -27,8 +27,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen>
-    with WidgetsBindingObserver {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   // ── Services ───────────────────────────────────────────────────
   final _authService = FirebaseAuthService();
   final _memberService = MemberService();
@@ -51,11 +50,19 @@ class _MainScreenState extends State<MainScreen>
 
   // ── Nav config ─────────────────────────────────────────────────
   static const _navItems = [
-    _NavItem(Icons.grid_view_rounded,     Icons.grid_view_outlined,       'Home'),
-    _NavItem(Icons.fitness_center_rounded, Icons.fitness_center_outlined,  'Train'),
-    _NavItem(Icons.smart_toy_rounded,      Icons.smart_toy_outlined,       'AI Coach'),
-    _NavItem(Icons.notifications_rounded,  Icons.notifications_outlined,   'Alerts'),
-    _NavItem(Icons.person_rounded,         Icons.person_outline_rounded,   'Profile'),
+    _NavItem(Icons.grid_view_rounded, Icons.grid_view_outlined, 'Home'),
+    _NavItem(
+      Icons.fitness_center_rounded,
+      Icons.fitness_center_outlined,
+      'Train',
+    ),
+    _NavItem(Icons.smart_toy_rounded, Icons.smart_toy_outlined, 'AI Coach'),
+    _NavItem(
+      Icons.notifications_rounded,
+      Icons.notifications_outlined,
+      'Alerts',
+    ),
+    _NavItem(Icons.person_rounded, Icons.person_outline_rounded, 'Profile'),
   ];
 
   // ══════════════════════════════════════════════════════════════
@@ -71,7 +78,8 @@ class _MainScreenState extends State<MainScreen>
     // Silently sync wearable data in background — no loading state shown
     Future.microtask(() async {
       try {
-        final memberId = await FirebaseAuthService.instance.getCurrentMemberId();
+        final memberId = await FirebaseAuthService.instance
+            .getCurrentMemberId();
         if (memberId != null) {
           await WearableSnapshotService.instance.syncTodaySnapshot(memberId);
           debugPrint('✅ Wearable snapshot synced');
@@ -86,7 +94,7 @@ class _MainScreenState extends State<MainScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _memberSub?.cancel();       // ✅ no memory leaks
+    _memberSub?.cancel(); // ✅ no memory leaks
     _announcementSub?.cancel();
     super.dispose();
   }
@@ -107,12 +115,19 @@ class _MainScreenState extends State<MainScreen>
 
   Future<void> _init() async {
     if (!mounted) return;
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
     try {
       final memberId = await _authService.getCurrentMemberId();
       if (memberId == null) {
-        if (mounted) setState(() { _error = 'Member not found'; _isLoading = false; });
+        if (mounted)
+          setState(() {
+            _error = 'Member not found';
+            _isLoading = false;
+          });
         return;
       }
 
@@ -134,20 +149,25 @@ class _MainScreenState extends State<MainScreen>
           .doc(memberId)
           .snapshots()
           .listen((snap) {
-        if (!mounted || !snap.exists) return;
-        final updated = MemberModel.fromMap(
-          snap.data() as Map<String, dynamic>, id: snap.id);
-        setState(() => _member = updated);
-      });
+            if (!mounted || !snap.exists) return;
+            final updated = MemberModel.fromMap(
+              snap.data() as Map<String, dynamic>,
+              id: snap.id,
+            );
+            setState(() => _member = updated);
+          });
 
       // ✅ Unread announcements stream — Alerts tab badge only
       _listenToUnreadAnnouncements(memberId);
 
       // ✅ Membership expiry alert — non-blocking
       if (member != null) MembershipAlertService().checkAndNotify(member);
-
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
     }
   }
 
@@ -158,13 +178,13 @@ class _MainScreenState extends State<MainScreen>
         .where('isActive', isEqualTo: true)
         .snapshots()
         .listen((snap) {
-      if (!mounted) return;
-      final unread = snap.docs.where((doc) {
-        final readBy = List.from(doc.data()['readBy'] ?? []);
-        return !readBy.contains(memberId);
-      }).length;
-      setState(() => _unreadCount = unread);
-    });
+          if (!mounted) return;
+          final unread = snap.docs.where((doc) {
+            final readBy = List.from(doc.data()['readBy'] ?? []);
+            return !readBy.contains(memberId);
+          }).length;
+          setState(() => _unreadCount = unread);
+        });
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -217,10 +237,7 @@ class _MainScreenState extends State<MainScreen>
           if (_member != null && _member!.isExpiringSoon)
             MembershipExpiryBanner(member: _member!),
           Expanded(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: _screens,
-            ),
+            child: IndexedStack(index: _currentIndex, children: _screens),
           ),
         ],
       ),
@@ -257,7 +274,11 @@ class _MainScreenState extends State<MainScreen>
             children: List.generate(_navItems.length, (i) {
               // ✅ Only Alerts tab (index 3) gets a badge
               final badge = i == 3 ? _unreadCount : 0;
-              return _buildNavItem(index: i, item: _navItems[i], badgeCount: badge);
+              return _buildNavItem(
+                index: i,
+                item: _navItems[i],
+                badgeCount: badge,
+              );
             }),
           ),
         ),
@@ -313,31 +334,30 @@ class _MainScreenState extends State<MainScreen>
                       right: -7,
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (child, anim) => ScaleTransition(
-                          scale: anim,
-                          child: child,
-                        ),
-                        child: Container(
-                          key: ValueKey(badgeCount),
-                          padding: const EdgeInsets.all(3),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          decoration: const BoxDecoration(
-                            color: AppColors.error,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            badgeCount > 9 ? '9+' : '$badgeCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ).animate().scale(
+                        transitionBuilder: (child, anim) =>
+                            ScaleTransition(scale: anim, child: child),
+                        child:
+                            Container(
+                              key: ValueKey(badgeCount),
+                              padding: const EdgeInsets.all(3),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              decoration: const BoxDecoration(
+                                color: AppColors.error,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                badgeCount > 9 ? '9+' : '$badgeCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ).animate().scale(
                               begin: const Offset(0.5, 0.5),
                               end: const Offset(1, 1),
                               duration: 300.ms,
@@ -378,22 +398,22 @@ class _MainScreenState extends State<MainScreen>
           children: [
             // ✅ Pulsing logo instead of plain spinner
             Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.neonLime.withValues(alpha: 0.1),
-                border: Border.all(
-                  color: AppColors.neonLime.withValues(alpha: 0.4),
-                  width: 2,
-                ),
-              ),
-              child: const Icon(
-                Icons.fitness_center_rounded,
-                color: AppColors.neonLime,
-                size: 36,
-              ),
-            )
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.neonLime.withValues(alpha: 0.1),
+                    border: Border.all(
+                      color: AppColors.neonLime.withValues(alpha: 0.4),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.fitness_center_rounded,
+                    color: AppColors.neonLime,
+                    size: 36,
+                  ),
+                )
                 .animate(onPlay: (c) => c.repeat(reverse: true))
                 .scale(
                   begin: const Offset(0.9, 0.9),
@@ -474,9 +494,12 @@ class _MainScreenState extends State<MainScreen>
                   backgroundColor: AppColors.neonLime,
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 14),
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ],
@@ -500,19 +523,25 @@ class _MainScreenState extends State<MainScreen>
                 color: AppColors.cardSurface,
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3)),
+                  color: AppColors.error.withValues(alpha: 0.3),
+                ),
               ),
-              child: const Icon(Icons.person_off_rounded,
-                  size: 40, color: AppColors.gray400),
+              child: const Icon(
+                Icons.person_off_rounded,
+                size: 40,
+                color: AppColors.gray400,
+              ),
             ),
             const SizedBox(height: 16),
-            Text('Unable to load profile',
-                style: AppTextStyles.heading3.copyWith(
-                    color: AppColors.white)),
+            Text(
+              'Unable to load profile',
+              style: AppTextStyles.heading3.copyWith(color: AppColors.white),
+            ),
             const SizedBox(height: 8),
-            Text('Check your internet connection',
-                style: AppTextStyles.caption.copyWith(
-                    color: AppColors.gray400)),
+            Text(
+              'Check your internet connection',
+              style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+            ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _init,
@@ -522,9 +551,12 @@ class _MainScreenState extends State<MainScreen>
                 backgroundColor: AppColors.neonLime,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 32, vertical: 12),
+                  horizontal: 32,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],

@@ -19,7 +19,7 @@ class QrCheckInScreen extends StatefulWidget {
 }
 
 class _QrCheckInScreenState extends State<QrCheckInScreen>
-with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   // ── Check-in state ──────────────────────────────────────
   bool _isInitialLoad = true; // prevents XP re-award on screen re-open
   bool _checkedInToday = false;
@@ -66,73 +66,65 @@ with SingleTickerProviderStateMixin {
     final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
     _attendanceSub = FirebaseFirestore.instance
-    .collection('attendance')
-    .where('memberId', isEqualTo: widget.member.id)
-    .where(
-      'checkInTime',
-      isGreaterThanOrEqualTo: Timestamp.fromDate(start),
-    )
-    .where(
-      'checkInTime',
-      isLessThanOrEqualTo: Timestamp.fromDate(end),
-    )
-    .limit(1)
-    .snapshots()
-    .listen((snapshot) async {
-      if (!mounted) return;
+        .collection('attendance')
+        .where('memberId', isEqualTo: widget.member.id)
+        .where('checkInTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('checkInTime', isLessThanOrEqualTo: Timestamp.fromDate(end))
+        .limit(1)
+        .snapshots()
+        .listen((snapshot) async {
+          if (!mounted) return;
 
-      final hasDoc = snapshot.docs.isNotEmpty;
+          final hasDoc = snapshot.docs.isNotEmpty;
 
-      if (_isInitialLoad) {
-        // First emission — restore state without awarding XP
-        _isInitialLoad = false;
-        if (hasDoc) {
-          final data = snapshot.docs.first.data();
-          final t = (data['checkInTime'] as Timestamp?)?.toDate();
-          setState(() {
-            _checkedInToday = true;
-            _xpAwarded = true; // already checked in — don't re-award
-            _checkInTime = t;
-          });
-        }
-        return;
-      }
+          if (_isInitialLoad) {
+            // First emission — restore state without awarding XP
+            _isInitialLoad = false;
+            if (hasDoc) {
+              final data = snapshot.docs.first.data();
+              final t = (data['checkInTime'] as Timestamp?)?.toDate();
+              setState(() {
+                _checkedInToday = true;
+                _xpAwarded = true; // already checked in — don't re-award
+                _checkInTime = t;
+              });
+            }
+            return;
+          }
 
-      // ── Real-time: admin just scanned → new doc appeared
-      if (hasDoc && !_checkedInToday) {
-        final data = snapshot.docs.first.data();
-        final t = (data['checkInTime'] as Timestamp?)?.toDate();
-        setState(() {
-          _checkedInToday = true;
-          _checkInTime = t;
+          // ── Real-time: admin just scanned → new doc appeared
+          if (hasDoc && !_checkedInToday) {
+            final data = snapshot.docs.first.data();
+            final t = (data['checkInTime'] as Timestamp?)?.toDate();
+            setState(() {
+              _checkedInToday = true;
+              _checkInTime = t;
+            });
+            if (!_xpAwarded) {
+              setState(() => _xpAwarded = true);
+              await _awardCheckInXp();
+            }
+          }
+
+          // ── Edge case: admin corrected / deleted the check-in doc
+          if (!hasDoc && _checkedInToday) {
+            setState(() {
+              _checkedInToday = false;
+              _xpAwarded = false;
+              _earnedXp = 0;
+              _newBadges = [];
+              _checkInTime = null;
+              _isInitialLoad = false;
+            });
+          }
         });
-        if (!_xpAwarded) {
-          setState(() => _xpAwarded = true);
-          await _awardCheckInXp();
-        }
-      }
-
-      // ── Edge case: admin corrected / deleted the check-in doc
-      if (!hasDoc && _checkedInToday) {
-        setState(() {
-          _checkedInToday = false;
-          _xpAwarded = false;
-          _earnedXp = 0;
-          _newBadges = [];
-          _checkInTime = null;
-          _isInitialLoad = false;
-        });
-      }
-    });
   }
 
   // ─────────────────────────────────────────────────────────
   // GAMIFICATION STREAM — live streak / level on stat row
   // ─────────────────────────────────────────────────────────
   void _listenToGamification() {
-    _gamSub = GamificationService()
-    .stream(widget.member.id)
-    .listen((g) {
+    _gamSub = GamificationService().stream(widget.member.id).listen((g) {
       if (mounted) setState(() => _gamification = g);
     });
   }
@@ -142,11 +134,15 @@ with SingleTickerProviderStateMixin {
   // ─────────────────────────────────────────────────────────
   Future<void> _awardCheckInXp() async {
     try {
-      await GamificationService.instance.processEvent('check_in', widget.member.id);
+      await GamificationService.instance.processEvent(
+        'check_in',
+        widget.member.id,
+      );
       if (mounted) {
         setState(() {
           _earnedXp = 20; // Changed according to processEvent check_in
-          _newBadges = []; // processEvent handles badge notifications directly now
+          _newBadges =
+              []; // processEvent handles badge notifications directly now
         });
       }
     } catch (e) {
@@ -194,16 +190,16 @@ with SingleTickerProviderStateMixin {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 500),
                 switchInCurve: Curves.easeOutCubic,
-                  transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(
-                      scale: animation.drive(Tween(begin: 0.92, end: 1.0)),
-                      child: child,
-                    ),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: animation.drive(Tween(begin: 0.92, end: 1.0)),
+                    child: child,
                   ),
-                  child: _checkedInToday
-                  ? _buildSuccessCard(key: const ValueKey('success'))
-                  : _buildQrCard(key: const ValueKey('qr')),
+                ),
+                child: _checkedInToday
+                    ? _buildSuccessCard(key: const ValueKey('success'))
+                    : _buildQrCard(key: const ValueKey('qr')),
               ),
               const SizedBox(height: 16),
               // ── Streak / level / XP stats ─────────────────
@@ -225,8 +221,8 @@ with SingleTickerProviderStateMixin {
     final checked = _checkedInToday;
     final color = checked ? AppColors.neonLime : AppColors.neonOrange;
     final icon = checked
-    ? Icons.check_circle_rounded
-    : Icons.radio_button_unchecked_rounded;
+        ? Icons.check_circle_rounded
+        : Icons.radio_button_unchecked_rounded;
     final label = checked ? 'CHECKED IN TODAY' : 'NOT YET CHECKED IN';
 
     return AnimatedContainer(
@@ -261,12 +257,12 @@ with SingleTickerProviderStateMixin {
             ),
             Text(
               '${_checkInTime!.hour.toString().padLeft(2, '0')}:'
-            '${_checkInTime!.minute.toString().padLeft(2, '0')}',
-            style: TextStyle(
-              color: color.withValues(alpha: 0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
+              '${_checkInTime!.minute.toString().padLeft(2, '0')}',
+              style: TextStyle(
+                color: color.withValues(alpha: 0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ],
@@ -335,7 +331,8 @@ with SingleTickerProviderStateMixin {
               ],
             ),
             child: QrImageView(
-              data: widget.member.qrCode, // SPRING{memberId} — exact admin format
+              data:
+                  widget.member.qrCode, // SPRING{memberId} — exact admin format
               version: QrVersions.auto,
               size: 210,
               backgroundColor: Colors.white,
@@ -353,27 +350,21 @@ with SingleTickerProviderStateMixin {
 
           // ── Member info strip ─────────────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.backgroundBlack,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.06),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor:
-                  AppColors.neonLime.withValues(alpha: 0.15),
+                  backgroundColor: AppColors.neonLime.withValues(alpha: 0.15),
                   child: Text(
                     widget.member.name.isNotEmpty
-                    ? widget.member.name[0].toUpperCase()
-                    : 'M',
+                        ? widget.member.name[0].toUpperCase()
+                        : 'M',
                     style: const TextStyle(
                       color: AppColors.neonLime,
                       fontWeight: FontWeight.bold,
@@ -395,8 +386,9 @@ with SingleTickerProviderStateMixin {
                       ),
                       Text(
                         widget.member.membershipPlan,
-                        style: AppTextStyles.caption
-                        .copyWith(color: AppColors.gray400),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray400,
+                        ),
                       ),
                     ],
                   ),
@@ -457,34 +449,34 @@ with SingleTickerProviderStateMixin {
         children: [
           // ── Checkmark ─────────────────────────────────────
           Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              color: AppColors.neonLime.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: Border.all(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: AppColors.neonLime.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.neonLime.withValues(alpha: 0.4),
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: AppColors.neonLime,
+                  size: 48,
+                ),
+              )
+              .animate()
+              .scale(
+                begin: const Offset(0, 0),
+                end: const Offset(1, 1),
+                duration: 450.ms,
+                curve: Curves.elasticOut,
+              )
+              .shimmer(
+                delay: 300.ms,
+                duration: 1200.ms,
                 color: AppColors.neonLime.withValues(alpha: 0.4),
-                width: 2,
               ),
-            ),
-            child: const Icon(
-              Icons.check_rounded,
-              color: AppColors.neonLime,
-              size: 48,
-            ),
-          )
-          .animate()
-          .scale(
-            begin: const Offset(0, 0),
-            end: const Offset(1, 1),
-            duration: 450.ms,
-            curve: Curves.elasticOut,
-          )
-          .shimmer(
-            delay: 300.ms,
-            duration: 1200.ms,
-            color: AppColors.neonLime.withValues(alpha: 0.4),
-          ),
           const SizedBox(height: 16),
 
           Text(
@@ -505,105 +497,106 @@ with SingleTickerProviderStateMixin {
           // ── XP earned pill ────────────────────────────────
           if (_earnedXp > 0)
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 22,
-                vertical: 11,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.neonLime.withValues(alpha: 0.18),
-                    AppColors.neonTeal.withValues(alpha: 0.18),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: AppColors.neonLime.withValues(alpha: 0.4),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('⚡', style: TextStyle(fontSize: 16)),
-                  const SizedBox(width: 6),
-                  Text(
-                    '+$_earnedXp XP EARNED',
-                    style: const TextStyle(
-                      color: AppColors.neonLime,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.neonLime.withValues(alpha: 0.18),
+                        AppColors.neonTeal.withValues(alpha: 0.18),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: AppColors.neonLime.withValues(alpha: 0.4),
                     ),
                   ),
-                ],
-              ),
-            )
-            .animate()
-            .fadeIn(delay: 400.ms)
-            .slideY(begin: 0.2, end: 0, delay: 400.ms, duration: 300.ms),
-
-            // ── Badge unlocked pills ──────────────────────────
-            for (int i = 0; i < _newBadges.length; i++)
-              Container(
-                margin: const EdgeInsets.only(top: 10),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.amber.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🏅', style: TextStyle(fontSize: 14)),
-                    const SizedBox(width: 6),
-                    Text(
-                      'BADGE: ${_newBadges[i].title.toUpperCase()}',
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('⚡', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 6),
+                      Text(
+                        '+$_earnedXp XP EARNED',
+                        style: const TextStyle(
+                          color: AppColors.neonLime,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              )
-              .animate()
-              .fadeIn(delay: Duration(milliseconds: 550 + i * 100))
-              .shimmer(
-                delay: Duration(milliseconds: 650 + i * 100),
-                duration: 1000.ms,
-                color: Colors.amber.withValues(alpha: 0.4),
-              ),
+                    ],
+                  ),
+                )
+                .animate()
+                .fadeIn(delay: 400.ms)
+                .slideY(begin: 0.2, end: 0, delay: 400.ms, duration: 300.ms),
 
-              // ── Check-in time ─────────────────────────────────
-              if (_checkInTime != null) ...[
-                const SizedBox(height: 18),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.schedule_rounded,
-                      size: 14,
-                      color: AppColors.gray400,
+          // ── Badge unlocked pills ──────────────────────────
+          for (int i = 0; i < _newBadges.length; i++)
+            Container(
+                  margin: const EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.amber.withValues(alpha: 0.4),
                     ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Checked in at '
-                    '${_checkInTime!.hour.toString().padLeft(2, '0')}:'
-                    '${_checkInTime!.minute.toString().padLeft(2, '0')}',
-                    style:
-                    AppTextStyles.caption.copyWith(color: AppColors.gray400),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 500.ms),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🏅', style: TextStyle(fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'BADGE: ${_newBadges[i].title.toUpperCase()}',
+                        style: const TextStyle(
+                          color: Colors.amber,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                .animate()
+                .fadeIn(delay: Duration(milliseconds: 550 + i * 100))
+                .shimmer(
+                  delay: Duration(milliseconds: 650 + i * 100),
+                  duration: 1000.ms,
+                  color: Colors.amber.withValues(alpha: 0.4),
+                ),
+
+          // ── Check-in time ─────────────────────────────────
+          if (_checkInTime != null) ...[
+            const SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.schedule_rounded,
+                  size: 14,
+                  color: AppColors.gray400,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'Checked in at '
+                  '${_checkInTime!.hour.toString().padLeft(2, '0')}:'
+                  '${_checkInTime!.minute.toString().padLeft(2, '0')}',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
               ],
+            ).animate().fadeIn(delay: 500.ms),
+          ],
         ],
       ),
     );
@@ -627,11 +620,26 @@ with SingleTickerProviderStateMixin {
       ),
       child: Row(
         children: [
-          _statCell(emoji: '🔥', value: '$streak', label: 'Streak', color: AppColors.neonOrange),
+          _statCell(
+            emoji: '🔥',
+            value: '$streak',
+            label: 'Streak',
+            color: AppColors.neonOrange,
+          ),
           _verticalDivider(),
-          _statCell(emoji: '⚡', value: '$totalXp', label: 'Total XP', color: AppColors.neonLime),
+          _statCell(
+            emoji: '⚡',
+            value: '$totalXp',
+            label: 'Total XP',
+            color: AppColors.neonLime,
+          ),
           _verticalDivider(),
-          _statCell(emoji: '🏆', value: level.title, label: 'Level', color: AppColors.neonTeal),
+          _statCell(
+            emoji: '🏆',
+            value: level.title,
+            label: 'Level',
+            color: AppColors.neonTeal,
+          ),
         ],
       ),
     ).animate().fadeIn(delay: 200.ms, duration: 300.ms);
@@ -680,22 +688,26 @@ with SingleTickerProviderStateMixin {
   // ─────────────────────────────────────────────────────────
   Widget _buildInstruction() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.info_outline_rounded, size: 13, color: AppColors.gray600),
-        const SizedBox(width: 6),
-        Text(
-          'Waiting for receptionist to scan your QR code...',
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.gray600,
-            fontSize: 11,
-          ),
-        ),
-      ],
-    )
-    .animate(onPlay: (c) => c.repeat())
-    .fadeIn(duration: 800.ms)
-    .then()
-    .fadeOut(delay: 1600.ms, duration: 800.ms);
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              size: 13,
+              color: AppColors.gray600,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Waiting for receptionist to scan your QR code...',
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.gray600,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        )
+        .animate(onPlay: (c) => c.repeat())
+        .fadeIn(duration: 800.ms)
+        .then()
+        .fadeOut(delay: 1600.ms, duration: 800.ms);
   }
 }

@@ -65,5 +65,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
     iosBundleId: 'com.springhealthtech.springHealthMember',
   );
-
 }

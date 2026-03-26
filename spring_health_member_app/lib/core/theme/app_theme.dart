@@ -10,7 +10,7 @@ class AppTheme {
       primaryColor: AppColors.neonLime,
       scaffoldBackgroundColor: AppColors.backgroundBlack,
       fontFamily: GoogleFonts.poppins().fontFamily,
-      
+
       colorScheme: const ColorScheme.dark(
         primary: AppColors.neonLime,
         secondary: AppColors.neonTeal,
@@ -35,7 +35,9 @@ class AppTheme {
           foregroundColor: Colors.black, // Dark text on lime button
           textStyle: AppTextStyles.button,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30), // Pill shape for premium feel
+            borderRadius: BorderRadius.circular(
+              30,
+            ), // Pill shape for premium feel
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           elevation: 0,
@@ -63,13 +65,14 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 20,
+        ),
       ),
 
-      iconTheme: const IconThemeData(
-        color: AppColors.white,
-      ),
-      
+      iconTheme: const IconThemeData(color: AppColors.white),
+
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,

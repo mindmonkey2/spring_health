@@ -74,14 +74,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: AppColors.neonLime.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.photo_library_rounded,
-                      color: AppColors.neonLime),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: AppColors.neonLime,
+                  ),
                 ),
-                title: Text('Choose from Gallery',
-                    style: AppTextStyles.bodyLarge),
-                subtitle: Text('Pick an existing photo',
-                    style: AppTextStyles.caption
-                        .copyWith(color: AppColors.gray400)),
+                title: Text(
+                  'Choose from Gallery',
+                  style: AppTextStyles.bodyLarge,
+                ),
+                subtitle: Text(
+                  'Pick an existing photo',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _pickAndUpload(ImageSource.gallery);
@@ -95,14 +102,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: AppColors.neonTeal.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.camera_alt_rounded,
-                      color: AppColors.neonTeal),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.neonTeal,
+                  ),
                 ),
-                title:
-                    Text('Take a Photo', style: AppTextStyles.bodyLarge),
-                subtitle: Text('Use your camera',
-                    style: AppTextStyles.caption
-                        .copyWith(color: AppColors.gray400)),
+                title: Text('Take a Photo', style: AppTextStyles.bodyLarge),
+                subtitle: Text(
+                  'Use your camera',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _pickAndUpload(ImageSource.camera);
@@ -136,22 +147,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .child('member_photos')
           .child('$uid.jpg');
 
-      await ref.putFile(
-          imageFile, SettableMetadata(contentType: 'image/jpeg'));
+      await ref.putFile(imageFile, SettableMetadata(contentType: 'image/jpeg'));
       final downloadUrl = await ref.getDownloadURL();
 
-      await FirebaseFirestore.instance
-          .collection('members')
-          .doc(uid)
-          .update({'photoUrl': downloadUrl});
+      await FirebaseFirestore.instance.collection('members').doc(uid).update({
+        'photoUrl': downloadUrl,
+      });
 
       if (!mounted) return;
       setState(() {
         _isUploadingPhoto = false;
-        _member = MemberModel.fromMap(
-          {..._member.toMap(), 'photoUrl': downloadUrl},
-          id: _member.id,
-        );
+        _member = MemberModel.fromMap({
+          ..._member.toMap(),
+          'photoUrl': downloadUrl,
+        }, id: _member.id);
       });
       _showSuccess('Profile photo updated');
     } on FirebaseException catch (e) {
@@ -172,13 +181,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showError(String msg) => _showSnack(msg, AppColors.error);
 
   void _showSnack(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: color,
-      behavior: SnackBarBehavior.floating,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   // ─── Navigation ────────────────────────────────────────────────────────────
@@ -190,20 +200,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppColors.cardSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-              color: AppColors.neonLime.withValues(alpha: 0.3)),
+          side: BorderSide(color: AppColors.neonLime.withValues(alpha: 0.3)),
         ),
         title: Text('Logout', style: AppTextStyles.heading3),
         content: Text(
           'Are you sure you want to logout?',
-          style: AppTextStyles.bodyMedium
-              .copyWith(color: AppColors.gray400),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
-                style: TextStyle(color: AppColors.gray400)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.gray400)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -237,8 +244,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
       appBar: AppBar(
-        title: Text('PROFILE',
-            style: AppTextStyles.heading2.copyWith(letterSpacing: 2)),
+        title: Text(
+          'PROFILE',
+          style: AppTextStyles.heading2.copyWith(letterSpacing: 2),
+        ),
         backgroundColor: AppColors.backgroundBlack,
         elevation: 0,
       ),
@@ -266,13 +275,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [
-          AppColors.neonLime.withValues(alpha: 0.15),
-          AppColors.turquoise.withValues(alpha: 0.15),
-        ]),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.neonLime.withValues(alpha: 0.15),
+            AppColors.turquoise.withValues(alpha: 0.15),
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -288,12 +298,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border:
-                          Border.all(color: AppColors.neonLime, width: 3),
+                      border: Border.all(color: AppColors.neonLime, width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              AppColors.neonLime.withValues(alpha: 0.3),
+                          color: AppColors.neonLime.withValues(alpha: 0.3),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -305,8 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _member.photoUrl!,
                               fit: BoxFit.cover,
                               // fix: single underscores → no unnecessary_underscores lint
-                              errorBuilder: (_, e, s) =>
-                                  _buildDefaultAvatar(),
+                              errorBuilder: (_, e, s) => _buildDefaultAvatar(),
                             )
                           : _buildDefaultAvatar(),
                     ),
@@ -320,11 +327,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.backgroundBlack,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                          color: AppColors.neonLime, width: 1.5),
+                      border: Border.all(color: AppColors.neonLime, width: 1.5),
                     ),
-                    child: const Icon(Icons.camera_alt_rounded,
-                        color: AppColors.neonLime, size: 16),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.neonLime,
+                      size: 16,
+                    ),
                   ),
                 ),
                 if (_isUploadingPhoto)
@@ -332,13 +341,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: AppColors.backgroundBlack
-                          .withValues(alpha: 0.65),
+                      color: AppColors.backgroundBlack.withValues(alpha: 0.65),
                       shape: BoxShape.circle,
                     ),
                     child: const Center(
                       child: CircularProgressIndicator(
-                          color: AppColors.neonLime, strokeWidth: 3),
+                        color: AppColors.neonLime,
+                        strokeWidth: 3,
+                      ),
                     ),
                   ),
               ],
@@ -347,24 +357,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           Text(
             _member.name.toUpperCase(),
-            style: AppTextStyles.heading2
-                .copyWith(color: AppColors.neonLime),
+            style: AppTextStyles.heading2.copyWith(color: AppColors.neonLime),
             textAlign: TextAlign.center,
           ).animate().fadeIn(delay: 100.ms),
           const SizedBox(height: 8),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.cardSurface,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: AppColors.gray400.withValues(alpha: 0.3)),
+                color: AppColors.gray400.withValues(alpha: 0.3),
+              ),
             ),
             child: Text(
               'ID: ${_member.id}',
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.gray400, letterSpacing: 1.2),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.gray400,
+                letterSpacing: 1.2,
+              ),
             ),
           ).animate().fadeIn(delay: 200.ms),
           const SizedBox(height: 16),
@@ -380,8 +391,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Center(
         child: Text(
           _member.name.isNotEmpty ? _member.name[0].toUpperCase() : '?',
-          style: AppTextStyles.heading1
-              .copyWith(color: AppColors.neonLime, fontSize: 40),
+          style: AppTextStyles.heading1.copyWith(
+            color: AppColors.neonLime,
+            fontSize: 40,
+          ),
         ),
       ),
     );
@@ -418,11 +431,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Icon(icon, color: badgeColor, size: 18),
           const SizedBox(width: 8),
-          Text(text,
-              style: AppTextStyles.bodyLarge.copyWith(
-                  color: badgeColor,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2)),
+          Text(
+            text,
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: badgeColor,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
         ],
       ),
     ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0);
@@ -436,20 +452,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: AppColors.neonLime.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildCardHeader(
-              'MEMBERSHIP DETAILS', Icons.card_membership, AppColors.neonLime),
+            'MEMBERSHIP DETAILS',
+            Icons.card_membership,
+            AppColors.neonLime,
+          ),
           const SizedBox(height: 20),
-          _buildInfoRow('Plan', _member.membershipPlan,
-              Icons.fitness_center_rounded),
+          _buildInfoRow(
+            'Plan',
+            _member.membershipPlan,
+            Icons.fitness_center_rounded,
+          ),
           const SizedBox(height: 16),
-          _buildInfoRow('Branch', _member.branch.toUpperCase(),
-              Icons.location_on_rounded),
+          _buildInfoRow(
+            'Branch',
+            _member.branch.toUpperCase(),
+            Icons.location_on_rounded,
+          ),
           const SizedBox(height: 16),
           _buildInfoRow(
             'Start Date',
@@ -472,8 +496,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             valueColor: _member.isExpired
                 ? AppColors.error
                 : _member.isExpiringSoon
-                    ? AppColors.warning
-                    : AppColors.success,
+                ? AppColors.warning
+                : AppColors.success,
           ),
         ],
       ),
@@ -488,14 +512,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: AppColors.turquoise.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.turquoise.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCardHeader('PERSONAL INFORMATION', Icons.person_rounded,
-              AppColors.turquoise),
+          _buildCardHeader(
+            'PERSONAL INFORMATION',
+            Icons.person_rounded,
+            AppColors.turquoise,
+          ),
           const SizedBox(height: 20),
           _buildInfoRow('Phone', _member.phone, Icons.phone_rounded),
           const SizedBox(height: 16),
@@ -505,26 +531,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _member.email.isNotEmpty ? _member.email : 'Not provided',
             Icons.email_rounded,
           ),
-          if (_member.address != null &&
-              _member.address!.isNotEmpty) ...[
+          if (_member.address != null && _member.address!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildInfoRow(
-                'Address', _member.address!, Icons.home_rounded),
+            _buildInfoRow('Address', _member.address!, Icons.home_rounded),
           ],
           if (_member.emergencyContactName != null &&
               _member.emergencyContactName!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildInfoRow('Emergency Contact',
-                _member.emergencyContactName!, Icons.emergency_rounded,
-                valueColor: AppColors.neonOrange),
+            _buildInfoRow(
+              'Emergency Contact',
+              _member.emergencyContactName!,
+              Icons.emergency_rounded,
+              valueColor: AppColors.neonOrange,
+            ),
           ],
           if (_member.emergencyContactPhone != null &&
               _member.emergencyContactPhone!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildInfoRow('Emergency Phone',
-                _member.emergencyContactPhone!,
-                Icons.phone_forwarded_rounded,
-                valueColor: AppColors.neonOrange),
+            _buildInfoRow(
+              'Emergency Phone',
+              _member.emergencyContactPhone!,
+              Icons.phone_forwarded_rounded,
+              valueColor: AppColors.neonOrange,
+            ),
           ],
         ],
       ),
@@ -550,8 +579,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.monitor_heart_outlined,
           AppColors.neonOrange,
           subtitle: 'Metrics, BP, goals — powers your AI coach',
-          onTap: () =>
-              _push(HealthProfileScreen(memberId: _member.id)),
+          onTap: () => _push(HealthProfileScreen(memberId: _member.id)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -559,8 +587,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.receipt_long_rounded,
           AppColors.neonLime,
           subtitle: 'View transactions & receipts',
-          onTap: () => _push(PaymentHistoryScreen(
-              memberId: _member.id, memberName: _member.name)),
+          onTap: () => _push(
+            PaymentHistoryScreen(
+              memberId: _member.id,
+              memberName: _member.name,
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -576,8 +608,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.monitor_weight_rounded,
           AppColors.neonTeal,
           subtitle: 'Track weight, BMI & measurements',
-          onTap: () =>
-              _push(BodyMetricsScreen(memberId: _member.id)),
+          onTap: () => _push(BodyMetricsScreen(memberId: _member.id)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -585,8 +616,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.calendar_month_rounded,
           AppColors.turquoise,
           subtitle: 'View your check-in records',
-          onTap: () => _push(MemberAttendanceScreen(
-              memberId: _member.id, memberName: _member.name)),
+          onTap: () => _push(
+            MemberAttendanceScreen(
+              memberId: _member.id,
+              memberName: _member.name,
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         _buildActionTile(
@@ -615,15 +650,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Icon(icon, color: color, size: 22),
         const SizedBox(width: 12),
-        Text(title,
-            style: AppTextStyles.heading3
-                .copyWith(fontSize: 15, letterSpacing: 1.2)),
+        Text(
+          title,
+          style: AppTextStyles.heading3.copyWith(
+            fontSize: 15,
+            letterSpacing: 1.2,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon,
-      {Color? valueColor}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Container(
@@ -640,14 +683,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.gray400)),
+              Text(
+                label,
+                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+              ),
               const SizedBox(height: 4),
-              Text(value,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                      color: valueColor ?? AppColors.textPrimary,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                value,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: valueColor ?? AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -691,20 +738,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(label,
-                          style: AppTextStyles.bodyLarge
-                              .copyWith(fontWeight: FontWeight.w600)),
+                      Text(
+                        label,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 2),
-                        Text(subtitle,
-                            style: AppTextStyles.caption
-                                .copyWith(color: AppColors.gray400)),
+                        Text(
+                          subtitle,
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.gray400,
+                          ),
+                        ),
                       ],
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded,
-                    color: AppColors.gray400, size: 20),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.gray400,
+                  size: 20,
+                ),
               ],
             ),
           ),

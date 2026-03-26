@@ -2,11 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/weekly_war_model.dart';
 import 'gamification_service.dart';
 
+import 'package:flutter/foundation.dart'; // for @visibleForTesting
+
 class WeeklyWarService {
   static final WeeklyWarService instance = WeeklyWarService._internal();
-  WeeklyWarService._internal();
+  WeeklyWarService._internal({FirebaseFirestore? db})
+    : _db = db ?? FirebaseFirestore.instance;
 
-  final _db = FirebaseFirestore.instance;
+  @visibleForTesting
+  WeeklyWarService.forTesting(FirebaseFirestore db) : _db = db;
+
+  final FirebaseFirestore _db;
   final _gamService = GamificationService();
 
   Future<WeeklyWarModel?> getActiveWar(String branchId) async {
@@ -27,7 +33,11 @@ class WeeklyWarService {
   }
 
   Future<void> recordWorkoutEntry(
-      String memberId, String branchId, String exercise, int reps) async {
+    String memberId,
+    String branchId,
+    String exercise,
+    int reps,
+  ) async {
     final war = await getActiveWar(branchId);
     if (war == null || war.status != 'active') return;
     if (war.exercise.toLowerCase() != exercise.toLowerCase()) return;
@@ -48,6 +58,41 @@ class WeeklyWarService {
     }, SetOptions(merge: true));
   }
 
+  Future<void> recordWorkoutEntries(
+    String memberId,
+    String branchId,
+    Map<String, int> exerciseReps,
+  ) async {
+    if (exerciseReps.isEmpty) return;
+
+    final war = await getActiveWar(branchId);
+    if (war == null || war.status != 'active') return;
+
+    // Find if the active war's exercise is in the logged exercises (case-insensitive)
+    final warExerciseLower = war.exercise.toLowerCase();
+    int totalWarReps = 0;
+    for (final entry in exerciseReps.entries) {
+      if (entry.key.toLowerCase() == warExerciseLower) {
+        totalWarReps += entry.value;
+      }
+    }
+
+    if (totalWarReps == 0) return;
+
+    final entryRef = _db
+        .collection('weekly_wars')
+        .doc(war.id)
+        .collection('entries')
+        .doc(memberId);
+
+    await entryRef.set({
+      'memberId': memberId,
+      'totalReps': FieldValue.increment(totalWarReps),
+      'sessionCount': FieldValue.increment(1),
+      'lastUpdated': Timestamp.now(),
+    }, SetOptions(merge: true));
+  }
+
   Stream<List<WarEntryModel>> getWarLeaderboard(String warId) {
     return _db
         .collection('weekly_wars')
@@ -55,9 +100,11 @@ class WeeklyWarService {
         .collection('entries')
         .orderBy('totalReps', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => WarEntryModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => WarEntryModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   Future<void> completeWar(String warId) async {
@@ -80,8 +127,9 @@ class WeeklyWarService {
       if (!isLocked) return;
 
       // 2. Read all entries, sort by totalReps desc
-      final entriesSnapshot =
-          await entriesRef.orderBy('totalReps', descending: true).get();
+      final entriesSnapshot = await entriesRef
+          .orderBy('totalReps', descending: true)
+          .get();
       final entries = entriesSnapshot.docs
           .map((doc) => WarEntryModel.fromFirestore(doc))
           .toList();
@@ -105,14 +153,20 @@ class WeeklyWarService {
           winnerName = entry.memberName;
           await _gamService.processEvent('war_winner', entry.memberId);
           await _db.collection('gamification').doc(entry.memberId).update({
-            'warWins': FieldValue.increment(1)
+            'warWins': FieldValue.increment(1),
           });
         } else if (rank <= 3) {
-          await _gamService.processEvent('war_top3', entry.memberId,
-              customXP: rank == 2 ? 300 : 150);
+          await _gamService.processEvent(
+            'war_top3',
+            entry.memberId,
+            customXP: rank == 2 ? 300 : 150,
+          );
         } else if (rank <= 10) {
-          await _gamService.processEvent('war_top3', entry.memberId,
-              customXP: 50);
+          await _gamService.processEvent(
+            'war_top3',
+            entry.memberId,
+            customXP: 50,
+          );
         } else {
           await _gamService.processEvent('war_participate', entry.memberId);
         }
@@ -163,7 +217,10 @@ class WeeklyWarService {
   }
 
   // Get member's rank in a specific war
-  Future<WarEntryModel?> getMemberWarEntry(String warId, String memberId) async {
+  Future<WarEntryModel?> getMemberWarEntry(
+    String warId,
+    String memberId,
+  ) async {
     try {
       final doc = await _db
           .collection('weekly_wars')

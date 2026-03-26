@@ -19,11 +19,11 @@ class _RpeRatingSheetState extends State<RpeRatingSheet> {
   bool _submitting = false;
 
   static const List<Map<String, dynamic>> _rpeOptions = [
-    {'value': 1, 'label': 'Very Easy',   'color': Color(0xFF4CAF50)},
-    {'value': 2, 'label': 'Easy',        'color': Color(0xFF8BC34A)},
-    {'value': 3, 'label': 'Moderate',    'color': Color(0xFFC6F135)},  // neonLime
-    {'value': 4, 'label': 'Hard',        'color': Color(0xFFFF9800)},
-    {'value': 5, 'label': 'Exhausting',  'color': Color(0xFFFF5252)},
+    {'value': 1, 'label': 'Very Easy', 'color': Color(0xFF4CAF50)},
+    {'value': 2, 'label': 'Easy', 'color': Color(0xFF8BC34A)},
+    {'value': 3, 'label': 'Moderate', 'color': Color(0xFFC6F135)}, // neonLime
+    {'value': 4, 'label': 'Hard', 'color': Color(0xFFFF9800)},
+    {'value': 5, 'label': 'Exhausting', 'color': Color(0xFFFF5252)},
   ];
 
   Future<void> _submitRpe(int rpe, String label) async {
@@ -53,7 +53,8 @@ class _RpeRatingSheetState extends State<RpeRatingSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 40, height: 4,
+            width: 40,
+            height: 4,
             decoration: BoxDecoration(
               color: AppColors.textSecondary,
               borderRadius: BorderRadius.circular(2),

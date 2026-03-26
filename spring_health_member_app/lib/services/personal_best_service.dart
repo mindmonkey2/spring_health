@@ -6,8 +6,8 @@ import '../models/personal_best_model.dart';
 class PersonalBestXP {
   static const int beatPersonalBest = 50;
   static const int matchPersonalBest = 20;
-  static const int loggedEntry       = 10;
-  static const int dailyChecklist    = 100; // all 6 exercises logged in one day
+  static const int loggedEntry = 10;
+  static const int dailyChecklist = 100; // all 6 exercises logged in one day
 }
 
 class PersonalBestService {
@@ -22,17 +22,25 @@ class PersonalBestService {
   // ─── Read ──────────────────────────────────────────────────────────────────
 
   Stream<List<PersonalBestRecord>> watchRecords(String uid) {
-    return _exercisesRef(uid).snapshots().map((snap) =>
-        snap.docs.map((d) => PersonalBestRecord.fromMap(d.data(), d.id)).toList());
+    return _exercisesRef(uid).snapshots().map(
+      (snap) => snap.docs
+          .map((d) => PersonalBestRecord.fromMap(d.data(), d.id))
+          .toList(),
+    );
   }
 
-  Future<PersonalBestRecord?> getRecord(String uid, CoreExercise exercise) async {
+  Future<PersonalBestRecord?> getRecord(
+    String uid,
+    CoreExercise exercise,
+  ) async {
     final doc = await _exercisesRef(uid).doc(exercise.key).get();
     if (!doc.exists) return null;
     return PersonalBestRecord.fromMap(doc.data()!, doc.id);
   }
 
-  Future<Map<CoreExercise, PersonalBestRecord>> getAllRecords(String uid) async {
+  Future<Map<CoreExercise, PersonalBestRecord>> getAllRecords(
+    String uid,
+  ) async {
     final snap = await _exercisesRef(uid).get();
     final result = <CoreExercise, PersonalBestRecord>{};
     for (final doc in snap.docs) {
@@ -78,10 +86,7 @@ class PersonalBestService {
         isPersonalBest: isPersonalBest,
       );
 
-      final updatedHistory = [
-        ...(existing?.history ?? []),
-        newEntry,
-      ];
+      final updatedHistory = [...(existing?.history ?? []), newEntry];
 
       await _exercisesRef(uid).doc(exercise.key).set({
         'exerciseKey': exercise.key,
@@ -105,10 +110,10 @@ class PersonalBestService {
 
   /// Awards XP to the gamification/{uid} document
   Future<void> _awardXP(String uid, int xp) async {
-    await _gamificationRef(uid).doc(uid).set(
-      {'xp': FieldValue.increment(xp), 'lastUpdated': FieldValue.serverTimestamp()},
-      SetOptions(merge: true),
-    );
+    await _gamificationRef(uid).doc(uid).set({
+      'xp': FieldValue.increment(xp),
+      'lastUpdated': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   /// Checks if all 6 core exercises logged today → awards checklist bonus once
@@ -136,13 +141,10 @@ class PersonalBestService {
       return 0; // already awarded today
     }
 
-    await _gamificationRef(uid).doc(uid).set(
-      {
-        'xp': FieldValue.increment(PersonalBestXP.dailyChecklist),
-        'lastChecklistBonus': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    await _gamificationRef(uid).doc(uid).set({
+      'xp': FieldValue.increment(PersonalBestXP.dailyChecklist),
+      'lastChecklistBonus': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
 
     return PersonalBestXP.dailyChecklist;
   }

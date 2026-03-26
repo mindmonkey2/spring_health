@@ -27,7 +27,10 @@ class FitnessChartWidget extends StatelessWidget {
         children: [
           Text(
             'ACTIVITY GROWTH',
-            style: AppTextStyles.caption.copyWith(letterSpacing: 1.5, color: AppColors.gray400),
+            style: AppTextStyles.caption.copyWith(
+              letterSpacing: 1.5,
+              color: AppColors.gray400,
+            ),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -47,8 +50,12 @@ class FitnessChartWidget extends StatelessWidget {
                 ),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -68,7 +75,9 @@ class FitnessChartWidget extends StatelessWidget {
                       },
                     ),
                   ),
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
                 borderData: FlBorderData(show: false),
                 minX: 0,

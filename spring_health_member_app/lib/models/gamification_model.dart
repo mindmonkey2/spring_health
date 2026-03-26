@@ -13,8 +13,8 @@ class XpSource {
   static const int paymentOnTime = 150;
   static const int profileCompleted = 75;
   static const int firstCheckIn = 100;
-  static const int earlyBird = 75;    // check-in before 7am
-  static const int nightOwl = 75;     // check-in after 8pm
+  static const int earlyBird = 75; // check-in before 7am
+  static const int nightOwl = 75; // check-in after 8pm
 }
 
 // ─────────────────────────────────────────────
@@ -273,13 +273,12 @@ class MemberGamification {
   GymLevel get currentLevel => GymLevel.forXp(totalXp);
 
   List<BadgeDefinition> get earnedBadges => earnedBadgeIds
-  .map((id) => BadgeDefinition.findById(id))
-  .whereType<BadgeDefinition>()
-  .toList();
+      .map((id) => BadgeDefinition.findById(id))
+      .whereType<BadgeDefinition>()
+      .toList();
 
-  List<BadgeDefinition> get unearnedBadges => BadgeDefinition.all
-  .where((b) => !earnedBadgeIds.contains(b.id))
-  .toList();
+  List<BadgeDefinition> get unearnedBadges =>
+      BadgeDefinition.all.where((b) => !earnedBadgeIds.contains(b.id)).toList();
 
   factory MemberGamification.empty(String memberId) => MemberGamification(
     memberId: memberId,
@@ -304,11 +303,11 @@ class MemberGamification {
       totalWorkouts: data['totalWorkouts'] ?? 0,
       totalVolumeKg: data['totalVolumeKg'] ?? 0,
       lastCheckIn: data['lastCheckIn'] != null
-      ? (data['lastCheckIn'] as Timestamp).toDate()
-      : null,
+          ? (data['lastCheckIn'] as Timestamp).toDate()
+          : null,
       recentXpEvents: (data['recentXpEvents'] as List<dynamic>? ?? [])
-      .map((e) => XpEvent.fromMap(e as Map<String, dynamic>))
-      .toList(),
+          .map((e) => XpEvent.fromMap(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -321,10 +320,10 @@ class MemberGamification {
     'totalCheckIns': totalCheckIns,
     'totalWorkouts': totalWorkouts,
     'totalVolumeKg': totalVolumeKg,
-    'lastCheckIn':
-    lastCheckIn != null ? Timestamp.fromDate(lastCheckIn!) : null,
-    'recentXpEvents':
-    recentXpEvents.take(20).map((e) => e.toMap()).toList(),
+    'lastCheckIn': lastCheckIn != null
+        ? Timestamp.fromDate(lastCheckIn!)
+        : null,
+    'recentXpEvents': recentXpEvents.take(20).map((e) => e.toMap()).toList(),
   };
 }
 
@@ -358,7 +357,6 @@ class XpEvent {
     'badgeEarned': badgeEarned,
   };
 }
-
 
 // ─────────────────────────────────────────────
 // LEADERBOARD ENTRY

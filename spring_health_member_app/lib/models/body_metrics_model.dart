@@ -76,14 +76,14 @@ class BodyMetricsModel {
       'memberId': memberId,
       'weight': weight,
       if (height != null) 'height': height,
-        if (bodyFat != null) 'bodyFat': bodyFat,
-          if (chest != null) 'chest': chest,
-            if (waist != null) 'waist': waist,
-              if (hips != null) 'hips': hips,
-                if (arms != null) 'arms': arms,
-                  if (thighs != null) 'thighs': thighs,
-                    if (notes != null && notes!.isNotEmpty) 'notes': notes,
-                      'recordedAt': Timestamp.fromDate(recordedAt),
+      if (bodyFat != null) 'bodyFat': bodyFat,
+      if (chest != null) 'chest': chest,
+      if (waist != null) 'waist': waist,
+      if (hips != null) 'hips': hips,
+      if (arms != null) 'arms': arms,
+      if (thighs != null) 'thighs': thighs,
+      if (notes != null && notes!.isNotEmpty) 'notes': notes,
+      'recordedAt': Timestamp.fromDate(recordedAt),
     };
   }
 }

@@ -52,36 +52,36 @@ class AiLoadingOverlay extends StatelessWidget {
             children: [
               // Lottie animation or pulsing circle
               Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.neonLime.withValues(alpha: 0.1),
-                  border: Border.all(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.neonLime.withValues(alpha: 0.1),
+                      border: Border.all(
+                        color: AppColors.neonLime.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.smart_toy_rounded,
+                        color: AppColors.neonLime,
+                        size: 48,
+                      ),
+                    ),
+                  )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1.1, 1.1),
+                    duration: 1.seconds,
+                    curve: Curves.easeInOut,
+                  )
+                  .then()
+                  .shimmer(
                     color: AppColors.neonLime.withValues(alpha: 0.5),
-                    width: 2,
+                    duration: 1.seconds,
                   ),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.smart_toy_rounded,
-                    color: AppColors.neonLime,
-                    size: 48,
-                  ),
-                ),
-              )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .scale(
-                begin: const Offset(0.9, 0.9),
-                end: const Offset(1.1, 1.1),
-                duration: 1.seconds,
-                curve: Curves.easeInOut,
-              )
-              .then()
-              .shimmer(
-                color: AppColors.neonLime.withValues(alpha: 0.5),
-                duration: 1.seconds,
-              ),
               const SizedBox(height: 24),
               Text(
                 message,

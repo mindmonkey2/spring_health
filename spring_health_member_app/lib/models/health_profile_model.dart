@@ -68,11 +68,13 @@ class HealthProfileModel {
       bloodGroup: map['bloodGroup'] as String?,
       fitnessGoal: map['fitnessGoal'] as String?,
       fitnessLevel: map['fitnessLevel'] as String?,
-      jointRestrictions: (map['jointRestrictions'] as List<dynamic>?)
+      jointRestrictions:
+          (map['jointRestrictions'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           const [],
-      medicalConditions: (map['medicalConditions'] as List<dynamic>?)
+      medicalConditions:
+          (map['medicalConditions'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           const [],
@@ -100,8 +102,9 @@ class HealthProfileModel {
       'jointRestrictions': jointRestrictions,
       'medicalConditions': medicalConditions,
       'dietaryPreference': dietaryPreference,
-      'lastUpdated':
-          lastUpdated != null ? Timestamp.fromDate(lastUpdated!) : null,
+      'lastUpdated': lastUpdated != null
+          ? Timestamp.fromDate(lastUpdated!)
+          : null,
     };
   }
 
@@ -130,8 +133,11 @@ class HealthProfileModel {
     final newHeight = heightCm ?? this.heightCm;
 
     double? newBmi = bmi ?? this.bmi;
-    if ((weightKg != null || heightCm != null) && newWeight != null && newHeight != null && newHeight > 0) {
-       newBmi = newWeight / ((newHeight / 100) * (newHeight / 100));
+    if ((weightKg != null || heightCm != null) &&
+        newWeight != null &&
+        newHeight != null &&
+        newHeight > 0) {
+      newBmi = newWeight / ((newHeight / 100) * (newHeight / 100));
     }
 
     return HealthProfileModel(
@@ -160,7 +166,8 @@ class HealthProfileModel {
   static String bpCategory(int systolic, int diastolic) {
     if (systolic < 120 && diastolic < 80) return 'Normal';
     if (systolic >= 120 && systolic <= 129 && diastolic < 80) return 'Elevated';
-    if ((systolic >= 130 && systolic <= 139) || (diastolic >= 80 && diastolic <= 89)) {
+    if ((systolic >= 130 && systolic <= 139) ||
+        (diastolic >= 80 && diastolic <= 89)) {
       return 'Stage 1 Hypertension';
     }
     if (systolic > 180 || diastolic > 120) return 'Hypertensive Crisis';

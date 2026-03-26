@@ -8,7 +8,7 @@ class TrainerService {
 
   // Dependency injection constructor — for tests only
   TrainerService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
+    : _db = db ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
 
@@ -16,40 +16,40 @@ class TrainerService {
 
   Stream<TrainerModel?> getMyTrainerStream(String memberId) {
     return _db
-    .collection('trainers')
-    .where('assignedMembers', arrayContains: memberId)
-    .limit(1)
-    .snapshots()
-    .map((snap) {
-      if (snap.docs.isEmpty) return null;
-      final trainer =
-      TrainerModel.fromMap(snap.docs.first.data(), snap.docs.first.id);
-      return trainer.isActive ? trainer : null;
-    });
+        .collection('trainers')
+        .where('assignedMembers', arrayContains: memberId)
+        .limit(1)
+        .snapshots()
+        .map((snap) {
+          if (snap.docs.isEmpty) return null;
+          final trainer = TrainerModel.fromMap(
+            snap.docs.first.data(),
+            snap.docs.first.id,
+          );
+          return trainer.isActive ? trainer : null;
+        });
   }
 
   // ── All active trainers at a branch ──────────────────────────────────────
 
   Stream<List<TrainerModel>> getTrainersStream(String branch) {
     return _db
-    .collection('trainers')
-    .where('branch', isEqualTo: branch)
-    .where('isActive', isEqualTo: true)
-    .snapshots()
-    .map((snap) => snap.docs
-    .map((d) => TrainerModel.fromMap(d.data(), d.id))
-    .toList());
+        .collection('trainers')
+        .where('branch', isEqualTo: branch)
+        .where('isActive', isEqualTo: true)
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((d) => TrainerModel.fromMap(d.data(), d.id))
+              .toList(),
+        );
   }
 
   // ── Diet plan assigned to a member ────────────────────────────────────────
   // Doc ID = memberId for direct lookup — no query needed
 
   Stream<DietPlanModel?> getDietPlanStream(String memberId) {
-    return _db
-    .collection('dietPlans')
-    .doc(memberId)
-    .snapshots()
-    .map((doc) {
+    return _db.collection('dietPlans').doc(memberId).snapshots().map((doc) {
       if (!doc.exists || doc.data() == null) return null;
       final plan = DietPlanModel.fromFirestore(doc);
       return plan.isActive ? plan : null;

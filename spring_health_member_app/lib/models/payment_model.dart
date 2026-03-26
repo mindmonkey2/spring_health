@@ -38,9 +38,13 @@ class PaymentModel {
       planName: data['planName'] ?? '',
       paymentMode: data['paymentMode'] ?? 'cash',
       status: data['status'] ?? 'paid',
-      paymentDate: (data['paymentDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      membershipStartDate: (data['membershipStartDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      membershipEndDate: (data['membershipEndDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      paymentDate:
+          (data['paymentDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      membershipStartDate:
+          (data['membershipStartDate'] as Timestamp?)?.toDate() ??
+          DateTime.now(),
+      membershipEndDate:
+          (data['membershipEndDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       transactionId: data['transactionId'],
       notes: data['notes'],
       collectedBy: data['collectedBy'] ?? 'Staff',

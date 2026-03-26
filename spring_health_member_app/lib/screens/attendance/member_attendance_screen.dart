@@ -19,12 +19,10 @@ class MemberAttendanceScreen extends StatefulWidget {
   });
 
   @override
-  State<MemberAttendanceScreen> createState() =>
-  _MemberAttendanceScreenState();
+  State<MemberAttendanceScreen> createState() => _MemberAttendanceScreenState();
 }
 
-class _MemberAttendanceScreenState
-extends State<MemberAttendanceScreen> {
+class _MemberAttendanceScreenState extends State<MemberAttendanceScreen> {
   final _attendanceService = AttendanceService();
   final _gamService = GamificationService();
 
@@ -37,10 +35,7 @@ extends State<MemberAttendanceScreen> {
   String _selectedFilter = 'all'; // all, thisMonth, lastMonth
 
   // Calendar navigation
-  DateTime _calendarMonth = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-  );
+  DateTime _calendarMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
   @override
   void initState() {
@@ -63,8 +58,7 @@ extends State<MemberAttendanceScreen> {
         setState(() {
           _records = records;
           _gam = results[1] as MemberGamification;
-          _checkedInDates =
-          _attendanceService.buildCheckedInDates(records);
+          _checkedInDates = _attendanceService.buildCheckedInDates(records);
           _isLoading = false;
         });
       }
@@ -86,32 +80,32 @@ extends State<MemberAttendanceScreen> {
     switch (_selectedFilter) {
       case 'thisMonth':
         return _records
-        .where((a) =>
-        a.checkInTime.year == now.year &&
-        a.checkInTime.month == now.month)
-        .toList();
+            .where(
+              (a) =>
+                  a.checkInTime.year == now.year &&
+                  a.checkInTime.month == now.month,
+            )
+            .toList();
       case 'lastMonth':
         final last = DateTime(now.year, now.month - 1);
         return _records
-        .where((a) =>
-        a.checkInTime.year == last.year &&
-        a.checkInTime.month == last.month)
-        .toList();
+            .where(
+              (a) =>
+                  a.checkInTime.year == last.year &&
+                  a.checkInTime.month == last.month,
+            )
+            .toList();
       default:
         return _records;
     }
   }
 
   int get _thisWeekCount {
-    final weekAgo =
-    DateTime.now().subtract(const Duration(days: 7));
-    return _records
-    .where((a) => a.checkInTime.isAfter(weekAgo))
-    .length;
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+    return _records.where((a) => a.checkInTime.isAfter(weekAgo)).length;
   }
 
-  int get _thisMonthCount =>
-  _records.where((a) => a.isThisMonth).length;
+  int get _thisMonthCount => _records.where((a) => a.isThisMonth).length;
 
   bool _isCheckedIn(DateTime day) {
     final key = '${day.year}-${day.month}-${day.day}';
@@ -119,10 +113,12 @@ extends State<MemberAttendanceScreen> {
   }
 
   List<AttendanceModel> get _calendarMonthRecords => _records
-  .where((r) =>
-  r.checkInTime.year == _calendarMonth.year &&
-  r.checkInTime.month == _calendarMonth.month)
-  .toList();
+      .where(
+        (r) =>
+            r.checkInTime.year == _calendarMonth.year &&
+            r.checkInTime.month == _calendarMonth.month,
+      )
+      .toList();
 
   Map<String, int> get _timeOfDayBreakdown {
     final map = <String, int>{
@@ -135,14 +131,14 @@ extends State<MemberAttendanceScreen> {
     for (final r in _records) {
       final h = r.checkInTime.hour;
       final slot = h < 7
-      ? 'Early Bird'
-      : h < 12
-      ? 'Morning'
-      : h < 17
-      ? 'Afternoon'
-      : h < 20
-      ? 'Evening'
-      : 'Night Owl';
+          ? 'Early Bird'
+          : h < 12
+          ? 'Morning'
+          : h < 17
+          ? 'Afternoon'
+          : h < 20
+          ? 'Evening'
+          : 'Night Owl';
       map[slot] = (map[slot] ?? 0) + 1;
     }
     return map;
@@ -165,8 +161,7 @@ extends State<MemberAttendanceScreen> {
         actions: [
           // Filter dropdown
           PopupMenuButton<String>(
-            icon:
-            Icon(Icons.filter_list, color: AppColors.neonLime),
+            icon: Icon(Icons.filter_list, color: AppColors.neonLime),
             color: AppColors.cardSurface,
             onSelected: (val) => setState(() => _selectedFilter = val),
             itemBuilder: (_) => [
@@ -177,16 +172,15 @@ extends State<MemberAttendanceScreen> {
           ),
           IconButton(
             onPressed: _load,
-            icon: const Icon(Icons.refresh_rounded,
-                             color: AppColors.neonLime),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.neonLime),
           ),
         ],
       ),
       body: _isLoading
-      ? _buildLoading()
-      : _error != null
-      ? _buildError()
-      : _buildContent(),
+          ? _buildLoading()
+          : _error != null
+          ? _buildError()
+          : _buildContent(),
     );
   }
 
@@ -231,9 +225,9 @@ extends State<MemberAttendanceScreen> {
             _buildCalendarSection(),
             const SizedBox(height: 20),
             if (_records.isNotEmpty) _buildTimeOfDaySection(),
-              if (_records.isNotEmpty) const SizedBox(height: 20),
-                _buildRecentLog(),
-                const SizedBox(height: 40),
+            if (_records.isNotEmpty) const SizedBox(height: 20),
+            _buildRecentLog(),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -256,9 +250,7 @@ extends State<MemberAttendanceScreen> {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.neonLime.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,16 +268,22 @@ extends State<MemberAttendanceScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(
-                'This Week', '$_thisWeekCount',
-                Icons.calendar_view_week_rounded),
+                'This Week',
+                '$_thisWeekCount',
+                Icons.calendar_view_week_rounded,
+              ),
               _buildDivider(),
               _buildStatItem(
-                'This Month', '$_thisMonthCount',
-                Icons.calendar_month_rounded),
+                'This Month',
+                '$_thisMonthCount',
+                Icons.calendar_month_rounded,
+              ),
               _buildDivider(),
               _buildStatItem(
-                'All Time', '${_records.length}',
-                Icons.emoji_events_rounded),
+                'All Time',
+                '${_records.length}',
+                Icons.emoji_events_rounded,
+              ),
             ],
           ),
         ],
@@ -300,15 +298,11 @@ extends State<MemberAttendanceScreen> {
         const SizedBox(height: 8),
         Text(
           value,
-          style: AppTextStyles.heading2.copyWith(
-            color: AppColors.neonLime,
-          ),
+          style: AppTextStyles.heading2.copyWith(color: AppColors.neonLime),
         ),
         Text(
           label,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.gray400,
-          ),
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
         ),
       ],
     );
@@ -334,9 +328,7 @@ extends State<MemberAttendanceScreen> {
             value: currentStreak,
             label: 'Current Streak',
             sublabel: currentStreak > 0 ? 'Keep going! 🔥' : 'Start today!',
-            color: currentStreak > 0
-            ? AppColors.neonOrange
-            : AppColors.gray400,
+            color: currentStreak > 0 ? AppColors.neonOrange : AppColors.gray400,
             pulsing: currentStreak > 0,
           ),
         ),
@@ -370,17 +362,14 @@ extends State<MemberAttendanceScreen> {
       ),
       child: Column(
         children: [
-          Icon(Icons.local_fire_department_rounded,
-               color: color, size: 28)
-          .animate(onPlay: pulsing ? (c) => c.repeat(reverse: true) : null)
-          .scale(
-            begin: const Offset(1.0, 1.0),
-            end: pulsing
-            ? const Offset(1.2, 1.2)
-            : const Offset(1.0, 1.0),
-            duration: 1200.ms,
-            curve: Curves.easeInOut,
-          ),
+          Icon(Icons.local_fire_department_rounded, color: color, size: 28)
+              .animate(onPlay: pulsing ? (c) => c.repeat(reverse: true) : null)
+              .scale(
+                begin: const Offset(1.0, 1.0),
+                end: pulsing ? const Offset(1.2, 1.2) : const Offset(1.0, 1.0),
+                duration: 1200.ms,
+                curve: Curves.easeInOut,
+              ),
           const SizedBox(height: 8),
           Text(
             '$value',
@@ -392,14 +381,14 @@ extends State<MemberAttendanceScreen> {
           ),
           Text(
             'days',
-            style:
-            AppTextStyles.caption.copyWith(color: color.withValues(alpha: 0.7)),
+            style: AppTextStyles.caption.copyWith(
+              color: color.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style:
-            AppTextStyles.caption.copyWith(color: AppColors.gray400),
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
           ),
           const SizedBox(height: 6),
           // Milestone dots
@@ -407,8 +396,7 @@ extends State<MemberAttendanceScreen> {
           const SizedBox(height: 6),
           if (value > 0)
             Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
@@ -441,13 +429,9 @@ extends State<MemberAttendanceScreen> {
             height: 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: reached
-              ? color
-              : Colors.white.withValues(alpha: 0.08),
+              color: reached ? color : Colors.white.withValues(alpha: 0.08),
               border: Border.all(
-                color: reached
-                ? color
-                : Colors.white.withValues(alpha: 0.15),
+                color: reached ? color : Colors.white.withValues(alpha: 0.15),
               ),
             ),
           ),
@@ -465,16 +449,18 @@ extends State<MemberAttendanceScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(20),
-        border:
-        Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_month_rounded,
-                   color: AppColors.neonLime, size: 16),
+              Icon(
+                Icons.calendar_month_rounded,
+                color: AppColors.neonLime,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Text(
                 'ATTENDANCE CALENDAR',
@@ -499,32 +485,37 @@ extends State<MemberAttendanceScreen> {
                     _calendarMonth.month - 1,
                   );
                 }),
-                icon: Icon(Icons.chevron_left_rounded,
-                           color: AppColors.gray400),
-                         padding: EdgeInsets.zero,
-                         constraints: const BoxConstraints(),
+                icon: Icon(
+                  Icons.chevron_left_rounded,
+                  color: AppColors.gray400,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
               Text(
                 DateFormat('MMMM yyyy').format(_calendarMonth),
-                style: AppTextStyles.bodyLarge
-                .copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               IconButton(
-                onPressed: _calendarMonth.year == DateTime.now().year &&
-                _calendarMonth.month == DateTime.now().month
-                ? null
-                : () => setState(() {
-                  _calendarMonth = DateTime(
-                    _calendarMonth.year,
-                    _calendarMonth.month + 1,
-                  );
-                }),
+                onPressed:
+                    _calendarMonth.year == DateTime.now().year &&
+                        _calendarMonth.month == DateTime.now().month
+                    ? null
+                    : () => setState(() {
+                        _calendarMonth = DateTime(
+                          _calendarMonth.year,
+                          _calendarMonth.month + 1,
+                        );
+                      }),
                 icon: Icon(
                   Icons.chevron_right_rounded,
-                  color: _calendarMonth.year == DateTime.now().year &&
-                  _calendarMonth.month == DateTime.now().month
-                  ? AppColors.gray600
-                  : AppColors.gray400,
+                  color:
+                      _calendarMonth.year == DateTime.now().year &&
+                          _calendarMonth.month == DateTime.now().month
+                      ? AppColors.gray600
+                      : AppColors.gray400,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -536,19 +527,21 @@ extends State<MemberAttendanceScreen> {
           // Weekday headers — Mon first
           Row(
             children: ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-            .map((d) => Expanded(
-              child: Center(
-                child: Text(
-                  d,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.gray600,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
+                .map(
+                  (d) => Expanded(
+                    child: Center(
+                      child: Text(
+                        d,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ))
-            .toList(),
+                )
+                .toList(),
           ),
           const SizedBox(height: 8),
 
@@ -558,24 +551,23 @@ extends State<MemberAttendanceScreen> {
           // Month visit count
           Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.neonLime.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.neonLime.withValues(alpha: 0.3),
-                  ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.neonLime.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.neonLime.withValues(alpha: 0.3),
                 ),
-                child: Text(
-                  '${_calendarMonthRecords.length} visits in '
+              ),
+              child: Text(
+                '${_calendarMonthRecords.length} visits in '
                 '${DateFormat('MMMM').format(_calendarMonth)}',
                 style: TextStyle(
                   color: AppColors.neonLime,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
-                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -584,16 +576,19 @@ extends State<MemberAttendanceScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _legendDot(AppColors.backgroundBlack,
-                         Colors.white12, 'No visit'),
+              _legendDot(AppColors.backgroundBlack, Colors.white12, 'No visit'),
               const SizedBox(width: 16),
               _legendDot(
                 AppColors.neonLime.withValues(alpha: 0.25),
                 AppColors.neonLime.withValues(alpha: 0.6),
-                'Visited'),
+                'Visited',
+              ),
               const SizedBox(width: 16),
-              _legendDot(Colors.amber.withValues(alpha: 0.2),
-              Colors.amber, 'Today'),
+              _legendDot(
+                Colors.amber.withValues(alpha: 0.2),
+                Colors.amber,
+                'Today',
+              ),
             ],
           ),
         ],
@@ -602,10 +597,11 @@ extends State<MemberAttendanceScreen> {
   }
 
   Widget _buildCalendarGrid() {
-    final firstDay =
-    DateTime(_calendarMonth.year, _calendarMonth.month, 1);
+    final firstDay = DateTime(_calendarMonth.year, _calendarMonth.month, 1);
     final daysInMonth = DateUtils.getDaysInMonth(
-      _calendarMonth.year, _calendarMonth.month);
+      _calendarMonth.year,
+      _calendarMonth.month,
+    );
     final startOffset = (firstDay.weekday - 1) % 7;
     final rows = ((startOffset + daysInMonth) / 7).ceil();
     final today = DateTime.now();
@@ -620,8 +616,11 @@ extends State<MemberAttendanceScreen> {
               if (dayNum < 1 || dayNum > daysInMonth) {
                 return const Expanded(child: SizedBox());
               }
-              final day = DateTime(_calendarMonth.year,
-                                   _calendarMonth.month, dayNum);
+              final day = DateTime(
+                _calendarMonth.year,
+                _calendarMonth.month,
+                dayNum,
+              );
               final isToday = DateUtils.isSameDay(day, today);
               final checked = _isCheckedIn(day);
               final isFuture = day.isAfter(today);
@@ -634,20 +633,17 @@ extends State<MemberAttendanceScreen> {
                     height: 34,
                     decoration: BoxDecoration(
                       color: isToday
-                      ? Colors.amber.withValues(alpha: 0.2)
-                      : checked
-                      ? AppColors.neonLime
-                      .withValues(alpha: 0.25)
-                      : AppColors.backgroundBlack,
+                          ? Colors.amber.withValues(alpha: 0.2)
+                          : checked
+                          ? AppColors.neonLime.withValues(alpha: 0.25)
+                          : AppColors.backgroundBlack,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: isToday
-                        ? Colors.amber
-                        : checked
-                        ? AppColors.neonLime
-                        .withValues(alpha: 0.5)
-                        : Colors.white
-                        .withValues(alpha: 0.05),
+                            ? Colors.amber
+                            : checked
+                            ? AppColors.neonLime.withValues(alpha: 0.5)
+                            : Colors.white.withValues(alpha: 0.05),
                         width: isToday || checked ? 1.5 : 1,
                       ),
                     ),
@@ -658,16 +654,15 @@ extends State<MemberAttendanceScreen> {
                           '$dayNum',
                           style: TextStyle(
                             color: isFuture
-                            ? AppColors.gray600
-                            : isToday
-                            ? Colors.amber
-                            : checked
-                            ? AppColors.neonLime
-                            : AppColors.gray400,
-                            fontWeight:
-                            checked || isToday
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                                ? AppColors.gray600
+                                : isToday
+                                ? Colors.amber
+                                : checked
+                                ? AppColors.neonLime
+                                : AppColors.gray400,
+                            fontWeight: checked || isToday
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             fontSize: 12,
                           ),
                         ),
@@ -711,8 +706,10 @@ extends State<MemberAttendanceScreen> {
         const SizedBox(width: 5),
         Text(
           label,
-          style: AppTextStyles.caption
-          .copyWith(color: AppColors.gray400, fontSize: 10),
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            fontSize: 10,
+          ),
         ),
       ],
     );
@@ -723,13 +720,10 @@ extends State<MemberAttendanceScreen> {
   // ─────────────────────────────────────
   Widget _buildTimeOfDaySection() {
     final breakdown = _timeOfDayBreakdown;
-    final filtered = breakdown.entries
-    .where((e) => e.value > 0)
-    .toList();
+    final filtered = breakdown.entries.where((e) => e.value > 0).toList();
     if (filtered.isEmpty) return const SizedBox.shrink();
 
-    final maxCount =
-    breakdown.values.reduce((a, b) => a > b ? a : b);
+    final maxCount = breakdown.values.reduce((a, b) => a > b ? a : b);
     final timeColors = {
       'Early Bird': Colors.purpleAccent,
       'Morning': Colors.amber,
@@ -750,16 +744,18 @@ extends State<MemberAttendanceScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(20),
-        border:
-        Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.access_time_rounded,
-                   color: AppColors.neonOrange, size: 16),
+              Icon(
+                Icons.access_time_rounded,
+                color: AppColors.neonOrange,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Text(
                 'VISIT TIME BREAKDOWN',
@@ -773,14 +769,10 @@ extends State<MemberAttendanceScreen> {
           ),
           const SizedBox(height: 18),
           ...filtered.map((entry) {
-            final color =
-            timeColors[entry.key] ?? AppColors.gray400;
-            final icon = timeIcons[entry.key] ??
-            Icons.access_time_rounded;
-            final pct =
-            (entry.value / _records.length * 100).toInt();
-            final barFraction =
-            maxCount > 0 ? entry.value / maxCount : 0.0;
+            final color = timeColors[entry.key] ?? AppColors.gray400;
+            final icon = timeIcons[entry.key] ?? Icons.access_time_rounded;
+            final pct = (entry.value / _records.length * 100).toInt();
+            final barFraction = maxCount > 0 ? entry.value / maxCount : 0.0;
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 14),
@@ -805,8 +797,7 @@ extends State<MemberAttendanceScreen> {
                         children: [
                           Container(
                             height: 10,
-                            color: Colors.white
-                            .withValues(alpha: 0.05),
+                            color: Colors.white.withValues(alpha: 0.05),
                           ),
                           FractionallySizedBox(
                             widthFactor: barFraction,
@@ -814,13 +805,9 @@ extends State<MemberAttendanceScreen> {
                               height: 10,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    color.withValues(alpha: 0.7),
-                                    color,
-                                  ],
+                                  colors: [color.withValues(alpha: 0.7), color],
                                 ),
-                                borderRadius:
-                                BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                             ),
                           ),
@@ -862,16 +849,14 @@ extends State<MemberAttendanceScreen> {
       final key = DateFormat('yyyy-MM-dd').format(r.checkInTime);
       grouped.putIfAbsent(key, () => []).add(r);
     }
-    final sortedKeys = grouped.keys.toList()
-    ..sort((a, b) => b.compareTo(a));
+    final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(Icons.history_rounded,
-                 color: AppColors.neonTeal, size: 16),
+            Icon(Icons.history_rounded, color: AppColors.neonTeal, size: 16),
             const SizedBox(width: 8),
             Text(
               'VISIT LOG',
@@ -885,7 +870,9 @@ extends State<MemberAttendanceScreen> {
             Text(
               '${_filtered.length} total',
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.gray600, fontSize: 10),
+                color: AppColors.gray600,
+                fontSize: 10,
+              ),
             ),
           ],
         ),
@@ -899,18 +886,19 @@ extends State<MemberAttendanceScreen> {
     ).animate().fadeIn(delay: 300.ms);
   }
 
-  Widget _buildDateGroup(
-    DateTime date, List<AttendanceModel> records) {
+  Widget _buildDateGroup(DateTime date, List<AttendanceModel> records) {
     final today = DateTime.now();
     final isToday = DateUtils.isSameDay(date, today);
     final isYesterday = DateUtils.isSameDay(
-      date, today.subtract(const Duration(days: 1)));
+      date,
+      today.subtract(const Duration(days: 1)),
+    );
 
     final label = isToday
-    ? 'Today'
-    : isYesterday
-    ? 'Yesterday'
-    : DateFormat('EEEE, MMM dd, yyyy').format(date);
+        ? 'Today'
+        : isYesterday
+        ? 'Yesterday'
+        : DateFormat('EEEE, MMM dd, yyyy').format(date);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -926,257 +914,267 @@ extends State<MemberAttendanceScreen> {
           ),
         ),
         ...records.asMap().entries.map(
-          (entry) => _buildAttendanceCard(
-            entry.value, entry.key, isToday),
+          (entry) => _buildAttendanceCard(entry.value, entry.key, isToday),
         ),
         const SizedBox(height: 8),
       ],
     );
-    }
+  }
 
-    Widget _buildAttendanceCard(
-      AttendanceModel record, int index, bool isToday) {
-      final h = record.checkInTime.hour;
-      final timeSlot = h < 7
-      ? 'Early Bird'
-      : h < 12
-      ? 'Morning'
-      : h < 17
-      ? 'Afternoon'
-      : h < 20
-      ? 'Evening'
-      : 'Night Owl';
-      final timeColor = _getTimeColor(timeSlot);
-      final timeIcon = _getTimeIcon(timeSlot);
+  Widget _buildAttendanceCard(AttendanceModel record, int index, bool isToday) {
+    final h = record.checkInTime.hour;
+    final timeSlot = h < 7
+        ? 'Early Bird'
+        : h < 12
+        ? 'Morning'
+        : h < 17
+        ? 'Afternoon'
+        : h < 20
+        ? 'Evening'
+        : 'Night Owl';
+    final timeColor = _getTimeColor(timeSlot);
+    final timeIcon = _getTimeIcon(timeSlot);
 
-      return Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.cardSurface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isToday
-            ? AppColors.neonLime.withValues(alpha: 0.3)
-            : AppColors.neonLime.withValues(alpha: 0.1),
-          ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isToday
+              ? AppColors.neonLime.withValues(alpha: 0.3)
+              : AppColors.neonLime.withValues(alpha: 0.1),
         ),
-        child: Row(
-          children: [
-            // Time-of-day icon
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.neonLime.withValues(alpha: 0.15),
-                    timeColor.withValues(alpha: 0.15),
+      ),
+      child: Row(
+        children: [
+          // Time-of-day icon
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.neonLime.withValues(alpha: 0.15),
+                  timeColor.withValues(alpha: 0.15),
+                ],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(timeIcon, color: timeColor, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Check-in',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (isToday) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.neonLime.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'TODAY',
+                          style: TextStyle(
+                            color: AppColors.neonLime,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(timeIcon, color: timeColor, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: 12,
+                      color: AppColors.gray400,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      DateFormat('hh:mm a').format(record.checkInTime),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.location_on_rounded,
+                      size: 12,
+                      color: AppColors.gray400,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      record.branch,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                      ),
+                    ),
+                    // ✅ Duration if checked out
+                    if (record.isCheckedOut) ...[
+                      const SizedBox(width: 12),
+                      Icon(
+                        Icons.timer_rounded,
+                        size: 12,
+                        color: AppColors.neonTeal,
+                      ),
+                      const SizedBox(width: 4),
                       Text(
-                        'Check-in',
-                        style: AppTextStyles.bodyLarge.copyWith(
+                        record.formattedDuration,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.neonTeal,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (isToday) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.neonLime
-                              .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'TODAY',
-                              style: TextStyle(
-                                color: AppColors.neonLime,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                        ),
-                      ],
                     ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time_rounded,
-                           size: 12, color: AppColors.gray400),
-                           const SizedBox(width: 4),
-                           Text(
-                             DateFormat('hh:mm a')
-                             .format(record.checkInTime),
-                             style: AppTextStyles.caption
-                             .copyWith(color: AppColors.gray400),
-                           ),
-                           const SizedBox(width: 12),
-                           Icon(Icons.location_on_rounded,
-                                size: 12, color: AppColors.gray400),
-                                const SizedBox(width: 4),
-                                Text(
-                                  record.branch,
-                                  style: AppTextStyles.caption
-                                  .copyWith(color: AppColors.gray400),
-                                ),
-                                // ✅ Duration if checked out
-                                if (record.isCheckedOut) ...[
-                                  const SizedBox(width: 12),
-                                  Icon(Icons.timer_rounded,
-                                       size: 12, color: AppColors.neonTeal),
-                                       const SizedBox(width: 4),
-                                       Text(
-                                         record.formattedDuration,
-                                         style: AppTextStyles.caption.copyWith(
-                                           color: AppColors.neonTeal,
-                                           fontWeight: FontWeight.bold,
-                                         ),
-                                       ),
-                                ],
-                    ],
-                  ),
-                ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Status badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.3),
               ),
             ),
-            // Status badge
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.success.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Text(
-                  'Done',
-                  style: TextStyle(
-                    color: AppColors.success,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            child: Text(
+              'Done',
+              style: TextStyle(
+                color: AppColors.success,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: (index * 40).ms).slideX(begin: 0.05, end: 0);
+  }
+
+  // ─────────────────────────────────────
+  // STATES
+  // ─────────────────────────────────────
+  Widget _buildLoading() => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircularProgressIndicator(color: AppColors.neonLime),
+        const SizedBox(height: 16),
+        Text(
+          'Loading your attendance...',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
         ),
-      ).animate().fadeIn(delay: (index * 40).ms).slideX(begin: 0.05, end: 0);
-      }
+      ],
+    ),
+  );
 
-      // ─────────────────────────────────────
-      // STATES
-      // ─────────────────────────────────────
-      Widget _buildLoading() => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: AppColors.neonLime),
-            const SizedBox(height: 16),
-            Text(
-              'Loading your attendance...',
-              style: AppTextStyles.bodyMedium
-              .copyWith(color: AppColors.gray400),
-            ),
-          ],
+  Widget _buildError() => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.error_outline_rounded, size: 64, color: AppColors.error),
+        const SizedBox(height: 16),
+        Text(
+          'Something went wrong',
+          style: AppTextStyles.heading3.copyWith(color: AppColors.error),
         ),
-      );
-
-      Widget _buildError() => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline_rounded,
-                 size: 64, color: AppColors.error),
-                 const SizedBox(height: 16),
-                 Text(
-                   'Something went wrong',
-                   style: AppTextStyles.heading3
-                   .copyWith(color: AppColors.error),
-                 ),
-                 const SizedBox(height: 8),
-                 Text(
-                   _error!,
-                   style: AppTextStyles.caption
-                   .copyWith(color: AppColors.gray400),
-                   textAlign: TextAlign.center,
-                 ),
-                 const SizedBox(height: 24),
-                 ElevatedButton.icon(
-                   onPressed: _load,
-                   icon: const Icon(Icons.refresh_rounded),
-                   label: const Text('RETRY'),
-                   style: ElevatedButton.styleFrom(
-                     backgroundColor: AppColors.neonLime,
-                     foregroundColor: Colors.black,
-                   ),
-                 ),
-          ],
+        const SizedBox(height: 8),
+        Text(
+          _error!,
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          textAlign: TextAlign.center,
         ),
-      );
-
-      Widget _buildNoDataForFilter() => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.filter_list_off_rounded,
-                 size: 60, color: AppColors.gray400),
-                 const SizedBox(height: 16),
-                 Text('No records found', style: AppTextStyles.heading3),
-                 const SizedBox(height: 8),
-                 Text(
-                   'Try a different filter',
-                   style: AppTextStyles.bodyMedium
-                   .copyWith(color: AppColors.gray400),
-                 ),
-                 TextButton(
-                   onPressed: () =>
-                   setState(() => _selectedFilter = 'all'),
-                   child: Text(
-                     'SHOW ALL',
-                     style: TextStyle(color: AppColors.neonLime),
-                   ),
-                 ),
-          ],
+        const SizedBox(height: 24),
+        ElevatedButton.icon(
+          onPressed: _load,
+          icon: const Icon(Icons.refresh_rounded),
+          label: const Text('RETRY'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.neonLime,
+            foregroundColor: Colors.black,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
-      // ─────────────────────────────────────
-      // HELPERS
-      // ─────────────────────────────────────
-      Color _getTimeColor(String slot) {
-        switch (slot) {
-          case 'Early Bird':  return Colors.purpleAccent;
-          case 'Morning':     return Colors.amber;
-          case 'Afternoon':   return AppColors.neonOrange;
-          case 'Evening':     return AppColors.neonTeal;
-          case 'Night Owl':   return Colors.blueAccent;
-          default:            return AppColors.gray400;
-        }
-      }
+  Widget _buildNoDataForFilter() => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.filter_list_off_rounded, size: 60, color: AppColors.gray400),
+        const SizedBox(height: 16),
+        Text('No records found', style: AppTextStyles.heading3),
+        const SizedBox(height: 8),
+        Text(
+          'Try a different filter',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+        ),
+        TextButton(
+          onPressed: () => setState(() => _selectedFilter = 'all'),
+          child: Text('SHOW ALL', style: TextStyle(color: AppColors.neonLime)),
+        ),
+      ],
+    ),
+  );
 
-      IconData _getTimeIcon(String slot) {
-        switch (slot) {
-          case 'Early Bird':  return Icons.wb_twilight_rounded;
-          case 'Morning':     return Icons.wb_sunny_rounded;
-          case 'Afternoon':   return Icons.light_mode_rounded;
-          case 'Evening':     return Icons.wb_cloudy_rounded;
-          case 'Night Owl':   return Icons.nightlight_round;
-          default:            return Icons.access_time_rounded;
-        }
-      }
+  // ─────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────
+  Color _getTimeColor(String slot) {
+    switch (slot) {
+      case 'Early Bird':
+        return Colors.purpleAccent;
+      case 'Morning':
+        return Colors.amber;
+      case 'Afternoon':
+        return AppColors.neonOrange;
+      case 'Evening':
+        return AppColors.neonTeal;
+      case 'Night Owl':
+        return Colors.blueAccent;
+      default:
+        return AppColors.gray400;
+    }
+  }
+
+  IconData _getTimeIcon(String slot) {
+    switch (slot) {
+      case 'Early Bird':
+        return Icons.wb_twilight_rounded;
+      case 'Morning':
+        return Icons.wb_sunny_rounded;
+      case 'Afternoon':
+        return Icons.light_mode_rounded;
+      case 'Evening':
+        return Icons.wb_cloudy_rounded;
+      case 'Night Owl':
+        return Icons.nightlight_round;
+      default:
+        return Icons.access_time_rounded;
+    }
+  }
 }

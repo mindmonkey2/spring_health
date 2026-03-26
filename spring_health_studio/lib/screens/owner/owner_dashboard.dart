@@ -92,15 +92,12 @@ class _OwnerDashboardState extends State<OwnerDashboard>
       } else {
         final s = await firestoreService.getDashboardStats(selectedBranch);
         final mr = await firestoreService.getMonthlyRevenue(selectedBranch);
-        final members = await firestoreService
-            .getMembersByBranch(selectedBranch!)
-            .first;
-        double paid = 0, cash = 0, upi = 0;
-        for (final m in members) {
-          paid += m.finalAmount - m.dueAmount;
-          cash += m.cashAmount;
-          upi += m.upiAmount;
-        }
+        final branchTotals = await firestoreService.getBranchMemberTotals(selectedBranch!);
+
+        final paid = branchTotals['paid'] ?? 0.0;
+        final cash = branchTotals['cash'] ?? 0.0;
+        final upi = branchTotals['upi'] ?? 0.0;
+
         s['monthlyRevenue'] = ((mr['total'] as double?) ?? 0) > 0 ? mr['total'] : paid;
         s['monthlyCash']   = ((mr['cash']  as double?) ?? 0) > 0 ? mr['cash']  : cash;
         s['monthlyUpi']    = ((mr['upi']   as double?) ?? 0) > 0 ? mr['upi']   : upi;

@@ -313,6 +313,38 @@ class FirestoreService {
   }
 
 
+  Future<Map<String, double>> getBranchMemberTotals(String branch) async {
+    try {
+      final query = _firestore
+          .collection('members')
+          .where('branch', isEqualTo: branch)
+          .where('isArchived', isEqualTo: false);
+
+      final aggregateQuery = query.aggregate(
+        sum('finalAmount'),
+        sum('dueAmount'),
+        sum('cashAmount'),
+        sum('upiAmount'),
+      );
+
+      final snapshot = await aggregateQuery.get();
+
+      final totalFinalAmount = snapshot.getSum('finalAmount') ?? 0.0;
+      final totalDueAmount = snapshot.getSum('dueAmount') ?? 0.0;
+      final totalCashAmount = snapshot.getSum('cashAmount') ?? 0.0;
+      final totalUpiAmount = snapshot.getSum('upiAmount') ?? 0.0;
+
+      return {
+        'paid': totalFinalAmount - totalDueAmount,
+        'cash': totalCashAmount,
+        'upi': totalUpiAmount,
+      };
+    } catch (e) {
+      debugPrint('Error getting branch member totals: $e');
+      return {'paid': 0.0, 'cash': 0.0, 'upi': 0.0};
+    }
+  }
+
   Stream<List<MemberModel>> getMembersByBranch(
     String branch,
     {bool includeArchived = false}

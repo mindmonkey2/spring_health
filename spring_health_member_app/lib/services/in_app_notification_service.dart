@@ -21,6 +21,36 @@ class InAppNotificationService {
   }
 
   // ── Write ────────────────────────────────────────────────
+  Future<void> addNotificationsForMemberBatch({
+    required String uid,
+    required List<NotificationData> notifications,
+  }) async {
+    if (notifications.isEmpty) return;
+    final col = _firestore
+        .collection('notifications')
+        .doc(uid)
+        .collection('items');
+    final batch = _firestore.batch();
+    final now = DateTime.now();
+
+    for (final notif in notifications) {
+      final id = _uuid.v4();
+      batch.set(
+        col.doc(id),
+        AppNotification(
+          id: id,
+          type: notif.type,
+          title: notif.title,
+          body: notif.body,
+          isRead: false,
+          createdAt: now,
+          metadata: notif.metadata,
+        ).toFirestore(),
+      );
+    }
+    await batch.commit();
+  }
+
   Future<void> addNotificationForMember({
     required String uid,
     required NotificationType type,

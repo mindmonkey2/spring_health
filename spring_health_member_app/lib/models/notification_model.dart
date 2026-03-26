@@ -2,6 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum NotificationType { xp, badge, gym, announcement }
 
+class NotificationData {
+  final NotificationType type;
+  final String title;
+  final String body;
+  final Map<String, dynamic>? metadata;
+
+  NotificationData({
+    required this.type,
+    required this.title,
+    required this.body,
+    this.metadata,
+  });
+}
+
 class AppNotification {
   final String id;
   final NotificationType type;

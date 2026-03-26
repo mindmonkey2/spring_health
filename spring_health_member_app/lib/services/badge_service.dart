@@ -122,15 +122,22 @@ class BadgeService {
         .doc(memberId)
         .update({'badges': FieldValue.arrayUnion(newlyAwarded)});
 
+    final notifications = <NotificationData>[];
     for (final badgeId in newlyAwarded) {
       final badgeDef = badgeDefinitions.firstWhere((b) => b['id'] == badgeId);
-      await InAppNotificationService().addNotificationForMember(
-        uid: memberId,
-        type: NotificationType.badge,
-        title: '🏅 Badge Unlocked!',
-        body: 'You earned: ${badgeDef['label']}',
-        metadata: {'badgeId': badgeId},
+      notifications.add(
+        NotificationData(
+          type: NotificationType.badge,
+          title: '🏅 Badge Unlocked!',
+          body: 'You earned: ${badgeDef['label']}',
+          metadata: {'badgeId': badgeId},
+        ),
       );
     }
+
+    await InAppNotificationService().addNotificationsForMemberBatch(
+      uid: memberId,
+      notifications: notifications,
+    );
   }
 }

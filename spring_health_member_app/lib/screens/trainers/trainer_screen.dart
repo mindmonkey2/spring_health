@@ -18,8 +18,9 @@ Color specColor(String spec) {
   }
   if (s.contains('yoga')) return AppColors.neonTeal;
   if (s.contains('cardio')) return AppColors.neonOrange;
-  if (s.contains('zumba') || s.contains('dance'))
+  if (s.contains('zumba') || s.contains('dance')) {
     return const Color(0xFFFF4081);
+  }
   if (s.contains('cross') || s.contains('hiit')) return const Color(0xFFFF5252);
   return AppColors.gray400;
 }

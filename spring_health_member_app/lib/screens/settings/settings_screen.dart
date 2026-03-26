@@ -164,8 +164,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppColors.neonTeal,
               announcementAlerts && pushNotifications,
               (v) {
-                if (v != null && pushNotifications)
+                if (v != null && pushNotifications) {
                   _handleAnnouncementToggle(v);
+                }
               },
               disabled: !pushNotifications,
             ),

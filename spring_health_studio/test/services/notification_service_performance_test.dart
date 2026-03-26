@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../lib/models/member_model.dart';
-import '../../lib/services/notification_service.dart';
-import '../../lib/services/whatsapp_service.dart';
-import '../../lib/services/firestore_service.dart';
+import 'package:spring_health_studio/models/member_model.dart';
+import 'package:spring_health_studio/services/notification_service.dart';
+import 'package:spring_health_studio/services/whatsapp_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:spring_health_studio/services/firestore_service.dart';
 
 class MockWhatsAppService extends WhatsAppService {
   int sendCount = 0;
@@ -86,7 +87,7 @@ void main() {
       await service.sendBirthdayWishes();
       stopwatch.stop();
 
-      print('OPTIMIZED (Firestore): sendBirthdayWishes took ${stopwatch.elapsedMilliseconds}ms for 10 members');
+      debugPrint('OPTIMIZED (Firestore): sendBirthdayWishes took ${stopwatch.elapsedMilliseconds}ms for 10 members');
       expect(mockWhatsApp.sendCount, 10);
     });
 
@@ -103,7 +104,7 @@ void main() {
       await service.sendExpiryReminders();
       stopwatch.stop();
 
-      print('OPTIMIZED (Firestore): sendExpiryReminders took ${stopwatch.elapsedMilliseconds}ms for 10 members');
+      debugPrint('OPTIMIZED (Firestore): sendExpiryReminders took ${stopwatch.elapsedMilliseconds}ms for 10 members');
       expect(mockWhatsApp.sendCount, 10);
     });
 
@@ -120,7 +121,7 @@ void main() {
       await service.sendDuePaymentReminders();
       stopwatch.stop();
 
-      print('OPTIMIZED (Firestore): sendDuePaymentReminders took ${stopwatch.elapsedMilliseconds}ms for 10 members');
+      debugPrint('OPTIMIZED (Firestore): sendDuePaymentReminders took ${stopwatch.elapsedMilliseconds}ms for 10 members');
       expect(mockWhatsApp.sendCount, 10);
     });
   });

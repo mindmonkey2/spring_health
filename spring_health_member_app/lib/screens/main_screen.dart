@@ -123,11 +123,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     try {
       final memberId = await _authService.getCurrentMemberId();
       if (memberId == null) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _error = 'Member not found';
             _isLoading = false;
           });
+        }
         return;
       }
 
@@ -163,11 +164,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       // ✅ Membership expiry alert — non-blocking
       if (member != null) MembershipAlertService().checkAndNotify(member);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = e.toString();
           _isLoading = false;
         });
+      }
     }
   }
 

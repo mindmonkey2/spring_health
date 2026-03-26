@@ -64,21 +64,23 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final memberId = await _authService.getCurrentMemberId();
       if (memberId == null) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _error = 'Member ID not found';
             _isLoading = false;
           });
+        }
         return;
       }
 
       final member = await _memberService.getMemberData(memberId);
       if (member == null) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _error = 'Member data not found';
             _isLoading = false;
           });
+        }
         return;
       }
 
@@ -115,11 +117,12 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = 'Failed to load data';
           _isLoading = false;
         });
+      }
     }
   }
 

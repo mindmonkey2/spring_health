@@ -501,8 +501,9 @@ class _ExerciseCardState extends State<_ExerciseCard> {
                   value: val,
                 );
                 widget.onXpEarned(xp);
-                if (mounted)
+                if (mounted) {
                   _showXpToast(xp, val > (widget.record?.currentBest ?? 0));
+                }
               } finally {
                 if (mounted) setState(() => _isLogging = false);
               }

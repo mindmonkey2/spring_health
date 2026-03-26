@@ -27,14 +27,14 @@ class NotificationService {
   NotificationService._internal();
 
   static final GlobalKey<NavigatorState> navigatorKey =
-  GlobalKey<NavigatorState>();
+      GlobalKey<NavigatorState>();
 
-  final _messaging       = FirebaseMessaging.instance;
-  final _localNotifs     = FlutterLocalNotificationsPlugin();
-  final _db              = FirebaseFirestore.instance;
-  final _auth            = FirebaseAuth.instance;
+  final _messaging = FirebaseMessaging.instance;
+  final _localNotifs = FlutterLocalNotificationsPlugin();
+  final _db = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
-  bool _isInitialized    = false;
+  bool _isInitialized = false;
 
   // ── Public: Initialize ────────────────────────────────────────────────────
 
@@ -43,9 +43,13 @@ class NotificationService {
     try {
       // 1. Request permissions
       final settings = await _messaging.requestPermission(
-        alert: true, badge: true, sound: true,
-        announcement: true, carPlay: false,
-        criticalAlert: false, provisional: false,
+        alert: true,
+        badge: true,
+        sound: true,
+        announcement: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.denied) {
@@ -96,15 +100,12 @@ class NotificationService {
 
       // ✅ FIX: Save to fcmTokens/{authUid} — NOT members/{authUid}
       // Member docs use custom UUIDs, not Firebase Auth UIDs.
-      await _db.collection('fcmTokens').doc(user.uid).set(
-        {
-          'token':     token,
-          'uid':       user.uid,
-          'platform':  Platform.isAndroid ? 'android' : 'ios',
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await _db.collection('fcmTokens').doc(user.uid).set({
+        'token': token,
+        'uid': user.uid,
+        'platform': Platform.isAndroid ? 'android' : 'ios',
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       // ✅ Also update the member doc (look up by user_id field)
       await _updateMemberFcmToken(user.uid, token);
@@ -113,7 +114,7 @@ class NotificationService {
       _messaging.onTokenRefresh.listen((newToken) async {
         debugPrint('🔄 FCM token refreshed');
         await _db.collection('fcmTokens').doc(user.uid).update({
-          'token':     newToken,
+          'token': newToken,
           'updatedAt': FieldValue.serverTimestamp(),
         });
         await _updateMemberFcmToken(user.uid, newToken);
@@ -129,17 +130,17 @@ class NotificationService {
   Future<void> _updateMemberFcmToken(String uid, String token) async {
     try {
       final snap = await _db
-      .collection('members')
-      .where('user_id', isEqualTo: uid)
-      .limit(1)
-      .get();
+          .collection('members')
+          .where('user_id', isEqualTo: uid)
+          .limit(1)
+          .get();
 
       if (snap.docs.isEmpty) return;
 
       await snap.docs.first.reference.update({
-        'fcmToken':          token,
+        'fcmToken': token,
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
-        'platform':          Platform.isAndroid ? 'android' : 'ios',
+        'platform': Platform.isAndroid ? 'android' : 'ios',
       });
       debugPrint('✅ Member fcmToken updated');
     } catch (e) {
@@ -174,14 +175,13 @@ class NotificationService {
 
   // ── Public: Misc ──────────────────────────────────────────────────────────
 
-  Future<void> clearAllNotifications() async =>
-  _localNotifs.cancelAll();
+  Future<void> clearAllNotifications() async => _localNotifs.cancelAll();
 
   // ── Private: Local notifications init ────────────────────────────────────
 
   Future<void> _initLocalNotifications() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const ios     = DarwinInitializationSettings(
+    const ios = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
@@ -227,16 +227,18 @@ class NotificationService {
     required Importance importance,
   }) async {
     final channel = AndroidNotificationChannel(
-      id, name,
-      description:      description,
-      importance:       importance,
-      playSound:        true,
-      enableVibration:  true,
+      id,
+      name,
+      description: description,
+      importance: importance,
+      playSound: true,
+      enableVibration: true,
     );
     await _localNotifs
-    .resolvePlatformSpecificImplementation<
-    AndroidFlutterLocalNotificationsPlugin>()
-    ?.createNotificationChannel(channel);
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
   }
 
   // ── Private: Message handlers ─────────────────────────────────────────────
@@ -245,21 +247,21 @@ class NotificationService {
     debugPrint('📱 Foreground: ${message.notification?.title}');
     if (message.notification == null) return;
 
-    final type    = message.data['type'] as String? ?? 'announcement';
+    final type = message.data['type'] as String? ?? 'announcement';
     final channel = _channelForType(type);
 
     _showLocalNotification(
-      title:     message.notification!.title ?? 'Spring Health',
-      body:      message.notification!.body  ?? '',
-      payload:   message.data['id']?.toString(),
+      title: message.notification!.title ?? 'Spring Health',
+      body: message.notification!.body ?? '',
+      payload: message.data['id']?.toString(),
       channelId: channel,
     );
 
     // Write to in-app feed
     InAppNotificationService().addNotification(
-      type:     _notifTypeFromString(type),
-      title:    message.notification!.title ?? 'Spring Health',
-      body:     message.notification!.body  ?? '',
+      type: _notifTypeFromString(type),
+      title: message.notification!.title ?? 'Spring Health',
+      body: message.notification!.body ?? '',
       metadata: Map<String, dynamic>.from(message.data),
     );
   }
@@ -280,13 +282,14 @@ class NotificationService {
     String channelId = 'high_importance_channel',
   }) async {
     final androidDetails = AndroidNotificationDetails(
-      channelId, channelId,
-      importance:       Importance.high,
-      priority:         Priority.high,
-      playSound:        true,
-      enableVibration:  true,
-      icon:             '@mipmap/ic_launcher',
-      color:            const Color(0xFFCDFF00),
+      channelId,
+      channelId,
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      icon: '@mipmap/ic_launcher',
+      color: const Color(0xFFCDFF00),
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
@@ -295,11 +298,14 @@ class NotificationService {
     );
 
     await _localNotifs.show(
-      id:                  DateTime.now().millisecondsSinceEpoch % 100000,
-      title:               title,
-      body:                body,
-      notificationDetails: NotificationDetails(android: androidDetails, iOS: iosDetails),
-      payload:             payload,
+      id: DateTime.now().millisecondsSinceEpoch % 100000,
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      ),
+      payload: payload,
     );
   }
 
@@ -307,9 +313,12 @@ class NotificationService {
 
   String _channelForType(String type) {
     switch (type) {
-      case 'payment':   return 'payment_channel';
-      case 'challenge': return 'challenge_channel';
-      default:          return 'high_importance_channel';
+      case 'payment':
+        return 'payment_channel';
+      case 'challenge':
+        return 'challenge_channel';
+      default:
+        return 'high_importance_channel';
     }
   }
 

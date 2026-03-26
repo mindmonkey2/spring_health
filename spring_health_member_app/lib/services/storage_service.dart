@@ -18,9 +18,9 @@ class StorageService {
       }
 
       // ✅ Store by authUid but keep memberId as metadata for reference
-      final Reference storageRef = _storage
-      .ref()
-      .child('users/profile_images/$authUid.jpg');
+      final Reference storageRef = _storage.ref().child(
+        'users/profile_images/$authUid.jpg',
+      );
 
       final UploadTask uploadTask = storageRef.putFile(
         imageFile,
@@ -34,7 +34,7 @@ class StorageService {
       uploadTask.snapshotEvents.listen(
         (TaskSnapshot snapshot) {
           final progress =
-          snapshot.bytesTransferred / snapshot.totalBytes * 100;
+              snapshot.bytesTransferred / snapshot.totalBytes * 100;
           debugPrint('Upload progress: ${progress.toStringAsFixed(1)}%');
         },
         onError: (e) {
@@ -47,7 +47,6 @@ class StorageService {
 
       debugPrint('Upload success: $downloadUrl');
       return downloadUrl;
-
     } on FirebaseException catch (e) {
       // ✅ Firebase-specific error with code — visible in release too
       debugPrint('FirebaseException [${e.code}]: ${e.message}');
@@ -60,10 +59,7 @@ class StorageService {
 
   Future<void> deleteProfileImage(String authUid) async {
     try {
-      await _storage
-      .ref()
-      .child('users/profile_images/$authUid.jpg')
-      .delete();
+      await _storage.ref().child('users/profile_images/$authUid.jpg').delete();
     } on FirebaseException catch (e) {
       debugPrint('Delete error [${e.code}]: ${e.message}');
     }

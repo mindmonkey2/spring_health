@@ -75,7 +75,8 @@ class WeeklyWarModel {
 
 class WarEntryModel {
   final String memberId;
-  final String memberName; // Stored separately if needed, but often fetched via join or assumed available
+  final String
+  memberName; // Stored separately if needed, but often fetched via join or assumed available
   final int totalReps;
   final int sessionCount;
   final DateTime lastUpdated;
@@ -95,7 +96,9 @@ class WarEntryModel {
   factory WarEntryModel.fromMap(Map<String, dynamic> map, String id) {
     return WarEntryModel(
       memberId: map['memberId'] ?? id,
-      memberName: map['memberName'] ?? '', // Might not be in doc directly, handle carefully
+      memberName:
+          map['memberName'] ??
+          '', // Might not be in doc directly, handle carefully
       totalReps: map['totalReps'] ?? 0,
       sessionCount: map['sessionCount'] ?? 0,
       lastUpdated: _toDateTime(map['lastUpdated']),

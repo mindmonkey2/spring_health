@@ -36,7 +36,8 @@ class FirebaseAuthService {
   Future<String?> _loadVerificationId() async {
     try {
       final saved = await _secureStorage.read(key: _verificationKey);
-      if (saved != null) debugPrint('✅ Loaded verification ID from secure storage');
+      if (saved != null)
+        debugPrint('✅ Loaded verification ID from secure storage');
       return saved;
     } catch (e) {
       debugPrint('⚠ Error loading verification ID: $e');
@@ -149,7 +150,7 @@ class FirebaseAuthService {
         await _saveMemberId(memberId);
 
         await _firestore.collection('members').doc(memberId).update({
-          'uid'           : user.uid,
+          'uid': user.uid,
           'last_app_login': FieldValue.serverTimestamp(),
         });
 
@@ -189,8 +190,7 @@ class FirebaseAuthService {
         verificationCompleted: (PhoneAuthCredential credential) async {
           debugPrint('✅ Auto verification triggered');
           try {
-            final userCredential =
-                await _auth.signInWithCredential(credential);
+            final userCredential = await _auth.signInWithCredential(credential);
             await _clearVerificationId();
             if (userCredential.user != null) {
               await _storeMemberIdFromUser(userCredential.user!);
@@ -215,7 +215,9 @@ class FirebaseAuthService {
         },
 
         codeAutoRetrievalTimeout: (String verificationId) async {
-          debugPrint('⏰ Auto-retrieval timeout — saving latest verification ID');
+          debugPrint(
+            '⏰ Auto-retrieval timeout — saving latest verification ID',
+          );
           await _saveVerificationId(verificationId);
           onCodeAutoRetrievalTimeout?.call(verificationId);
         },
@@ -240,7 +242,8 @@ class FirebaseAuthService {
 
       if (resolvedId == null || resolvedId.isEmpty) {
         throw Exception(
-            'Verification session expired. Please request a new OTP.');
+          'Verification session expired. Please request a new OTP.',
+        );
       }
 
       debugPrint('🔐 Verifying OTP with ID: ${resolvedId.substring(0, 10)}...');
@@ -296,7 +299,9 @@ class FirebaseAuthService {
         return null;
       }
 
-      debugPrint('🔄 memberId not cached — falling back to phone lookup: $phone');
+      debugPrint(
+        '🔄 memberId not cached — falling back to phone lookup: $phone',
+      );
       final memberData = await checkMemberExists(phone);
 
       if (memberData == null) {
@@ -309,11 +314,13 @@ class FirebaseAuthService {
       await _saveMemberId(memberId);
 
       await _firestore.collection('members').doc(memberId).update({
-        'uid'           : currentUser!.uid,
+        'uid': currentUser!.uid,
         'last_app_login': FieldValue.serverTimestamp(),
       });
 
-      debugPrint('✅ memberId resolved via phone fallback and cached: $memberId');
+      debugPrint(
+        '✅ memberId resolved via phone fallback and cached: $memberId',
+      );
       return memberId;
     } catch (e) {
       debugPrint('❌ Error getting memberId: $e');

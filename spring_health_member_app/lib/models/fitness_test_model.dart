@@ -62,8 +62,9 @@ class FitnessTestModel {
       'benchpress1rmKg': benchpress1rmKg,
       'overallLevel': overallLevel,
       'testedAt': Timestamp.fromDate(testedAt),
-      'nextTestDue':
-          nextTestDue != null ? Timestamp.fromDate(nextTestDue!) : null,
+      'nextTestDue': nextTestDue != null
+          ? Timestamp.fromDate(nextTestDue!)
+          : null,
     };
   }
 

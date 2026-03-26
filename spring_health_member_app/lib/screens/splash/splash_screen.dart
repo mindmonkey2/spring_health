@@ -42,10 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
-    _orbAnim = CurvedAnimation(
-      parent: _orbController,
-      curve: Curves.easeInOut,
-    );
+    _orbAnim = CurvedAnimation(parent: _orbController, curve: Curves.easeInOut);
 
     // ── Loading dots ─────────────────────────────────────
     _dotsController = AnimationController(
@@ -86,8 +83,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     final user = _authService.currentUser;
-    final destination =
-        user != null ? const MainScreen() : const LoginScreen();
+    final destination = user != null ? const MainScreen() : const LoginScreen();
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -134,9 +130,10 @@ class _SplashScreenState extends State<SplashScreen>
                 children: [
                   // Top-left orb
                   Positioned(
-                    left: size.width * 0.05 +
-                        _orbAnim.value * size.width * 0.06,
-                    top: size.height * 0.08 +
+                    left:
+                        size.width * 0.05 + _orbAnim.value * size.width * 0.06,
+                    top:
+                        size.height * 0.08 +
                         _orbAnim.value * size.height * 0.04,
                     child: _GlowOrb(
                       radius: 80,
@@ -146,9 +143,11 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   // Right orb
                   Positioned(
-                    right: size.width * 0.04 +
+                    right:
+                        size.width * 0.04 +
                         (1 - _orbAnim.value) * size.width * 0.05,
-                    top: size.height * 0.25 +
+                    top:
+                        size.height * 0.25 +
                         _orbAnim.value * size.height * 0.03,
                     child: _GlowOrb(
                       radius: 60,
@@ -159,7 +158,8 @@ class _SplashScreenState extends State<SplashScreen>
                   // Bottom orb
                   Positioned(
                     left: size.width * 0.3,
-                    bottom: size.height * 0.12 +
+                    bottom:
+                        size.height * 0.12 +
                         _orbAnim.value * size.height * 0.02,
                     child: _GlowOrb(
                       radius: 50,
@@ -195,14 +195,16 @@ class _SplashScreenState extends State<SplashScreen>
                   children: [
                     // ── Tagline ────────────────────────────
                     Text(
-                      'UNLEASH YOUR POTENTIAL',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF00E5FF).withValues(alpha: 0.85),
-                        letterSpacing: 3.5,
-                      ),
-                    )
+                          'UNLEASH YOUR POTENTIAL',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(
+                              0xFF00E5FF,
+                            ).withValues(alpha: 0.85),
+                            letterSpacing: 3.5,
+                          ),
+                        )
                         .animate()
                         .fadeIn(delay: 900.ms, duration: 700.ms)
                         .slideY(begin: 0.3, end: 0),
@@ -210,9 +212,9 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 48),
 
                     // ── Pulsing loading dots ───────────────
-                    _LoadingDots(controller: _dotsController)
-                        .animate()
-                        .fadeIn(delay: 1200.ms),
+                    _LoadingDots(
+                      controller: _dotsController,
+                    ).animate().fadeIn(delay: 1200.ms),
 
                     const SizedBox(height: 20),
 
@@ -305,8 +307,9 @@ class _LoadingDots extends StatelessWidget {
                     color: AppColors.neonLime.withValues(alpha: opacity),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.neonLime
-                            .withValues(alpha: opacity * 0.5),
+                        color: AppColors.neonLime.withValues(
+                          alpha: opacity * 0.5,
+                        ),
                         blurRadius: 6,
                         spreadRadius: 1,
                       ),

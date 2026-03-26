@@ -48,11 +48,14 @@ class NotificationTile extends StatelessWidget {
           color: Colors.red.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(Icons.delete_outline_rounded,
-                          color: Colors.redAccent, size: 26),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          color: Colors.redAccent,
+          size: 26,
+        ),
       ),
       onDismissed: (_) =>
-      InAppNotificationService().deleteNotification(notification.id),
+          InAppNotificationService().deleteNotification(notification.id),
       child: GestureDetector(
         onTap: () {
           if (isUnread) {
@@ -65,13 +68,13 @@ class NotificationTile extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isUnread
-            ? color.withValues(alpha: 0.07)
-            : Colors.white.withValues(alpha: 0.03),
+                ? color.withValues(alpha: 0.07)
+                : Colors.white.withValues(alpha: 0.03),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isUnread
-              ? color.withValues(alpha: 0.45)
-              : Colors.white.withValues(alpha: 0.07),
+                  ? color.withValues(alpha: 0.45)
+                  : Colors.white.withValues(alpha: 0.07),
               width: isUnread ? 1.2 : 0.8,
             ),
           ),
@@ -86,8 +89,11 @@ class NotificationTile extends StatelessWidget {
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child:
-                Icon(_iconFor(notification.type), color: color, size: 22),
+                child: Icon(
+                  _iconFor(notification.type),
+                  color: color,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               // Text
@@ -104,8 +110,8 @@ class NotificationTile extends StatelessWidget {
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: isUnread
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                             ),
                           ),
                         ),
@@ -120,7 +126,8 @@ class NotificationTile extends StatelessWidget {
                                 BoxShadow(
                                   color: color.withValues(alpha: 0.6),
                                   blurRadius: 6,
-                                  spreadRadius: 1)
+                                  spreadRadius: 1,
+                                ),
                               ],
                             ),
                           ),
@@ -134,7 +141,8 @@ class NotificationTile extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.55),
                         fontSize: 13,
-                        height: 1.4),
+                        height: 1.4,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -142,7 +150,8 @@ class NotificationTile extends StatelessWidget {
                       style: TextStyle(
                         color: color.withValues(alpha: 0.7),
                         fontSize: 11,
-                        fontWeight: FontWeight.w600),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),

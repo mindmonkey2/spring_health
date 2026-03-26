@@ -42,11 +42,11 @@ class FirestoreService {
   Future<MemberModel?> getMemberByPhone(String phone) async {
     try {
       final snapshot = await _firestore
-      .collection('members')
-      .where('phone', isEqualTo: phone)
-      .where('isArchived', isEqualTo: false)
-      .limit(1)
-      .get();
+          .collection('members')
+          .where('phone', isEqualTo: phone)
+          .where('isArchived', isEqualTo: false)
+          .limit(1)
+          .get();
 
       if (snapshot.docs.isNotEmpty) {
         return MemberModel.fromMap({
@@ -65,11 +65,9 @@ class FirestoreService {
   /// Stream member data (real-time updates)
   Stream<MemberModel?> getMemberStream(String memberId) {
     try {
-      return _firestore
-      .collection('members')
-      .doc(memberId)
-      .snapshots()
-      .map((doc) {
+      return _firestore.collection('members').doc(memberId).snapshots().map((
+        doc,
+      ) {
         if (doc.exists && doc.data() != null) {
           return MemberModel.fromMap({...doc.data()!, 'id': doc.id});
         }
@@ -87,18 +85,15 @@ class FirestoreService {
   Stream<List<AttendanceModel>> getAttendanceByMember(String memberId) {
     try {
       return _firestore
-      .collection('attendance')
-      .where('memberId', isEqualTo: memberId)
-      .orderBy('checkInTime', descending: true)
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return AttendanceModel.fromMap({
-            ...doc.data(),
-            'id': doc.id,
+          .collection('attendance')
+          .where('memberId', isEqualTo: memberId)
+          .orderBy('checkInTime', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) {
+              return AttendanceModel.fromMap({...doc.data(), 'id': doc.id});
+            }).toList();
           });
-        }).toList();
-      });
     } catch (e) {
       debugPrint('Error getting attendance: $e');
       return Stream.value([]);
@@ -113,18 +108,21 @@ class FirestoreService {
   ) async {
     try {
       final snapshot = await _firestore
-      .collection('attendance')
-      .where('memberId', isEqualTo: memberId)
-      .where('checkInTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-      .where('checkInTime', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-      .orderBy('checkInTime', descending: true)
-      .get();
+          .collection('attendance')
+          .where('memberId', isEqualTo: memberId)
+          .where(
+            'checkInTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
+          .where(
+            'checkInTime',
+            isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+          )
+          .orderBy('checkInTime', descending: true)
+          .get();
 
       return snapshot.docs.map((doc) {
-        return AttendanceModel.fromMap({
-          ...doc.data(),
-          'id': doc.id,
-        });
+        return AttendanceModel.fromMap({...doc.data(), 'id': doc.id});
       }).toList();
     } catch (e) {
       debugPrint('Error getting attendance for date range: $e');
@@ -140,12 +138,18 @@ class FirestoreService {
       final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
       final snapshot = await _firestore
-      .collection('attendance')
-      .where('memberId', isEqualTo: memberId)
-      .where('checkInTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-      .where('checkInTime', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
-      .limit(1)
-      .get();
+          .collection('attendance')
+          .where('memberId', isEqualTo: memberId)
+          .where(
+            'checkInTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
+          .where(
+            'checkInTime',
+            isLessThanOrEqualTo: Timestamp.fromDate(endOfDay),
+          )
+          .limit(1)
+          .get();
 
       return snapshot.docs.isNotEmpty;
     } catch (e) {
@@ -162,11 +166,17 @@ class FirestoreService {
       final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
 
       final snapshot = await _firestore
-      .collection('attendance')
-      .where('memberId', isEqualTo: memberId)
-      .where('checkInTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
-      .where('checkInTime', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
-      .get();
+          .collection('attendance')
+          .where('memberId', isEqualTo: memberId)
+          .where(
+            'checkInTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+          )
+          .where(
+            'checkInTime',
+            isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth),
+          )
+          .get();
 
       return snapshot.docs.length;
     } catch (e) {
@@ -181,19 +191,16 @@ class FirestoreService {
   Stream<List<AnnouncementModel>> getAnnouncements(String branch) {
     try {
       return _firestore
-      .collection('announcements')
-      .where('targetBranches', arrayContains: branch)
-      .orderBy('createdAt', descending: true)
-      .limit(50)
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return AnnouncementModel.fromMap({
-            ...doc.data(),
-            'id': doc.id,
+          .collection('announcements')
+          .where('targetBranches', arrayContains: branch)
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) {
+              return AnnouncementModel.fromMap({...doc.data(), 'id': doc.id});
+            }).toList();
           });
-        }).toList();
-      });
     } catch (e) {
       debugPrint('Error getting announcements: $e');
       return Stream.value([]);
@@ -204,18 +211,15 @@ class FirestoreService {
   Stream<List<AnnouncementModel>> getAllAnnouncements() {
     try {
       return _firestore
-      .collection('announcements')
-      .orderBy('createdAt', descending: true)
-      .limit(50)
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return AnnouncementModel.fromMap({
-            ...doc.data(),
-            'id': doc.id,
+          .collection('announcements')
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) {
+              return AnnouncementModel.fromMap({...doc.data(), 'id': doc.id});
+            }).toList();
           });
-        }).toList();
-      });
     } catch (e) {
       debugPrint('Error getting all announcements: $e');
       return Stream.value([]);
@@ -223,7 +227,10 @@ class FirestoreService {
   }
 
   /// Mark announcement as read
-  Future<void> markAnnouncementAsRead(String announcementId, String memberId) async {
+  Future<void> markAnnouncementAsRead(
+    String announcementId,
+    String memberId,
+  ) async {
     try {
       await _firestore.collection('announcements').doc(announcementId).update({
         'readBy': FieldValue.arrayUnion([memberId]),
@@ -239,18 +246,15 @@ class FirestoreService {
   Stream<List<PaymentModel>> getPaymentsByMember(String memberId) {
     try {
       return _firestore
-      .collection('payments')
-      .where('memberId', isEqualTo: memberId)
-      .orderBy('paymentDate', descending: true)
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return PaymentModel.fromMap({
-            ...doc.data(),
-            'id': doc.id,
+          .collection('payments')
+          .where('memberId', isEqualTo: memberId)
+          .orderBy('paymentDate', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) {
+              return PaymentModel.fromMap({...doc.data(), 'id': doc.id});
+            }).toList();
           });
-        }).toList();
-      });
     } catch (e) {
       debugPrint('Error getting payments: $e');
       return Stream.value([]);
@@ -263,10 +267,7 @@ class FirestoreService {
       final doc = await _firestore.collection('payments').doc(paymentId).get();
 
       if (doc.exists && doc.data() != null) {
-        return PaymentModel.fromMap({
-          ...doc.data()!,
-          'id': doc.id,
-        });
+        return PaymentModel.fromMap({...doc.data()!, 'id': doc.id});
       }
 
       return null;
@@ -279,20 +280,24 @@ class FirestoreService {
   // ==================== FITNESS DATA METHODS ====================
 
   /// Save daily fitness data
-  Future<void> saveFitnessData(String memberId, Map<String, dynamic> fitnessData) async {
+  Future<void> saveFitnessData(
+    String memberId,
+    Map<String, dynamic> fitnessData,
+  ) async {
     try {
       final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       await _firestore
-      .collection('fitnessData')
-      .doc('${memberId}_$dateKey')
-      .set({
-        'memberId': memberId,
-        'date': Timestamp.fromDate(today),
-        ...fitnessData,
-        'syncedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+          .collection('fitnessData')
+          .doc('${memberId}_$dateKey')
+          .set({
+            'memberId': memberId,
+            'date': Timestamp.fromDate(today),
+            ...fitnessData,
+            'syncedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving fitness data: $e');
       rethrow;
@@ -307,12 +312,12 @@ class FirestoreService {
   ) async {
     try {
       final snapshot = await _firestore
-      .collection('fitnessData')
-      .where('memberId', isEqualTo: memberId)
-      .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-      .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-      .orderBy('date', descending: true)
-      .get();
+          .collection('fitnessData')
+          .where('memberId', isEqualTo: memberId)
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .orderBy('date', descending: true)
+          .get();
 
       return snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
@@ -325,13 +330,14 @@ class FirestoreService {
   Stream<Map<String, dynamic>?> getTodaysFitnessData(String memberId) {
     try {
       final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       return _firestore
-      .collection('fitnessData')
-      .doc('${memberId}_$dateKey')
-      .snapshots()
-      .map((doc) => doc.exists ? doc.data() : null);
+          .collection('fitnessData')
+          .doc('${memberId}_$dateKey')
+          .snapshots()
+          .map((doc) => doc.exists ? doc.data() : null);
     } catch (e) {
       debugPrint('Error streaming today\'s fitness data: $e');
       return Stream.value(null);

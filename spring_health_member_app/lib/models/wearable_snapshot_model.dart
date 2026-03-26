@@ -71,8 +71,10 @@ class WearableSnapshotModel {
   });
 
   factory WearableSnapshotModel.fromMap(Map<String, dynamic> map, String id) {
-    final int totalSleepMinutes = (map['totalSleepMinutes'] as num?)?.toInt() ?? 0;
-    final int deepSleepMinutes = (map['deepSleepMinutes'] as num?)?.toInt() ?? 0;
+    final int totalSleepMinutes =
+        (map['totalSleepMinutes'] as num?)?.toInt() ?? 0;
+    final int deepSleepMinutes =
+        (map['deepSleepMinutes'] as num?)?.toInt() ?? 0;
 
     // Derived Sleep Quality
     String sleepQuality = 'poor';
@@ -84,8 +86,10 @@ class WearableSnapshotModel {
       sleepQuality = 'fair';
     }
 
-    final double? bodyTemperature = (map['bodyTemperature'] as num?)?.toDouble();
-    final bool irregularHeartRateEvent = map['irregularHeartRateEvent'] as bool? ?? false;
+    final double? bodyTemperature = (map['bodyTemperature'] as num?)
+        ?.toDouble();
+    final bool irregularHeartRateEvent =
+        map['irregularHeartRateEvent'] as bool? ?? false;
     final double? hrv = (map['heartRateVariability'] as num?)?.toDouble();
 
     // Derived Recovery Status
@@ -117,8 +121,10 @@ class WearableSnapshotModel {
       }
     }
 
-    final double activeCaloriesBurned = (map['activeCaloriesBurned'] as num?)?.toDouble() ?? 0;
-    final double? basalCaloriesBurned = (map['basalCaloriesBurned'] as num?)?.toDouble();
+    final double activeCaloriesBurned =
+        (map['activeCaloriesBurned'] as num?)?.toDouble() ?? 0;
+    final double? basalCaloriesBurned = (map['basalCaloriesBurned'] as num?)
+        ?.toDouble();
     double? totalDailyCalories;
     if (basalCaloriesBurned != null) {
       totalDailyCalories = basalCaloriesBurned + activeCaloriesBurned;
@@ -144,7 +150,8 @@ class WearableSnapshotModel {
       totalSleepMinutes: totalSleepMinutes,
       deepSleepMinutes: deepSleepMinutes,
       remSleepMinutes: (map['remSleepMinutes'] as num?)?.toInt() ?? 0,
-      awakeDuringSleepMinutes: (map['awakeDuringSleepMinutes'] as num?)?.toInt() ?? 0,
+      awakeDuringSleepMinutes:
+          (map['awakeDuringSleepMinutes'] as num?)?.toInt() ?? 0,
       bloodGlucoseMgDl: (map['bloodGlucoseMgDl'] as num?)?.toDouble(),
       waterLitres: (map['waterLitres'] as num?)?.toDouble(),
       totalDailyCalories: totalDailyCalories,
@@ -220,8 +227,10 @@ class WearableSnapshotModel {
       bloodOxygen: bloodOxygen ?? this.bloodOxygen,
       respiratoryRate: respiratoryRate ?? this.respiratoryRate,
       bodyTemperature: bodyTemperature ?? this.bodyTemperature,
-      irregularHeartRateEvent: irregularHeartRateEvent ?? this.irregularHeartRateEvent,
-      avgHeartRateDuringDay: avgHeartRateDuringDay ?? this.avgHeartRateDuringDay,
+      irregularHeartRateEvent:
+          irregularHeartRateEvent ?? this.irregularHeartRateEvent,
+      avgHeartRateDuringDay:
+          avgHeartRateDuringDay ?? this.avgHeartRateDuringDay,
       weightKg: weightKg ?? this.weightKg,
       bodyFatPercentage: bodyFatPercentage ?? this.bodyFatPercentage,
       steps: steps ?? this.steps,
@@ -232,7 +241,8 @@ class WearableSnapshotModel {
       totalSleepMinutes: totalSleepMinutes ?? this.totalSleepMinutes,
       deepSleepMinutes: deepSleepMinutes ?? this.deepSleepMinutes,
       remSleepMinutes: remSleepMinutes ?? this.remSleepMinutes,
-      awakeDuringSleepMinutes: awakeDuringSleepMinutes ?? this.awakeDuringSleepMinutes,
+      awakeDuringSleepMinutes:
+          awakeDuringSleepMinutes ?? this.awakeDuringSleepMinutes,
       bloodGlucoseMgDl: bloodGlucoseMgDl ?? this.bloodGlucoseMgDl,
       waterLitres: waterLitres ?? this.waterLitres,
       totalDailyCalories: totalDailyCalories ?? this.totalDailyCalories,

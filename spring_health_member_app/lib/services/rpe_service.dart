@@ -50,10 +50,7 @@ class RpeService {
     final average = values.reduce((a, b) => a + b) / values.length;
 
     // Update aiPlans/{uid} with rolling average
-    await FirebaseFirestore.instance
-        .collection('aiPlans')
-        .doc(_uid)
-        .update({
+    await FirebaseFirestore.instance.collection('aiPlans').doc(_uid).update({
       'lastAverageRpe': double.parse(average.toStringAsFixed(2)),
       'lastRpeSubmittedAt': Timestamp.now(),
     });

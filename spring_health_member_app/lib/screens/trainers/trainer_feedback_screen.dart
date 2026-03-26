@@ -6,11 +6,11 @@ import '../../core/theme/app_colors.dart';
 
 const List<String> _kWorkoutTypes = [
   'Strength Training',
-'Cardio',
-'HIIT',
-'Yoga / Flexibility',
-'Body Composition',
-'General',
+  'Cardio',
+  'HIIT',
+  'Yoga / Flexibility',
+  'Body Composition',
+  'General',
 ];
 
 class TrainerFeedbackScreen extends StatefulWidget {
@@ -26,15 +26,12 @@ class TrainerFeedbackScreen extends StatefulWidget {
   });
 
   @override
-  State<TrainerFeedbackScreen> createState() =>
-  _TrainerFeedbackScreenState();
+  State<TrainerFeedbackScreen> createState() => _TrainerFeedbackScreenState();
 }
 
-class _TrainerFeedbackScreenState
-extends State<TrainerFeedbackScreen> {
+class _TrainerFeedbackScreenState extends State<TrainerFeedbackScreen> {
   final TrainerFeedbackService _service = TrainerFeedbackService();
-  final TextEditingController _messageController =
-  TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String _selectedWorkoutType = 'General';
@@ -74,7 +71,8 @@ extends State<TrainerFeedbackScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to submit: $e'),
-            backgroundColor: Colors.red),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -96,14 +94,18 @@ extends State<TrainerFeedbackScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Workout Feedback',
-                       style: TextStyle(
-                         color: Colors.white,
-                         fontWeight: FontWeight.bold,
-                         fontSize: 16)),
-                      Text('to ${widget.trainerName}',
-                           style: const TextStyle(
-                             color: Colors.white54, fontSize: 11)),
+            const Text(
+              'Workout Feedback',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              'to ${widget.trainerName}',
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
+            ),
           ],
         ),
       ),
@@ -141,7 +143,8 @@ extends State<TrainerFeedbackScreen> {
         color: Colors.white70,
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.5),
+        letterSpacing: 0.5,
+      ),
     );
   }
 
@@ -156,29 +159,24 @@ extends State<TrainerFeedbackScreen> {
           borderRadius: BorderRadius.circular(20),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                ? AppColors.neonTeal.withValues(alpha: 0.2)
-                : Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                  ? AppColors.neonTeal
-                  : Colors.white24,
-                ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.neonTeal.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected ? AppColors.neonTeal : Colors.white24,
               ),
-              child: Text(
-                type,
-                style: TextStyle(
-                  color: isSelected ? AppColors.neonTeal : Colors.white54,
-                  fontSize: 13,
-                  fontWeight: isSelected
-                  ? FontWeight.w600
-                  : FontWeight.normal,
-                ),
+            ),
+            child: Text(
+              type,
+              style: TextStyle(
+                color: isSelected ? AppColors.neonTeal : Colors.white54,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
+            ),
           ),
         );
       }).toList(),
@@ -195,9 +193,7 @@ extends State<TrainerFeedbackScreen> {
             padding: const EdgeInsets.only(right: 8),
             child: Icon(
               star <= _rating ? Icons.star : Icons.star_border,
-              color: star <= _rating
-              ? AppColors.neonLime
-              : Colors.white38,
+              color: star <= _rating ? AppColors.neonLime : Colors.white38,
               size: 32,
             ),
           ),
@@ -213,24 +209,21 @@ extends State<TrainerFeedbackScreen> {
       maxLines: 5,
       decoration: InputDecoration(
         hintText:
-        'Describe the workout session, what went well, what to improve...',
+            'Describe the workout session, what went well, what to improve...',
         hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.05),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-          const BorderSide(color: Colors.white24),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-          const BorderSide(color: Colors.white24),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-          const BorderSide(color: AppColors.neonTeal),
+          borderSide: const BorderSide(color: AppColors.neonTeal),
         ),
       ),
       validator: (v) {
@@ -254,22 +247,25 @@ extends State<TrainerFeedbackScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.neonTeal,
           foregroundColor: Colors.black,
-            disabledBackgroundColor: AppColors.neonTeal.withValues(alpha: 0.4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
-              elevation: 0,
+          disabledBackgroundColor: AppColors.neonTeal.withValues(alpha: 0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 0,
         ),
         child: _submitting
-        ? const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            color: Colors.black, strokeWidth: 2))
-        : const Text(
-          'Submit Feedback',
-          style: TextStyle(
-            fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.black,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Text(
+                'Submit Feedback',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
       ),
     );
   }

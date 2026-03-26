@@ -72,7 +72,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
       // Firestore sync — fires-and-forgets, won't block UI
       if (widget.memberId != null) {
-        HealthService.instance.saveToFirestore(widget.memberId!, today).ignore();
+        HealthService.instance
+            .saveToFirestore(widget.memberId!, today)
+            .ignore();
       }
 
       if (!mounted) return;
@@ -124,21 +126,22 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
         content: Text(
           didSync
               ? (todayStats.steps == 0)
-                  ? '0 steps found. Ensure Samsung Health/Google Fit is syncing data to Health Connect.'
-                  : '✅ Synced from Health Connect!'
+                    ? '0 steps found. Ensure Samsung Health/Google Fit is syncing data to Health Connect.'
+                    : '✅ Synced from Health Connect!'
               : _hasHealthPermission
-                  ? '⚠️ Connected but no data yet — check Samsung Health sharing'
-                  : 'Connect Health Connect to sync your stats.',
+              ? '⚠️ Connected but no data yet — check Samsung Health sharing'
+              : 'Connect Health Connect to sync your stats.',
         ),
         backgroundColor: didSync
-            ? (todayStats.steps == 0 ? AppColors.neonOrange : AppColors.neonTeal)
+            ? (todayStats.steps == 0
+                  ? AppColors.neonOrange
+                  : AppColors.neonTeal)
             : AppColors.neonOrange,
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: (didSync && todayStats.steps == 0) ? 5 : 3),
       ),
     );
   }
-
 
   // ── Connect device dialog ──────────────────────────────────────────────────
 
@@ -156,8 +159,8 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               SnackBar(
                 content: Text(
                   '⚡ Connected to '
-                '${Platform.isIOS ? "Apple Health" : "Health Connect"}! '
-                'Loading your real data…',
+                  '${Platform.isIOS ? "Apple Health" : "Health Connect"}! '
+                  'Loading your real data…',
                 ),
                 backgroundColor: AppColors.neonTeal,
                 behavior: SnackBarBehavior.floating,
@@ -173,8 +176,10 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   String _getWorkoutIconAsset(String type) {
     final t = type.toLowerCase();
-    if (t.contains('upper') || t.contains('power')) return 'assets/icons/dumbbell_3d.png';
-    if (t.contains('cardio') || t.contains('run')) return 'assets/icons/running_shoe_3d.png';
+    if (t.contains('upper') || t.contains('power'))
+      return 'assets/icons/dumbbell_3d.png';
+    if (t.contains('cardio') || t.contains('run'))
+      return 'assets/icons/running_shoe_3d.png';
     if (t.contains('yoga')) return 'assets/icons/yoga_3d.png';
     if (t.contains('leg')) return 'assets/icons/dumbbell_3d.png';
     return 'assets/icons/fire_3d.png';
@@ -182,7 +187,8 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   Color _getWorkoutColor(String type) {
     final t = type.toLowerCase();
-    if (t.contains('power') || t.contains('strength')) return Colors.purpleAccent;
+    if (t.contains('power') || t.contains('strength'))
+      return Colors.purpleAccent;
     if (t.contains('cardio')) return AppColors.neonTeal;
     if (t.contains('yoga')) return Colors.blueAccent;
     if (t.contains('leg')) return AppColors.neonLime;
@@ -211,15 +217,17 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               decoration: BoxDecoration(
                 color: AppColors.neonTeal.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: AppColors.neonTeal.withValues(alpha: 0.4),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Platform.isIOS
-                    ? Icons.favorite_rounded
-                    : Icons.monitor_heart_rounded,
+                        ? Icons.favorite_rounded
+                        : Icons.monitor_heart_rounded,
                     color: AppColors.neonTeal,
                     size: 12,
                   ),
@@ -237,30 +245,30 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               ),
             ).animate().fadeIn(),
 
-            // Refresh button
-            IconButton(
-              onPressed: isLoading ? null : _handleRefresh,
-              icon: isLoading
-              ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.neonLime,
-                ),
-              )
-              : const Icon(Icons.refresh_rounded, color: AppColors.neonLime),
-            ),
+          // Refresh button
+          IconButton(
+            onPressed: isLoading ? null : _handleRefresh,
+            icon: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.neonLime,
+                    ),
+                  )
+                : const Icon(Icons.refresh_rounded, color: AppColors.neonLime),
+          ),
 
-            // Sync/connect button
-            IconButton(
-              onPressed: _showConnectDeviceDialog,
-              icon: Icon(
-                isConnected ? Icons.sync_rounded : Icons.sync_disabled,
-                color: isConnected ? AppColors.neonTeal : AppColors.gray400,
-              ),
-              tooltip: isConnected ? 'Connected' : 'Connect device',
+          // Sync/connect button
+          IconButton(
+            onPressed: _showConnectDeviceDialog,
+            icon: Icon(
+              isConnected ? Icons.sync_rounded : Icons.sync_disabled,
+              color: isConnected ? AppColors.neonTeal : AppColors.gray400,
             ),
+            tooltip: isConnected ? 'Connected' : 'Connect device',
+          ),
         ],
       ),
       body: RefreshIndicator(
@@ -282,7 +290,7 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                        WorkoutHistoryScreen(memberId: widget.memberId!),
+                            WorkoutHistoryScreen(memberId: widget.memberId!),
                       ),
                     ),
                     icon: const Icon(Icons.fitness_center_rounded),
@@ -296,10 +304,10 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.neonLime,
                       foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -308,9 +316,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
               // ── Chart ─────────────────────────────────────────────
               const FitnessChartWidget()
-              .animate()
-              .fadeIn(duration: 800.ms)
-              .slideY(begin: 0.1, end: 0),
+                  .animate()
+                  .fadeIn(duration: 800.ms)
+                  .slideY(begin: 0.1, end: 0),
               const SizedBox(height: 32),
 
               // ── Today's stats header ───────────────────────────────
@@ -320,25 +328,27 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                   Text("TODAY'S STATS", style: AppTextStyles.heading3),
                   // Live / Empty badge
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: todayStats.isRealData
-                      ? AppColors.success.withValues(alpha: 0.15)
-                      : AppColors.gray800,
+                          ? AppColors.success.withValues(alpha: 0.15)
+                          : AppColors.gray800,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: todayStats.isRealData
-                        ? AppColors.success.withValues(alpha: 0.5)
-                        : AppColors.gray600.withValues(alpha: 0.3),
+                            ? AppColors.success.withValues(alpha: 0.5)
+                            : AppColors.gray600.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Text(
                       todayStats.isRealData ? '● LIVE' : '◌ NOT SYNCED',
                       style: TextStyle(
                         color: todayStats.isRealData
-                        ? AppColors.success
-                        : AppColors.gray600,
+                            ? AppColors.success
+                            : AppColors.gray600,
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
@@ -350,24 +360,24 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               const SizedBox(height: 16),
 
               // ── Hero stats card ────────────────────────────────────
-              _buildTodayStatsCard()
-              .animate()
-              .fadeIn(delay: 200.ms)
-              .scale(),
+              _buildTodayStatsCard().animate().fadeIn(delay: 200.ms).scale(),
               const SizedBox(height: 32),
 
               // ── Weekly Goals ───────────────────────────────────────
-              Text('WEEKLY GOALS', style: AppTextStyles.heading3)
-              .animate()
-              .fadeIn(delay: 250.ms),
+              Text(
+                'WEEKLY GOALS',
+                style: AppTextStyles.heading3,
+              ).animate().fadeIn(delay: 250.ms),
               const SizedBox(height: 16),
 
               _buildGoalRow(
                 'Running',
-                weeklyData.fold(0.0, (t, s) => t + s.distance).toStringAsFixed(1),
+                weeklyData
+                    .fold(0.0, (t, s) => t + s.distance)
+                    .toStringAsFixed(1),
                 'km',
                 weeklyData.fold(0.0, (t, s) => t + s.distance) /
-                WeeklyGoal.defaults.runningKm,
+                    WeeklyGoal.defaults.runningKm,
                 AppColors.neonTeal,
                 'assets/icons/running_shoe_3d.png',
                 delay: 300,
@@ -379,7 +389,7 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                 weeklyData.fold(0, (t, s) => t + s.calories).toString(),
                 'kcal',
                 weeklyData.fold(0, (t, s) => t + s.calories) /
-                WeeklyGoal.defaults.caloriesKcal,
+                    WeeklyGoal.defaults.caloriesKcal,
                 AppColors.neonOrange,
                 'assets/icons/fire_3d.png',
                 delay: 400,
@@ -389,10 +399,10 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               _buildGoalRow(
                 'Active Time',
                 (weeklyData.fold(0, (t, s) => t + s.activeMinutes) / 60)
-                .toStringAsFixed(1),
+                    .toStringAsFixed(1),
                 'hrs',
                 (weeklyData.fold(0, (t, s) => t + s.activeMinutes) / 60) /
-                WeeklyGoal.defaults.activeHours,
+                    WeeklyGoal.defaults.activeHours,
                 AppColors.neonLime,
                 'assets/icons/dumbbell_3d.png',
                 delay: 500,
@@ -406,14 +416,15 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                   Text('RECENT WORKOUTS', style: AppTextStyles.heading3),
                   TextButton(
                     onPressed: widget.memberId != null
-                    ? () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WorkoutHistoryScreen(
-                          memberId: widget.memberId!),
-                      ),
-                    )
-                    : null,
+                        ? () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => WorkoutHistoryScreen(
+                                memberId: widget.memberId!,
+                              ),
+                            ),
+                          )
+                        : null,
                     child: Text(
                       'VIEW ALL',
                       style: AppTextStyles.link.copyWith(fontSize: 12),
@@ -426,32 +437,33 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               // Show empty state if no workouts
               if (recentWorkouts.isEmpty)
                 _buildEmptyWorkouts()
-                else
-                  ...recentWorkouts.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final workout = entry.value;
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: index < recentWorkouts.length - 1 ? 12 : 0),
-                        child: _buildWorkoutItem(
-                          workout.type,
-                          '${workout.duration} min • ${workout.notes ?? "Workout"}',
-                          _getWorkoutColor(workout.type),
-                          _getWorkoutIconAsset(workout.type),
-                          timeago.format(workout.startTime, locale: 'en_short'),
-                          workout.caloriesBurned,
-                          delay: 700 + (index * 100),
-                        ),
-                    );
-                  }),
+              else
+                ...recentWorkouts.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final workout = entry.value;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index < recentWorkouts.length - 1 ? 12 : 0,
+                    ),
+                    child: _buildWorkoutItem(
+                      workout.type,
+                      '${workout.duration} min • ${workout.notes ?? "Workout"}',
+                      _getWorkoutColor(workout.type),
+                      _getWorkoutIconAsset(workout.type),
+                      timeago.format(workout.startTime, locale: 'en_short'),
+                      workout.caloriesBurned,
+                      delay: 700 + (index * 100),
+                    ),
+                  );
+                }),
 
-                  const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-                  // ── Connect device CTA (only if NOT connected) ─────────
-                  if (!isConnected)
-                    _buildConnectCTA().animate().fadeIn(delay: 900.ms).scale(),
+              // ── Connect device CTA (only if NOT connected) ─────────
+              if (!isConnected)
+                _buildConnectCTA().animate().fadeIn(delay: 900.ms).scale(),
 
-                    const SizedBox(height: 32),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -486,7 +498,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    (todayStats.steps == 0 && !todayStats.isRealData) ? '--' : todayStats.steps.toString(),
+                    (todayStats.steps == 0 && !todayStats.isRealData)
+                        ? '--'
+                        : todayStats.steps.toString(),
                     style: AppTextStyles.heading1.copyWith(
                       fontSize: 48,
                       color: AppColors.neonLime,
@@ -506,27 +520,32 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                 ],
               ),
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.neonOrange,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.local_fire_department_rounded,
-                               size: 14, color: Colors.black),
-                           const SizedBox(width: 4),
-                           Text(
-                             todayStats.calories == 0
-                             ? '-- cal'
-                           : '${todayStats.calories} cal',
-                           style: const TextStyle(
-                             color: Colors.black,
-                             fontWeight: FontWeight.bold,
-                             fontSize: 12,
-                           ),
-                           ),
+                    const Icon(
+                      Icons.local_fire_department_rounded,
+                      size: 14,
+                      color: Colors.black,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      todayStats.calories == 0
+                          ? '-- cal'
+                          : '${todayStats.calories} cal',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -538,9 +557,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               _buildQuickStat(
                 Icons.directions_walk_rounded,
                 todayStats.distance == 0
-                ? '-- km'
-              : '${todayStats.distance.toStringAsFixed(1)} km',
-              AppColors.neonTeal,
+                    ? '-- km'
+                    : '${todayStats.distance.toStringAsFixed(1)} km',
+                AppColors.neonTeal,
               ),
               const SizedBox(width: 20),
               _buildBpmStat(),
@@ -548,9 +567,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
               _buildQuickStat(
                 Icons.timer_rounded,
                 todayStats.activeMinutes == 0
-                ? '-- min'
-              : '${todayStats.activeMinutes} min',
-              AppColors.neonOrange,
+                    ? '-- min'
+                    : '${todayStats.activeMinutes} min',
+                AppColors.neonOrange,
               ),
             ],
           ),
@@ -561,8 +580,8 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   Widget _buildBpmStat() {
     final bpmText = todayStats.heartRate == 0
-    ? '-- bpm'
-    : '${todayStats.heartRate} bpm';
+        ? '-- bpm'
+        : '${todayStats.heartRate} bpm';
     final w = Row(
       children: [
         const Icon(Icons.favorite_rounded, size: 16, color: Colors.redAccent),
@@ -580,7 +599,12 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
     try {
       return w
           .animate(onPlay: (c) => c.repeat(reverse: true))
-          .scaleXY(begin: 1.0, end: 1.08, duration: 700.ms, curve: Curves.easeInOut);
+          .scaleXY(
+            begin: 1.0,
+            end: 1.08,
+            duration: 700.ms,
+            curve: Curves.easeInOut,
+          );
     } catch (e) {
       return w; // Fallback gracefully if animation fails
     }
@@ -614,18 +638,21 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
       ),
       child: Column(
         children: [
-          Icon(Icons.fitness_center_rounded,
-               size: 40, color: AppColors.gray600),
-               const SizedBox(height: 12),
-               Text(
-                 'No workouts logged yet',
-                 style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
-               ),
-               const SizedBox(height: 6),
-               Text(
-                 'Log your first workout to see it here.',
-                 style: AppTextStyles.caption.copyWith(color: AppColors.gray600),
-               ),
+          Icon(
+            Icons.fitness_center_rounded,
+            size: 40,
+            color: AppColors.gray600,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No workouts logged yet',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Log your first workout to see it here.',
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray600),
+          ),
         ],
       ),
     ).animate().fadeIn(delay: 700.ms);
@@ -640,8 +667,8 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
     double progress,
     Color color,
     String iconPath, {
-      required int delay,
-    }) {
+    required int delay,
+  }) {
     final clamped = progress.clamp(0.0, 1.0);
     final pct = (clamped * 100).toInt();
 
@@ -663,7 +690,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                   const SizedBox(width: 12),
                   Text(
                     label,
-                    style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white),
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                 ],
               ),
@@ -679,14 +708,19 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                         ),
                         TextSpan(
                           text: ' $unit',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.gray600),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.gray600,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -717,160 +751,181 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
         ],
       ),
     ).animate().fadeIn(delay: delay.ms).slideX(begin: 0.1, end: 0);
-    }
+  }
 
-    // ── Connect device CTA ─────────────────────────────────────────────────────
+  // ── Connect device CTA ─────────────────────────────────────────────────────
 
-    Widget _buildConnectCTA() {
-      final platformName = Platform.isIOS ? 'Apple Health' : 'Health Connect';
-      final platformIcon =
-      Platform.isIOS ? Icons.favorite_rounded : Icons.monitor_heart_rounded;
+  Widget _buildConnectCTA() {
+    final platformName = Platform.isIOS ? 'Apple Health' : 'Health Connect';
+    final platformIcon = Platform.isIOS
+        ? Icons.favorite_rounded
+        : Icons.monitor_heart_rounded;
 
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.neonTeal.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          children: [
-            Icon(platformIcon, size: 48, color: AppColors.neonTeal),
-            const SizedBox(height: 16),
-            Text(
-              'Connect $platformName',
-              style: AppTextStyles.heading3.copyWith(color: AppColors.neonTeal),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sync your real steps, calories and heart rate automatically. '
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.neonTeal.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(platformIcon, size: 48, color: AppColors.neonTeal),
+          const SizedBox(height: 16),
+          Text(
+            'Connect $platformName',
+            style: AppTextStyles.heading3.copyWith(color: AppColors.neonTeal),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Sync your real steps, calories and heart rate automatically. '
             'Works with Apple Watch, Wear OS, Mi Band & Fitbit.',
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
             textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _showConnectDeviceDialog,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.neonTeal,
-                  foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                ),
-                icon: Icon(platformIcon, size: 18),
-                label: const Text(
-                  'CONNECT NOW',
-                  style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _showConnectDeviceDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.neonTeal,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // ── Asset / icon helpers ───────────────────────────────────────────────────
-
-    Widget _buildIconOrAsset(String iconPath, Color color) {
-      return Image.asset(
-        iconPath,
-        height: 32,
-        width: 32,
-        errorBuilder: (context, error, stackTrace) => _getFallbackIcon(iconPath, color),
-      ).animate().scale(duration: 1.seconds, curve: Curves.elasticOut);
-    }
-
-
-    Widget _getFallbackIcon(String iconPath, Color color) {
-      if (iconPath.contains('calendar')) {
-        return Icon(Icons.calendar_today_rounded, color: color, size: 28); // ← return, not child:
-      }
-      return Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(Icons.fitness_center_rounded, size: 20, color: color), // ← Icons.fitness_center_rounded, not icon
-      );
-    }
-
-
-    // ── Workout item card ──────────────────────────────────────────────────────
-
-    Widget _buildWorkoutItem(
-      String title,
-      String subtitle,
-      Color color,
-      String iconAsset,
-      String timeAgoStr,
-      int calories, {
-        required int delay,
-      }) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.cardSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+              icon: Icon(platformIcon, size: 18),
+              label: const Text(
+                'CONNECT NOW',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
               ),
-              child: Image.asset(iconAsset, width: 24, height: 24),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.bold,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Asset / icon helpers ───────────────────────────────────────────────────
+
+  Widget _buildIconOrAsset(String iconPath, Color color) {
+    return Image.asset(
+      iconPath,
+      height: 32,
+      width: 32,
+      errorBuilder: (context, error, stackTrace) =>
+          _getFallbackIcon(iconPath, color),
+    ).animate().scale(duration: 1.seconds, curve: Curves.elasticOut);
+  }
+
+  Widget _getFallbackIcon(String iconPath, Color color) {
+    if (iconPath.contains('calendar')) {
+      return Icon(
+        Icons.calendar_today_rounded,
+        color: color,
+        size: 28,
+      ); // ← return, not child:
+    }
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(
+        Icons.fitness_center_rounded,
+        size: 20,
+        color: color,
+      ), // ← Icons.fitness_center_rounded, not icon
+    );
+  }
+
+  // ── Workout item card ──────────────────────────────────────────────────────
+
+  Widget _buildWorkoutItem(
+    String title,
+    String subtitle,
+    Color color,
+    String iconAsset,
+    String timeAgoStr,
+    int calories, {
+    required int delay,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Image.asset(iconAsset, width: 24, height: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(subtitle, style: AppTextStyles.caption),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: 12,
+                      color: AppColors.gray600,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: AppTextStyles.caption),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time_rounded,
-                           size: 12, color: AppColors.gray600),
-                      const SizedBox(width: 4),
-                      Text(
-                        timeAgoStr.toUpperCase(),
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray600, fontSize: 10),
+                    const SizedBox(width: 4),
+                    Text(
+                      timeAgoStr.toUpperCase(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray600,
+                        fontSize: 10,
                       ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.local_fire_department_rounded,
-                           size: 12, color: AppColors.neonOrange),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$calories cal',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray600, fontSize: 10),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.local_fire_department_rounded,
+                      size: 12,
+                      color: AppColors.neonOrange,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$calories cal',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray600,
+                        fontSize: 10,
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.gray600),
-          ],
-        ),
-      ).animate().fadeIn(delay: delay.ms).slideX(begin: 0.1, end: 0);
-      }
+          ),
+          Icon(Icons.chevron_right_rounded, color: AppColors.gray600),
+        ],
+      ),
+    ).animate().fadeIn(delay: delay.ms).slideX(begin: 0.1, end: 0);
+  }
 }

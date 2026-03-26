@@ -52,20 +52,20 @@ class ProfileHeaderWidget extends StatelessWidget {
                   radius: 50,
                   backgroundColor: AppColors.cardSurface,
                   backgroundImage: member.photoUrl != null
-                  ? NetworkImage(member.photoUrl!)
-                  : null,
+                      ? NetworkImage(member.photoUrl!)
+                      : null,
                   child: member.photoUrl == null
-                  ? Text(
-                    member.name.isNotEmpty
-                    ? member.name[0].toUpperCase()
-                    : 'M',
-                    style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.neonLime,
-                    ),
-                  )
-                  : null,
+                      ? Text(
+                          member.name.isNotEmpty
+                              ? member.name[0].toUpperCase()
+                              : 'M',
+                          style: const TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.neonLime,
+                          ),
+                        )
+                      : null,
                 ),
               ),
               if (onEditPhoto != null)
@@ -108,11 +108,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.phone_outlined,
-                size: 16,
-                color: AppColors.gray400,
-              ),
+              Icon(Icons.phone_outlined, size: 16, color: AppColors.gray400),
               const SizedBox(width: 8),
               Text(
                 '+91 ${member.phone}',

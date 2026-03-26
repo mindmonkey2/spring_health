@@ -14,13 +14,13 @@ class _Rank {
 }
 
 const _ranks = [
-  _Rank('E',   AppColors.rankE, 0),
-  _Rank('D',   AppColors.rankD, 500),
-  _Rank('C',   AppColors.rankC, 1500),
-  _Rank('B',   AppColors.rankB, 3500),
-  _Rank('A',   AppColors.rankA, 7000),
-  _Rank('S',   AppColors.rankS, 13000),
-  _Rank('SS',  AppColors.rankSS, 25000),
+  _Rank('E', AppColors.rankE, 0),
+  _Rank('D', AppColors.rankD, 500),
+  _Rank('C', AppColors.rankC, 1500),
+  _Rank('B', AppColors.rankB, 3500),
+  _Rank('A', AppColors.rankA, 7000),
+  _Rank('S', AppColors.rankS, 13000),
+  _Rank('SS', AppColors.rankSS, 25000),
   _Rank('SSS', AppColors.rankSSS, 50000),
 ];
 
@@ -71,9 +71,7 @@ class _PersonalBestScreenState extends State<PersonalBestScreen>
   @override
   Widget build(BuildContext context) {
     if (_uid == null) {
-      return const Scaffold(
-        body: Center(child: Text('Not signed in')),
-      );
+      return const Scaffold(body: Center(child: Text('Not signed in')));
     }
 
     return Scaffold(
@@ -229,10 +227,7 @@ class _PersonalBestScreenState extends State<PersonalBestScreen>
                     rank.name == next.name
                         ? 'Max Rank Achieved!'
                         : 'Next: ${next.name} Rank at ${next.minXp} XP',
-                    style: TextStyle(
-                      color: AppColors.gray400,
-                      fontSize: 11,
-                    ),
+                    style: TextStyle(color: AppColors.gray400, fontSize: 11),
                   ),
                 ],
               ),
@@ -290,8 +285,10 @@ class _ExerciseListTab extends StatelessWidget {
         _ChecklistBanner(
           isComplete: _checklistComplete,
           completedCount: CoreExercise.values
-              .where((e) => records
-                  .any((r) => r.exerciseKey == e.key && r.loggedToday))
+              .where(
+                (e) =>
+                    records.any((r) => r.exerciseKey == e.key && r.loggedToday),
+              )
               .length,
           accentColor: rankColor,
         ),
@@ -339,20 +336,25 @@ class _ChecklistBanner extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isComplete
-              ? [AppColors.gold.withValues(alpha: 0.2), AppColors.warning.withValues(alpha: 0.1)]
-              : [accentColor.withValues(alpha: 0.15), accentColor.withValues(alpha: 0.05)],
+              ? [
+                  AppColors.gold.withValues(alpha: 0.2),
+                  AppColors.warning.withValues(alpha: 0.1),
+                ]
+              : [
+                  accentColor.withValues(alpha: 0.15),
+                  accentColor.withValues(alpha: 0.05),
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isComplete ? AppColors.gold : accentColor.withValues(alpha: 0.4),
+          color: isComplete
+              ? AppColors.gold
+              : accentColor.withValues(alpha: 0.4),
         ),
       ),
       child: Row(
         children: [
-          Text(
-            isComplete ? '🏆' : '🎯',
-            style: const TextStyle(fontSize: 28),
-          ),
+          Text(isComplete ? '🏆' : '🎯', style: const TextStyle(fontSize: 28)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -370,10 +372,7 @@ class _ChecklistBanner extends StatelessWidget {
                   isComplete
                       ? '+${PersonalBestXP.dailyChecklist} Bonus XP Earned!'
                       : '$completedCount / $total exercises logged today',
-                  style: TextStyle(
-                    color: AppColors.gray400,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.gray400, fontSize: 12),
                 ),
               ],
             ),
@@ -458,7 +457,9 @@ class _ExerciseCardState extends State<_ExerciseCard> {
                 suffixStyle: TextStyle(color: AppColors.gray400),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.gray400.withValues(alpha: 0.3)),
+                  borderSide: BorderSide(
+                    color: AppColors.gray400.withValues(alpha: 0.3),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -484,7 +485,9 @@ class _ExerciseCardState extends State<_ExerciseCard> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.neonLime,
               foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () async {
               final val = int.tryParse(controller.text.trim());
@@ -498,7 +501,8 @@ class _ExerciseCardState extends State<_ExerciseCard> {
                   value: val,
                 );
                 widget.onXpEarned(xp);
-                if (mounted) _showXpToast(xp, val > (widget.record?.currentBest ?? 0));
+                if (mounted)
+                  _showXpToast(xp, val > (widget.record?.currentBest ?? 0));
               } finally {
                 if (mounted) setState(() => _isLogging = false);
               }
@@ -516,9 +520,20 @@ class _ExerciseCardState extends State<_ExerciseCard> {
         backgroundColor: isPB ? AppColors.gold : AppColors.neonLime,
         content: Row(
           children: [
-            Text(isPB ? '🏆 NEW PERSONAL BEST! ' : '✅ Logged! ',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-            Text('+$xp XP', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            Text(
+              isPB ? '🏆 NEW PERSONAL BEST! ' : '✅ Logged! ',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Text(
+              '+$xp XP',
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         duration: const Duration(seconds: 3),
@@ -533,7 +548,9 @@ class _ExerciseCardState extends State<_ExerciseCard> {
     final record = widget.record;
     final loggedToday = record?.loggedToday ?? false;
     final currentBest = record?.currentBest ?? 0;
-    final lastEntry = record?.history.isNotEmpty == true ? record!.history.last : null;
+    final lastEntry = record?.history.isNotEmpty == true
+        ? record!.history.last
+        : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -547,7 +564,12 @@ class _ExerciseCardState extends State<_ExerciseCard> {
           width: 1.5,
         ),
         boxShadow: loggedToday
-            ? [BoxShadow(color: AppColors.neonLime.withValues(alpha: 0.15), blurRadius: 8)]
+            ? [
+                BoxShadow(
+                  color: AppColors.neonLime.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                ),
+              ]
             : null,
       ),
       child: ListTile(
@@ -560,7 +582,10 @@ class _ExerciseCardState extends State<_ExerciseCard> {
             color: AppColors.neonLime.withValues(alpha: 0.1),
           ),
           child: Center(
-            child: Text(widget.exercise.emoji, style: const TextStyle(fontSize: 22)),
+            child: Text(
+              widget.exercise.emoji,
+              style: const TextStyle(fontSize: 22),
+            ),
           ),
         ),
         title: Text(
@@ -590,19 +615,26 @@ class _ExerciseCardState extends State<_ExerciseCard> {
                 ),
               )
             : loggedToday
-                ? Icon(Icons.check_circle_rounded, color: AppColors.neonLime, size: 28)
-                : ElevatedButton(
-                    onPressed: _showLogDialog,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.neonLime,
-                      foregroundColor: Colors.black,
-                      minimumSize: const Size(64, 36),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text('Log', style: TextStyle(fontWeight: FontWeight.bold)),
+            ? Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.neonLime,
+                size: 28,
+              )
+            : ElevatedButton(
+                onPressed: _showLogDialog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.neonLime,
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(64, 36),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                ),
+                child: const Text(
+                  'Log',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
       ),
     );
   }
@@ -671,11 +703,23 @@ class _ProgressTabState extends State<_ProgressTab> {
         if (record.exerciseKey.isNotEmpty)
           Row(
             children: [
-              _StatChip(label: 'Best', value: '${record.currentBest} ${_selected.unitShort}', color: widget.rankColor),
+              _StatChip(
+                label: 'Best',
+                value: '${record.currentBest} ${_selected.unitShort}',
+                color: widget.rankColor,
+              ),
               const SizedBox(width: 10),
-              _StatChip(label: 'Entries', value: '${record.history.length}', color: AppColors.neonLime),
+              _StatChip(
+                label: 'Entries',
+                value: '${record.history.length}',
+                color: AppColors.neonLime,
+              ),
               const SizedBox(width: 10),
-              _StatChip(label: 'XP', value: '${record.totalXpEarned}', color: AppColors.gold),
+              _StatChip(
+                label: 'XP',
+                value: '${record.totalXpEarned}',
+                color: AppColors.gold,
+              ),
             ],
           ),
 
@@ -715,7 +759,11 @@ class _StatChip extends StatelessWidget {
   final String value;
   final Color color;
 
-  const _StatChip({required this.label, required this.value, required this.color});
+  const _StatChip({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -728,11 +776,15 @@ class _StatChip extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(value,
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.bold, fontSize: 16)),
-          Text(label,
-              style: TextStyle(color: AppColors.gray400, fontSize: 11)),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          Text(label, style: TextStyle(color: AppColors.gray400, fontSize: 11)),
         ],
       ),
     );
@@ -754,7 +806,9 @@ class _ProgressChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Show last 14 entries max
-    final data = entries.length > 14 ? entries.sublist(entries.length - 14) : entries;
+    final data = entries.length > 14
+        ? entries.sublist(entries.length - 14)
+        : entries;
 
     return Container(
       height: 200,
@@ -769,10 +823,7 @@ class _ProgressChart extends StatelessWidget {
           alignment: Alignment.topRight,
           child: Text(
             unit,
-            style: TextStyle(
-              color: AppColors.gray400,
-              fontSize: 11,
-            ),
+            style: TextStyle(color: AppColors.gray400, fontSize: 11),
           ),
         ),
       ),
@@ -826,7 +877,10 @@ class _ChartPainter extends CustomPainter {
 
     for (int i = 0; i < entries.length; i++) {
       final x = xStep * i;
-      final y = size.height - ((entries[i].value - minVal) / range) * size.height * 0.85 - 10;
+      final y =
+          size.height -
+          ((entries[i].value - minVal) / range) * size.height * 0.85 -
+          10;
       if (i == 0) {
         path.moveTo(x, y);
         fillPath.moveTo(x, size.height);
@@ -847,11 +901,18 @@ class _ChartPainter extends CustomPainter {
     final dotPaint = Paint()..style = PaintingStyle.fill;
     for (int i = 0; i < entries.length; i++) {
       final x = xStep * i;
-      final y = size.height - ((entries[i].value - minVal) / range) * size.height * 0.85 - 10;
+      final y =
+          size.height -
+          ((entries[i].value - minVal) / range) * size.height * 0.85 -
+          10;
       dotPaint.color = entries[i].isPersonalBest
           ? AppColors.gold
           : color.withValues(alpha: 0.7);
-      canvas.drawCircle(Offset(x, y), entries[i].isPersonalBest ? 6 : 4, dotPaint);
+      canvas.drawCircle(
+        Offset(x, y),
+        entries[i].isPersonalBest ? 6 : 4,
+        dotPaint,
+      );
     }
   }
 

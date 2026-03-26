@@ -37,6 +37,7 @@ class ChallengeTeam {
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
 enum ChallengeType { stepWars, caloriesCrusher, workoutWarrior }
+
 enum ChallengeStatus { upcoming, active, completed }
 
 // ── Challenge ─────────────────────────────────────────────────────────────────
@@ -74,36 +75,47 @@ class ChallengeModel {
 
   String get typeLabel {
     switch (type) {
-      case ChallengeType.stepWars:       return 'Step Wars';
-      case ChallengeType.caloriesCrusher: return 'Calorie Crusher';
-      case ChallengeType.workoutWarrior:  return 'Workout Warrior';
+      case ChallengeType.stepWars:
+        return 'Step Wars';
+      case ChallengeType.caloriesCrusher:
+        return 'Calorie Crusher';
+      case ChallengeType.workoutWarrior:
+        return 'Workout Warrior';
     }
   }
 
   String get typeUnit {
     switch (type) {
-      case ChallengeType.stepWars:       return 'steps';
-      case ChallengeType.caloriesCrusher: return 'cal';
-      case ChallengeType.workoutWarrior:  return 'workouts';
+      case ChallengeType.stepWars:
+        return 'steps';
+      case ChallengeType.caloriesCrusher:
+        return 'cal';
+      case ChallengeType.workoutWarrior:
+        return 'workouts';
     }
   }
 
   String get typeEmoji {
     switch (type) {
-      case ChallengeType.stepWars:       return '🚶';
-      case ChallengeType.caloriesCrusher: return '🔥';
-      case ChallengeType.workoutWarrior:  return '💪';
+      case ChallengeType.stepWars:
+        return '🚶';
+      case ChallengeType.caloriesCrusher:
+        return '🔥';
+      case ChallengeType.workoutWarrior:
+        return '💪';
     }
   }
 
-  int    get totalScore  => teamA.totalScore + teamB.totalScore;
+  int get totalScore => teamA.totalScore + teamB.totalScore;
   double get teamAPercent =>
-  totalScore == 0 ? 0.5 : teamA.totalScore / totalScore;
+      totalScore == 0 ? 0.5 : teamA.totalScore / totalScore;
 
   // ── Serialization ─────────────────────────────────────────────────────────
 
-  factory ChallengeModel.fromFirestore(Map<String, dynamic> map, String id) =>
-  ChallengeModel(
+  factory ChallengeModel.fromFirestore(
+    Map<String, dynamic> map,
+    String id,
+  ) => ChallengeModel(
     id: id,
     title: map['title'] as String? ?? '',
     type: ChallengeType.values.firstWhere(
@@ -115,30 +127,29 @@ class ChallengeModel {
       orElse: () => ChallengeStatus.active,
     ),
     startDate: (map['startDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    endDate:   (map['endDate']   as Timestamp?)?.toDate() ??
-    DateTime.now().add(const Duration(days: 7)),
-    teamA: ChallengeTeam.fromMap(
-      (map['teamA'] as Map<String, dynamic>?) ?? {}),
-      teamB: ChallengeTeam.fromMap(
-        (map['teamB'] as Map<String, dynamic>?) ?? {}),
-        winnerId:    map['winnerId'] as String?,
-        prizeXP:     (map['prizeXP'] as num?)?.toInt() ?? 200,
-        description: map['description'] as String? ?? '',
-        createdAt:   (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    endDate:
+        (map['endDate'] as Timestamp?)?.toDate() ??
+        DateTime.now().add(const Duration(days: 7)),
+    teamA: ChallengeTeam.fromMap((map['teamA'] as Map<String, dynamic>?) ?? {}),
+    teamB: ChallengeTeam.fromMap((map['teamB'] as Map<String, dynamic>?) ?? {}),
+    winnerId: map['winnerId'] as String?,
+    prizeXP: (map['prizeXP'] as num?)?.toInt() ?? 200,
+    description: map['description'] as String? ?? '',
+    createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
   );
 
   Map<String, dynamic> toMap() => {
-    'title':       title,
-    'type':        type.name,
-    'status':      status.name,
-    'startDate':   Timestamp.fromDate(startDate),
-    'endDate':     Timestamp.fromDate(endDate),
-    'teamA':       teamA.toMap(),
-    'teamB':       teamB.toMap(),
+    'title': title,
+    'type': type.name,
+    'status': status.name,
+    'startDate': Timestamp.fromDate(startDate),
+    'endDate': Timestamp.fromDate(endDate),
+    'teamA': teamA.toMap(),
+    'teamB': teamB.toMap(),
     if (winnerId != null) 'winnerId': winnerId,
-      'prizeXP':     prizeXP,
-      'description': description,
-      'createdAt':   Timestamp.fromDate(createdAt),
+    'prizeXP': prizeXP,
+    'description': description,
+    'createdAt': Timestamp.fromDate(createdAt),
   };
 }
 
@@ -150,7 +161,7 @@ class ChallengeEntryModel {
   final String memberId;
   final String memberName;
   final String teamId;
-  final int    score;
+  final int score;
   final DateTime lastUpdated;
 
   const ChallengeEntryModel({
@@ -164,23 +175,24 @@ class ChallengeEntryModel {
   });
 
   factory ChallengeEntryModel.fromFirestore(
-    Map<String, dynamic> map, String id) =>
-    ChallengeEntryModel(
-      id:          id,
-      challengeId: map['challengeId'] as String? ?? '',
-      memberId:    map['memberId']    as String? ?? '',
-      memberName:  map['memberName']  as String? ?? '',
-      teamId:      map['teamId']      as String? ?? '',
-      score:       (map['score']      as num?)?.toInt() ?? 0,
-      lastUpdated: (map['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    );
+    Map<String, dynamic> map,
+    String id,
+  ) => ChallengeEntryModel(
+    id: id,
+    challengeId: map['challengeId'] as String? ?? '',
+    memberId: map['memberId'] as String? ?? '',
+    memberName: map['memberName'] as String? ?? '',
+    teamId: map['teamId'] as String? ?? '',
+    score: (map['score'] as num?)?.toInt() ?? 0,
+    lastUpdated: (map['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
+  );
 
-    Map<String, dynamic> toMap() => {
-      'challengeId': challengeId,
-      'memberId':    memberId,
-      'memberName':  memberName,
-      'teamId':      teamId,
-      'score':       score,
-      'lastUpdated': Timestamp.fromDate(lastUpdated),
-    };
+  Map<String, dynamic> toMap() => {
+    'challengeId': challengeId,
+    'memberId': memberId,
+    'memberName': memberName,
+    'teamId': teamId,
+    'score': score,
+    'lastUpdated': Timestamp.fromDate(lastUpdated),
+  };
 }

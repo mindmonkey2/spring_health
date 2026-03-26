@@ -7,10 +7,7 @@ import '../../../models/member_model.dart';
 class MembershipCardWidget extends StatelessWidget {
   final MemberModel member;
 
-  const MembershipCardWidget({
-    super.key,
-    required this.member,
-  });
+  const MembershipCardWidget({super.key, required this.member});
 
   Color _getStatusColor() {
     final daysRemaining = member.daysRemaining;
@@ -61,9 +58,7 @@ class MembershipCardWidget extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Show this QR code at reception',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.gray400,
-                ),
+                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
               ),
               const SizedBox(height: 24),
 
@@ -82,18 +77,19 @@ class MembershipCardWidget extends StatelessWidget {
                   ],
                 ),
                 child: QrImageView(
-                  data: member.qrCode, // ✅ NOW USES member.qrCode (SPRING_abc123)
-                version: QrVersions.auto,
-                size: 200,
-                backgroundColor: Colors.white,
-                eyeStyle: const QrEyeStyle(
-                  eyeShape: QrEyeShape.square,
-                  color: Colors.black,
-                ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  dataModuleShape: QrDataModuleShape.square,
-                  color: Colors.black,
-                ),
+                  data:
+                      member.qrCode, // ✅ NOW USES member.qrCode (SPRING_abc123)
+                  version: QrVersions.auto,
+                  size: 200,
+                  backgroundColor: Colors.white,
+                  eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: Colors.black,
+                  ),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: Colors.black,
+                  ),
                 ),
               ),
 
@@ -104,10 +100,7 @@ class MembershipCardWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      AppColors.backgroundBlack,
-                      AppColors.cardSurface,
-                    ],
+                    colors: [AppColors.backgroundBlack, AppColors.cardSurface],
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
@@ -140,12 +133,12 @@ class MembershipCardWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neonLime,
                     foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 8,
-                      shadowColor: AppColors.neonLime.withValues(alpha: 0.5),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 8,
+                    shadowColor: AppColors.neonLime.withValues(alpha: 0.5),
                   ),
                   child: const Text(
                     'CLOSE',
@@ -171,9 +164,7 @@ class MembershipCardWidget extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.gray400,
-          ),
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
         ),
         Text(
           value,
@@ -204,10 +195,7 @@ class MembershipCardWidget extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
-          width: 2,
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 2),
         boxShadow: [
           BoxShadow(
             color: statusColor.withValues(alpha: 0.2),
@@ -234,10 +222,7 @@ class MembershipCardWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    member.name,
-                    style: AppTextStyles.heading3,
-                  ),
+                  Text(member.name, style: AppTextStyles.heading3),
                 ],
               ),
               Container(
@@ -305,12 +290,12 @@ class MembershipCardWidget extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       member.daysRemaining > 0
-                      ? '${member.daysRemaining} days'
-                    : 'Expired',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: statusColor,
-                    ),
+                          ? '${member.daysRemaining} days'
+                          : 'Expired',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
                     ),
                   ],
                 ),
@@ -336,12 +321,12 @@ class MembershipCardWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: statusColor,
                 foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 8,
-                  shadowColor: statusColor.withValues(alpha: 0.5),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 8,
+                shadowColor: statusColor.withValues(alpha: 0.5),
               ),
             ),
           ),

@@ -77,8 +77,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_rounded,
-              color: Colors.white, size: 20),
+          Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
           SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -131,9 +130,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
         return Scaffold(
           backgroundColor: AppColors.backgroundBlack,
           appBar: _buildAppBar(),
-          body: metrics.isEmpty
-              ? _buildEmpty()
-              : _buildContent(metrics),
+          body: metrics.isEmpty ? _buildEmpty() : _buildContent(metrics),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _openSheet(metrics), // shared data ✅
             backgroundColor: AppColors.neonLime,
@@ -158,12 +155,16 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       backgroundColor: AppColors.backgroundBlack,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_rounded,
-            color: AppColors.neonLime),
+        icon: const Icon(
+          Icons.arrow_back_ios_rounded,
+          color: AppColors.neonLime,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text('BODY METRICS',
-          style: AppTextStyles.heading2.copyWith(letterSpacing: 2)),
+      title: Text(
+        'BODY METRICS',
+        style: AppTextStyles.heading2.copyWith(letterSpacing: 2),
+      ),
     );
   }
 
@@ -182,10 +183,9 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
               child: _buildBPWarningBanner(),
             ),
 
-          _buildCurrentStats(metrics.first)
-              .animate()
-              .fadeIn(duration: 600.ms)
-              .slideY(begin: 0.2, end: 0),
+          _buildCurrentStats(
+            metrics.first,
+          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0),
           const SizedBox(height: 24),
           _buildChart(metrics)
               .animate()
@@ -194,16 +194,18 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           const SizedBox(height: 24),
           Text(
             'HISTORY',
-            style: AppTextStyles.caption
-                .copyWith(color: AppColors.gray400, letterSpacing: 2),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.gray400,
+              letterSpacing: 2,
+            ),
           ).animate().fadeIn(delay: 200.ms),
           const SizedBox(height: 12),
           ...metrics.asMap().entries.map(
-                (e) => _buildCard(e.value, e.key, metrics)
-                    .animate()
-                    .fadeIn(delay: (300 + e.key * 60).ms)
-                    .slideX(begin: 0.1, end: 0),
-              ),
+            (e) => _buildCard(e.value, e.key, metrics)
+                .animate()
+                .fadeIn(delay: (300 + e.key * 60).ms)
+                .slideX(begin: 0.1, end: 0),
+          ),
           const SizedBox(height: 90),
         ],
       ),
@@ -225,8 +227,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: AppColors.neonLime.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,12 +238,13 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
               Text(
                 'CURRENT STATS',
                 style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neonLime, letterSpacing: 2),
+                  color: AppColors.neonLime,
+                  letterSpacing: 2,
+                ),
               ),
               Text(
                 DateFormat('dd MMM yyyy').format(m.recordedAt),
-                style: AppTextStyles.caption
-                    .copyWith(color: AppColors.gray400),
+                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
               ),
             ],
           ),
@@ -250,24 +252,29 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _statChip('WEIGHT', m.weight.toStringAsFixed(1), 'kg',
-                  AppColors.neonLime, Icons.monitor_weight_rounded),
+              _statChip(
+                'WEIGHT',
+                m.weight.toStringAsFixed(1),
+                'kg',
+                AppColors.neonLime,
+                Icons.monitor_weight_rounded,
+              ),
               _divider(),
               _statChip(
-                  'BMI',
-                  m.bmi != null ? m.bmi!.toStringAsFixed(1) : '—',
-                  m.bmiCategory,
-                  _bmiColor(m.bmi),
-                  Icons.analytics_rounded),
+                'BMI',
+                m.bmi != null ? m.bmi!.toStringAsFixed(1) : '—',
+                m.bmiCategory,
+                _bmiColor(m.bmi),
+                Icons.analytics_rounded,
+              ),
               _divider(),
               _statChip(
-                  'BODY FAT',
-                  m.bodyFat != null
-                      ? m.bodyFat!.toStringAsFixed(1)
-                      : '—',
-                  m.bodyFat != null ? '%' : 'Not logged',
-                  AppColors.neonOrange,
-                  Icons.person_rounded),
+                'BODY FAT',
+                m.bodyFat != null ? m.bodyFat!.toStringAsFixed(1) : '—',
+                m.bodyFat != null ? '%' : 'Not logged',
+                AppColors.neonOrange,
+                Icons.person_rounded,
+              ),
             ],
           ),
           if (m.waist != null || m.chest != null || m.hips != null)
@@ -277,49 +284,66 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
     );
   }
 
-  Widget _statChip(String label, String value, String unit,
-      Color color, IconData icon) {
-    return Column(children: [
-      Icon(icon, color: color, size: 20),
-      const SizedBox(height: 6),
-      Text(value,
-          style: AppTextStyles.heading2
-              .copyWith(color: color, fontSize: 22)),
-      Text(unit,
-          style: AppTextStyles.caption
-              .copyWith(color: AppColors.gray400, fontSize: 10)),
-      const SizedBox(height: 4),
-      Text(label,
+  Widget _statChip(
+    String label,
+    String value,
+    String unit,
+    Color color,
+    IconData icon,
+  ) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: AppTextStyles.heading2.copyWith(color: color, fontSize: 22),
+        ),
+        Text(
+          unit,
           style: AppTextStyles.caption.copyWith(
-              color: AppColors.gray400,
-              fontSize: 9,
-              letterSpacing: 1.5)),
-    ]);
+            color: AppColors.gray400,
+            fontSize: 10,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            fontSize: 9,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _divider() => Container(
-      width: 1,
-      height: 50,
-      color: AppColors.gray400.withValues(alpha: 0.3));
+    width: 1,
+    height: 50,
+    color: AppColors.gray400.withValues(alpha: 0.3),
+  );
 
   Widget _measurementsRow(BodyMetricsModel m) {
-    return Column(children: [
-      const SizedBox(height: 12),
-      Divider(color: AppColors.gray400.withValues(alpha: 0.15)),
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 12,
-        runSpacing: 8,
-        children: [
-          if (m.chest != null) _miniMeasurement('Chest', m.chest!),
-          if (m.waist != null) _miniMeasurement('Waist', m.waist!),
-          if (m.hips != null) _miniMeasurement('Hips', m.hips!),
-          if (m.arms != null) _miniMeasurement('Arms', m.arms!),
-          if (m.thighs != null)
-            _miniMeasurement('Thighs', m.thighs!),
-        ],
-      ),
-    ]);
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        Divider(color: AppColors.gray400.withValues(alpha: 0.15)),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            if (m.chest != null) _miniMeasurement('Chest', m.chest!),
+            if (m.waist != null) _miniMeasurement('Waist', m.waist!),
+            if (m.hips != null) _miniMeasurement('Hips', m.hips!),
+            if (m.arms != null) _miniMeasurement('Arms', m.arms!),
+            if (m.thighs != null) _miniMeasurement('Thighs', m.thighs!),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _miniMeasurement(String label, double value) {
@@ -328,14 +352,16 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       decoration: BoxDecoration(
         color: AppColors.neonTeal.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-            color: AppColors.neonTeal.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
       ),
-      child: Text('$label ${value.toStringAsFixed(1)} cm',
-          style: TextStyle(
-              color: AppColors.neonTeal,
-              fontSize: 11,
-              fontWeight: FontWeight.w600)),
+      child: Text(
+        '$label ${value.toStringAsFixed(1)} cm',
+        style: TextStyle(
+          color: AppColors.neonTeal,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -348,8 +374,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,12 +382,17 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('PROGRESS CHART',
-                  style: AppTextStyles.caption.copyWith(
-                      color: AppColors.gray400, letterSpacing: 2)),
-              Text('Last ${chrono.length} entries',
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.gray400)),
+              Text(
+                'PROGRESS CHART',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.gray400,
+                  letterSpacing: 2,
+                ),
+              ),
+              Text(
+                'Last ${chrono.length} entries',
+                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -382,9 +412,10 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
               unselectedLabelColor: AppColors.gray400,
               dividerColor: Colors.transparent,
               labelStyle: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1),
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
               tabs: const [
                 Tab(text: 'WEIGHT'),
                 Tab(text: 'BMI'),
@@ -401,8 +432,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                 _lineChart(
                   points: chrono.map((m) => m.weight).toList(),
                   labels: chrono
-                      .map((m) =>
-                          DateFormat('dd/MM').format(m.recordedAt))
+                      .map((m) => DateFormat('dd/MM').format(m.recordedAt))
                       .toList(),
                   color: AppColors.neonLime,
                   unit: 'kg',
@@ -415,8 +445,9 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                             .toList(),
                         labels: chrono
                             .where((m) => m.bmi != null)
-                            .map((m) => DateFormat('dd/MM')
-                                .format(m.recordedAt))
+                            .map(
+                              (m) => DateFormat('dd/MM').format(m.recordedAt),
+                            )
                             .toList(),
                         color: _bmiColor(chrono.last.bmi),
                         unit: 'BMI',
@@ -430,8 +461,9 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                             .toList(),
                         labels: chrono
                             .where((m) => m.bodyFat != null)
-                            .map((m) => DateFormat('dd/MM')
-                                .format(m.recordedAt))
+                            .map(
+                              (m) => DateFormat('dd/MM').format(m.recordedAt),
+                            )
                             .toList(),
                         color: AppColors.neonOrange,
                         unit: '%',
@@ -479,17 +511,18 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
           rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
+            sideTitles: SideTitles(showTitles: false),
+          ),
           topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
+            sideTitles: SideTitles(showTitles: false),
+          ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 42,
               getTitlesWidget: (v, _) => Text(
                 v.toStringAsFixed(1),
-                style: TextStyle(
-                    color: AppColors.gray400, fontSize: 10),
+                style: TextStyle(color: AppColors.gray400, fontSize: 10),
               ),
             ),
           ),
@@ -507,9 +540,10 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                 }
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(labels[i],
-                      style: TextStyle(
-                          color: AppColors.gray400, fontSize: 9)),
+                  child: Text(
+                    labels[i],
+                    style: TextStyle(color: AppColors.gray400, fontSize: 9),
+                  ),
                 );
               },
             ),
@@ -525,8 +559,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
             isStrokeCapRound: true,
             dotData: FlDotData(
               show: true,
-              getDotPainter: (spot, p1, p2, p3) =>
-                  FlDotCirclePainter(
+              getDotPainter: (spot, p1, p2, p3) => FlDotCirclePainter(
                 radius: 4,
                 color: color,
                 strokeWidth: 2,
@@ -549,13 +582,16 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (spots) => spots
-                .map((s) => LineTooltipItem(
-                      '${s.y.toStringAsFixed(1)} $unit',
-                      TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12),
-                    ))
+                .map(
+                  (s) => LineTooltipItem(
+                    '${s.y.toStringAsFixed(1)} $unit',
+                    TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -564,26 +600,26 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   }
 
   Widget _noData(String msg) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.show_chart_rounded,
-                color: AppColors.gray400, size: 36),
-            const SizedBox(height: 8),
-            Text(msg,
-                style: AppTextStyles.caption
-                    .copyWith(color: AppColors.gray400),
-                textAlign: TextAlign.center),
-          ],
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.show_chart_rounded, color: AppColors.gray400, size: 36),
+        const SizedBox(height: 8),
+        Text(
+          msg,
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          textAlign: TextAlign.center,
         ),
-      );
+      ],
+    ),
+  );
 
   // ─── History Card ──────────────────────────────────────────────────────────
 
-  Widget _buildCard(
-      BodyMetricsModel m, int idx, List<BodyMetricsModel> all) {
-    final double? change =
-        idx < all.length - 1 ? m.weight - all[idx + 1].weight : null;
+  Widget _buildCard(BodyMetricsModel m, int idx, List<BodyMetricsModel> all) {
+    final double? change = idx < all.length - 1
+        ? m.weight - all[idx + 1].weight
+        : null;
 
     return Dismissible(
       key: Key(m.id),
@@ -594,12 +630,10 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
         decoration: BoxDecoration(
           color: AppColors.error.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-              color: AppColors.error.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
         ),
         alignment: Alignment.centerRight,
-        child:
-            const Icon(Icons.delete_rounded, color: AppColors.error),
+        child: const Icon(Icons.delete_rounded, color: AppColors.error),
       ),
       confirmDismiss: (_) async => await showDialog<bool>(
         context: context,
@@ -607,24 +641,24 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           backgroundColor: AppColors.cardSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-                color: AppColors.error.withValues(alpha: 0.3)),
+            side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
           ),
           title: Text('Delete Entry', style: AppTextStyles.heading3),
-          content: Text('Remove this metrics entry?',
-              style: AppTextStyles.bodyMedium
-                  .copyWith(color: AppColors.gray400)),
+          content: Text(
+            'Remove this metrics entry?',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('CANCEL',
-                  style: TextStyle(color: AppColors.gray400)),
+              child: Text('CANCEL', style: TextStyle(color: AppColors.gray400)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white),
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('DELETE'),
             ),
           ],
@@ -633,11 +667,13 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       onDismissed: (_) async {
         await _service.deleteMetrics(m.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Entry deleted'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Entry deleted'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
       child: Container(
@@ -657,60 +693,77 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           children: [
             Row(
               children: [
-                const Icon(Icons.calendar_today_rounded,
-                    size: 13, color: AppColors.gray400),
+                const Icon(
+                  Icons.calendar_today_rounded,
+                  size: 13,
+                  color: AppColors.gray400,
+                ),
                 const SizedBox(width: 6),
                 Text(
-                  DateFormat('EEE, dd MMM yyyy')
-                      .format(m.recordedAt),
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(fontWeight: FontWeight.bold),
+                  DateFormat('EEE, dd MMM yyyy').format(m.recordedAt),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (idx == 0)
                   Container(
                     margin: const EdgeInsets.only(left: 8),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color:
-                          AppColors.neonLime.withValues(alpha: 0.15),
+                      color: AppColors.neonLime.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppColors.neonLime),
                     ),
-                    child: Text('LATEST',
-                        style: TextStyle(
-                            color: AppColors.neonLime,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'LATEST',
+                      style: TextStyle(
+                        color: AppColors.neonLime,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 const Spacer(),
                 if (idx > 0)
-                  const Icon(Icons.swipe_left_rounded,
-                      size: 13, color: AppColors.gray400),
+                  const Icon(
+                    Icons.swipe_left_rounded,
+                    size: 13,
+                    color: AppColors.gray400,
+                  ),
               ],
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                    child: _cardStat('Weight',
-                        '${m.weight.toStringAsFixed(1)} kg',
-                        AppColors.neonLime,
-                        weightChange: change)),
+                  child: _cardStat(
+                    'Weight',
+                    '${m.weight.toStringAsFixed(1)} kg',
+                    AppColors.neonLime,
+                    weightChange: change,
+                  ),
+                ),
                 Expanded(
-                    child: _cardStat(
-                        'BMI',
-                        m.bmi != null
-                            ? '${m.bmi!.toStringAsFixed(1)} (${m.bmiCategory})'
-                            : '— (no height)',
-                        _bmiColor(m.bmi))),
+                  child: _cardStat(
+                    'BMI',
+                    m.bmi != null
+                        ? '${m.bmi!.toStringAsFixed(1)} (${m.bmiCategory})'
+                        : '— (no height)',
+                    _bmiColor(m.bmi),
+                  ),
+                ),
                 Expanded(
-                    child: _cardStat(
-                        'Body Fat',
-                        m.bodyFat != null
-                            ? '${m.bodyFat!.toStringAsFixed(1)}%'
-                            : '—',
-                        AppColors.neonOrange)),
+                  child: _cardStat(
+                    'Body Fat',
+                    m.bodyFat != null
+                        ? '${m.bodyFat!.toStringAsFixed(1)}%'
+                        : '—',
+                    AppColors.neonOrange,
+                  ),
+                ),
               ],
             ),
             if (m.chest != null ||
@@ -728,8 +781,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                     if (m.waist != null) _chip('Waist', m.waist!),
                     if (m.hips != null) _chip('Hips', m.hips!),
                     if (m.arms != null) _chip('Arms', m.arms!),
-                    if (m.thighs != null)
-                      _chip('Thighs', m.thighs!),
+                    if (m.thighs != null) _chip('Thighs', m.thighs!),
                   ],
                 ),
               ),
@@ -738,15 +790,21 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.notes_rounded,
-                        size: 13, color: AppColors.gray400),
+                    const Icon(
+                      Icons.notes_rounded,
+                      size: 13,
+                      color: AppColors.gray400,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text(m.notes!,
-                          style: AppTextStyles.caption
-                              .copyWith(color: AppColors.gray400),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        m.notes!,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray400,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -757,22 +815,32 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
     );
   }
 
-  Widget _cardStat(String label, String value, Color color,
-      {double? weightChange}) {
+  Widget _cardStat(
+    String label,
+    String value,
+    Color color, {
+    double? weightChange,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: AppTextStyles.caption.copyWith(
-                color: AppColors.gray400,
-                fontSize: 10,
-                letterSpacing: 1)),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            fontSize: 10,
+            letterSpacing: 1,
+          ),
+        ),
         const SizedBox(height: 3),
-        Text(value,
-            style: AppTextStyles.caption.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 12)),
+        Text(
+          value,
+          style: AppTextStyles.caption.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
         if (weightChange != null)
           Row(
             children: [
@@ -781,18 +849,15 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                     ? Icons.arrow_upward_rounded
                     : Icons.arrow_downward_rounded,
                 size: 11,
-                color: weightChange > 0
-                    ? AppColors.error
-                    : AppColors.success,
+                color: weightChange > 0 ? AppColors.error : AppColors.success,
               ),
               Text(
                 '${weightChange.abs().toStringAsFixed(1)} kg',
                 style: TextStyle(
-                    color: weightChange > 0
-                        ? AppColors.error
-                        : AppColors.success,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold),
+                  color: weightChange > 0 ? AppColors.error : AppColors.success,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -801,20 +866,21 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   }
 
   Widget _chip(String label, double value) => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: AppColors.neonTeal.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-              color: AppColors.neonTeal.withValues(alpha: 0.3)),
-        ),
-        child: Text('$label: ${value.toStringAsFixed(1)} cm',
-            style: TextStyle(
-                color: AppColors.neonTeal,
-                fontSize: 11,
-                fontWeight: FontWeight.w600)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: AppColors.neonTeal.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
+    ),
+    child: Text(
+      '$label: ${value.toStringAsFixed(1)} cm',
+      style: TextStyle(
+        color: AppColors.neonTeal,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 
   // ─── Empty / Error ─────────────────────────────────────────────────────────
 
@@ -839,19 +905,23 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                     color: AppColors.cardSurface,
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: AppColors.neonLime.withValues(alpha: 0.3)),
+                      color: AppColors.neonLime.withValues(alpha: 0.3),
+                    ),
                   ),
-                  child: Icon(Icons.monitor_weight_outlined,
-                      size: 56,
-                      color: AppColors.neonLime.withValues(alpha: 0.5)),
+                  child: Icon(
+                    Icons.monitor_weight_outlined,
+                    size: 56,
+                    color: AppColors.neonLime.withValues(alpha: 0.5),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Text('No Metrics Yet', style: AppTextStyles.heading3),
                 const SizedBox(height: 8),
                 Text(
                   'Start tracking to see your progress over time',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.gray400),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.gray400,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -862,15 +932,20 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                     backgroundColor: AppColors.neonLime,
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 14),
+                      horizontal: 28,
+                      vertical: 14,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   icon: const Icon(Icons.add_rounded),
                   label: const Text(
                     'LOG FIRST ENTRY',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                    ),
                   ),
                 ),
               ],
@@ -882,23 +957,28 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   }
 
   Widget _buildError(String e) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline_rounded,
-                size: 64, color: AppColors.error),
-            const SizedBox(height: 16),
-            Text('Something went wrong',
-                style: AppTextStyles.heading3
-                    .copyWith(color: AppColors.error)),
-            const SizedBox(height: 8),
-            Text(e,
-                style: AppTextStyles.caption
-                    .copyWith(color: AppColors.gray400),
-                textAlign: TextAlign.center),
-          ],
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.error_outline_rounded,
+          size: 64,
+          color: AppColors.error,
         ),
-      );
+        const SizedBox(height: 16),
+        Text(
+          'Something went wrong',
+          style: AppTextStyles.heading3.copyWith(color: AppColors.error),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          e,
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -928,12 +1008,10 @@ class AddMetricsBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<AddMetricsBottomSheet> createState() =>
-      _AddMetricsBottomSheetState();
+  State<AddMetricsBottomSheet> createState() => _AddMetricsBottomSheetState();
 }
 
-class _AddMetricsBottomSheetState
-    extends State<AddMetricsBottomSheet> {
+class _AddMetricsBottomSheetState extends State<AddMetricsBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
   bool _showMeasurements = false;
@@ -968,7 +1046,7 @@ class _AddMetricsBottomSheetState
       _hipsCtrl,
       _armsCtrl,
       _thighsCtrl,
-      _notesCtrl
+      _notesCtrl,
     ]) {
       c.dispose();
     }
@@ -982,37 +1060,41 @@ class _AddMetricsBottomSheetState
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
     try {
-      await widget.service.addMetrics(BodyMetricsModel(
-        id: '',
-        memberId: widget.memberId,
-        weight: double.parse(_weightCtrl.text.trim()),
-        height: _parse(_heightCtrl.text),
-        bodyFat: _parse(_bodyFatCtrl.text),
-        chest: _parse(_chestCtrl.text),
-        waist: _parse(_waistCtrl.text),
-        hips: _parse(_hipsCtrl.text),
-        arms: _parse(_armsCtrl.text),
-        thighs: _parse(_thighsCtrl.text),
-        notes: _notesCtrl.text.trim().isEmpty
-            ? null
-            : _notesCtrl.text.trim(),
-        recordedAt: _date,
-      ));
+      await widget.service.addMetrics(
+        BodyMetricsModel(
+          id: '',
+          memberId: widget.memberId,
+          weight: double.parse(_weightCtrl.text.trim()),
+          height: _parse(_heightCtrl.text),
+          bodyFat: _parse(_bodyFatCtrl.text),
+          chest: _parse(_chestCtrl.text),
+          waist: _parse(_waistCtrl.text),
+          hips: _parse(_hipsCtrl.text),
+          arms: _parse(_armsCtrl.text),
+          thighs: _parse(_thighsCtrl.text),
+          notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+          recordedAt: _date,
+        ),
+      );
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Metrics saved! Keep it up 💪'),
-          backgroundColor: AppColors.neonLime,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Metrics saved! Keep it up 💪'),
+            backgroundColor: AppColors.neonLime,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -1045,8 +1127,7 @@ class _AddMetricsBottomSheetState
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.cardSurface,
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: DraggableScrollableSheet(
         expand: false,
@@ -1069,12 +1150,13 @@ class _AddMetricsBottomSheetState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('LOG METRICS',
-                      style: AppTextStyles.heading3),
+                  Text('LOG METRICS', style: AppTextStyles.heading3),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded,
-                        color: AppColors.gray400),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.gray400,
+                    ),
                   ),
                 ],
               ),
@@ -1096,28 +1178,28 @@ class _AddMetricsBottomSheetState
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: AppColors.backgroundBlack,
-                            borderRadius:
-                                BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: AppColors.neonLime
-                                    .withValues(alpha: 0.3)),
+                              color: AppColors.neonLime.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
                               const Icon(
-                                  Icons.calendar_today_rounded,
-                                  color: AppColors.neonLime,
-                                  size: 18),
+                                Icons.calendar_today_rounded,
+                                color: AppColors.neonLime,
+                                size: 18,
+                              ),
                               const SizedBox(width: 12),
                               Text(
-                                DateFormat('EEE, dd MMM yyyy')
-                                    .format(_date),
+                                DateFormat('EEE, dd MMM yyyy').format(_date),
                                 style: AppTextStyles.bodyMedium,
                               ),
                               const Spacer(),
                               const Icon(
-                                  Icons.arrow_drop_down_rounded,
-                                  color: AppColors.neonLime),
+                                Icons.arrow_drop_down_rounded,
+                                color: AppColors.neonLime,
+                              ),
                             ],
                           ),
                         ),
@@ -1127,55 +1209,65 @@ class _AddMetricsBottomSheetState
                       _sectionLabel('MAIN METRICS'),
                       const SizedBox(height: 12),
                       _field(
-                          _weightCtrl, 'Weight *', 'e.g. 70.5',
-                          'kg', Icons.monitor_weight_rounded,
-                          AppColors.neonLime,
-                          required: true),
+                        _weightCtrl,
+                        'Weight *',
+                        'e.g. 70.5',
+                        'kg',
+                        Icons.monitor_weight_rounded,
+                        AppColors.neonLime,
+                        required: true,
+                      ),
                       const SizedBox(height: 12),
                       _field(
-                          _heightCtrl,
-                          'Height (for BMI)',
-                          'e.g. 170.0',
-                          'cm',
-                          Icons.height_rounded,
-                          AppColors.neonTeal),
+                        _heightCtrl,
+                        'Height (for BMI)',
+                        'e.g. 170.0',
+                        'cm',
+                        Icons.height_rounded,
+                        AppColors.neonTeal,
+                      ),
                       const SizedBox(height: 12),
                       _field(
-                          _bodyFatCtrl, 'Body Fat', 'e.g. 18.5',
-                          '%', Icons.person_rounded,
-                          AppColors.neonOrange),
+                        _bodyFatCtrl,
+                        'Body Fat',
+                        'e.g. 18.5',
+                        '%',
+                        Icons.person_rounded,
+                        AppColors.neonOrange,
+                      ),
                       const SizedBox(height: 20),
 
                       // Measurements toggle
                       GestureDetector(
-                        onTap: () => setState(() =>
-                            _showMeasurements = !_showMeasurements),
+                        onTap: () => setState(
+                          () => _showMeasurements = !_showMeasurements,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: AppColors.backgroundBlack,
-                            borderRadius:
-                                BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: AppColors.neonTeal
-                                    .withValues(alpha: 0.3)),
+                              color: AppColors.neonTeal.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
                               const Icon(
-                                  Icons.straighten_rounded,
-                                  color: AppColors.neonTeal,
-                                  size: 18),
+                                Icons.straighten_rounded,
+                                color: AppColors.neonTeal,
+                                size: 18,
+                              ),
                               const SizedBox(width: 12),
-                              Text('Body Measurements (Optional)',
-                                  style: AppTextStyles.bodyMedium),
+                              Text(
+                                'Body Measurements (Optional)',
+                                style: AppTextStyles.bodyMedium,
+                              ),
                               const Spacer(),
                               Icon(
                                 _showMeasurements
-                                    ? Icons
-                                        .keyboard_arrow_up_rounded
-                                    : Icons
-                                        .keyboard_arrow_down_rounded,
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
                                 color: AppColors.neonTeal,
                               ),
                             ],
@@ -1185,39 +1277,54 @@ class _AddMetricsBottomSheetState
                       if (_showMeasurements) ...[
                         const SizedBox(height: 12),
                         _field(
-                            _chestCtrl, 'Chest', 'e.g. 95.0',
-                            'cm',
-                            Icons.accessibility_new_rounded,
-                            AppColors.neonTeal),
+                          _chestCtrl,
+                          'Chest',
+                          'e.g. 95.0',
+                          'cm',
+                          Icons.accessibility_new_rounded,
+                          AppColors.neonTeal,
+                        ),
                         const SizedBox(height: 12),
                         _field(
-                            _waistCtrl, 'Waist', 'e.g. 80.0',
-                            'cm',
-                            Icons.accessibility_new_rounded,
-                            AppColors.neonTeal),
+                          _waistCtrl,
+                          'Waist',
+                          'e.g. 80.0',
+                          'cm',
+                          Icons.accessibility_new_rounded,
+                          AppColors.neonTeal,
+                        ),
                         const SizedBox(height: 12),
                         _field(
-                            _hipsCtrl, 'Hips', 'e.g. 95.0',
-                            'cm',
-                            Icons.accessibility_new_rounded,
-                            AppColors.neonTeal),
+                          _hipsCtrl,
+                          'Hips',
+                          'e.g. 95.0',
+                          'cm',
+                          Icons.accessibility_new_rounded,
+                          AppColors.neonTeal,
+                        ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
                             Expanded(
                               child: _field(
-                                  _armsCtrl, 'Arms', 'e.g. 35.0',
-                                  'cm',
-                                  Icons.fitness_center_rounded,
-                                  AppColors.neonTeal),
+                                _armsCtrl,
+                                'Arms',
+                                'e.g. 35.0',
+                                'cm',
+                                Icons.fitness_center_rounded,
+                                AppColors.neonTeal,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _field(
-                                  _thighsCtrl, 'Thighs',
-                                  'e.g. 55.0', 'cm',
-                                  Icons.fitness_center_rounded,
-                                  AppColors.neonTeal),
+                                _thighsCtrl,
+                                'Thighs',
+                                'e.g. 55.0',
+                                'cm',
+                                Icons.fitness_center_rounded,
+                                AppColors.neonTeal,
+                              ),
                             ),
                           ],
                         ),
@@ -1231,30 +1338,26 @@ class _AddMetricsBottomSheetState
                         maxLines: 2,
                         style: AppTextStyles.bodyMedium,
                         decoration: InputDecoration(
-                          hintText:
-                              'e.g. After morning workout, fasted',
-                          hintStyle:
-                              TextStyle(color: AppColors.gray400),
+                          hintText: 'e.g. After morning workout, fasted',
+                          hintStyle: TextStyle(color: AppColors.gray400),
                           filled: true,
                           fillColor: AppColors.backgroundBlack,
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                                color: AppColors.neonLime
-                                    .withValues(alpha: 0.4)),
+                              color: AppColors.neonLime.withValues(alpha: 0.4),
+                            ),
                           ),
-                          contentPadding:
-                              const EdgeInsets.all(14),
+                          contentPadding: const EdgeInsets.all(14),
                           prefixIcon: const Icon(
-                              Icons.notes_rounded,
-                              color: AppColors.gray400,
-                              size: 18),
+                            Icons.notes_rounded,
+                            color: AppColors.gray400,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -1268,10 +1371,9 @@ class _AddMetricsBottomSheetState
                             backgroundColor: AppColors.neonLime,
                             foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(16)),
-                            disabledBackgroundColor: AppColors
-                                .neonLime
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            disabledBackgroundColor: AppColors.neonLime
                                 .withValues(alpha: 0.4),
                           ),
                           child: _isSaving
@@ -1279,15 +1381,17 @@ class _AddMetricsBottomSheetState
                                   width: 24,
                                   height: 24,
                                   child: CircularProgressIndicator(
-                                      color: Colors.black,
-                                      strokeWidth: 2),
+                                    color: Colors.black,
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Text(
                                   'SAVE METRICS',
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.5,
-                                      fontSize: 16),
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                    fontSize: 16,
+                                  ),
                                 ),
                         ),
                       ),
@@ -1303,9 +1407,13 @@ class _AddMetricsBottomSheetState
     );
   }
 
-  Widget _sectionLabel(String label) => Text(label,
-      style: AppTextStyles.caption
-          .copyWith(color: AppColors.gray400, letterSpacing: 2));
+  Widget _sectionLabel(String label) => Text(
+    label,
+    style: AppTextStyles.caption.copyWith(
+      color: AppColors.gray400,
+      letterSpacing: 2,
+    ),
+  );
 
   Widget _field(
     TextEditingController ctrl,
@@ -1318,11 +1426,8 @@ class _AddMetricsBottomSheetState
   }) {
     return TextFormField(
       controller: ctrl,
-      keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-      ],
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
       style: AppTextStyles.bodyMedium,
       validator: required
           ? (v) {
@@ -1339,29 +1444,28 @@ class _AddMetricsBottomSheetState
         labelText: label,
         labelStyle: TextStyle(color: AppColors.gray400),
         hintText: hint,
-        hintStyle: TextStyle(
-            color: AppColors.gray400.withValues(alpha: 0.4)),
+        hintStyle: TextStyle(color: AppColors.gray400.withValues(alpha: 0.4)),
         filled: true,
         fillColor: AppColors.backgroundBlack,
         prefixIcon: Icon(icon, color: color, size: 18),
         suffixText: unit,
-        suffixStyle:
-            TextStyle(color: color, fontWeight: FontWeight.bold),
+        suffixStyle: TextStyle(color: color, fontWeight: FontWeight.bold),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: color.withValues(alpha: 0.4)),
+          borderSide: BorderSide(color: color.withValues(alpha: 0.4)),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16, vertical: 14),
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }

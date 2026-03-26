@@ -53,7 +53,8 @@ class HealthService {
     try {
       await initialize();
       if (Platform.isAndroid) {
-        final status = await _health.getHealthConnectSdkStatus(); // FIX 5: use _health, not Health()
+        final status = await _health
+            .getHealthConnectSdkStatus(); // FIX 5: use _health, not Health()
         debugPrint('[HealthService] SDK status: $status');
         return status != HealthConnectSdkStatus.sdkUnavailable;
       }
@@ -80,7 +81,9 @@ class HealthService {
         debugPrint('[HealthService] SDK status before request: $sdkStatus');
 
         if (sdkStatus == HealthConnectSdkStatus.sdkUnavailable) {
-          debugPrint('[HealthService] Health Connect unavailable on this device');
+          debugPrint(
+            '[HealthService] Health Connect unavailable on this device',
+          );
           return false;
         }
 
@@ -89,7 +92,8 @@ class HealthService {
           await _health.installHealthConnect();
           return false;
         }
-        if (sdkStatus == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+        if (sdkStatus ==
+            HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
           // Installed but outdated — also prompt update via installHealthConnect()
           await _health.installHealthConnect();
           return false;
@@ -122,7 +126,8 @@ class HealthService {
         if (sdkStatus == HealthConnectSdkStatus.sdkUnavailable) {
           return HealthPermissionStatus.unavailable;
         }
-        if (sdkStatus == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+        if (sdkStatus ==
+            HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
           return HealthPermissionStatus.notDetermined;
         }
       }
@@ -210,7 +215,7 @@ class HealthService {
       final points = _health.removeDuplicates(rawPoints);
 
       double activeCalories = 0;
-      double totalCalories  = 0;
+      double totalCalories = 0;
       double distanceMeters = 0;
       final List<int> heartRates = [];
 
@@ -235,24 +240,24 @@ class HealthService {
         }
       }
 
-      final calories    = totalCalories > 0 ? totalCalories : activeCalories;
-      final avgBpm      = heartRates.isNotEmpty
-      ? heartRates.reduce((a, b) => a + b) ~/ heartRates.length
-      : 0;
-      final maxBpm      = heartRates.isNotEmpty
-      ? heartRates.reduce((a, b) => a > b ? a : b)
-      : 0;
+      final calories = totalCalories > 0 ? totalCalories : activeCalories;
+      final avgBpm = heartRates.isNotEmpty
+          ? heartRates.reduce((a, b) => a + b) ~/ heartRates.length
+          : 0;
+      final maxBpm = heartRates.isNotEmpty
+          ? heartRates.reduce((a, b) => a > b ? a : b)
+          : 0;
 
       return FitnessStats(
-        steps:         steps,
-        calories:      calories.toInt(),
-        distance:      distanceMeters / 1000,
-        heartRate:     avgBpm,
-        maxHeartRate:  maxBpm,
+        steps: steps,
+        calories: calories.toInt(),
+        distance: distanceMeters / 1000,
+        heartRate: avgBpm,
+        maxHeartRate: maxBpm,
         activeMinutes: (steps / 100).clamp(0, 1440).toInt(),
-        sleepHours:    sleepMinutes / 60.0,
-        date:          now,
-        isRealData:    true,
+        sleepHours: sleepMinutes / 60.0,
+        date: now,
+        isRealData: true,
       );
     } catch (e) {
       debugPrint('[HealthService] getTodayStats error: $e');
@@ -267,9 +272,9 @@ class HealthService {
     final now = DateTime.now();
 
     final futures = List.generate(7, (i) {
-      final date  = now.subtract(Duration(days: 6 - i));
+      final date = now.subtract(Duration(days: 6 - i));
       final start = DateTime(date.year, date.month, date.day);
-      final end   = (6 - i) == 0
+      final end = (6 - i) == 0
           ? now
           : DateTime(date.year, date.month, date.day, 23, 59, 59);
       return _fetchDayStats(date, start, end);
@@ -279,7 +284,10 @@ class HealthService {
   }
 
   Future<FitnessStats> _fetchDayStats(
-      DateTime date, DateTime start, DateTime end) async {
+    DateTime date,
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
       int steps = 0;
       try {
@@ -309,7 +317,7 @@ class HealthService {
       final points = _health.removeDuplicates(rawPoints);
 
       double activeCalories = 0;
-      double totalCalories  = 0;
+      double totalCalories = 0;
       double distanceMeters = 0;
       final List<int> heartRates = [];
 
@@ -321,7 +329,8 @@ class HealthService {
           totalCalories += val;
         } else if (p.type == HealthDataType.HEART_RATE) {
           heartRates.add(val.toInt());
-        } else if (p.type == HealthDataType.DISTANCE_WALKING_RUNNING || p.type == HealthDataType.DISTANCE_DELTA) {
+        } else if (p.type == HealthDataType.DISTANCE_WALKING_RUNNING ||
+            p.type == HealthDataType.DISTANCE_DELTA) {
           distanceMeters += val;
         }
       }
@@ -329,18 +338,20 @@ class HealthService {
       final calories = totalCalories > 0 ? totalCalories : activeCalories;
 
       return FitnessStats(
-        steps:         steps,
-        calories:      calories.toInt(),
-        distance:      distanceMeters > 0 ? (distanceMeters / 1000) : (steps * 0.000762),
-        heartRate:     heartRates.isNotEmpty
+        steps: steps,
+        calories: calories.toInt(),
+        distance: distanceMeters > 0
+            ? (distanceMeters / 1000)
+            : (steps * 0.000762),
+        heartRate: heartRates.isNotEmpty
             ? heartRates.reduce((a, b) => a + b) ~/ heartRates.length
             : 0,
-        maxHeartRate:  heartRates.isNotEmpty
+        maxHeartRate: heartRates.isNotEmpty
             ? heartRates.reduce((a, b) => a > b ? a : b)
             : 0,
         activeMinutes: (steps / 100).clamp(0, 1440).toInt(),
-        date:          date,
-        isRealData:    true,
+        date: date,
+        isRealData: true,
       );
     } catch (e) {
       debugPrint('[HealthService] _fetchDayStats error for $date: $e');
@@ -357,10 +368,15 @@ class HealthService {
 
   Future<double> _fetchSleepMinutes() async {
     try {
-      final now       = DateTime.now();
+      final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
-      final start     = DateTime(yesterday.year, yesterday.month, yesterday.day, 20);
-      final end       = DateTime(now.year, now.month, now.day, 12);
+      final start = DateTime(
+        yesterday.year,
+        yesterday.month,
+        yesterday.day,
+        20,
+      );
+      final end = DateTime(now.year, now.month, now.day, 12);
 
       final rawPoints = await _health.getHealthDataFromTypes(
         startTime: start,
@@ -394,18 +410,18 @@ class HealthService {
           .collection('daily')
           .doc(dateKey)
           .set({
-        'steps':         stats.steps,
-        'calories':      stats.calories,
-        'distanceKm':    stats.distance,
-        'heartRate':     stats.heartRate,
-        'maxHeartRate':  stats.maxHeartRate,
-        'activeMinutes': stats.activeMinutes,
-        'sleepHours':    stats.sleepHours,
-        'date':          Timestamp.fromDate(stats.date),
-        'updatedAt':     FieldValue.serverTimestamp(),
-        'source':        Platform.isIOS ? 'healthkit' : 'health_connect',
-        'isRealData':    stats.isRealData,
-      }, SetOptions(merge: true));
+            'steps': stats.steps,
+            'calories': stats.calories,
+            'distanceKm': stats.distance,
+            'heartRate': stats.heartRate,
+            'maxHeartRate': stats.maxHeartRate,
+            'activeMinutes': stats.activeMinutes,
+            'sleepHours': stats.sleepHours,
+            'date': Timestamp.fromDate(stats.date),
+            'updatedAt': FieldValue.serverTimestamp(),
+            'source': Platform.isIOS ? 'healthkit' : 'health_connect',
+            'isRealData': stats.isRealData,
+          }, SetOptions(merge: true));
       debugPrint('[HealthService] Saved to Firestore for $dateKey');
     } catch (e) {
       debugPrint('[HealthService] Firestore sync error: $e');

@@ -28,17 +28,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _authService  = FirebaseAuthService();
+  final _authService = FirebaseAuthService();
   final _memberService = MemberService();
-  final _gamService   = GamificationService();
+  final _gamService = GamificationService();
   final _wearableService = WearableSnapshotService.instance;
   final _aiCoachService = AiCoachService();
 
-  String?           _memberId;
-  MemberModel?      _member;
+  String? _memberId;
+  MemberModel? _member;
   MemberGamification? _gamification;
-  bool              _isLoading = true;
-  String?           _error;
+  bool _isLoading = true;
+  String? _error;
 
   String? _recoveryStatus;
   String? _coachNoteSnippet;
@@ -53,7 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Data ─────────────────────────────────────────────────────────────────
 
-  Future<void> _loadMemberData() async { // ✅ FIX 4: Future<void>
+  Future<void> _loadMemberData() async {
+    // ✅ FIX 4: Future<void>
     if (!mounted) return;
     setState(() {
       _isLoading = true;
@@ -63,13 +64,21 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final memberId = await _authService.getCurrentMemberId();
       if (memberId == null) {
-        if (mounted) setState(() { _error = 'Member ID not found'; _isLoading = false; });
+        if (mounted)
+          setState(() {
+            _error = 'Member ID not found';
+            _isLoading = false;
+          });
         return;
       }
 
       final member = await _memberService.getMemberData(memberId);
       if (member == null) {
-        if (mounted) setState(() { _error = 'Member data not found'; _isLoading = false; });
+        if (mounted)
+          setState(() {
+            _error = 'Member data not found';
+            _isLoading = false;
+          });
         return;
       }
 
@@ -87,7 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
         if (aiPlan != null && aiPlan['coachNote'] != null) {
           final note = aiPlan['coachNote'] as String;
           final firstSentence = note.split('.').first;
-          coachNoteSnippet = firstSentence.length > 60 ? '${firstSentence.substring(0, 60)}...' : '$firstSentence.';
+          coachNoteSnippet = firstSentence.length > 60
+              ? '${firstSentence.substring(0, 60)}...'
+              : '$firstSentence.';
         }
       } catch (e) {
         debugPrint('Error loading AI data for home screen banner: $e');
@@ -95,16 +106,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (mounted) {
         setState(() {
-          _memberId     = memberId;
-          _member       = member;
+          _memberId = memberId;
+          _member = member;
           _gamification = gamification;
           _recoveryStatus = recoveryStatus;
           _coachNoteSnippet = coachNoteSnippet;
-          _isLoading    = false;
+          _isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) setState(() { _error = 'Failed to load data'; _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = 'Failed to load data';
+          _isLoading = false;
+        });
     }
   }
 
@@ -121,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String get _motivationalSubtitle {
     final streak = _gamification?.currentStreak ?? 0;
     if (streak >= 14) return '🔥 $streak DAYS UNSTOPPABLE!';
-    if (streak >= 7)  return '💪 $streak DAY STREAK — KEEP IT UP!';
-    if (streak >= 3)  return '⚡ $streak DAYS STRONG!';
+    if (streak >= 7) return '💪 $streak DAY STREAK — KEEP IT UP!';
+    if (streak >= 3) return '⚡ $streak DAYS STRONG!';
     return 'READY TO TRAIN?';
   }
 
@@ -140,8 +155,16 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: AppColors.cardSurface,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: badge.color.withValues(alpha: 0.5), width: 2),
-            boxShadow: [BoxShadow(color: badge.color.withValues(alpha: 0.3), blurRadius: 30)],
+            border: Border.all(
+              color: badge.color.withValues(alpha: 0.5),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: badge.color.withValues(alpha: 0.3),
+                blurRadius: 30,
+              ),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -149,12 +172,15 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 '🏅 BADGE UNLOCKED!',
                 style: AppTextStyles.caption.copyWith(
-                  color: badge.color, letterSpacing: 2, fontWeight: FontWeight.bold,
+                  color: badge.color,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
               Container(
-                width: 80, height: 80,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: badge.color.withValues(alpha: 0.15),
@@ -167,37 +193,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 duration: 800.ms,
               ),
               const SizedBox(height: 16),
-              Text(badge.title,
-                   style: AppTextStyles.heading3.copyWith(color: badge.color)),
-                   const SizedBox(height: 6),
-                   Text(
-                     badge.description,
-                     style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
-                     textAlign: TextAlign.center,
-                   ),
-                   if (badge.xpReward > 0) ...[
-                     const SizedBox(height: 12),
-                     Text(
-                       '+${badge.xpReward} XP',
-                       style: const TextStyle(
-                         color: AppColors.neonLime, fontWeight: FontWeight.bold, fontSize: 18,
-                       ),
-                     ),
-                   ],
-                   const SizedBox(height: 20),
-                   SizedBox(
-                     width: double.infinity,
-                     child: ElevatedButton(
-                       onPressed: () => Navigator.pop(context),
-                       style: ElevatedButton.styleFrom(
-                         backgroundColor: badge.color,
-                         foregroundColor: Colors.black,
-                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                       ),
-                       child: const Text('AWESOME! 💪',
-                                         style: TextStyle(fontWeight: FontWeight.bold)),
-                     ),
-                   ),
+              Text(
+                badge.title,
+                style: AppTextStyles.heading3.copyWith(color: badge.color),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                badge.description,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.gray400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (badge.xpReward > 0) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '+${badge.xpReward} XP',
+                  style: const TextStyle(
+                    color: AppColors.neonLime,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: badge.color,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'AWESOME! 💪',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -219,12 +255,16 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(color: AppColors.neonLime, strokeWidth: 3),
+              const CircularProgressIndicator(
+                color: AppColors.neonLime,
+                strokeWidth: 3,
+              ),
               const SizedBox(height: 16),
               Text(
                 'LOADING YOUR DATA...',
                 style: AppTextStyles.caption.copyWith(
-                  color: AppColors.gray400, letterSpacing: 2,
+                  color: AppColors.gray400,
+                  letterSpacing: 2,
                 ),
               ),
             ],
@@ -241,7 +281,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: AppColors.error),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: AppColors.error,
+              ),
               const SizedBox(height: 16),
               Text(
                 _error ?? 'Something went wrong',
@@ -276,7 +320,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // ── Header ──────────────────────────────────────────
                 _buildHeader(),
                 const SizedBox(height: 24),
@@ -288,10 +331,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
 
                 // ── Membership Card ──────────────────────────────────
-                MembershipCardWidget(member: _member!)
-                .animate()
-                .fadeIn(delay: 200.ms)
-                .slideY(begin: 0.2, end: 0),
+                MembershipCardWidget(
+                  member: _member!,
+                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
                 // ── AI Personal Trainer Banner ───────────────────────
@@ -322,11 +364,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 28),
 
                 // ── Streak Banner ────────────────────────────────────
-                if (_gamification != null && _gamification!.currentStreak > 0) ...[
+                if (_gamification != null &&
+                    _gamification!.currentStreak > 0) ...[
                   _buildStreakBanner(),
-                  const SizedBox(height: 20), // ✅ FIX 5: breathing room at bottom
+                  const SizedBox(
+                    height: 20,
+                  ), // ✅ FIX 5: breathing room at bottom
                 ],
-
               ],
             ),
           ),
@@ -375,7 +419,9 @@ class _HomeScreenState extends State<HomeScreen> {
         // Navigate directly to AiCoachScreen via push to keep Bottom Nav
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AiCoachScreen(memberId: _memberId!)),
+          MaterialPageRoute(
+            builder: (context) => AiCoachScreen(memberId: _memberId!),
+          ),
         );
       },
       child: Container(
@@ -397,7 +443,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.smart_toy_rounded, color: AppColors.neonLime, size: 24),
+                const Icon(
+                  Icons.smart_toy_rounded,
+                  color: AppColors.neonLime,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text('AI Personal Trainer', style: AppTextStyles.heading3),
               ],
@@ -412,7 +462,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Text(
                 chipText,
-                style: AppTextStyles.caption.copyWith(color: chipColor, fontWeight: FontWeight.bold),
+                style: AppTextStyles.caption.copyWith(
+                  color: chipColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -426,7 +479,11 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text('View Today\'s Plan', style: AppTextStyles.link),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, color: AppColors.neonLime, size: 16),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppColors.neonLime,
+                  size: 16,
+                ),
               ],
             ),
           ],
@@ -448,7 +505,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 '$_greeting,',
                 style: AppTextStyles.caption.copyWith(
-                  color: AppColors.gray400, letterSpacing: 1.5,
+                  color: AppColors.gray400,
+                  letterSpacing: 1.5,
                 ),
               ),
               Text(
@@ -472,21 +530,26 @@ class _HomeScreenState extends State<HomeScreen> {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.neonLime, width: 2),
             boxShadow: [
-              BoxShadow(color: AppColors.neonLime.withValues(alpha: 0.2), blurRadius: 10),
+              BoxShadow(
+                color: AppColors.neonLime.withValues(alpha: 0.2),
+                blurRadius: 10,
+              ),
             ],
           ),
           child: CircleAvatar(
             radius: 26,
             backgroundColor: AppColors.surfaceDark,
             backgroundImage: _member!.photoUrl != null
-            ? NetworkImage(_member!.photoUrl!)
-            : null,
+                ? NetworkImage(_member!.photoUrl!)
+                : null,
             child: _member!.photoUrl == null
-            ? Text(
-              _member!.name.substring(0, 1).toUpperCase(),
-              style: AppTextStyles.heading2.copyWith(color: AppColors.neonLime),
-            )
-            : null,
+                ? Text(
+                    _member!.name.substring(0, 1).toUpperCase(),
+                    style: AppTextStyles.heading2.copyWith(
+                      color: AppColors.neonLime,
+                    ),
+                  )
+                : null,
           ),
         ),
       ],
@@ -496,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── XP Mini Card ──────────────────────────────────────────────────────────
 
   Widget _buildXpMiniCard() {
-    final gam   = _gamification!;
+    final gam = _gamification!;
     final level = gam.currentLevel;
     final progress = level.progressPercent(gam.totalXp);
 
@@ -504,7 +567,8 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => XpScreen(memberId: _memberId!, memberName: _member!.name),
+          builder: (_) =>
+              XpScreen(memberId: _memberId!, memberName: _member!.name),
         ),
       ),
       child: Container(
@@ -522,7 +586,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           children: [
             Container(
-              width: 48, height: 48,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: level.color.withValues(alpha: 0.15),
@@ -535,7 +600,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'LV${level.level}',
                     style: TextStyle(
-                      color: level.color, fontSize: 9, fontWeight: FontWeight.bold,
+                      color: level.color,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -552,14 +619,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         level.title.toUpperCase(),
                         style: TextStyle(
-                          color: level.color, fontSize: 11,
-                          fontWeight: FontWeight.bold, letterSpacing: 1.5,
+                          color: level.color,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
                         ),
                       ),
                       Text(
                         '${gam.totalXp} XP',
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray400, fontWeight: FontWeight.bold,
+                          color: AppColors.gray400,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -582,20 +652,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.local_fire_department_rounded,
-                                 size: 12, color: AppColors.neonOrange),
+                      const Icon(
+                        Icons.local_fire_department_rounded,
+                        size: 12,
+                        color: AppColors.neonOrange,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${gam.currentStreak} day streak',
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray400, fontSize: 11,
+                          color: AppColors.gray400,
+                          fontSize: 11,
                         ),
                       ),
                       const Spacer(),
                       Text(
                         'VIEW ALL →',
                         style: AppTextStyles.caption.copyWith(
-                          color: level.color, fontSize: 10, fontWeight: FontWeight.bold,
+                          color: level.color,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -630,11 +706,14 @@ class _HomeScreenState extends State<HomeScreen> {
             final saved = await Navigator.push<bool>(
               context,
               MaterialPageRoute(
-                builder: (_) => WorkoutLoggerScreen(memberId: _memberId!)),
+                builder: (_) => WorkoutLoggerScreen(memberId: _memberId!),
+              ),
             );
             if (saved == true && _memberId != null) {
               final badges = await _gamService.awardXp(
-                _memberId!, 'Workout Logged', XpSource.workoutLogged,
+                _memberId!,
+                'Workout Logged',
+                XpSource.workoutLogged,
                 isWorkout: true,
               );
               if (mounted) {
@@ -655,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) =>
-                XpScreen(memberId: _memberId!, memberName: _member!.name),
+                    XpScreen(memberId: _memberId!, memberName: _member!.name),
               ),
             );
           },
@@ -671,7 +750,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) =>
-                WarScreen(memberId: _memberId!, memberName: _member!.name),
+                    WarScreen(memberId: _memberId!, memberName: _member!.name),
               ),
             );
           },
@@ -686,7 +765,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => BodyMetricsScreen(memberId: _memberId!)),
+                builder: (_) => BodyMetricsScreen(memberId: _memberId!),
+              ),
             );
           },
         ),
@@ -701,14 +781,16 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               PageRouteBuilder(
                 pageBuilder: (ctx, anim, _) =>
-                QrCheckInScreen(member: _member!),
+                    QrCheckInScreen(member: _member!),
                 transitionsBuilder: (ctx, anim, _, child) => SlideTransition(
-                  position: Tween(
-                    begin: const Offset(0, 1),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-                    child: child,
+                  position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+                      .animate(
+                        CurvedAnimation(
+                          parent: anim,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      ),
+                  child: child,
                 ),
               ),
             );
@@ -760,20 +842,20 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color.withValues(alpha: 0.1),
-                ),
-                child: Icon(icon, size: 28, color: color),
-              )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .scale(
-                begin: const Offset(1, 1),
-                end: const Offset(1.08, 1.08),
-                duration: 2.seconds,
-                curve: Curves.easeInOut,
-              ),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color.withValues(alpha: 0.1),
+                    ),
+                    child: Icon(icon, size: 28, color: color),
+                  )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(
+                    begin: const Offset(1, 1),
+                    end: const Offset(1.08, 1.08),
+                    duration: 2.seconds,
+                    curve: Curves.easeInOut,
+                  ),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -830,27 +912,27 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Pulsing bolt icon
             Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.neonLime.withValues(alpha: 0.12),
-                border: Border.all(
-                  color: AppColors.neonLime.withValues(alpha: 0.5),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.neonLime.withValues(alpha: 0.12),
+                    border: Border.all(
+                      color: AppColors.neonLime.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.bolt_rounded,
+                    color: AppColors.neonLime,
+                    size: 26,
+                  ),
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scale(
+                  begin: const Offset(1.0, 1.0),
+                  end: const Offset(1.1, 1.1),
+                  duration: 1800.ms,
+                  curve: Curves.easeInOut,
                 ),
-              ),
-              child: const Icon(
-                Icons.bolt_rounded,
-                color: AppColors.neonLime,
-                size: 26,
-              ),
-            )
-            .animate(onPlay: (c) => c.repeat(reverse: true))
-            .scale(
-              begin: const Offset(1.0, 1.0),
-              end: const Offset(1.1, 1.1),
-              duration: 1800.ms,
-              curve: Curves.easeInOut,
-            ),
             const SizedBox(width: 16),
             // Text block
             Expanded(
@@ -870,23 +952,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.neonOrange.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: AppColors.neonOrange.withValues(alpha: 0.5),
-                            ),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.neonOrange.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppColors.neonOrange.withValues(alpha: 0.5),
                           ),
-                          child: Text(
-                            'SOON',
-                            style: TextStyle(
-                              color: AppColors.neonOrange,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
+                        ),
+                        child: Text(
+                          'SOON',
+                          style: TextStyle(
+                            color: AppColors.neonOrange,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
                           ),
+                        ),
                       ),
                     ],
                   ),
@@ -930,17 +1014,17 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           const Icon(
-            Icons.local_fire_department_rounded,
-            color: AppColors.neonOrange,
-            size: 32,
-          )
-          .animate(onPlay: (c) => c.repeat(reverse: true))
-          .scale(
-            begin: const Offset(1, 1),
-            end: const Offset(1.15, 1.15),
-            duration: 1.seconds,
-            curve: Curves.easeInOut,
-          ),
+                Icons.local_fire_department_rounded,
+                color: AppColors.neonOrange,
+                size: 32,
+              )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .scale(
+                begin: const Offset(1, 1),
+                end: const Offset(1.15, 1.15),
+                duration: 1.seconds,
+                curve: Curves.easeInOut,
+              ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -956,9 +1040,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Text(
                   streak >= 7
-                  ? 'You\'re on fire! Keep it up!'
-                : 'Keep coming back to grow your streak!',
-                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+                      ? 'You\'re on fire! Keep it up!'
+                      : 'Keep coming back to grow your streak!',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                  ),
                 ),
               ],
             ),

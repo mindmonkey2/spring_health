@@ -7,10 +7,7 @@ import '../../../models/member_model.dart';
 class MembershipInfoCard extends StatelessWidget {
   final MemberModel member;
 
-  const MembershipInfoCard({
-    super.key,
-    required this.member,
-  });
+  const MembershipInfoCard({super.key, required this.member});
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +78,7 @@ class MembershipInfoCard extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Divider
-          Container(
-            height: 1,
-            color: AppColors.gray400.withValues(alpha: 0.2),
-          ),
+          Container(height: 1, color: AppColors.gray400.withValues(alpha: 0.2)),
 
           const SizedBox(height: 24),
 
@@ -123,10 +117,10 @@ class MembershipInfoCard extends StatelessWidget {
                   '${member.daysRemaining} days',
                   Icons.timer,
                   valueColor: member.isExpiringSoon
-                  ? AppColors.warning
-                  : member.isExpired
-                  ? AppColors.error
-                  : AppColors.success,
+                      ? AppColors.warning
+                      : member.isExpired
+                      ? AppColors.error
+                      : AppColors.success,
                 ),
               ),
               Container(
@@ -172,19 +166,12 @@ class MembershipInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: badgeColor.withValues(alpha: 0.5),
-          width: 1,
-        ),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            statusIcon,
-            color: badgeColor,
-            size: 16,
-          ),
+          Icon(statusIcon, color: badgeColor, size: 16),
           const SizedBox(width: 6),
           Text(
             statusText,
@@ -204,24 +191,18 @@ class MembershipInfoCard extends StatelessWidget {
     String label,
     String value,
     IconData icon, {
-      Color? valueColor,
-    }) {
+    Color? valueColor,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: AppColors.gray400,
-            ),
+            Icon(icon, size: 16, color: AppColors.gray400),
             const SizedBox(width: 6),
             Text(
               label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.gray400,
-              ),
+              style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
             ),
           ],
         ),
@@ -240,5 +221,5 @@ class MembershipInfoCard extends StatelessWidget {
         ),
       ],
     );
-    }
+  }
 }

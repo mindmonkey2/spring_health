@@ -68,14 +68,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             child: CustomScrollView(
               slivers: [
                 // ✅ Summary Card
-                SliverToBoxAdapter(
-                  child: _buildSummaryCard(allPayments),
-                ),
+                SliverToBoxAdapter(child: _buildSummaryCard(allPayments)),
 
                 // ✅ Filter Chips
-                SliverToBoxAdapter(
-                  child: _buildFilterChips(),
-                ),
+                SliverToBoxAdapter(child: _buildFilterChips()),
 
                 // ✅ Payment List Header
                 SliverToBoxAdapter(
@@ -104,13 +100,14 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
                 // ✅ Payment Items
                 filtered.isEmpty
-                ? SliverFillRemaining(child: _buildNoDataForFilter())
-                : SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildPaymentCard(filtered[index]),
-                    childCount: filtered.length,
-                  ),
-                ),
+                    ? SliverFillRemaining(child: _buildNoDataForFilter())
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) =>
+                              _buildPaymentCard(filtered[index]),
+                          childCount: filtered.length,
+                        ),
+                      ),
 
                 // Bottom padding
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -161,7 +158,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.neonLime.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -249,8 +249,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-          ? AppColors.neonLime.withValues(alpha: 0.2)
-          : AppColors.cardSurface,
+              ? AppColors.neonLime.withValues(alpha: 0.2)
+              : AppColors.cardSurface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppColors.neonLime : Colors.white10,
@@ -335,19 +335,21 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     const SizedBox(height: 4),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        payment.status.toUpperCase(),
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Text(
-                          payment.status.toUpperCase(),
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -362,8 +364,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.payment_rounded,
-                         size: 12, color: AppColors.gray400),
+                    Icon(
+                      Icons.payment_rounded,
+                      size: 12,
+                      color: AppColors.gray400,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       payment.paymentMode.toUpperCase(),
@@ -376,8 +381,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 ),
                 Row(
                   children: [
-                    Icon(Icons.date_range_rounded,
-                         size: 12, color: AppColors.gray400),
+                    Icon(
+                      Icons.date_range_rounded,
+                      size: 12,
+                      color: AppColors.gray400,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${DateFormat('dd MMM').format(payment.membershipStartDate)} → ${DateFormat('dd MMM yy').format(payment.membershipEndDate)}',
@@ -390,8 +398,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 ),
                 Row(
                   children: [
-                    Icon(Icons.receipt_long_rounded,
-                         size: 12, color: AppColors.neonTeal),
+                    Icon(
+                      Icons.receipt_long_rounded,
+                      size: 12,
+                      color: AppColors.neonTeal,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'VIEW',
@@ -422,10 +433,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         backgroundColor: AppColors.cardSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: BorderSide(
-            color: statusColor.withValues(alpha: 0.3),
-            width: 1,
-          ),
+          side: BorderSide(color: statusColor.withValues(alpha: 0.3), width: 1),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -455,9 +463,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               const SizedBox(height: 4),
               Text(
                 'Spring Health Gym',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.gray400,
-                ),
+                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
               ),
               const SizedBox(height: 20),
 
@@ -468,9 +474,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: statusColor.withValues(alpha: 0.3),
-                  ),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   children: [
@@ -496,71 +500,90 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
               // Details
               _buildReceiptRow('Plan', payment.planName, AppColors.white),
-              _buildReceiptRow('Date',
-                               DateFormat('dd MMM yyyy').format(payment.paymentDate),
-                               AppColors.white),
-                        _buildReceiptRow('Mode',
-                                         payment.paymentMode.toUpperCase(), AppColors.neonTeal),
-                                         _buildReceiptRow('Status',
-                                                          payment.status.toUpperCase(), statusColor),
-                                                          _buildReceiptRow('Valid From',
-                                                                           DateFormat('dd MMM yyyy').format(payment.membershipStartDate),
-                                                                           AppColors.white),
-                        _buildReceiptRow('Valid Until',
-                                         DateFormat('dd MMM yyyy').format(payment.membershipEndDate),
-                                         AppColors.white),
-                        _buildReceiptRow('Collected By',
-                                         payment.collectedBy, AppColors.white),
-                        if (payment.transactionId != null)
-                          _buildReceiptRow('Txn ID',
-                                           payment.transactionId!, AppColors.gray400),
+              _buildReceiptRow(
+                'Date',
+                DateFormat('dd MMM yyyy').format(payment.paymentDate),
+                AppColors.white,
+              ),
+              _buildReceiptRow(
+                'Mode',
+                payment.paymentMode.toUpperCase(),
+                AppColors.neonTeal,
+              ),
+              _buildReceiptRow(
+                'Status',
+                payment.status.toUpperCase(),
+                statusColor,
+              ),
+              _buildReceiptRow(
+                'Valid From',
+                DateFormat('dd MMM yyyy').format(payment.membershipStartDate),
+                AppColors.white,
+              ),
+              _buildReceiptRow(
+                'Valid Until',
+                DateFormat('dd MMM yyyy').format(payment.membershipEndDate),
+                AppColors.white,
+              ),
+              _buildReceiptRow(
+                'Collected By',
+                payment.collectedBy,
+                AppColors.white,
+              ),
+              if (payment.transactionId != null)
+                _buildReceiptRow(
+                  'Txn ID',
+                  payment.transactionId!,
+                  AppColors.gray400,
+                ),
 
-                        const SizedBox(height: 16),
-                        const Divider(color: Colors.white10),
-                        const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white10),
+              const SizedBox(height: 12),
 
-                        // Copy Txn ID button
-                        if (payment.transactionId != null)
-                          TextButton.icon(
-                            onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: payment.transactionId!));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Transaction ID copied!'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.copy_rounded, size: 16),
-                            label: const Text('Copy Transaction ID'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.neonTeal,
-                            ),
-                          ),
+              // Copy Txn ID button
+              if (payment.transactionId != null)
+                TextButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: payment.transactionId!),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Transaction ID copied!'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.copy_rounded, size: 16),
+                  label: const Text('Copy Transaction ID'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.neonTeal,
+                  ),
+                ),
 
-                        // Close button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: statusColor,
-                              foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                            ),
-                            child: const Text(
-                              'CLOSE',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
+              // Close button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: statusColor,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'CLOSE',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -632,10 +655,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: AppColors.neonLime,
-            strokeWidth: 3,
-          ),
+          CircularProgressIndicator(color: AppColors.neonLime, strokeWidth: 3),
           const SizedBox(height: 16),
           Text(
             'LOADING PAYMENTS...',
@@ -656,12 +676,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         children: [
           Icon(Icons.error_outline_rounded, size: 64, color: AppColors.error),
           const SizedBox(height: 16),
-          Text('Something went wrong',
-               style: AppTextStyles.heading3.copyWith(color: AppColors.error)),
-               const SizedBox(height: 8),
-               Text(error,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
-                    textAlign: TextAlign.center),
+          Text(
+            'Something went wrong',
+            style: AppTextStyles.heading3.copyWith(color: AppColors.error),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -686,13 +710,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Text('No Payments Yet',
-               style: AppTextStyles.heading3.copyWith(color: AppColors.white)),
-               const SizedBox(height: 8),
-               Text(
-                 'Your payment history will appear here',
-                 style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
-               ),
+          Text(
+            'No Payments Yet',
+            style: AppTextStyles.heading3.copyWith(color: AppColors.white),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your payment history will appear here',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
         ],
       ),
     );
@@ -705,12 +731,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         children: [
           Icon(Icons.filter_list_off, size: 48, color: AppColors.gray400),
           const SizedBox(height: 16),
-          Text('No records found',
-               style: AppTextStyles.heading3.copyWith(color: AppColors.white)),
-               const SizedBox(height: 8),
-               Text('Try a different filter',
-                    style:
-                    AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400)),
+          Text(
+            'No records found',
+            style: AppTextStyles.heading3.copyWith(color: AppColors.white),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try a different filter',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
         ],
       ),
     );

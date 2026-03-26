@@ -7,10 +7,7 @@ import '../../../models/fitness_stats_model.dart';
 class WorkoutCardWidget extends StatelessWidget {
   final WorkoutSession workout;
 
-  const WorkoutCardWidget({
-    super.key,
-    required this.workout,
-  });
+  const WorkoutCardWidget({super.key, required this.workout});
 
   IconData _getWorkoutIcon(String type) {
     switch (type.toLowerCase()) {
@@ -67,11 +64,7 @@ class WorkoutCardWidget extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
 

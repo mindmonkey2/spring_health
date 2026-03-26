@@ -42,14 +42,14 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     color: AppColors.gray600,
   );
-  
+
   // Buttons & Interactive
   static TextStyle get button => GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: Colors.black, // Neon buttons have black text
   );
-  
+
   static TextStyle get link => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w600,

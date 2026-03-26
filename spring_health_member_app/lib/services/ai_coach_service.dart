@@ -52,15 +52,19 @@ class AiCoachService {
       context['dietaryPreference'] = healthProfile.dietaryPreference;
 
       String bpCategory = 'Unknown';
-      if (healthProfile.bpSystolic != null && healthProfile.bpDiastolic != null) {
-        bpCategory = HealthProfileModel.bpCategory(healthProfile.bpSystolic!, healthProfile.bpDiastolic!);
+      if (healthProfile.bpSystolic != null &&
+          healthProfile.bpDiastolic != null) {
+        bpCategory = HealthProfileModel.bpCategory(
+          healthProfile.bpSystolic!,
+          healthProfile.bpDiastolic!,
+        );
       }
 
       context['health'] = {
-         'bpSystolic': healthProfile.bpSystolic,
-         'bpDiastolic': healthProfile.bpDiastolic,
-         'bpCategory': bpCategory,
-         'bloodGroup': healthProfile.bloodGroup,
+        'bpSystolic': healthProfile.bpSystolic,
+        'bpDiastolic': healthProfile.bpDiastolic,
+        'bpCategory': bpCategory,
+        'bloodGroup': healthProfile.bloodGroup,
       };
     }
 
@@ -89,80 +93,87 @@ class AiCoachService {
 
     // 3. Wearables
     final wearableService = WearableSnapshotService(db: _db);
-    final snapshots = await wearableService.getLatestSnapshots(memberId, days: 7);
+    final snapshots = await wearableService.getLatestSnapshots(
+      memberId,
+      days: 7,
+    );
 
     if (snapshots.isNotEmpty) {
-       final today = snapshots.first;
+      final today = snapshots.first;
 
-       double sumSteps = 0;
-       double sumSleep = 0;
-       double sumDeepSleep = 0;
-       double sumRHR = 0;
-       int rhrCount = 0;
-       double sumHRV = 0;
-       int hrvCount = 0;
+      double sumSteps = 0;
+      double sumSleep = 0;
+      double sumDeepSleep = 0;
+      double sumRHR = 0;
+      int rhrCount = 0;
+      double sumHRV = 0;
+      int hrvCount = 0;
 
-       for (final s in snapshots) {
-         sumSteps += s.steps;
-         sumSleep += s.totalSleepMinutes;
-         sumDeepSleep += s.deepSleepMinutes;
-         if (s.restingHeartRate != null) {
-            sumRHR += s.restingHeartRate!;
-            rhrCount++;
-         }
-         if (s.heartRateVariability != null) {
-            sumHRV += s.heartRateVariability!;
-            hrvCount++;
-         }
-       }
+      for (final s in snapshots) {
+        sumSteps += s.steps;
+        sumSleep += s.totalSleepMinutes;
+        sumDeepSleep += s.deepSleepMinutes;
+        if (s.restingHeartRate != null) {
+          sumRHR += s.restingHeartRate!;
+          rhrCount++;
+        }
+        if (s.heartRateVariability != null) {
+          sumHRV += s.heartRateVariability!;
+          hrvCount++;
+        }
+      }
 
-       int days = snapshots.length;
+      int days = snapshots.length;
 
-       String hrvTrend = 'stable';
-       if (snapshots.length >= 2 && snapshots.first.heartRateVariability != null && snapshots.last.heartRateVariability != null) {
-          final first = snapshots.first.heartRateVariability!;
-          final last = snapshots.last.heartRateVariability!;
-          if (first < last - 5) {
-             hrvTrend = 'declining';
-          } else if (first > last + 5) {
-             hrvTrend = 'improving';
-          }
-       }
+      String hrvTrend = 'stable';
+      if (snapshots.length >= 2 &&
+          snapshots.first.heartRateVariability != null &&
+          snapshots.last.heartRateVariability != null) {
+        final first = snapshots.first.heartRateVariability!;
+        final last = snapshots.last.heartRateVariability!;
+        if (first < last - 5) {
+          hrvTrend = 'declining';
+        } else if (first > last + 5) {
+          hrvTrend = 'improving';
+        }
+      }
 
-       String weightTrend = 'stable';
-       if (snapshots.length >= 2 && snapshots.first.weightKg != null && snapshots.last.weightKg != null) {
-          final first = snapshots.first.weightKg!;
-          final last = snapshots.last.weightKg!;
-          if (first < last - 0.5) {
-             weightTrend = 'losing';
-          } else if (first > last + 0.5) {
-             weightTrend = 'gaining';
-          }
-       }
+      String weightTrend = 'stable';
+      if (snapshots.length >= 2 &&
+          snapshots.first.weightKg != null &&
+          snapshots.last.weightKg != null) {
+        final first = snapshots.first.weightKg!;
+        final last = snapshots.last.weightKg!;
+        if (first < last - 0.5) {
+          weightTrend = 'losing';
+        } else if (first > last + 0.5) {
+          weightTrend = 'gaining';
+        }
+      }
 
-       context['wearables'] = {
-         'today': today.toMap(),
-         'sevenDayAvgSteps': (sumSteps / days).round(),
-         'sevenDayAvgSleepMinutes': (sumSleep / days).round(),
-         'sevenDayAvgDeepSleepMinutes': (sumDeepSleep / days).round(),
-         'sevenDayAvgRHR': rhrCount > 0 ? (sumRHR / rhrCount).round() : null,
-         'sevenDayAvgHRV': hrvCount > 0 ? (sumHRV / hrvCount).round() : null,
-         'todayRecoveryStatus': today.recoveryStatus,
-         'todaySleepQuality': today.sleepQuality,
-         'hrvTrend': hrvTrend,
-         'weightTrend': weightTrend,
-       };
+      context['wearables'] = {
+        'today': today.toMap(),
+        'sevenDayAvgSteps': (sumSteps / days).round(),
+        'sevenDayAvgSleepMinutes': (sumSleep / days).round(),
+        'sevenDayAvgDeepSleepMinutes': (sumDeepSleep / days).round(),
+        'sevenDayAvgRHR': rhrCount > 0 ? (sumRHR / rhrCount).round() : null,
+        'sevenDayAvgHRV': hrvCount > 0 ? (sumHRV / hrvCount).round() : null,
+        'todayRecoveryStatus': today.recoveryStatus,
+        'todaySleepQuality': today.sleepQuality,
+        'hrvTrend': hrvTrend,
+        'weightTrend': weightTrend,
+      };
     } else {
-       context['wearables'] = null;
+      context['wearables'] = null;
     }
 
     // 4. Member
     final memberService = MemberService();
     final member = await memberService.getMemberData(memberId);
     if (member != null) {
-       context['branchName'] = member.branch;
-       context['plan'] = member.plan;
-       context['joiningDate'] = member.startDate.toString();
+      context['branchName'] = member.branch;
+      context['plan'] = member.plan;
+      context['joiningDate'] = member.startDate.toString();
     }
 
     return context;
@@ -181,7 +192,8 @@ class AiCoachService {
 
     if (context['wearables'] != null && context['wearables']['today'] != null) {
       final today = context['wearables']['today'];
-      final irregularHeartRateEvent = today['irregularHeartRateEvent'] as bool? ?? false;
+      final irregularHeartRateEvent =
+          today['irregularHeartRateEvent'] as bool? ?? false;
       final bodyTemperature = today['bodyTemperature'] as num?;
 
       if (irregularHeartRateEvent) {
@@ -231,7 +243,8 @@ class AiCoachService {
     final weightTrend = wearables['weightTrend'] ?? 'stable';
     final sevenDayAvgSteps = wearables['sevenDayAvgSteps'] ?? 0;
     final sevenDayAvgSleepMinutes = wearables['sevenDayAvgSleepMinutes'] ?? 0;
-    final sevenDayAvgDeepSleepMinutes = wearables['sevenDayAvgDeepSleepMinutes'] ?? 0;
+    final sevenDayAvgDeepSleepMinutes =
+        wearables['sevenDayAvgDeepSleepMinutes'] ?? 0;
     final sevenDayAvgRHR = wearables['sevenDayAvgRHR'] ?? 'Unknown';
 
     final health = context['health'] ?? {};
@@ -243,12 +256,21 @@ class AiCoachService {
     final bloodGlucoseMgDl = today['bloodGlucoseMgDl'] ?? 'Unknown';
 
     final rawMedicalConditions = context['medicalConditions'];
-    final medicalConditions = (rawMedicalConditions is List && rawMedicalConditions.isNotEmpty) ? rawMedicalConditions.join(', ') : 'None';
+    final medicalConditions =
+        (rawMedicalConditions is List && rawMedicalConditions.isNotEmpty)
+        ? rawMedicalConditions.join(', ')
+        : 'None';
     final rawJointRestrictions = context['jointRestrictions'];
-    final jointRestrictions = (rawJointRestrictions is List && rawJointRestrictions.isNotEmpty) ? rawJointRestrictions.join(', ') : 'None';
-    final jointsList = (rawJointRestrictions is List) ? rawJointRestrictions : [];
+    final jointRestrictions =
+        (rawJointRestrictions is List && rawJointRestrictions.isNotEmpty)
+        ? rawJointRestrictions.join(', ')
+        : 'None';
+    final jointsList = (rawJointRestrictions is List)
+        ? rawJointRestrictions
+        : [];
 
-    String prompt = """
+    String prompt =
+        """
 You are an expert certified personal trainer and exercise physiologist
 with deep knowledge of sports medicine and rehabilitation.
 Generate a personalized 7-day workout plan for this gym member.
@@ -278,24 +300,29 @@ Heart Rate Variability: $heartRateVariability ms
 """;
 
     if (hrvTrend == 'declining') {
-      prompt += "HRV trending DOWN over 7 days — possible overtraining, reduce volume this week\n";
+      prompt +=
+          "HRV trending DOWN over 7 days — possible overtraining, reduce volume this week\n";
     }
 
-    prompt += """
+    prompt +=
+        """
 Steps Today So Far: $steps
 Active Calories: $activeCaloriesBurned kcal
 Body Temperature: $bodyTemperature°C
 """;
 
     if (recoveryStatus == 'fatigued') {
-      prompt += "IMPORTANT: Member is fatigued today. Day 1 must be light — reduce volume by 30%, no maximal effort sets.\n";
+      prompt +=
+          "IMPORTANT: Member is fatigued today. Day 1 must be light — reduce volume by 30%, no maximal effort sets.\n";
     }
 
     if (recoveryStatus == 'sick') {
-      prompt += "IMPORTANT: Body temperature elevated. Day 1 must be complete rest or very light walking only.\n";
+      prompt +=
+          "IMPORTANT: Body temperature elevated. Day 1 must be complete rest or very light walking only.\n";
     }
 
-    prompt += """
+    prompt +=
+        """
 
 ═══ 7-DAY WEARABLE TRENDS ═══
 Avg Daily Steps (7 days): $sevenDayAvgSteps
@@ -310,13 +337,17 @@ Blood Pressure: $bpSystolic/$bpDiastolic mmHg
   → Category: $bpCategory
 """;
 
-    if (bpCategory.toString().contains('Stage 1') || bpCategory.toString().contains('Stage 2') || bpCategory.toString().contains('Elevated')) {
-      prompt += "BP PROTOCOL: Keep all sets at RPE ≤ 7/10. Include minimum 10-min aerobic warm-up. Avoid Valsalva maneuver (breath-holding during heavy lifts). Cue proper breathing on every exercise. Add BP check reminder before session.\n";
+    if (bpCategory.toString().contains('Stage 1') ||
+        bpCategory.toString().contains('Stage 2') ||
+        bpCategory.toString().contains('Elevated')) {
+      prompt +=
+          "BP PROTOCOL: Keep all sets at RPE ≤ 7/10. Include minimum 10-min aerobic warm-up. Avoid Valsalva maneuver (breath-holding during heavy lifts). Cue proper breathing on every exercise. Add BP check reminder before session.\n";
     }
 
     prompt += "Blood Oxygen (SpO2): $bloodOxygen%\n";
     if (bloodOxygen != 'Unknown' && (bloodOxygen as num) < 95) {
-      prompt += "FLAG: Low SpO2 — avoid breath-holding exercises, monitor breathing during session.\n";
+      prompt +=
+          "FLAG: Low SpO2 — avoid breath-holding exercises, monitor breathing during session.\n";
     }
 
     if (bloodGlucoseMgDl != 'Unknown') {
@@ -326,14 +357,16 @@ Blood Pressure: $bpSystolic/$bpDiastolic mmHg
       }
     }
 
-    prompt += """
+    prompt +=
+        """
 
 Medical Conditions: $medicalConditions
 Joint Restrictions: $jointRestrictions
 """;
 
     if (jointsList.isNotEmpty) {
-      prompt += "For each restriction, substitute exercises that do not directly load the affected joint.\n";
+      prompt +=
+          "For each restriction, substitute exercises that do not directly load the affected joint.\n";
     }
 
     final rpeContext = context['rpeContext'] as String? ?? '';
@@ -341,7 +374,8 @@ Joint Restrictions: $jointRestrictions
       prompt += "\n$rpeContext\n";
     }
 
-    prompt += """
+    prompt +=
+        """
 
 ═══ EQUIPMENT AT $branchName BRANCH ═══
 Standard commercial gym: barbells, dumbbells 20-40kg range, cable machines, lat pulldown, leg press, chest press machine, treadmills, stationary bikes
@@ -394,7 +428,10 @@ Standard commercial gym: barbells, dumbbells 20-40kg range, cable machines, lat 
     final dietaryPreference = context['dietaryPreference'] ?? 'None';
 
     final rawMedicalConditions = context['medicalConditions'];
-    final medicalConditions = (rawMedicalConditions is List && rawMedicalConditions.isNotEmpty) ? rawMedicalConditions.join(', ') : 'None';
+    final medicalConditions =
+        (rawMedicalConditions is List && rawMedicalConditions.isNotEmpty)
+        ? rawMedicalConditions.join(', ')
+        : 'None';
 
     final wearables = context['wearables'] ?? {};
     final today = wearables['today'] ?? {};
@@ -412,7 +449,8 @@ Standard commercial gym: barbells, dumbbells 20-40kg range, cable machines, lat 
     final waterLitres = today['waterLitres'] ?? 0.0;
     final bodyFatPercentage = today['bodyFatPercentage'] ?? 'Unknown';
 
-    String prompt = """
+    String prompt =
+        """
 You are an expert sports nutritionist and dietitian with deep knowledge
 of Indian dietary patterns and ICMR nutritional guidelines.
 Generate a personalized daily diet plan for this gym member.
@@ -433,20 +471,25 @@ Weight Trend (7 days): $weightTrend
 """;
 
     if (fitnessGoal.toString().toLowerCase().contains('loss')) {
-       prompt += "Target deficit of 300-400 kcal/day\n";
-    } else if (fitnessGoal.toString().toLowerCase().contains('gain') || fitnessGoal.toString().toLowerCase().contains('muscle')) {
-       prompt += "Target surplus of 200-300 kcal/day\n";
+      prompt += "Target deficit of 300-400 kcal/day\n";
+    } else if (fitnessGoal.toString().toLowerCase().contains('gain') ||
+        fitnessGoal.toString().toLowerCase().contains('muscle')) {
+      prompt += "Target surplus of 200-300 kcal/day\n";
     } else {
-       prompt += "Maintain calories, shift to high protein\n";
+      prompt += "Maintain calories, shift to high protein\n";
     }
 
-    prompt += """
+    prompt +=
+        """
 
 ═══ HEALTH-SPECIFIC DIET FLAGS ═══
 Blood Pressure: $bpSystolic/$bpDiastolic → $bpCategory
 """;
 
-    if (bpCategory.toString().contains('Stage 1') || bpCategory.toString().contains('Stage 2') || bpCategory.toString().contains('Elevated') || bpCategory.toString().contains('Hypertension')) {
+    if (bpCategory.toString().contains('Stage 1') ||
+        bpCategory.toString().contains('Stage 2') ||
+        bpCategory.toString().contains('Elevated') ||
+        bpCategory.toString().contains('Hypertension')) {
       prompt += """
 Apply DASH diet principles:
   - Limit sodium to 1,500-2,000mg/day
@@ -457,7 +500,8 @@ Apply DASH diet principles:
     }
 
     prompt += "Blood Glucose: $bloodGlucoseMgDl mg/dL\n";
-    if (medicalConditions.toLowerCase().contains('diabetes') || medicalConditions.toLowerCase().contains('diabetic')) {
+    if (medicalConditions.toLowerCase().contains('diabetes') ||
+        medicalConditions.toLowerCase().contains('diabetic')) {
       prompt += """
   - Low GI foods only (prefer whole grains over refined)
   - Avoid simple sugars and white rice in large portions
@@ -466,7 +510,8 @@ Apply DASH diet principles:
 """;
     }
 
-    prompt += """
+    prompt +=
+        """
 
 Hydration (logged today): ${waterLitres}L
 Hydration target: $weightKg × 0.035 + workout adjustment litres
@@ -475,11 +520,15 @@ Hydration target: $weightKg × 0.035 + workout adjustment litres
 """;
 
     if (dietaryPreference.toString().toLowerCase() == 'vegetarian') {
-      prompt += "No meat or fish. Eggs optional if eggetarian. Protein sources: paneer, dal, rajma, chana, soya, curd, milk, tofu, seeds, nuts\n";
-    } else if (dietaryPreference.toString().toLowerCase() == 'non_vegetarian' || dietaryPreference.toString().toLowerCase() == 'non-vegetarian') {
-      prompt += "Include chicken, eggs, fish as primary protein sources. Use Indian cooking methods (grilled, curry, tandoor).\n";
+      prompt +=
+          "No meat or fish. Eggs optional if eggetarian. Protein sources: paneer, dal, rajma, chana, soya, curd, milk, tofu, seeds, nuts\n";
+    } else if (dietaryPreference.toString().toLowerCase() == 'non_vegetarian' ||
+        dietaryPreference.toString().toLowerCase() == 'non-vegetarian') {
+      prompt +=
+          "Include chicken, eggs, fish as primary protein sources. Use Indian cooking methods (grilled, curry, tandoor).\n";
     } else if (dietaryPreference.toString().toLowerCase() == 'vegan') {
-      prompt += "No animal products. Use soy milk, tofu, tempeh, legumes, seeds, nuts for protein.\n";
+      prompt +=
+          "No animal products. Use soy milk, tofu, tempeh, legumes, seeds, nuts for protein.\n";
     }
 
     prompt += """
@@ -530,11 +579,17 @@ Use Indian foods exclusively or predominantly:
 
   Future<Map<String, dynamic>> generateWorkoutPlan(String memberId) async {
     // 1. Check cache
-    final doc = await _db.collection('aiPlans').doc(memberId).collection('current').doc('plan').get();
+    final doc = await _db
+        .collection('aiPlans')
+        .doc(memberId)
+        .collection('current')
+        .doc('plan')
+        .get();
     if (doc.exists && doc.data() != null) {
       final data = doc.data()!;
       final generatedAt = data['generatedAt'] as Timestamp?;
-      if (generatedAt != null && DateTime.now().difference(generatedAt.toDate()).inHours < 24) {
+      if (generatedAt != null &&
+          DateTime.now().difference(generatedAt.toDate()).inHours < 24) {
         return data;
       }
     }
@@ -548,11 +603,14 @@ Use Indian foods exclusively or predominantly:
       final values = recentRpe.map((e) => e['rpe'] as int).toList();
       final avg = values.reduce((a, b) => a + b) / values.length;
       if (avg <= 2.0) {
-        rpeContext = 'The member has rated recent sessions as very easy (average RPE ${avg.toStringAsFixed(1)}/5). Increase workout volume and intensity by approximately 10 percent. Add one extra set per exercise where appropriate.';
+        rpeContext =
+            'The member has rated recent sessions as very easy (average RPE ${avg.toStringAsFixed(1)}/5). Increase workout volume and intensity by approximately 10 percent. Add one extra set per exercise where appropriate.';
       } else if (avg <= 3.5) {
-        rpeContext = 'The member has rated recent sessions at a comfortable level (average RPE ${avg.toStringAsFixed(1)}/5). Maintain current intensity and volume.';
+        rpeContext =
+            'The member has rated recent sessions at a comfortable level (average RPE ${avg.toStringAsFixed(1)}/5). Maintain current intensity and volume.';
       } else {
-        rpeContext = 'The member has rated recent sessions as difficult (average RPE ${avg.toStringAsFixed(1)}/5). Reduce total volume by 10 to 15 percent. Shorten sessions if needed and add one additional rest day this week.';
+        rpeContext =
+            'The member has rated recent sessions as difficult (average RPE ${avg.toStringAsFixed(1)}/5). Reduce total volume by 10 to 15 percent. Shorten sessions if needed and add one additional rest day this week.';
       }
     }
     context['rpeContext'] = rpeContext;
@@ -562,10 +620,12 @@ Use Indian foods exclusively or predominantly:
       _checkSafetyGate(context);
     } catch (e) {
       final errorCode = e.toString().replaceAll('Exception: ', '');
-      await _db.collection('aiPlans').doc(memberId).collection('current').doc('plan').set({
-         'status': errorCode,
-         'generatedAt': Timestamp.now(),
-      });
+      await _db
+          .collection('aiPlans')
+          .doc(memberId)
+          .collection('current')
+          .doc('plan')
+          .set({'status': errorCode, 'generatedAt': Timestamp.now()});
       throw Exception('Safety gate failed: $errorCode');
     }
 
@@ -580,7 +640,8 @@ Use Indian foods exclusively or predominantly:
     Map<String, dynamic> plan;
     try {
       plan = jsonDecode(jsonString);
-      if (plan['weeklyPlan'] == null || (plan['weeklyPlan'] as List).length != 7) {
+      if (plan['weeklyPlan'] == null ||
+          (plan['weeklyPlan'] as List).length != 7) {
         throw Exception('invalid_plan_structure');
       }
     } catch (e) {
@@ -602,21 +663,32 @@ Use Indian foods exclusively or predominantly:
         'sleepQuality': context['wearables']?['todaySleepQuality'],
         'todaySteps': context['wearables']?['today']['steps'],
         'todayHRV': context['wearables']?['today']['heartRateVariability'],
-      }
+      },
     };
 
-    await _db.collection('aiPlans').doc(memberId).collection('current').doc('plan').set(planData);
+    await _db
+        .collection('aiPlans')
+        .doc(memberId)
+        .collection('current')
+        .doc('plan')
+        .set(planData);
 
     return planData;
   }
 
   Future<Map<String, dynamic>> generateDietPlan(String memberId) async {
     // 1. Check cache
-    final doc = await _db.collection('dietPlans').doc(memberId).collection('current').doc('plan').get();
+    final doc = await _db
+        .collection('dietPlans')
+        .doc(memberId)
+        .collection('current')
+        .doc('plan')
+        .get();
     if (doc.exists && doc.data() != null) {
       final data = doc.data()!;
       final generatedAt = data['generatedAt'] as Timestamp?;
-      if (generatedAt != null && DateTime.now().difference(generatedAt.toDate()).inHours < 24) {
+      if (generatedAt != null &&
+          DateTime.now().difference(generatedAt.toDate()).inHours < 24) {
         return data;
       }
     }
@@ -629,10 +701,12 @@ Use Indian foods exclusively or predominantly:
       _checkSafetyGate(context);
     } catch (e) {
       final errorCode = e.toString().replaceAll('Exception: ', '');
-      await _db.collection('dietPlans').doc(memberId).collection('current').doc('plan').set({
-         'status': errorCode,
-         'generatedAt': Timestamp.now(),
-      });
+      await _db
+          .collection('dietPlans')
+          .doc(memberId)
+          .collection('current')
+          .doc('plan')
+          .set({'status': errorCode, 'generatedAt': Timestamp.now()});
       throw Exception('Safety gate failed: $errorCode');
     }
 
@@ -659,14 +733,24 @@ Use Indian foods exclusively or predominantly:
       'generatedAt': Timestamp.now(),
     };
 
-    await _db.collection('dietPlans').doc(memberId).collection('current').doc('plan').set(planData);
+    await _db
+        .collection('dietPlans')
+        .doc(memberId)
+        .collection('current')
+        .doc('plan')
+        .set(planData);
 
     return planData;
   }
 
   Future<Map<String, dynamic>?> getCachedWorkoutPlan(String memberId) async {
     try {
-      final doc = await _db.collection('aiPlans').doc(memberId).collection('current').doc('plan').get();
+      final doc = await _db
+          .collection('aiPlans')
+          .doc(memberId)
+          .collection('current')
+          .doc('plan')
+          .get();
       if (doc.exists && doc.data() != null) {
         return doc.data();
       }
@@ -679,7 +763,12 @@ Use Indian foods exclusively or predominantly:
 
   Future<Map<String, dynamic>?> getCachedDietPlan(String memberId) async {
     try {
-      final doc = await _db.collection('dietPlans').doc(memberId).collection('current').doc('plan').get();
+      final doc = await _db
+          .collection('dietPlans')
+          .doc(memberId)
+          .collection('current')
+          .doc('plan')
+          .get();
       if (doc.exists && doc.data() != null) {
         return doc.data();
       }

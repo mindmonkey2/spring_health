@@ -8,10 +8,7 @@ import '../../../models/fitness_stats_model.dart';
 class StatsOverviewWidget extends StatefulWidget {
   final String memberId;
 
-  const StatsOverviewWidget({
-    super.key,
-    required this.memberId,
-  });
+  const StatsOverviewWidget({super.key, required this.memberId});
 
   @override
   State<StatsOverviewWidget> createState() => _StatsOverviewWidgetState();
@@ -26,10 +23,10 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
   bool _isConnecting = false;
 
   // Daily goals
-  static const int _stepGoal     = 8000;
-  static const int _calorieGoal  = 500;
-  static const double _distGoal  = 5.0; // km
-  static const int _bpmGoal      = 120; // moderate activity zone
+  static const int _stepGoal = 8000;
+  static const int _calorieGoal = 500;
+  static const double _distGoal = 5.0; // km
+  static const int _bpmGoal = 120; // moderate activity zone
 
   @override
   void initState() {
@@ -89,10 +86,14 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('✅ Health Connect synced! Your real stats are live.'),
+            content: const Text(
+              '✅ Health Connect synced! Your real stats are live.',
+            ),
             backgroundColor: AppColors.neonTeal,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -102,10 +103,14 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Please grant Health Connect permissions to sync your stats.'),
+            content: const Text(
+              'Please grant Health Connect permissions to sync your stats.',
+            ),
             backgroundColor: AppColors.neonOrange,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'OPEN SETTINGS',
@@ -152,9 +157,7 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
             Expanded(
               child: _buildStatCard(
                 label: 'STEPS',
-                value: _stats.isRealData
-                    ? _formatNumber(_stats.steps)
-                    : '0',
+                value: _stats.isRealData ? _formatNumber(_stats.steps) : '0',
                 subValue: '/ ${_formatNumber(_stepGoal)}',
                 icon: Icons.directions_walk_rounded,
                 color: AppColors.neonTeal,
@@ -221,8 +224,11 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.sync_rounded,
-                    size: 14, color: AppColors.neonTeal.withValues(alpha: 0.7)),
+                Icon(
+                  Icons.sync_rounded,
+                  size: 14,
+                  color: AppColors.neonTeal.withValues(alpha: 0.7),
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'TAP TO SYNC TODAY\'S DATA',
@@ -249,7 +255,10 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
       decoration: BoxDecoration(
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.35), width: 1.5),
+        border: Border.all(
+          color: AppColors.neonTeal.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.neonTeal.withValues(alpha: 0.08),
@@ -261,16 +270,21 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
         children: [
           // Icon
           Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.neonTeal.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.4)),
-            ),
-            child: const Icon(Icons.monitor_heart_rounded,
-                color: AppColors.neonTeal, size: 30),
-          )
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.neonTeal.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: AppColors.neonTeal.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.monitor_heart_rounded,
+                  color: AppColors.neonTeal,
+                  size: 30,
+                ),
+              )
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scale(
                 begin: const Offset(1.0, 1.0),
@@ -301,7 +315,9 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.neonTeal,
                 foregroundColor: Colors.black,
-                disabledBackgroundColor: AppColors.neonTeal.withValues(alpha: 0.5),
+                disabledBackgroundColor: AppColors.neonTeal.withValues(
+                  alpha: 0.5,
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -331,8 +347,11 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
             const SizedBox(height: 12),
             TextButton.icon(
               onPressed: () => _healthService.openHealthConnectSettings(),
-              icon: Icon(Icons.settings_rounded,
-                  size: 14, color: AppColors.gray400),
+              icon: Icon(
+                Icons.settings_rounded,
+                size: 14,
+                color: AppColors.gray400,
+              ),
               label: Text(
                 'Open Health Connect Settings',
                 style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
@@ -370,23 +389,20 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
 
   Widget _buildSkeletonCard({required int delay}) {
     return Container(
-      height: 110,
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Center(
-        child: CircularProgressIndicator(
-          color: AppColors.neonTeal.withValues(alpha: 0.4),
-          strokeWidth: 2,
-        ),
-      ),
-    )
-        .animate(onPlay: (c) => c.repeat(reverse: true))
-        .shimmer(
-          duration: 1200.ms,
-          color: Colors.white.withValues(alpha: 0.04),
+          height: 110,
+          decoration: BoxDecoration(
+            color: AppColors.cardSurface,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppColors.neonTeal.withValues(alpha: 0.4),
+              strokeWidth: 2,
+            ),
+          ),
         )
+        .animate(onPlay: (c) => c.repeat(reverse: true))
+        .shimmer(duration: 1200.ms, color: Colors.white.withValues(alpha: 0.04))
         .animate()
         .fadeIn(delay: delay.ms);
   }
@@ -404,21 +420,29 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded,
-              color: AppColors.gray400, size: 28),
+          const Icon(
+            Icons.info_outline_rounded,
+            color: AppColors.gray400,
+            size: 28,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Health Connect Not Available',
-                    style: AppTextStyles.bodyMedium
-                        .copyWith(color: AppColors.gray400)),
+                Text(
+                  'Health Connect Not Available',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   'Install Health Connect from the Play Store to sync your fitness data.',
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.gray600, height: 1.4),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray600,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
@@ -485,10 +509,7 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            value,
-            style: AppTextStyles.heading2.copyWith(fontSize: 26),
-          ),
+          Text(value, style: AppTextStyles.heading2.copyWith(fontSize: 26)),
           const SizedBox(height: 2),
           RichText(
             text: TextSpan(

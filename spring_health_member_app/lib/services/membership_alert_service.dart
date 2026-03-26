@@ -7,7 +7,7 @@ import 'in_app_notification_service.dart';
 
 class MembershipAlertService {
   static final MembershipAlertService _instance =
-  MembershipAlertService._internal();
+      MembershipAlertService._internal();
   factory MembershipAlertService() => _instance;
   MembershipAlertService._internal();
 
@@ -35,9 +35,9 @@ class MembershipAlertService {
 
       // Key by expiry date — auto-resets tracking when member renews
       final expiryKey =
-      '${member.expiryDate.year}-'
-      '${member.expiryDate.month.toString().padLeft(2, '0')}-'
-      '${member.expiryDate.day.toString().padLeft(2, '0')}';
+          '${member.expiryDate.year}-'
+          '${member.expiryDate.month.toString().padLeft(2, '0')}-'
+          '${member.expiryDate.day.toString().padLeft(2, '0')}';
       final trackedExpiry = data['expiryKey'] as String? ?? '';
 
       // If expiry date changed (renewed), start fresh tracking
@@ -56,26 +56,26 @@ class MembershipAlertService {
         alertKey = 'expired';
         title = '⚠️ Membership Expired';
         body =
-        'Your ${member.plan} membership has expired. '
-        'Visit reception to renew and regain full access.';
+            'Your ${member.plan} membership has expired. '
+            'Visit reception to renew and regain full access.';
       } else if (!isExpired && days <= 1 && alerted['day1'] != true) {
         alertKey = 'day1';
         title = '🚨 Last Day — Membership Expires Today';
         body =
-        'Your ${member.plan} membership expires today. '
-        'Head to the front desk to renew now.';
+            'Your ${member.plan} membership expires today. '
+            'Head to the front desk to renew now.';
       } else if (!isExpired && days <= 3 && alerted['day3'] != true) {
         alertKey = 'day3';
         title = '⏰ Expiring in $days Days';
         body =
-        'Your ${member.plan} membership expires in $days days. '
-        'Renew soon to avoid any interruption.';
+            'Your ${member.plan} membership expires in $days days. '
+            'Renew soon to avoid any interruption.';
       } else if (!isExpired && days <= 7 && alerted['day7'] != true) {
         alertKey = 'day7';
         title = '📅 Membership Expiring Soon — $days Days Left';
         body =
-        'Your ${member.plan} membership expires in $days days. '
-        'Plan your renewal early to stay uninterrupted.';
+            'Your ${member.plan} membership expires in $days days. '
+            'Plan your renewal early to stay uninterrupted.';
       }
 
       // Already alerted for every applicable threshold

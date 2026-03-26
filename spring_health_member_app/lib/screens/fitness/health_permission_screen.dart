@@ -29,8 +29,8 @@ class _HealthPermissionScreenState extends State<HealthPermissionScreen> {
         SnackBar(
           content: Text(
             Platform.isIOS
-            ? 'Please enable HealthKit in Settings → Health → Data Access.'
-          : 'Please enable Health Connect permissions in your device settings.',
+                ? 'Please enable HealthKit in Settings → Health → Data Access.'
+                : 'Please enable Health Connect permissions in your device settings.',
           ),
           backgroundColor: AppColors.neonOrange,
           behavior: SnackBarBehavior.floating,
@@ -47,7 +47,9 @@ class _HealthPermissionScreenState extends State<HealthPermissionScreen> {
   @override
   Widget build(BuildContext context) {
     final platform = Platform.isIOS ? 'Apple Health' : 'Health Connect';
-    final platformIcon = Platform.isIOS ? Icons.favorite_rounded : Icons.monitor_heart_rounded;
+    final platformIcon = Platform.isIOS
+        ? Icons.favorite_rounded
+        : Icons.monitor_heart_rounded;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -65,7 +67,9 @@ class _HealthPermissionScreenState extends State<HealthPermissionScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.neonTeal.withValues(alpha: 0.15),
-              border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.5)),
+              border: Border.all(
+                color: AppColors.neonTeal.withValues(alpha: 0.5),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.neonTeal.withValues(alpha: 0.3),
@@ -96,9 +100,21 @@ class _HealthPermissionScreenState extends State<HealthPermissionScreen> {
 
           // What we read
           ...[
-            _PermRow(icon: Icons.directions_walk_rounded, color: AppColors.neonLime, label: 'Steps & Distance'),
-            _PermRow(icon: Icons.local_fire_department_rounded, color: AppColors.neonOrange, label: 'Active Calories Burned'),
-            _PermRow(icon: Icons.favorite_rounded, color: Colors.red, label: 'Heart Rate (BPM)'),
+            _PermRow(
+              icon: Icons.directions_walk_rounded,
+              color: AppColors.neonLime,
+              label: 'Steps & Distance',
+            ),
+            _PermRow(
+              icon: Icons.local_fire_department_rounded,
+              color: AppColors.neonOrange,
+              label: 'Active Calories Burned',
+            ),
+            _PermRow(
+              icon: Icons.favorite_rounded,
+              color: Colors.red,
+              label: 'Heart Rate (BPM)',
+            ),
           ].animate(interval: 80.ms).fadeIn().slideX(begin: -0.1),
 
           const SizedBox(height: 24),
@@ -110,15 +126,29 @@ class _HealthPermissionScreenState extends State<HealthPermissionScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.neonTeal,
                 foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               icon: _isRequesting
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-              : Icon(platformIcon, size: 18),
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.black,
+                      ),
+                    )
+                  : Icon(platformIcon, size: 18),
               label: Text(
-                _isRequesting ? 'REQUESTING...' : 'CONNECT $platform'.toUpperCase(),
-                style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                _isRequesting
+                    ? 'REQUESTING...'
+                    : 'CONNECT $platform'.toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
           ).animate().fadeIn(delay: 500.ms).scale(),
@@ -140,7 +170,11 @@ class _PermRow extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String label;
-  const _PermRow({required this.icon, required this.color, required this.label});
+  const _PermRow({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -150,11 +184,17 @@ class _PermRow extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Icon(icon, color: color, size: 16),
           ),
           const SizedBox(width: 12),
-          Text(label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white)),
+          Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
           const Spacer(),
           Icon(Icons.check_circle_rounded, color: color, size: 18),
         ],

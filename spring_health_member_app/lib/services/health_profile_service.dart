@@ -6,19 +6,23 @@ import '../models/fitness_test_model.dart';
 class HealthProfileService {
   final FirebaseFirestore _db;
 
-  HealthProfileService({FirebaseFirestore? db}) : _db = db ?? FirebaseFirestore.instance;
+  HealthProfileService({FirebaseFirestore? db})
+    : _db = db ?? FirebaseFirestore.instance;
 
   Future<HealthProfileModel?> getHealthProfile(String memberId) async {
     final doc = await _db.collection('healthProfiles').doc(memberId).get();
     if (!doc.exists) return null;
-    return HealthProfileModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+    return HealthProfileModel.fromMap(
+      doc.data() as Map<String, dynamic>,
+      doc.id,
+    );
   }
 
   Future<void> saveHealthProfile(HealthProfileModel profile) async {
-    await _db.collection('healthProfiles').doc(profile.id).set(
-          profile.toMap(),
-          SetOptions(merge: true),
-        );
+    await _db
+        .collection('healthProfiles')
+        .doc(profile.id)
+        .set(profile.toMap(), SetOptions(merge: true));
   }
 
   Future<void> logBodyMetrics(String memberId, BodyMetricsLogModel log) async {
@@ -32,8 +36,10 @@ class HealthProfileService {
     await docRef.set(updatedLog.toMap());
   }
 
-  Future<List<BodyMetricsLogModel>> getMetricsHistory(String memberId,
-      {int limit = 30}) async {
+  Future<List<BodyMetricsLogModel>> getMetricsHistory(
+    String memberId, {
+    int limit = 30,
+  }) async {
     final snapshot = await _db
         .collection('bodyMetricsLogs')
         .doc(memberId)
@@ -68,13 +74,21 @@ class HealthProfileService {
         .get();
 
     if (snapshot.docs.isEmpty) return null;
-    return FitnessTestModel.fromMap(snapshot.docs.first.data(), snapshot.docs.first.id);
+    return FitnessTestModel.fromMap(
+      snapshot.docs.first.data(),
+      snapshot.docs.first.id,
+    );
   }
 
   Stream<HealthProfileModel?> watchHealthProfile(String memberId) {
-    return _db.collection('healthProfiles').doc(memberId).snapshots().map((doc) {
+    return _db.collection('healthProfiles').doc(memberId).snapshots().map((
+      doc,
+    ) {
       if (!doc.exists) return null;
-      return HealthProfileModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      return HealthProfileModel.fromMap(
+        doc.data() as Map<String, dynamic>,
+        doc.id,
+      );
     });
   }
 }

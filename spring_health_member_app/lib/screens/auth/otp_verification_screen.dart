@@ -58,10 +58,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.verifyOTP(
-        otp,
-        verificationId: _currentVerificationId,
-      );
+      await _authService.verifyOTP(otp, verificationId: _currentVerificationId);
 
       if (!mounted) return;
 
@@ -151,14 +148,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_outline,
-                color: Colors.black, size: 18),
+            const Icon(
+              Icons.check_circle_outline,
+              color: Colors.black,
+              size: 18,
+            ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(color: Colors.black),
-              ),
+              child: Text(message, style: const TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -205,8 +202,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         backgroundColor: AppColors.backgroundBlack,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.white,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -216,14 +215,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               // Animated running logo (icon only, no text)
-              Center(
-                child: SpringHealthLogoAnimated(
-                  size: 80,
-                  showText: false,
-                ),
-              ).animate().fadeIn(duration: 500.ms).scale(
+              Center(child: SpringHealthLogoAnimated(size: 80, showText: false))
+                  .animate()
+                  .fadeIn(duration: 500.ms)
+                  .scale(
                     begin: const Offset(0.7, 0.7),
                     end: const Offset(1.0, 1.0),
                     curve: Curves.elasticOut,

@@ -34,10 +34,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _emailCtrl = TextEditingController(text: widget.member.email);
-    _emergencyNameCtrl =
-        TextEditingController(text: widget.member.emergencyContactName ?? '');
-    _emergencyPhoneCtrl =
-        TextEditingController(text: widget.member.emergencyContactPhone ?? '');
+    _emergencyNameCtrl = TextEditingController(
+      text: widget.member.emergencyContactName ?? '',
+    );
+    _emergencyPhoneCtrl = TextEditingController(
+      text: widget.member.emergencyContactPhone ?? '',
+    );
     _newPhotoUrl = widget.member.photoUrl;
   }
 
@@ -81,8 +83,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     color: AppColors.neonLime.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.photo_library_rounded,
-                      color: AppColors.neonLime),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: AppColors.neonLime,
+                  ),
                 ),
                 title: const Text('Choose from Gallery'),
                 onTap: () {
@@ -98,8 +102,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     color: AppColors.neonTeal.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.camera_alt_rounded,
-                      color: AppColors.neonTeal),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.neonTeal,
+                  ),
                 ),
                 title: const Text('Take a Photo'),
                 onTap: () {
@@ -116,8 +122,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _pickAndUpload(ImageSource source) async {
-    final XFile? picked =
-        await _picker.pickImage(source: source, imageQuality: 75, maxWidth: 800);
+    final XFile? picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 75,
+      maxWidth: 800,
+    );
     if (picked == null || !mounted) return;
 
     setState(() => _isUploadingPhoto = true);
@@ -132,10 +141,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SettableMetadata(contentType: 'image/jpeg'),
       );
       final url = await ref.getDownloadURL();
-      await FirebaseFirestore.instance
-          .collection('members')
-          .doc(uid)
-          .update({'photoUrl': url});
+      await FirebaseFirestore.instance.collection('members').doc(uid).update({
+        'photoUrl': url,
+      });
       if (!mounted) return;
       setState(() {
         _newPhotoUrl = url;
@@ -193,9 +201,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundBlack,
         elevation: 0,
-        title: Text('Edit Profile',
-            style: AppTextStyles.heading3
-                .copyWith(color: AppColors.textPrimary)),
+        title: Text(
+          'Edit Profile',
+          style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
@@ -208,13 +217,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.neonLime),
+                      strokeWidth: 2,
+                      color: AppColors.neonLime,
+                    ),
                   )
-                : Text('SAVE',
+                : Text(
+                    'SAVE',
                     style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.neonLime,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1)),
+                      color: AppColors.neonLime,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -243,154 +257,181 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // ── Photo section ─────────────────────────────────────────────────────────
 
   Widget get _buildPhotoSection => Center(
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _isUploadingPhoto ? null : _showPhotoSheet,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.neonLime, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.neonLime.withValues(alpha: 0.25),
-                          blurRadius: 20,
-                          spreadRadius: 4,
-                        ),
-                      ],
+    child: Column(
+      children: [
+        GestureDetector(
+          onTap: _isUploadingPhoto ? null : _showPhotoSheet,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.neonLime, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.neonLime.withValues(alpha: 0.25),
+                      blurRadius: 20,
+                      spreadRadius: 4,
                     ),
-                    child: ClipOval(
-                      child: _newPhotoUrl != null
-                          ? Image.network(_newPhotoUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, e, s) =>
-                                  _defaultAvatar)
-                          : _defaultAvatar,
-                    ),
-                  ),
-                  if (_isUploadingPhoto)
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundBlack.withValues(alpha: 0.6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.neonLime, strokeWidth: 3),
-                      ),
-                    ),
-                  Positioned(
-                    bottom: 2,
-                    right: 2,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.neonLime,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: AppColors.backgroundBlack, width: 2),
-                      ),
-                      child: const Icon(Icons.camera_alt_rounded,
-                          size: 14, color: Colors.black),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+                child: ClipOval(
+                  child: _newPhotoUrl != null
+                      ? Image.network(
+                          _newPhotoUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, e, s) => _defaultAvatar,
+                        )
+                      : _defaultAvatar,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text('Tap to change photo',
-                style: AppTextStyles.caption
-                    .copyWith(color: AppColors.gray400)),
-          ],
-        ),
-      ).animate().fadeIn().scaleXY(begin: 0.9);
-
-  Widget get _defaultAvatar => Container(
-        color: AppColors.cardSurface,
-        child: Center(
-          child: Text(
-            widget.member.name.isNotEmpty
-                ? widget.member.name[0].toUpperCase()
-                : '?',
-            style: AppTextStyles.heading1
-                .copyWith(color: AppColors.neonLime, fontSize: 36),
+              if (_isUploadingPhoto)
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundBlack.withValues(alpha: 0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.neonLime,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                ),
+              Positioned(
+                bottom: 2,
+                right: 2,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.neonLime,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.backgroundBlack,
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    size: 14,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      );
+        const SizedBox(height: 10),
+        Text(
+          'Tap to change photo',
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+        ),
+      ],
+    ),
+  ).animate().fadeIn().scaleXY(begin: 0.9);
+
+  Widget get _defaultAvatar => Container(
+    color: AppColors.cardSurface,
+    child: Center(
+      child: Text(
+        widget.member.name.isNotEmpty
+            ? widget.member.name[0].toUpperCase()
+            : '?',
+        style: AppTextStyles.heading1.copyWith(
+          color: AppColors.neonLime,
+          fontSize: 36,
+        ),
+      ),
+    ),
+  );
 
   // ── Read-only section (name, phone, plan) ─────────────────────────────────
 
   Widget get _buildReadOnlySection => _sectionCard(
-        title: 'MEMBERSHIP INFO',
-        color: AppColors.gray400,
-        children: [
-          _readOnlyRow('Full Name', widget.member.name,
-              Icons.person_rounded, AppColors.neonLime),
-          const SizedBox(height: 12),
-          _readOnlyRow('Phone', widget.member.phone,
-              Icons.phone_rounded, AppColors.neonTeal),
-          const SizedBox(height: 12),
-          _readOnlyRow('Plan', widget.member.membershipPlan,
-              Icons.fitness_center_rounded, AppColors.neonOrange),
-          const SizedBox(height: 12),
-          _readOnlyRow('Branch', widget.member.branch.toUpperCase(),
-              Icons.location_on_rounded, AppColors.turquoise),
-        ],
-      );
+    title: 'MEMBERSHIP INFO',
+    color: AppColors.gray400,
+    children: [
+      _readOnlyRow(
+        'Full Name',
+        widget.member.name,
+        Icons.person_rounded,
+        AppColors.neonLime,
+      ),
+      const SizedBox(height: 12),
+      _readOnlyRow(
+        'Phone',
+        widget.member.phone,
+        Icons.phone_rounded,
+        AppColors.neonTeal,
+      ),
+      const SizedBox(height: 12),
+      _readOnlyRow(
+        'Plan',
+        widget.member.membershipPlan,
+        Icons.fitness_center_rounded,
+        AppColors.neonOrange,
+      ),
+      const SizedBox(height: 12),
+      _readOnlyRow(
+        'Branch',
+        widget.member.branch.toUpperCase(),
+        Icons.location_on_rounded,
+        AppColors.turquoise,
+      ),
+    ],
+  );
 
   // ── Editable fields ───────────────────────────────────────────────────────
 
   Widget get _buildEditableSection => _sectionCard(
-        title: 'CONTACT INFO',
+    title: 'CONTACT INFO',
+    color: AppColors.neonTeal,
+    children: [
+      _buildField(
+        label: 'Email Address',
+        hint: 'your@email.com',
+        controller: _emailCtrl,
+        icon: Icons.email_rounded,
         color: AppColors.neonTeal,
-        children: [
-          _buildField(
-            label: 'Email Address',
-            hint: 'your@email.com',
-            controller: _emailCtrl,
-            icon: Icons.email_rounded,
-            color: AppColors.neonTeal,
-            keyboardType: TextInputType.emailAddress,
-            validator: (v) {
-              if (v == null || v.isEmpty) return null;
-              if (!v.contains('@')) return 'Enter a valid email';
-              return null;
-            },
-          ),
-        ],
-      );
+        keyboardType: TextInputType.emailAddress,
+        validator: (v) {
+          if (v == null || v.isEmpty) return null;
+          if (!v.contains('@')) return 'Enter a valid email';
+          return null;
+        },
+      ),
+    ],
+  );
 
   // ── Emergency contact ─────────────────────────────────────────────────────
 
   Widget get _buildEmergencySection => _sectionCard(
-        title: 'EMERGENCY CONTACT',
+    title: 'EMERGENCY CONTACT',
+    color: AppColors.neonOrange,
+    children: [
+      _buildField(
+        label: 'Contact Name',
+        hint: 'Emergency contact person',
+        controller: _emergencyNameCtrl,
+        icon: Icons.person_outline_rounded,
         color: AppColors.neonOrange,
-        children: [
-          _buildField(
-            label: 'Contact Name',
-            hint: 'Emergency contact person',
-            controller: _emergencyNameCtrl,
-            icon: Icons.person_outline_rounded,
-            color: AppColors.neonOrange,
-          ),
-          const SizedBox(height: 16),
-          _buildField(
-            label: 'Contact Phone',
-            hint: 'Phone number with country code',
-            controller: _emergencyPhoneCtrl,
-            icon: Icons.phone_outlined,
-            color: AppColors.neonOrange,
-            keyboardType: TextInputType.phone,
-          ),
-        ],
-      );
+      ),
+      const SizedBox(height: 16),
+      _buildField(
+        label: 'Contact Phone',
+        hint: 'Phone number with country code',
+        controller: _emergencyPhoneCtrl,
+        icon: Icons.phone_outlined,
+        color: AppColors.neonOrange,
+        keyboardType: TextInputType.phone,
+      ),
+    ],
+  );
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -398,43 +439,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String title,
     required Color color,
     required List<Widget> children,
-  }) =>
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.cardSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  }) => Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: AppColors.cardSurface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: color.withValues(alpha: 0.2)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(title,
-                    style: AppTextStyles.caption.copyWith(
-                        color: color,
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.bold)),
-              ],
+            Container(
+              width: 4,
+              height: 18,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            const SizedBox(height: 16),
-            ...children,
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: AppTextStyles.caption.copyWith(
+                color: color,
+                letterSpacing: 2,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
-      ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05, end: 0);
+        const SizedBox(height: 16),
+        ...children,
+      ],
+    ),
+  ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05, end: 0);
 
-  Widget _readOnlyRow(
-      String label, String value, IconData icon, Color color) =>
+  Widget _readOnlyRow(String label, String value, IconData icon, Color color) =>
       Row(
         children: [
           Container(
@@ -451,19 +493,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: AppTextStyles.caption
-                        .copyWith(color: AppColors.gray400)),
+                Text(
+                  label,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.gray400,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(value,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.gray400)),
+                Text(
+                  value,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.gray400,
+                  ),
+                ),
               ],
             ),
           ),
-          const Icon(Icons.lock_outline_rounded,
-              size: 14, color: AppColors.gray600),
+          const Icon(
+            Icons.lock_outline_rounded,
+            size: 14,
+            color: AppColors.gray600,
+          ),
         ],
       );
 
@@ -475,61 +526,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required Color color,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
-  }) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.gray400)),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            validator: validator,
-            style: AppTextStyles.bodyMedium,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle:
-                  AppTextStyles.bodyMedium.copyWith(color: AppColors.gray600),
-              prefixIcon: Icon(icon, color: color, size: 20),
-              filled: true,
-              fillColor: AppColors.backgroundBlack,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                    color: AppColors.gray800),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: color, width: 1.5),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.error),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.error),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.gray800),
-              ),
-            ),
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        validator: validator,
+        style: AppTextStyles.bodyMedium,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.gray600,
           ),
-        ],
-      );
+          prefixIcon: Icon(icon, color: color, size: 20),
+          filled: true,
+          fillColor: AppColors.backgroundBlack,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.gray800),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: color, width: 1.5),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.error),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.gray800),
+          ),
+        ),
+      ),
+    ],
+  );
 
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
-      ..showSnackBar(SnackBar(
-        content: Text(msg),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.cardSurface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.cardSurface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
   }
 }

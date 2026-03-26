@@ -45,13 +45,13 @@ class AppNotification {
     if (metadata != null) 'metadata': metadata,
   };
 
-    AppNotification copyWith({bool? isRead}) => AppNotification(
-      id: id,
-      type: type,
-      title: title,
-      body: body,
-      isRead: isRead ?? this.isRead,
-      createdAt: createdAt,
-      metadata: metadata,
-    );
+  AppNotification copyWith({bool? isRead}) => AppNotification(
+    id: id,
+    type: type,
+    title: title,
+    body: body,
+    isRead: isRead ?? this.isRead,
+    createdAt: createdAt,
+    metadata: metadata,
+  );
 }

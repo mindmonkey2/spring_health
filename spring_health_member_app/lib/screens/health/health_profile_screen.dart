@@ -76,6 +76,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
         });
       }
     }
+
     _weightCtrl.addListener(updateBmi);
     _heightCtrl.addListener(updateBmi);
 
@@ -88,6 +89,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
         });
       }
     }
+
     _bpSysCtrl.addListener(updateBpCat);
     _bpDiaCtrl.addListener(updateBpCat);
 
@@ -97,10 +99,13 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
       final plk = double.tryParse(_plankCtrl.text);
       setState(() {
         _overallLevel = FitnessTestModel.deriveOverallLevel(
-          pushups: pu, pullups: pll, plank: plk,
+          pushups: pu,
+          pullups: pll,
+          plank: plk,
         );
       });
     }
+
     _pushupsCtrl.addListener(updateLevel);
     _pullupsCtrl.addListener(updateLevel);
     _plankCtrl.addListener(updateLevel);
@@ -133,7 +138,10 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
       _bmi = profile.bmi;
 
       if (profile.bpSystolic != null && profile.bpDiastolic != null) {
-        _bpCategory = HealthProfileModel.bpCategory(profile.bpSystolic!, profile.bpDiastolic!);
+        _bpCategory = HealthProfileModel.bpCategory(
+          profile.bpSystolic!,
+          profile.bpDiastolic!,
+        );
       }
     }
 
@@ -223,9 +231,9 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
     await _service.logBodyMetrics(widget.memberId, log);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Health profile updated')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Health profile updated')));
       _loadData();
     }
   }
@@ -294,13 +302,12 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.neonLime))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.neonLime),
+            )
           : TabBarView(
               controller: _tabController,
-              children: [
-                _buildMetricsTab(),
-                _buildFitnessTestsTab(),
-              ],
+              children: [_buildMetricsTab(), _buildFitnessTestsTab()],
             ),
     );
   }
@@ -327,10 +334,18 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
             backgroundColor: AppColors.neonLime,
             foregroundColor: AppColors.backgroundBlack,
             minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           onPressed: _saveMetrics,
-          child: Text('Save Profile', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.backgroundBlack, fontWeight: FontWeight.bold)),
+          child: Text(
+            'Save Profile',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.backgroundBlack,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(height: 24),
         _buildTrendCharts(),
@@ -338,7 +353,10 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
     );
   }
 
-  Widget _buildGlassCard({required Widget child, Color borderColor = AppColors.neonLime}) {
+  Widget _buildGlassCard({
+    required Widget child,
+    Color borderColor = AppColors.neonLime,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -350,12 +368,19 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, {bool isNumeric = true, String? helperText}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController ctrl, {
+    bool isNumeric = true,
+    String? helperText,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: ctrl,
-        keyboardType: isNumeric ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
+        keyboardType: isNumeric
+            ? const TextInputType.numberWithOptions(decimal: true)
+            : TextInputType.text,
         style: AppTextStyles.bodyMedium,
         decoration: InputDecoration(
           labelText: label,
@@ -364,8 +389,14 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
           labelStyle: AppTextStyles.caption.copyWith(color: AppColors.gray400),
           filled: true,
           fillColor: AppColors.surfaceDark,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );
@@ -414,17 +445,25 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('BMI:', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+                      Text(
+                        'BMI:',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.gray400,
+                        ),
+                      ),
                       Text(
                         _bmi != null ? _bmi!.toStringAsFixed(1) : '-',
-                        style: AppTextStyles.bodyLarge.copyWith(color: bmiColor, fontWeight: FontWeight.bold),
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: bmiColor,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -451,7 +490,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
               const SizedBox(width: 12),
               Expanded(child: _buildTextField('Hips (cm)', _hipsCtrl)),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -498,7 +537,10 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
               _buildTextField('Resting Heart Rate (bpm)', _hrCtrl),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: bpColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
@@ -509,7 +551,13 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                   children: [
                     Icon(Icons.monitor_heart_rounded, color: bpColor, size: 16),
                     const SizedBox(width: 8),
-                    Text(_bpCategory, style: AppTextStyles.bodyMedium.copyWith(color: bpColor, fontWeight: FontWeight.bold)),
+                    Text(
+                      _bpCategory,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: bpColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ).animate(target: isCrisis ? 1 : 0).shimmer(duration: 1000.ms),
@@ -527,12 +575,18 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
             ),
             child: Row(
               children: [
-                const Icon(Icons.warning_rounded, color: AppColors.error, size: 32),
+                const Icon(
+                  Icons.warning_rounded,
+                  color: AppColors.error,
+                  size: 32,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     "⚠️ Your blood pressure reading is in the high range. Please consult a doctor before starting any intense exercise. We've noted this in your fitness profile.",
-                    style: AppTextStyles.caption.copyWith(color: AppColors.error),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
                 ),
               ],
@@ -557,10 +611,15 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
             style: AppTextStyles.bodyMedium,
             decoration: InputDecoration(
               labelText: 'Blood Group',
-              labelStyle: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+              labelStyle: AppTextStyles.caption.copyWith(
+                color: AppColors.gray400,
+              ),
               filled: true,
               fillColor: AppColors.surfaceDark,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
             ),
             items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
                 .map((bg) => DropdownMenuItem(value: bg, child: Text(bg)))
@@ -569,84 +628,135 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
           ),
           const SizedBox(height: 16),
           // Dietary Preference
-          Text('Dietary Preference', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+          Text(
+            'Dietary Preference',
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: ['vegetarian', 'non_vegetarian', 'vegan', 'eggetarian'].map((diet) {
-              final isSel = _dietaryPreference == diet;
-              return ChoiceChip(
-                label: Text(diet.replaceAll('_', ' ').toUpperCase(), style: AppTextStyles.caption.copyWith(color: isSel ? AppColors.backgroundBlack : AppColors.textPrimary)),
-                selected: isSel,
-                selectedColor: AppColors.neonLime,
-                backgroundColor: AppColors.surfaceDark,
-                onSelected: (sel) {
-                  if (sel) {
-                    setState(() => _dietaryPreference = diet);
-                  }
-                },
-              );
-            }).toList(),
+            children: ['vegetarian', 'non_vegetarian', 'vegan', 'eggetarian']
+                .map((diet) {
+                  final isSel = _dietaryPreference == diet;
+                  return ChoiceChip(
+                    label: Text(
+                      diet.replaceAll('_', ' ').toUpperCase(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: isSel
+                            ? AppColors.backgroundBlack
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    selected: isSel,
+                    selectedColor: AppColors.neonLime,
+                    backgroundColor: AppColors.surfaceDark,
+                    onSelected: (sel) {
+                      if (sel) {
+                        setState(() => _dietaryPreference = diet);
+                      }
+                    },
+                  );
+                })
+                .toList(),
           ),
           const SizedBox(height: 16),
           // Medical Conditions
-          Text('Medical Conditions', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+          Text(
+            'Medical Conditions',
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: ['Hypertension', 'Diabetes', 'Asthma', 'Heart Condition', 'Joint Issues', 'Other', 'None'].map((cond) {
-              final isSel = _medicalConditions.contains(cond);
-              return FilterChip(
-                label: Text(cond, style: AppTextStyles.caption.copyWith(color: isSel ? AppColors.backgroundBlack : AppColors.textPrimary)),
-                selected: isSel,
-                selectedColor: AppColors.neonOrange,
-                backgroundColor: AppColors.surfaceDark,
-                onSelected: (sel) {
-                  setState(() {
-                    if (cond == 'None') {
-                      _medicalConditions = ['None'];
-                    } else {
-                      _medicalConditions.remove('None');
-                      if (sel) {
-                        _medicalConditions.add(cond);
-                      } else {
-                        _medicalConditions.remove(cond);
-                      }
-                    }
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                [
+                  'Hypertension',
+                  'Diabetes',
+                  'Asthma',
+                  'Heart Condition',
+                  'Joint Issues',
+                  'Other',
+                  'None',
+                ].map((cond) {
+                  final isSel = _medicalConditions.contains(cond);
+                  return FilterChip(
+                    label: Text(
+                      cond,
+                      style: AppTextStyles.caption.copyWith(
+                        color: isSel
+                            ? AppColors.backgroundBlack
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    selected: isSel,
+                    selectedColor: AppColors.neonOrange,
+                    backgroundColor: AppColors.surfaceDark,
+                    onSelected: (sel) {
+                      setState(() {
+                        if (cond == 'None') {
+                          _medicalConditions = ['None'];
+                        } else {
+                          _medicalConditions.remove('None');
+                          if (sel) {
+                            _medicalConditions.add(cond);
+                          } else {
+                            _medicalConditions.remove(cond);
+                          }
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 16),
           // Joint Restrictions
-          Text('Joint Restrictions', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+          Text(
+            'Joint Restrictions',
+            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: ['None', 'Lower Back', 'Left Knee', 'Right Knee', 'Left Shoulder', 'Right Shoulder', 'Left Ankle', 'Right Ankle'].map((rest) {
-              final isSel = _jointRestrictions.contains(rest);
-              return FilterChip(
-                label: Text(rest, style: AppTextStyles.caption.copyWith(color: isSel ? AppColors.backgroundBlack : AppColors.textPrimary)),
-                selected: isSel,
-                selectedColor: AppColors.neonTeal,
-                backgroundColor: AppColors.surfaceDark,
-                onSelected: (sel) {
-                  setState(() {
-                    if (rest == 'None') {
-                      _jointRestrictions = ['None'];
-                    } else {
-                      _jointRestrictions.remove('None');
-                      if (sel) {
-                        _jointRestrictions.add(rest);
-                      } else {
-                        _jointRestrictions.remove(rest);
-                      }
-                    }
-                  });
-                },
-              );
-            }).toList(),
+            children:
+                [
+                  'None',
+                  'Lower Back',
+                  'Left Knee',
+                  'Right Knee',
+                  'Left Shoulder',
+                  'Right Shoulder',
+                  'Left Ankle',
+                  'Right Ankle',
+                ].map((rest) {
+                  final isSel = _jointRestrictions.contains(rest);
+                  return FilterChip(
+                    label: Text(
+                      rest,
+                      style: AppTextStyles.caption.copyWith(
+                        color: isSel
+                            ? AppColors.backgroundBlack
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    selected: isSel,
+                    selectedColor: AppColors.neonTeal,
+                    backgroundColor: AppColors.surfaceDark,
+                    onSelected: (sel) {
+                      setState(() {
+                        if (rest == 'None') {
+                          _jointRestrictions = ['None'];
+                        } else {
+                          _jointRestrictions.remove('None');
+                          if (sel) {
+                            _jointRestrictions.add(rest);
+                          } else {
+                            _jointRestrictions.remove(rest);
+                          }
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
           ),
         ],
       ),
@@ -659,12 +769,24 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
       {'val': 'muscle_gain', 'icon': '💪', 'label': 'Muscle Gain'},
       {'val': 'strength', 'icon': '🏋️', 'label': 'Strength'},
       {'val': 'endurance', 'icon': '🏃', 'label': 'Endurance'},
-      {'val': 'body_recomposition', 'icon': '⚖️', 'label': 'Body Recomposition'},
+      {
+        'val': 'body_recomposition',
+        'icon': '⚖️',
+        'label': 'Body Recomposition',
+      },
       {'val': 'general_fitness', 'icon': '🌿', 'label': 'General Fitness'},
-      {'val': 'athletic_performance', 'icon': '⚡', 'label': 'Athletic Performance'},
+      {
+        'val': 'athletic_performance',
+        'icon': '⚡',
+        'label': 'Athletic Performance',
+      },
       {'val': 'flexibility', 'icon': '🧘', 'label': 'Flexibility'},
       {'val': 'stress_relief', 'icon': '😌', 'label': 'Stress Relief'},
-      {'val': 'health_maintenance', 'icon': '❤️', 'label': 'Health Maintenance'},
+      {
+        'val': 'health_maintenance',
+        'icon': '❤️',
+        'label': 'Health Maintenance',
+      },
     ];
 
     return _buildGlassCard(
@@ -692,8 +814,12 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: isSel ? AppColors.neonLime.withValues(alpha: 0.2) : AppColors.surfaceDark,
-                    border: Border.all(color: isSel ? AppColors.neonLime : AppColors.gray600),
+                    color: isSel
+                        ? AppColors.neonLime.withValues(alpha: 0.2)
+                        : AppColors.surfaceDark,
+                    border: Border.all(
+                      color: isSel ? AppColors.neonLime : AppColors.gray600,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -704,8 +830,12 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                         child: Text(
                           g['label']!,
                           style: AppTextStyles.caption.copyWith(
-                            color: isSel ? AppColors.neonLime : AppColors.textPrimary,
-                            fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                            color: isSel
+                                ? AppColors.neonLime
+                                : AppColors.textPrimary,
+                            fontWeight: isSel
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                           maxLines: 2,
                         ),
@@ -737,7 +867,9 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
 
     final sortedLogs = List<BodyMetricsLogModel>.from(_logs)
       ..sort((a, b) => a.loggedAt.compareTo(b.loggedAt));
-    final recentLogs = sortedLogs.length > 8 ? sortedLogs.sublist(sortedLogs.length - 8) : sortedLogs;
+    final recentLogs = sortedLogs.length > 8
+        ? sortedLogs.sublist(sortedLogs.length - 8)
+        : sortedLogs;
 
     List<FlSpot> weightSpots = [];
     List<FlSpot> bpSysSpots = [];
@@ -745,9 +877,12 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
 
     for (int i = 0; i < recentLogs.length; i++) {
       final log = recentLogs[i];
-      if (log.weightKg != null) weightSpots.add(FlSpot(i.toDouble(), log.weightKg!));
-      if (log.bpSystolic != null) bpSysSpots.add(FlSpot(i.toDouble(), log.bpSystolic!.toDouble()));
-      if (log.bodyFatPct != null) bfSpots.add(FlSpot(i.toDouble(), log.bodyFatPct!));
+      if (log.weightKg != null)
+        weightSpots.add(FlSpot(i.toDouble(), log.weightKg!));
+      if (log.bpSystolic != null)
+        bpSysSpots.add(FlSpot(i.toDouble(), log.bpSystolic!.toDouble()));
+      if (log.bodyFatPct != null)
+        bfSpots.add(FlSpot(i.toDouble(), log.bodyFatPct!));
     }
 
     Widget buildChart(String title, List<FlSpot> spots, Color color) {
@@ -810,20 +945,37 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
         deltaWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.arrow_drop_up_rounded, color: AppColors.neonLime, size: 20),
-            Text('+${diff.toStringAsFixed(diff is int ? 0 : 1)}', style: AppTextStyles.caption.copyWith(color: AppColors.neonLime)),
+            const Icon(
+              Icons.arrow_drop_up_rounded,
+              color: AppColors.neonLime,
+              size: 20,
+            ),
+            Text(
+              '+${diff.toStringAsFixed(diff is int ? 0 : 1)}',
+              style: AppTextStyles.caption.copyWith(color: AppColors.neonLime),
+            ),
           ],
         );
       } else if (diff < 0) {
         deltaWidget = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.arrow_drop_down_rounded, color: AppColors.error, size: 20),
-            Text(diff.toStringAsFixed(diff is int ? 0 : 1), style: AppTextStyles.caption.copyWith(color: AppColors.error)),
+            const Icon(
+              Icons.arrow_drop_down_rounded,
+              color: AppColors.error,
+              size: 20,
+            ),
+            Text(
+              diff.toStringAsFixed(diff is int ? 0 : 1),
+              style: AppTextStyles.caption.copyWith(color: AppColors.error),
+            ),
           ],
         );
       } else {
-        deltaWidget = Text(' -', style: AppTextStyles.caption.copyWith(color: AppColors.gray400));
+        deltaWidget = Text(
+          ' -',
+          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+        );
       }
     }
 
@@ -832,12 +984,24 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400)),
+          Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
           Row(
             children: [
-              Text(pastVal.toStringAsFixed(pastVal is int ? 0 : 1), style: AppTextStyles.bodyMedium),
+              Text(
+                pastVal.toStringAsFixed(pastVal is int ? 0 : 1),
+                style: AppTextStyles.bodyMedium,
+              ),
               const SizedBox(width: 8),
-              SizedBox(width: 40, child: Align(alignment: Alignment.centerRight, child: deltaWidget)),
+              SizedBox(
+                width: 40,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: deltaWidget,
+                ),
+              ),
             ],
           ),
         ],
@@ -859,7 +1023,11 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
         _buildGlassCard(
           child: Row(
             children: [
-              const Icon(Icons.fitness_center_rounded, color: AppColors.neonLime, size: 32),
+              const Icon(
+                Icons.fitness_center_rounded,
+                color: AppColors.neonLime,
+                size: 32,
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
@@ -883,17 +1051,40 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                     Text('Last Test Results', style: AppTextStyles.heading3),
                     Text(
                       DateFormat('dd MMM yyyy').format(_latestTest!.testedAt),
-                      style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text('Level: ${_latestTest!.overallLevel?.toUpperCase()}', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.turquoise)),
+                Text(
+                  'Level: ${_latestTest!.overallLevel?.toUpperCase()}',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.turquoise,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                _buildPastResultRow('Max Pushups', _latestTest!.pushupsMax, int.tryParse(_pushupsCtrl.text)),
-                _buildPastResultRow('Max Pullups', _latestTest!.pullupsMax, int.tryParse(_pullupsCtrl.text)),
-                _buildPastResultRow('Max Squats (60s)', _latestTest!.squatsMax, int.tryParse(_squatsCtrl.text)),
-                _buildPastResultRow('Plank Hold (sec)', _latestTest!.plankSeconds, double.tryParse(_plankCtrl.text)),
+                _buildPastResultRow(
+                  'Max Pushups',
+                  _latestTest!.pushupsMax,
+                  int.tryParse(_pushupsCtrl.text),
+                ),
+                _buildPastResultRow(
+                  'Max Pullups',
+                  _latestTest!.pullupsMax,
+                  int.tryParse(_pullupsCtrl.text),
+                ),
+                _buildPastResultRow(
+                  'Max Squats (60s)',
+                  _latestTest!.squatsMax,
+                  int.tryParse(_squatsCtrl.text),
+                ),
+                _buildPastResultRow(
+                  'Plank Hold (sec)',
+                  _latestTest!.plankSeconds,
+                  double.tryParse(_plankCtrl.text),
+                ),
               ],
             ),
           ),
@@ -907,13 +1098,22 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                 children: [
                   Text('New Test Entry', style: AppTextStyles.heading3),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: levelColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: levelColor),
                     ),
-                    child: Text(_overallLevel.toUpperCase(), style: AppTextStyles.caption.copyWith(color: levelColor, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      _overallLevel.toUpperCase(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: levelColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -927,15 +1127,23 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
               ),
               Row(
                 children: [
-                  Expanded(child: _buildTextField('Max Squats (60s)', _squatsCtrl)),
+                  Expanded(
+                    child: _buildTextField('Max Squats (60s)', _squatsCtrl),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildTextField('Plank Hold (sec)', _plankCtrl)),
+                  Expanded(
+                    child: _buildTextField('Plank Hold (sec)', _plankCtrl),
+                  ),
                 ],
               ),
               const Divider(color: AppColors.gray600, height: 32),
               Text('Estimated 1RM (Optional)', style: AppTextStyles.bodyLarge),
               const SizedBox(height: 8),
-              _buildTextField('Squat (kg)', _squat1rmCtrl, helperText: 'Your estimated 1-rep max for squat'),
+              _buildTextField(
+                'Squat (kg)',
+                _squat1rmCtrl,
+                helperText: 'Your estimated 1-rep max for squat',
+              ),
               _buildTextField('Deadlift (kg)', _deadlift1rmCtrl),
               _buildTextField('Bench Press (kg)', _benchpress1rmCtrl),
             ],
@@ -947,10 +1155,18 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
             backgroundColor: AppColors.neonLime,
             foregroundColor: AppColors.backgroundBlack,
             minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           onPressed: _saveFitnessTest,
-          child: Text('Save Test Results', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.backgroundBlack, fontWeight: FontWeight.bold)),
+          child: Text(
+            'Save Test Results',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.backgroundBlack,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ].animate(interval: 50.ms).fadeIn().slideY(begin: 0.1),
     );

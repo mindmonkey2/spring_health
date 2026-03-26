@@ -30,18 +30,16 @@ class SettingsTileWidget extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
                 // Icon
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: (iconColor ?? AppColors.neonLime)
-                    .withValues(alpha: 0.1),
+                    color: (iconColor ?? AppColors.neonLime).withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -77,11 +75,7 @@ class SettingsTileWidget extends StatelessWidget {
                 ),
 
                 // Trailing
-                trailing ??
-                Icon(
-                  Icons.chevron_right,
-                  color: AppColors.gray400,
-                ),
+                trailing ?? Icon(Icons.chevron_right, color: AppColors.gray400),
               ],
             ),
           ),

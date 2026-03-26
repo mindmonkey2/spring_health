@@ -21,7 +21,6 @@ class SpringHealthLogoAnimated extends StatefulWidget {
 
 class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
     with TickerProviderStateMixin {
-
   late AnimationController _entranceCtrl;
   late AnimationController _floatCtrl;
   late AnimationController _glowCtrl;
@@ -67,57 +66,53 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
       vsync: this,
       duration: const Duration(milliseconds: 2600),
     )..repeat(reverse: true);
-    _floatAnim = Tween<double>(begin: -6.0, end: 6.0).animate(
-      CurvedAnimation(parent: _floatCtrl, curve: Curves.easeInOut),
-    );
+    _floatAnim = Tween<double>(
+      begin: -6.0,
+      end: 6.0,
+    ).animate(CurvedAnimation(parent: _floatCtrl, curve: Curves.easeInOut));
 
     _glowCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
-    _glowAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut),
-    );
+    _glowAnim = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut));
 
     _orbitCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4000),
     )..repeat();
-    _orbitAnim = Tween<double>(begin: 0.0, end: 2 * pi).animate(
-      CurvedAnimation(parent: _orbitCtrl, curve: Curves.linear),
-    );
+    _orbitAnim = Tween<double>(
+      begin: 0.0,
+      end: 2 * pi,
+    ).animate(CurvedAnimation(parent: _orbitCtrl, curve: Curves.linear));
 
     _scanCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2200),
     )..repeat(reverse: false);
-    _scanAnim = Tween<double>(begin: -1.0, end: 1.0).animate(
-      CurvedAnimation(parent: _scanCtrl, curve: Curves.easeInOut),
-    );
+    _scanAnim = Tween<double>(
+      begin: -1.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _scanCtrl, curve: Curves.easeInOut));
 
     _particleCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat();
-    _particleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      _particleCtrl,
-    );
+    _particleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_particleCtrl);
 
     _textCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _textFadeAnim = CurvedAnimation(
-      parent: _textCtrl,
-      curve: Curves.easeOut,
-    );
+    _textFadeAnim = CurvedAnimation(parent: _textCtrl, curve: Curves.easeOut);
     _textSlideAnim = Tween<Offset>(
       begin: const Offset(0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _textCtrl,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeOutCubic));
 
     _entranceCtrl.forward().then((_) {
       if (!mounted) return;
@@ -132,18 +127,20 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
 
   void _buildParticles() {
     for (int i = 0; i < 14; i++) {
-      _particles.add(_Particle(
-        angle:  _rng.nextDouble() * 2 * pi,
-        radius: 0.52 + _rng.nextDouble() * 0.22,
-        speed:  0.3  + _rng.nextDouble() * 0.7,
-        size:   1.2  + _rng.nextDouble() * 2.2,
-        color:  i % 3 == 0
-            ? const Color(0xFF00E5FF)
-            : i % 3 == 1
-                ? const Color(0xFFC6F135)
-                : const Color(0xFFFF6B35),
-        phase:  _rng.nextDouble(),
-      ));
+      _particles.add(
+        _Particle(
+          angle: _rng.nextDouble() * 2 * pi,
+          radius: 0.52 + _rng.nextDouble() * 0.22,
+          speed: 0.3 + _rng.nextDouble() * 0.7,
+          size: 1.2 + _rng.nextDouble() * 2.2,
+          color: i % 3 == 0
+              ? const Color(0xFF00E5FF)
+              : i % 3 == 1
+              ? const Color(0xFFC6F135)
+              : const Color(0xFFFF6B35),
+          phase: _rng.nextDouble(),
+        ),
+      );
     }
   }
 
@@ -166,23 +163,26 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
       children: [
         AnimatedBuilder(
           animation: Listenable.merge([
-            _floatAnim, _glowAnim, _orbitAnim,
-            _scanAnim, _particleAnim,
+            _floatAnim,
+            _glowAnim,
+            _orbitAnim,
+            _scanAnim,
+            _particleAnim,
           ]),
           builder: (context, child) {
             return Transform.translate(
               offset: Offset(0, _floatAnim.value),
               child: SizedBox(
-                width:  widget.size * 1.3,
+                width: widget.size * 1.3,
                 height: widget.size * 1.3,
                 child: CustomPaint(
                   painter: _LogoPainter(
-                    glowValue:     _glowAnim.value,
-                    orbitAngle:    _orbitAnim.value,
-                    scanValue:     _scanAnim.value,
+                    glowValue: _glowAnim.value,
+                    orbitAngle: _orbitAnim.value,
+                    scanValue: _scanAnim.value,
                     particleValue: _particleAnim.value,
-                    particles:     _particles,
-                    logoSize:      widget.size,
+                    particles: _particles,
+                    logoSize: widget.size,
                   ),
                   child: Center(child: child),
                 ),
@@ -194,7 +194,7 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
             child: ScaleTransition(
               scale: _scaleAnim,
               child: SizedBox(
-                width:  widget.size,
+                width: widget.size,
                 height: widget.size,
                 child: ClipOval(
                   child: Image.asset(
@@ -220,9 +220,9 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
                 child: Text(
                   'SPRING HEALTH',
                   style: GoogleFonts.poppins(
-                    fontSize:   widget.size * 0.175,
+                    fontSize: widget.size * 0.175,
                     fontWeight: FontWeight.w900,
-                    color:      Colors.white,
+                    color: Colors.white,
                     letterSpacing: widget.size * 0.016,
                   ),
                 ),
@@ -237,9 +237,9 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
               child: Text(
                 'MEMBER APP',
                 style: GoogleFonts.poppins(
-                  fontSize:   widget.size * 0.09,
+                  fontSize: widget.size * 0.09,
                   fontWeight: FontWeight.w300,
-                  color:      const Color(0xFF00E5FF).withValues(alpha: 0.75),
+                  color: const Color(0xFF00E5FF).withValues(alpha: 0.75),
                   letterSpacing: widget.size * 0.042,
                 ),
               ),
@@ -263,9 +263,8 @@ class _LogoPainter extends CustomPainter {
   final List<_Particle> particles;
   final double logoSize;
 
-  static const _lime   = Color(0xFFC6F135);
-  static const _cyan   = Color(0xFF00E5FF);
-
+  static const _lime = Color(0xFFC6F135);
+  static const _cyan = Color(0xFF00E5FF);
 
   const _LogoPainter({
     required this.glowValue,
@@ -278,9 +277,9 @@ class _LogoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final cx = size.width  / 2;
+    final cx = size.width / 2;
     final cy = size.height / 2;
-    final r  = logoSize / 2;
+    final r = logoSize / 2;
 
     _drawGlowRing(canvas, cx, cy, r);
     _drawOrbitRing(canvas, cx, cy, r);
@@ -292,11 +291,12 @@ class _LogoPainter extends CustomPainter {
   // ── Pulsing glow behind image ──────────────────────────────
   void _drawGlowRing(Canvas canvas, double cx, double cy, double r) {
     for (final entry in [
-      (_lime, 0.18 + 0.22 * glowValue, r + 4 + 8 * glowValue,  12.0),
+      (_lime, 0.18 + 0.22 * glowValue, r + 4 + 8 * glowValue, 12.0),
       (_cyan, 0.08 + 0.10 * glowValue, r + 8 + 14 * glowValue, 20.0),
     ]) {
       canvas.drawCircle(
-        Offset(cx, cy), entry.$3,
+        Offset(cx, cy),
+        entry.$3,
         Paint()
           ..color = entry.$1.withValues(alpha: entry.$2)
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, entry.$4),
@@ -307,20 +307,23 @@ class _LogoPainter extends CustomPainter {
   // ── Dashed orbit ring ──────────────────────────────────────
   void _drawOrbitRing(Canvas canvas, double cx, double cy, double r) {
     final orbitR = r + 10;
-    final paint  = Paint()
+    final paint = Paint()
       ..color = _lime.withValues(alpha: 0.30 + 0.25 * glowValue)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
     const dashCount = 20;
-    const dashArc   = 0.12;
-    const gapArc    = (2 * pi / dashCount) - dashArc;
+    const dashArc = 0.12;
+    const gapArc = (2 * pi / dashCount) - dashArc;
 
     for (int i = 0; i < dashCount; i++) {
       final start = i * (dashArc + gapArc) + orbitAngle * 0.3;
       canvas.drawArc(
         Rect.fromCircle(center: Offset(cx, cy), radius: orbitR),
-        start, dashArc, false, paint,
+        start,
+        dashArc,
+        false,
+        paint,
       );
     }
   }
@@ -328,12 +331,13 @@ class _LogoPainter extends CustomPainter {
   // ── Glowing dot orbiting the ring ─────────────────────────
   void _drawOrbitDot(Canvas canvas, double cx, double cy, double r) {
     final orbitR = r + 10;
-    final dx     = cx + orbitR * cos(orbitAngle);
-    final dy     = cy + orbitR * sin(orbitAngle);
+    final dx = cx + orbitR * cos(orbitAngle);
+    final dy = cy + orbitR * sin(orbitAngle);
 
     // Glow
     canvas.drawCircle(
-      Offset(dx, dy), 7,
+      Offset(dx, dy),
+      7,
       Paint()
         ..color = _lime.withValues(alpha: 0.35)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
@@ -343,12 +347,13 @@ class _LogoPainter extends CustomPainter {
 
     // Trailing tail
     for (int i = 1; i <= 5; i++) {
-      final ta  = orbitAngle - i * 0.18;
-      final tx  = cx + orbitR * cos(ta);
-      final ty  = cy + orbitR * sin(ta);
+      final ta = orbitAngle - i * 0.18;
+      final tx = cx + orbitR * cos(ta);
+      final ty = cy + orbitR * sin(ta);
       final alpha = (1 - i / 6) * 0.5;
       canvas.drawCircle(
-        Offset(tx, ty), 2.5 - i * 0.3,
+        Offset(tx, ty),
+        2.5 - i * 0.3,
         Paint()..color = _cyan.withValues(alpha: alpha),
       );
     }
@@ -374,13 +379,10 @@ class _LogoPainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(cx - r, y - 1, r * 2, 2));
 
     canvas.save();
-    canvas.clipPath(Path()..addOval(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r),
-    ));
-    canvas.drawRect(
-      Rect.fromLTWH(cx - r, y - 1.2, r * 2, 2.4),
-      scanPaint,
+    canvas.clipPath(
+      Path()..addOval(Rect.fromCircle(center: Offset(cx, cy), radius: r)),
     );
+    canvas.drawRect(Rect.fromLTWH(cx - r, y - 1.2, r * 2, 2.4), scanPaint);
     // Glow below the line
     canvas.drawRect(
       Rect.fromLTWH(cx - r, y - 6, r * 2, 12),
@@ -395,18 +397,17 @@ class _LogoPainter extends CustomPainter {
   void _drawParticles(Canvas canvas, double cx, double cy, double r) {
     for (final p in particles) {
       final progress = ((particleValue + p.phase) % 1.0);
-      final angle    = p.angle + particleValue * p.speed * pi;
-      final dist     = r * p.radius;
-      final px       = cx + dist * cos(angle);
-      final py       = cy + dist * sin(angle);
+      final angle = p.angle + particleValue * p.speed * pi;
+      final dist = r * p.radius;
+      final px = cx + dist * cos(angle);
+      final py = cy + dist * sin(angle);
 
       // Fade in then out
-      final alpha = progress < 0.5
-          ? progress * 2
-          : (1 - progress) * 2;
+      final alpha = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
 
       canvas.drawCircle(
-        Offset(px, py), p.size * alpha,
+        Offset(px, py),
+        p.size * alpha,
         Paint()
           ..color = p.color.withValues(alpha: alpha * 0.8)
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, p.size),
@@ -416,9 +417,9 @@ class _LogoPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LogoPainter old) =>
-      old.glowValue     != glowValue     ||
-      old.orbitAngle    != orbitAngle    ||
-      old.scanValue     != scanValue     ||
+      old.glowValue != glowValue ||
+      old.orbitAngle != orbitAngle ||
+      old.scanValue != scanValue ||
       old.particleValue != particleValue;
 }
 
@@ -428,7 +429,7 @@ class _Particle {
   final double radius;
   final double speed;
   final double size;
-  final Color  color;
+  final Color color;
   final double phase;
 
   const _Particle({

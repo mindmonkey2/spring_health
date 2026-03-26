@@ -11,7 +11,8 @@ class WearableSnapshotService {
     : _db = db ?? FirebaseFirestore.instance,
       _health = Health();
 
-  static final WearableSnapshotService instance = WearableSnapshotService._internal();
+  static final WearableSnapshotService instance =
+      WearableSnapshotService._internal();
 
   factory WearableSnapshotService({FirebaseFirestore? db}) {
     return WearableSnapshotService._internal(db: db);
@@ -79,7 +80,9 @@ class WearableSnapshotService {
       // Use yesterdayAt6pm -> todayAt10am for sleep, else last24h -> now
       // Note: `health` package `getHealthDataFromTypes` takes a single start and end time.
       // So we fetch everything from yesterday at 6pm to now to be safe.
-      final startTime = yesterdayAt6pm.isBefore(last24h) ? yesterdayAt6pm : last24h;
+      final startTime = yesterdayAt6pm.isBefore(last24h)
+          ? yesterdayAt6pm
+          : last24h;
 
       // 3. Fetch health data
       List<HealthDataPoint> healthData = await _health.getHealthDataFromTypes(
@@ -217,24 +220,23 @@ class WearableSnapshotService {
             point.type == HealthDataType.SLEEP_DEEP ||
             point.type == HealthDataType.SLEEP_REM ||
             point.type == HealthDataType.SLEEP_AWAKE) {
-
           final duration = point.dateTo.difference(point.dateFrom).inMinutes;
 
           switch (point.type) {
-             case HealthDataType.SLEEP_ASLEEP:
-                totalSleepMinutes += duration;
-                break;
-             case HealthDataType.SLEEP_DEEP:
-                deepSleepMinutes += duration;
-                break;
-             case HealthDataType.SLEEP_REM:
-                remSleepMinutes += duration;
-                break;
-             case HealthDataType.SLEEP_AWAKE:
-                awakeDuringSleepMinutes += duration;
-                break;
-             default:
-                break;
+            case HealthDataType.SLEEP_ASLEEP:
+              totalSleepMinutes += duration;
+              break;
+            case HealthDataType.SLEEP_DEEP:
+              deepSleepMinutes += duration;
+              break;
+            case HealthDataType.SLEEP_REM:
+              remSleepMinutes += duration;
+              break;
+            case HealthDataType.SLEEP_AWAKE:
+              awakeDuringSleepMinutes += duration;
+              break;
+            default:
+              break;
           }
         }
 
@@ -248,7 +250,8 @@ class WearableSnapshotService {
 
       double? avgHeartRateDuringDay;
       if (heartRates.isNotEmpty) {
-        avgHeartRateDuringDay = heartRates.reduce((a, b) => a + b) / heartRates.length;
+        avgHeartRateDuringDay =
+            heartRates.reduce((a, b) => a + b) / heartRates.length;
       }
 
       final dateStr = DateFormat('yyyy-MM-dd').format(now);
@@ -288,22 +291,27 @@ class WearableSnapshotService {
       await snapshotRef.set(rawSnapshot.toMap());
 
       // 6. Update HealthProfileModel
-      if (weightKg != null || bpSystolic != null || bpDiastolic != null || restingHeartRate != null) {
+      if (weightKg != null ||
+          bpSystolic != null ||
+          bpDiastolic != null ||
+          restingHeartRate != null) {
         try {
-           final profileService = HealthProfileService(db: _db);
-           final currentProfile = await profileService.getHealthProfile(memberId);
-           if (currentProfile != null) {
-             final updatedProfile = currentProfile.copyWith(
-               weightKg: weightKg ?? currentProfile.weightKg,
-               bpSystolic: bpSystolic?.toInt() ?? currentProfile.bpSystolic,
-               bpDiastolic: bpDiastolic?.toInt() ?? currentProfile.bpDiastolic,
-             );
+          final profileService = HealthProfileService(db: _db);
+          final currentProfile = await profileService.getHealthProfile(
+            memberId,
+          );
+          if (currentProfile != null) {
+            final updatedProfile = currentProfile.copyWith(
+              weightKg: weightKg ?? currentProfile.weightKg,
+              bpSystolic: bpSystolic?.toInt() ?? currentProfile.bpSystolic,
+              bpDiastolic: bpDiastolic?.toInt() ?? currentProfile.bpDiastolic,
+            );
 
-             // HealthProfileModel may not have restingHeartRate yet but will use saveHealthProfile
-             await profileService.saveHealthProfile(updatedProfile);
-           }
+            // HealthProfileModel may not have restingHeartRate yet but will use saveHealthProfile
+            await profileService.saveHealthProfile(updatedProfile);
+          }
         } catch (e) {
-           debugPrint('⚠️ Failed to update HealthProfile from wearables: $e');
+          debugPrint('⚠️ Failed to update HealthProfile from wearables: $e');
         }
       }
 
@@ -314,7 +322,10 @@ class WearableSnapshotService {
     }
   }
 
-  Future<List<WearableSnapshotModel>> getLatestSnapshots(String memberId, {int days = 7}) async {
+  Future<List<WearableSnapshotModel>> getLatestSnapshots(
+    String memberId, {
+    int days = 7,
+  }) async {
     try {
       final snapshot = await _db
           .collection('wearableSnapshots')

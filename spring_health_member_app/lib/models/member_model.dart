@@ -75,8 +75,7 @@ class MemberModel {
 
   // ── Status getters ───────────────────────────────────────────────────────
 
-  bool get isExpired =>
-      DateTime.now().isAfter(expiryDate);
+  bool get isExpired => DateTime.now().isAfter(expiryDate);
 
   bool get isExpiringSoon =>
       !isExpired && expiryDate.difference(DateTime.now()).inDays <= 7;
@@ -108,8 +107,7 @@ class MemberModel {
 
   /// Matches how member_service.dart calls it:
   ///   MemberModel.fromFirestore(doc.data() as Map, doc.id)
-  factory MemberModel.fromFirestore(
-      Map<String, dynamic> data, String id) =>
+  factory MemberModel.fromFirestore(Map<String, dynamic> data, String id) =>
       MemberModel.fromMap(data, id: id);
 
   factory MemberModel.fromMap(Map<String, dynamic> map, {String id = ''}) {
@@ -122,8 +120,8 @@ class MemberModel {
       dateOfBirth: map['dateOfBirth'] as String?,
       address: map['address'] as String?,
       branch: map['branch'] as String? ?? '',
-      membershipPlan: map['membershipPlan'] as String? ??
-          map['plan'] as String? ?? '',
+      membershipPlan:
+          map['membershipPlan'] as String? ?? map['plan'] as String? ?? '',
       category: map['category'] as String? ?? '',
       joiningDate: _toDateTime(map['joiningDate']) ?? DateTime.now(),
       expiryDate: _toDateTime(map['expiryDate']) ?? DateTime.now(),
@@ -135,8 +133,9 @@ class MemberModel {
       dueAmount: (map['dueAmount'] as num?)?.toDouble() ?? 0,
       paymentMode: map['paymentMode'] as String? ?? 'Cash',
       isArchived: map['isArchived'] as bool? ?? false,
-      loyaltyMilestonesAwarded:
-          List<String>.from(map['loyaltyMilestonesAwarded'] as List? ?? []),
+      loyaltyMilestonesAwarded: List<String>.from(
+        map['loyaltyMilestonesAwarded'] as List? ?? [],
+      ),
       totalCheckIns: map['totalCheckIns'] as int? ?? 0,
       lastCheckInTime: _toDateTime(map['lastCheckInTime']),
       currentStreak: map['currentStreak'] as int? ?? 0,
@@ -162,43 +161,43 @@ class MemberModel {
   }
 
   Map<String, dynamic> toMap() => {
-        'name': name,
-        'phone': phone,
-        'email': email,
-        if (photoUrl != null) 'photoUrl': photoUrl,
-        if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
-        if (address != null) 'address': address,
-        'branch': branch,
-        'membershipPlan': membershipPlan,
-        'category': category,
-        'joiningDate': Timestamp.fromDate(joiningDate),
-        'expiryDate': Timestamp.fromDate(expiryDate),
-        'totalFee': totalFee,
-        'discount': discount,
-        'finalAmount': finalAmount,
-        'cashAmount': cashAmount,
-        'upiAmount': upiAmount,
-        'dueAmount': dueAmount,
-        'paymentMode': paymentMode,
-        'isArchived': isArchived,
-        'loyaltyMilestonesAwarded': loyaltyMilestonesAwarded,
-        'totalCheckIns': totalCheckIns,
-        if (lastCheckInTime != null)
-          'lastCheckInTime': Timestamp.fromDate(lastCheckInTime!),
-        'currentStreak': currentStreak,
-        'longestStreak': longestStreak,
-        'xpPoints': xpPoints,
-        'level': level,
-        'badges': badges,
-        if (fcmToken != null) 'fcmToken': fcmToken,
-        if (uid != null) 'uid': uid,
-        if (emergencyContactName != null)
-          'emergencyContactName': emergencyContactName,
-        if (emergencyContactPhone != null)
-          'emergencyContactPhone': emergencyContactPhone,
-        if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
-        'updatedAt': Timestamp.fromDate(updatedAt ?? DateTime.now()),
-      };
+    'name': name,
+    'phone': phone,
+    'email': email,
+    if (photoUrl != null) 'photoUrl': photoUrl,
+    if (dateOfBirth != null) 'dateOfBirth': dateOfBirth,
+    if (address != null) 'address': address,
+    'branch': branch,
+    'membershipPlan': membershipPlan,
+    'category': category,
+    'joiningDate': Timestamp.fromDate(joiningDate),
+    'expiryDate': Timestamp.fromDate(expiryDate),
+    'totalFee': totalFee,
+    'discount': discount,
+    'finalAmount': finalAmount,
+    'cashAmount': cashAmount,
+    'upiAmount': upiAmount,
+    'dueAmount': dueAmount,
+    'paymentMode': paymentMode,
+    'isArchived': isArchived,
+    'loyaltyMilestonesAwarded': loyaltyMilestonesAwarded,
+    'totalCheckIns': totalCheckIns,
+    if (lastCheckInTime != null)
+      'lastCheckInTime': Timestamp.fromDate(lastCheckInTime!),
+    'currentStreak': currentStreak,
+    'longestStreak': longestStreak,
+    'xpPoints': xpPoints,
+    'level': level,
+    'badges': badges,
+    if (fcmToken != null) 'fcmToken': fcmToken,
+    if (uid != null) 'uid': uid,
+    if (emergencyContactName != null)
+      'emergencyContactName': emergencyContactName,
+    if (emergencyContactPhone != null)
+      'emergencyContactPhone': emergencyContactPhone,
+    if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
+    'updatedAt': Timestamp.fromDate(updatedAt ?? DateTime.now()),
+  };
 
   MemberModel copyWith({
     String? id,
@@ -235,43 +234,41 @@ class MemberModel {
     String? emergencyContactPhone,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) =>
-      MemberModel(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        phone: phone ?? this.phone,
-        email: email ?? this.email,
-        photoUrl: photoUrl ?? this.photoUrl,
-        dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-        address: address ?? this.address,
-        branch: branch ?? this.branch,
-        membershipPlan: membershipPlan ?? this.membershipPlan,
-        category: category ?? this.category,
-        joiningDate: joiningDate ?? this.joiningDate,
-        expiryDate: expiryDate ?? this.expiryDate,
-        totalFee: totalFee ?? this.totalFee,
-        discount: discount ?? this.discount,
-        finalAmount: finalAmount ?? this.finalAmount,
-        cashAmount: cashAmount ?? this.cashAmount,
-        upiAmount: upiAmount ?? this.upiAmount,
-        dueAmount: dueAmount ?? this.dueAmount,
-        paymentMode: paymentMode ?? this.paymentMode,
-        isArchived: isArchived ?? this.isArchived,
-        loyaltyMilestonesAwarded:
-            loyaltyMilestonesAwarded ?? this.loyaltyMilestonesAwarded,
-        totalCheckIns: totalCheckIns ?? this.totalCheckIns,
-        lastCheckInTime: lastCheckInTime ?? this.lastCheckInTime,
-        currentStreak: currentStreak ?? this.currentStreak,
-        longestStreak: longestStreak ?? this.longestStreak,
-        xpPoints: xpPoints ?? this.xpPoints,
-        level: level ?? this.level,
-        badges: badges ?? this.badges,
-        fcmToken: fcmToken ?? this.fcmToken,
-        uid: uid ?? this.uid,
-        emergencyContactName: emergencyContactName ?? this.emergencyContactName,
-        emergencyContactPhone:
-            emergencyContactPhone ?? this.emergencyContactPhone,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-      );
+  }) => MemberModel(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    phone: phone ?? this.phone,
+    email: email ?? this.email,
+    photoUrl: photoUrl ?? this.photoUrl,
+    dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+    address: address ?? this.address,
+    branch: branch ?? this.branch,
+    membershipPlan: membershipPlan ?? this.membershipPlan,
+    category: category ?? this.category,
+    joiningDate: joiningDate ?? this.joiningDate,
+    expiryDate: expiryDate ?? this.expiryDate,
+    totalFee: totalFee ?? this.totalFee,
+    discount: discount ?? this.discount,
+    finalAmount: finalAmount ?? this.finalAmount,
+    cashAmount: cashAmount ?? this.cashAmount,
+    upiAmount: upiAmount ?? this.upiAmount,
+    dueAmount: dueAmount ?? this.dueAmount,
+    paymentMode: paymentMode ?? this.paymentMode,
+    isArchived: isArchived ?? this.isArchived,
+    loyaltyMilestonesAwarded:
+        loyaltyMilestonesAwarded ?? this.loyaltyMilestonesAwarded,
+    totalCheckIns: totalCheckIns ?? this.totalCheckIns,
+    lastCheckInTime: lastCheckInTime ?? this.lastCheckInTime,
+    currentStreak: currentStreak ?? this.currentStreak,
+    longestStreak: longestStreak ?? this.longestStreak,
+    xpPoints: xpPoints ?? this.xpPoints,
+    level: level ?? this.level,
+    badges: badges ?? this.badges,
+    fcmToken: fcmToken ?? this.fcmToken,
+    uid: uid ?? this.uid,
+    emergencyContactName: emergencyContactName ?? this.emergencyContactName,
+    emergencyContactPhone: emergencyContactPhone ?? this.emergencyContactPhone,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
 }

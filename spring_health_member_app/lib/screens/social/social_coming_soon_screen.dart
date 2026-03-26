@@ -14,9 +14,11 @@ class SocialComingSoonScreen extends StatelessWidget {
         backgroundColor: AppColors.backgroundBlack,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-                           color: AppColors.neonLime),
-                           onPressed: () => Navigator.pop(context),
+          icon: const Icon(
+            Icons.arrow_back_ios_rounded,
+            color: AppColors.neonLime,
+          ),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'SPRING SOCIAL',
@@ -33,40 +35,37 @@ class SocialComingSoonScreen extends StatelessWidget {
 
               // ── Animated bolt icon ────────────────────────────────
               Container(
-                padding: const EdgeInsets.all(28),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.backgroundBlack,
-                  border: Border.all(
-                    color: AppColors.neonLime.withValues(alpha: 0.6),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neonLime.withValues(alpha: 0.35),
-                      blurRadius: 30,
-                      spreadRadius: 4,
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.backgroundBlack,
+                      border: Border.all(
+                        color: AppColors.neonLime.withValues(alpha: 0.6),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.neonLime.withValues(alpha: 0.35),
+                          blurRadius: 30,
+                          spreadRadius: 4,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.bolt_rounded,
-                  color: AppColors.neonLime,
-                  size: 48,
-                ),
-              )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .scale(
-                begin: const Offset(1.0, 1.0),
-                end: const Offset(1.06, 1.06),
-                duration: 2.seconds,
-                curve: Curves.easeInOut,
-              )
-              .animate()
-              .scale(
-                duration: 600.ms,
-                curve: Curves.easeOutBack,
-              ),
+                    child: const Icon(
+                      Icons.bolt_rounded,
+                      color: AppColors.neonLime,
+                      size: 48,
+                    ),
+                  )
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(
+                    begin: const Offset(1.0, 1.0),
+                    end: const Offset(1.06, 1.06),
+                    duration: 2.seconds,
+                    curve: Curves.easeInOut,
+                  )
+                  .animate()
+                  .scale(duration: 600.ms, curve: Curves.easeOutBack),
 
               const SizedBox(height: 32),
 
@@ -137,7 +136,8 @@ class SocialComingSoonScreen extends StatelessWidget {
                       icon: Icons.flash_on_rounded,
                       color: AppColors.neonLime,
                       title: 'Flex Zone',
-                      subtitle: 'Data-driven workout posts that show real stats',
+                      subtitle:
+                          'Data-driven workout posts that show real stats',
                     ),
                     const SizedBox(height: 14),
                     _featureRow(
@@ -151,7 +151,8 @@ class SocialComingSoonScreen extends StatelessWidget {
                       icon: Icons.military_tech_rounded,
                       color: AppColors.neonOrange,
                       title: 'War Room',
-                      subtitle: 'Squad challenges, streaks & friendly rivalries',
+                      subtitle:
+                          'Squad challenges, streaks & friendly rivalries',
                     ),
                     const SizedBox(height: 14),
                     _featureRow(
@@ -168,8 +169,10 @@ class SocialComingSoonScreen extends StatelessWidget {
 
               // ── Built for Spring Health badge ─────────────────────
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.cardSurface,
                   borderRadius: BorderRadius.circular(12),
@@ -180,16 +183,19 @@ class SocialComingSoonScreen extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.location_on_rounded,
-                         color: AppColors.neonLime, size: 14),
-                         const SizedBox(width: 6),
-                         Text(
-                           'Built exclusively for Spring Health members',
-                           style: AppTextStyles.caption.copyWith(
-                             color: AppColors.gray400,
-                             fontSize: 11,
-                           ),
-                         ),
+                    Icon(
+                      Icons.location_on_rounded,
+                      color: AppColors.neonLime,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Built exclusively for Spring Health members',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.gray400,
+                        fontSize: 11,
+                      ),
+                    ),
                   ],
                 ),
               ).animate().fadeIn(delay: 700.ms),

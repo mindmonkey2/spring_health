@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/workout_summary_model.dart';
 
 class MemberFitnessService {
@@ -30,7 +31,11 @@ class MemberFitnessService {
           .map((d) => WorkoutSummaryModel.fromMap(d.data(), d.id))
           .toList();
         }
-      } catch (_) {}
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Error fetching workouts from subcollection: $e');
+        }
+      }
 
       // Fallback: top-level collection with memberId field
       try {
@@ -44,7 +49,10 @@ class MemberFitnessService {
         return top.docs
         .map((d) => WorkoutSummaryModel.fromMap(d.data(), d.id))
         .toList();
-      } catch (_) {
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Error fetching workouts from top-level collection: $e');
+        }
         return [];
       }
     }
@@ -57,7 +65,10 @@ class MemberFitnessService {
           await _db.collection('gamification').doc(memberId).get();
           if (doc.exists) return doc.data();
           return null;
-        } catch (_) {
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('Error fetching gamification profile: $e');
+          }
           return null;
         }
       }

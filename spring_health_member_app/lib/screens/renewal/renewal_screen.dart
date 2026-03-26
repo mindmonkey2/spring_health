@@ -4,6 +4,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../models/member_model.dart';
 import '../../services/renewal_service.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/config/app_config.dart';
 import 'renewal_confirmation_screen.dart';
 
 /// Renewal plans: label → days. Prices pulled from branch constants.
@@ -56,7 +57,7 @@ class _RenewalScreenState extends State<RenewalScreen> {
   void _openRazorpay() {
     final price = _priceForPlan(_selectedPlan);
     final options = {
-      'key': 'rzp_test_REPLACE_WITH_YOUR_KEY',
+      'key': AppConfig.razorpayKey,
       'amount': price * 100, // paise
       'name': 'Spring Health Studio',
       'description': '$_selectedPlan Membership Renewal',

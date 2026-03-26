@@ -10,12 +10,18 @@ import '../models/payment_model.dart';
 import '../utils/date_utils.dart' as app_date_utils;
 
 class WhatsAppService {
+  static final WhatsAppService instance = WhatsAppService._internal();
+
+  WhatsAppService();
+
+  WhatsAppService._internal();
+
   // ═══════════════════════════════════════════════════════════════
   // CORE MESSAGING (Text Only)
   // ═══════════════════════════════════════════════════════════════
 
   // Format phone number for WhatsApp (remove spaces, dashes, add country code)
-  static String _formatPhoneNumber(String phone) {
+  String _formatPhoneNumber(String phone) {
     // Remove all non-digit characters
     String cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
 
@@ -32,7 +38,7 @@ class WhatsAppService {
   }
 
   // Send WhatsApp message
-  static Future<bool> sendMessage({
+  Future<bool> sendMessage({
     required String phoneNumber,
     required String message,
   }) async {
@@ -65,7 +71,7 @@ class WhatsAppService {
   // ═══════════════════════════════════════════════════════════════
 
   // Send Welcome Message to New Member (Text only)
-  static Future<bool> sendWelcomeMessage(MemberModel member) async {
+  Future<bool> sendWelcomeMessage(MemberModel member) async {
     final message = '''
     🎉 *Welcome to Spring Health Studio!* 🎉
 
@@ -99,7 +105,7 @@ class WhatsAppService {
   }
 
   // Send Payment Receipt (Text only)
-  static Future<bool> sendPaymentReceipt({
+  Future<bool> sendPaymentReceipt({
     required MemberModel member,
     required PaymentModel payment,
   }) async {
@@ -133,7 +139,7 @@ class WhatsAppService {
   }
 
   // Send Expiry Reminder (Text only)
-  static Future<bool> sendExpiryReminder(MemberModel member, int daysLeft) async {
+  Future<bool> sendExpiryReminder(MemberModel member, int daysLeft) async {
     String emoji = daysLeft <= 1 ? '🚨' : daysLeft <= 3 ? '⚠️' : '📅';
 
     final message = '''
@@ -165,7 +171,7 @@ class WhatsAppService {
   }
 
   // Send Due Payment Reminder (Text only)
-  static Future<bool> sendDuePaymentReminder(MemberModel member) async {
+  Future<bool> sendDuePaymentReminder(MemberModel member) async {
     final message = '''
     💰 *Payment Reminder* 💰
 
@@ -194,7 +200,7 @@ class WhatsAppService {
   }
 
   // Send Birthday Wish (Text only)
-  static Future<bool> sendBirthdayWish(MemberModel member) async {
+  Future<bool> sendBirthdayWish(MemberModel member) async {
     final message = '''
     🎂🎉 *HAPPY BIRTHDAY!* 🎉🎂
 
@@ -225,7 +231,7 @@ class WhatsAppService {
   }
 
   // Send Rejoin Message to Expired Members (Witty & Fun!)
-  static Future<bool> sendRejoinMessage(MemberModel member) async {
+  Future<bool> sendRejoinMessage(MemberModel member) async {
     // Calculate days since expiry
     final daysExpired = DateTime.now().difference(member.expiryDate).inDays;
 
@@ -358,7 +364,7 @@ class WhatsAppService {
   }
 
   // Send Custom Message
-  static Future<bool> sendCustomMessage({
+  Future<bool> sendCustomMessage({
     required String phoneNumber,
     required String memberName,
     required String customMessage,
@@ -384,7 +390,7 @@ class WhatsAppService {
   // ═══════════════════════════════════════════════════════════════
 
   /// Send Welcome Package with Invoice + Membership Card (For New Members)
-  static Future<bool> sendWelcomePackage(MemberModel member) async {
+  Future<bool> sendWelcomePackage(MemberModel member) async {
     try {
       final pdfService = PDFService();
 
@@ -444,7 +450,7 @@ class WhatsAppService {
   }
 
   /// Send Rejoin Package with Invoice + Membership Card
-  static Future<bool> sendRejoinPackage(MemberModel member) async {
+  Future<bool> sendRejoinPackage(MemberModel member) async {
     try {
       final pdfService = PDFService();
 
@@ -502,7 +508,7 @@ class WhatsAppService {
   }
 
   /// Send Payment Receipt with Invoice PDF (After Due Payment)
-  static Future<bool> sendPaymentReceiptWithInvoice(
+  Future<bool> sendPaymentReceiptWithInvoice(
     MemberModel member,
     PaymentModel payment,
   ) async {
@@ -555,7 +561,7 @@ class WhatsAppService {
   }
 
   /// Resend Documents (Manual from Member Detail Screen)
-  static Future<bool> resendDocuments(MemberModel member) async {
+  Future<bool> resendDocuments(MemberModel member) async {
     try {
       final pdfService = PDFService();
 
@@ -612,7 +618,7 @@ class WhatsAppService {
   // ═══════════════════════════════════════════════════════════════
 
   // Check if WhatsApp is installed
-  static Future<bool> isWhatsAppInstalled() async {
+  Future<bool> isWhatsAppInstalled() async {
     try {
       final whatsappUrl = Uri.parse('https://wa.me/');
       return await canLaunchUrl(whatsappUrl);

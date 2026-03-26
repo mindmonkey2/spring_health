@@ -37,19 +37,20 @@ class DocumentSendDialog extends StatelessWidget {
             try {
               switch (documentType) {
                 case 'welcome':
-                  await WhatsAppService.sendWelcomePackage(member);
+                  await WhatsAppService.instance.sendWelcomePackage(member);
                   break;
                 case 'rejoin':
-                  await WhatsAppService.sendRejoinPackage(member);
+                  await WhatsAppService.instance.sendRejoinPackage(member);
                   break;
                 case 'receipt':
                   if (payment != null) {
                     // ✅ FIXED: Use payment! (non-null assertion)
-                    await WhatsAppService.sendPaymentReceiptWithInvoice(member, payment!);
+                    await WhatsAppService.instance
+                        .sendPaymentReceiptWithInvoice(member, payment!);
                   }
                   break;
                 case 'resend':
-                  await WhatsAppService.resendDocuments(member);
+                  await WhatsAppService.instance.resendDocuments(member);
                   break;
               }
             } catch (e) {

@@ -314,18 +314,18 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
       bool sent = false;
       switch (type) {
         case 'welcome':
-          sent = await WhatsAppService.sendWelcomeMessage(currentMember!);
+          sent = await WhatsAppService.instance.sendWelcomeMessage(currentMember!);
         case 'receipt':
           final payments = await firestoreService.getPaymentsByMember(currentMember!.id).first;
           if (payments.isNotEmpty) {
-            sent = await WhatsAppService.sendPaymentReceipt(
+            sent = await WhatsAppService.instance.sendPaymentReceipt(
                 member: currentMember!, payment: payments.first);
           }
         case 'expiry':
           final d = currentMember!.expiryDate.difference(DateTime.now()).inDays;
-          sent = await WhatsAppService.sendExpiryReminder(currentMember!, d);
+          sent = await WhatsAppService.instance.sendExpiryReminder(currentMember!, d);
         case 'due':
-          sent = await WhatsAppService.sendDuePaymentReminder(currentMember!);
+          sent = await WhatsAppService.instance.sendDuePaymentReminder(currentMember!);
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -361,7 +361,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
             onPressed: () async {
               if (ctrl.text.trim().isEmpty) return;
               Navigator.pop(context);
-              final sent = await WhatsAppService.sendCustomMessage(
+              final sent = await WhatsAppService.instance.sendCustomMessage(
                 phoneNumber: currentMember!.phone,
                 memberName: currentMember!.name,
                 customMessage: ctrl.text.trim(),

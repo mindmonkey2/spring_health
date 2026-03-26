@@ -5,8 +5,8 @@ class WorkoutService {
   final _db = FirebaseFirestore.instance;
 
   // ✅ Save a completed workout
-  Future<void> saveWorkout(WorkoutLog workout) async {
-    await _db.collection('workouts').add(workout.toMap());
+  Future<DocumentReference> saveWorkout(WorkoutLog workout) async {
+    return await _db.collection('workouts').add(workout.toMap());
   }
 
   // ✅ Real-time stream of member's workout history

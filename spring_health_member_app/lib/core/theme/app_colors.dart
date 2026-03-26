@@ -30,6 +30,7 @@ class AppColors {
   // Functional Colors
   static const Color white = Color(0xFFFAFAFA);              // Off-white for text
   static const Color gray100 = Color(0xFFF4F4F5);
+  static const Color textSecondary = Color(0xFFA1A1AA);
   static const Color gray400 = Color(0xFFA1A1AA);
   static const Color gray600 = Color(0xFF52525B);
   static const Color gray800 = Color(0xFF27272A);

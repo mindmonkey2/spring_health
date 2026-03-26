@@ -11,6 +11,7 @@ import '../../services/workout_service.dart';
 import '../../services/gamification_service.dart';
 import '../../services/weekly_war_service.dart';
 import '../../services/member_service.dart';
+import '../../widgets/rpe_rating_sheet.dart';
 
 class WorkoutLoggerScreen extends StatefulWidget {
   final String memberId;
@@ -1319,7 +1320,7 @@ with SingleTickerProviderStateMixin { // ✅ for live timer
                                        );
 
                                        try {
-                                         await _workoutService.saveWorkout(workout);
+                                         final savedDocRef = await _workoutService.saveWorkout(workout);
 
                                          // ✅ Record to Weekly War
                                          final member = await _memberService.getMemberData(widget.memberId);
@@ -1347,6 +1348,20 @@ with SingleTickerProviderStateMixin { // ✅ for live timer
 
                                          if (!mounted) return;
                                          setState(() => _isSaving = false);
+
+                                         final sessionId = savedDocRef.id; // capture the saved doc ID
+                                         final selectedMuscleGroups = workout.exercises.map((e) => e.category).toSet().toList();
+                                         if (mounted) {
+                                           await showModalBottomSheet(
+                                             context: context,
+                                             isDismissible: true,
+                                             backgroundColor: Colors.transparent,
+                                             builder: (_) => RpeRatingSheet(
+                                               sessionId: sessionId,
+                                               muscleGroups: selectedMuscleGroups,
+                                             ),
+                                           );
+                                         }
 
                                          // ✅ Show summary instead of just popping
                                          _showWorkoutSummary(workout, badges);

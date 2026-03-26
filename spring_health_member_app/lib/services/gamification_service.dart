@@ -438,7 +438,11 @@ class GamificationService {
           memberName = mData['name'] ?? 'Member';
           photoUrl = mData['photoUrl'];
         }
-      } catch (_) {}
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Error fetching member info for leaderboard: $e');
+        }
+      }
       entries.add(
         LeaderboardEntry(
           rank: i + 1,

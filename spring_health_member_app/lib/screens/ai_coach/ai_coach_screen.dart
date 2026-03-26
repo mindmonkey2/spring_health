@@ -308,14 +308,57 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     );
   }
 
-  Widget _buildMealCard(Map<String, dynamic> meal) {
-    return const SizedBox.shrink();
+  Widget _buildDailyTargetsCard(Map<String, dynamic> targets) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department_rounded, color: AppColors.neonOrange, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                '${targets['calories']} kcal',
+                style: AppTextStyles.heading2,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _macroTile('Protein', '${targets['protein']}', 'g', AppColors.neonLime),
+              _macroTile('Carbs', '${targets['carbs']}', 'g', AppColors.info),
+              _macroTile('Fats', '${targets['fats']}', 'g', AppColors.warning),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildDietNotesSection(String? notes, String? bpNote, String? glucoseNote, String? suppNote) { return const SizedBox.shrink(); }
-
-  Widget _buildDietActionButtons() {
-    return const SizedBox.shrink();
+  Widget _macroTile(String label, String value, String unit, Color color) {
+    return Column(
+      children: [
+        Text(label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400, fontSize: 12)),
+        const SizedBox(height: 4),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(value, style: AppTextStyles.heading3.copyWith(color: color)),
+            const SizedBox(width: 2),
+            Text(unit, style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildTodayTab(Map<String, dynamic>? plan) {
@@ -752,6 +795,38 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           ),
           const SizedBox(height: 12),
           Text(coachNote, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white)),
+
+          if (plan['trainerOverride'] != null) ...[
+            const SizedBox(height: 16),
+            Chip(
+              label: const Text('🏋️ Trainer has reviewed this plan'),
+              backgroundColor: AppColors.neonTeal.withValues(alpha: 0.15),
+              labelStyle: const TextStyle(color: AppColors.neonTeal, fontWeight: FontWeight.w600),
+              side: const BorderSide(color: AppColors.neonTeal),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.cardSurface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.fitness_center_rounded, color: AppColors.neonTeal, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      plan['trainerOverride']['trainerNote'] as String? ?? '',
+                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           if (bpNote != null)
             Chip(

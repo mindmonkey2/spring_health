@@ -13,6 +13,7 @@ import 'edit_member_screen.dart';
 import 'collect_dues_screen.dart';
 import 'rejoin_member_screen.dart';
 import 'member_fitness_tab.dart'; // NEW
+import '../trainers/trainer_plan_override_screen.dart'; // NEW
 import '../../../services/whatsapp_service.dart';
 import '../../../widgets/document_send_dialog.dart';
 import '../../../theme/app_colors.dart';
@@ -89,6 +90,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               _optionTile(Icons.refresh_rounded,  'Rejoin Membership',     AppColors.success,  'rejoin',
                   subtitle: 'Renew expired membership'),
             _optionTile(Icons.message_rounded,    'Send WhatsApp Reminder', AppColors.whatsApp, 'whatsapp'),
+            _optionTile(Icons.smart_toy_rounded,  'View AI Plan & Override', AppColors.primary, 'override_ai'),
             _optionTile(
               currentMember?.isArchived == true ? Icons.unarchive_rounded : Icons.archive_rounded,
               currentMember?.isArchived == true ? 'Restore Member' : 'Archive Member',
@@ -117,6 +119,13 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
         final updated = await Navigator.push<bool>(context,
             MaterialPageRoute(builder: (_) => RejoinMemberScreen(member: currentMember!)));
         if (updated == true) _loadMemberData();
+      case 'override_ai':
+        Navigator.push(context, MaterialPageRoute(
+          builder: (_) => TrainerPlanOverrideScreen(
+            memberId: currentMember!.id,
+            memberName: currentMember!.name,
+          ),
+        ));
       case 'whatsapp':
         _showWhatsAppOptions();
       case 'archive':

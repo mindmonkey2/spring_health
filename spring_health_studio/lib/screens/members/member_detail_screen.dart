@@ -8,6 +8,7 @@ import '../../../models/attendance_model.dart';
 import '../../../models/payment_model.dart';
 import '../../../services/firestore_service.dart';
 import '../../../services/pdf_service.dart';
+import '../../../services/auth_service.dart';
 import '../../../utils/date_utils.dart' as app_date_utils;
 import 'edit_member_screen.dart';
 import 'collect_dues_screen.dart';
@@ -33,6 +34,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
   late TabController _tabController;
   MemberModel? currentMember;
   bool isLoading = true;
+  String? currentUserRole;
 
   @override
   void initState() {
@@ -55,6 +57,15 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
 
   Future<void> _loadMemberData() async {
     try {
+      final user = AuthService().currentUser;
+      if (user != null && currentUserRole == null) {
+        final userData = await firestoreService.getUserRole(user.uid);
+        if (mounted) {
+          setState(() {
+            currentUserRole = userData['role'] as String?;
+          });
+        }
+      }
       final m = await firestoreService.getMemberById(widget.member.id);
       if (mounted) setState(() { currentMember = m ?? widget.member; isLoading = false; });
     } catch (_) {

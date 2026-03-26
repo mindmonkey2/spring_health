@@ -176,10 +176,12 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   String _getWorkoutIconAsset(String type) {
     final t = type.toLowerCase();
-    if (t.contains('upper') || t.contains('power'))
+    if (t.contains('upper') || t.contains('power')) {
       return 'assets/icons/dumbbell_3d.png';
-    if (t.contains('cardio') || t.contains('run'))
+    }
+    if (t.contains('cardio') || t.contains('run')) {
       return 'assets/icons/running_shoe_3d.png';
+    }
     if (t.contains('yoga')) return 'assets/icons/yoga_3d.png';
     if (t.contains('leg')) return 'assets/icons/dumbbell_3d.png';
     return 'assets/icons/fire_3d.png';
@@ -187,8 +189,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   Color _getWorkoutColor(String type) {
     final t = type.toLowerCase();
-    if (t.contains('power') || t.contains('strength'))
+    if (t.contains('power') || t.contains('strength')) {
       return Colors.purpleAccent;
+    }
     if (t.contains('cardio')) return AppColors.neonTeal;
     if (t.contains('yoga')) return Colors.blueAccent;
     if (t.contains('leg')) return AppColors.neonLime;

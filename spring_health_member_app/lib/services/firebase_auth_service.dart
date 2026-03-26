@@ -36,8 +36,9 @@ class FirebaseAuthService {
   Future<String?> _loadVerificationId() async {
     try {
       final saved = await _secureStorage.read(key: _verificationKey);
-      if (saved != null)
+      if (saved != null) {
         debugPrint('✅ Loaded verification ID from secure storage');
+      }
       return saved;
     } catch (e) {
       debugPrint('⚠ Error loading verification ID: $e');

@@ -55,8 +55,9 @@ enum WorkoutType {
 
   static WorkoutType fromString(String raw) {
     final s = raw.toLowerCase();
-    if (s.contains('upper') || s.contains('power'))
+    if (s.contains('upper') || s.contains('power')) {
       return WorkoutType.upperBody;
+    }
     if (s.contains('cardio') || s.contains('run')) return WorkoutType.cardio;
     if (s.contains('yoga')) return WorkoutType.yoga;
     if (s.contains('leg')) return WorkoutType.legDay;

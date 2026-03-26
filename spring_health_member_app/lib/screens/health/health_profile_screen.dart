@@ -877,12 +877,15 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
 
     for (int i = 0; i < recentLogs.length; i++) {
       final log = recentLogs[i];
-      if (log.weightKg != null)
+      if (log.weightKg != null) {
         weightSpots.add(FlSpot(i.toDouble(), log.weightKg!));
-      if (log.bpSystolic != null)
+      }
+      if (log.bpSystolic != null) {
         bpSysSpots.add(FlSpot(i.toDouble(), log.bpSystolic!.toDouble()));
-      if (log.bodyFatPct != null)
+      }
+      if (log.bodyFatPct != null) {
         bfSpots.add(FlSpot(i.toDouble(), log.bodyFatPct!));
+      }
     }
 
     Widget buildChart(String title, List<FlSpot> spots, Color color) {

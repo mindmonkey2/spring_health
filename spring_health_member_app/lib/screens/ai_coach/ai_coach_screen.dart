@@ -151,7 +151,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     if (confirm != true) return;
 
     if (!mounted) return;
-    AiLoadingOverlay.show(context, message: '🤖 Your AI coach is building\nyour plan...');
+    AiLoadingOverlay.show(context,
+        message: '🤖 Your AI coach is building\nyour plan...');
 
     try {
       await _aiCoachService.generateWorkoutPlan(widget.memberId);
@@ -163,7 +164,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       if (mounted) {
         AiLoadingOverlay.hide(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          SnackBar(
+              content: Text(e.toString().replaceAll('Exception: ', ''))),
         );
       }
     }
@@ -178,7 +180,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         appBar: AppBar(
           backgroundColor: AppColors.backgroundBlack,
           title: Text(
-            'AI Personal Trainer',
+            'AjAX — AI Coach',
             style: AppTextStyles.heading2,
           ),
           bottom: const TabBar(
@@ -203,9 +205,12 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     );
   }
 
+  // ─── Diet Tab ─────────────────────────────────────────────────────────────
+
   Widget _buildDietTab() {
     if (_isLoadingDietPlan) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.neonLime));
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.neonLime));
     }
 
     if (_cachedDietPlan == null) {
@@ -215,7 +220,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.restaurant_menu_rounded, color: AppColors.neonTeal, size: 56),
+              const Icon(Icons.restaurant_menu_rounded,
+                  color: AppColors.neonTeal, size: 56),
               const SizedBox(height: 16),
               Text('No diet plan yet', style: AppTextStyles.bodyMedium),
               const SizedBox(height: 8),
@@ -223,7 +229,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                 'Your AI nutritionist will build a personalised '
                 '5-meal Indian meal plan based on your goals, '
                 'body metrics, and dietary preference.',
-                style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+                style:
+                    AppTextStyles.caption.copyWith(color: AppColors.gray400),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -233,15 +240,19 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const DietPlanScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const DietPlanScreen()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neonLime,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Get My AI Diet Plan', style: TextStyle(color: AppColors.backgroundBlack)),
+                  child: const Text('Get My AI Diet Plan',
+                      style:
+                          TextStyle(color: AppColors.backgroundBlack)),
                 ),
               ),
             ],
@@ -252,13 +263,6 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
 
     final plan = _cachedDietPlan!;
     final targets = plan['dailyTargets'] as Map<String, dynamic>? ?? {};
-    // deleted
-
-    // deleted
-    // deleted
-    // deleted
-    // deleted
-
     final coachNote = _cachedWorkoutPlan?['coachNote'] as String?;
 
     return RefreshIndicator(
@@ -276,9 +280,12 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               const SizedBox(height: 16),
               Chip(
                 label: Text(coachNote),
-                backgroundColor: AppColors.neonTeal.withValues(alpha: 0.15),
-                labelStyle: const TextStyle(color: AppColors.neonTeal),
-                avatar: const Icon(Icons.tips_and_updates_rounded, color: AppColors.neonTeal, size: 14),
+                backgroundColor:
+                    AppColors.neonTeal.withValues(alpha: 0.15),
+                labelStyle:
+                    const TextStyle(color: AppColors.neonTeal),
+                avatar: const Icon(Icons.tips_and_updates_rounded,
+                    color: AppColors.neonTeal, size: 14),
               ),
             ],
             const SizedBox(height: 16),
@@ -290,15 +297,20 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const DietPlanScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const DietPlanScreen()),
                   );
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.neonLime),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text('View Full Diet Plan →', style: AppTextStyles.button.copyWith(color: AppColors.neonLime)),
+                child: Text('View Full Diet Plan  →',
+                    style: AppTextStyles.button
+                        .copyWith(color: AppColors.neonLime)),
               ),
             ),
             const SizedBox(height: 48),
@@ -312,30 +324,26 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
+        color: AppColors.surfaceDark.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+            color: AppColors.neonLime.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('Daily Targets', style: AppTextStyles.caption),
+          const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.local_fire_department_rounded, color: AppColors.neonOrange, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                '${targets['calories']} kcal',
-                style: AppTextStyles.heading2,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _macroTile('Protein', '${targets['protein']}', 'g', AppColors.neonLime),
-              _macroTile('Carbs', '${targets['carbs']}', 'g', AppColors.info),
-              _macroTile('Fats', '${targets['fats']}', 'g', AppColors.warning),
+              _macroTile('Calories',
+                  '${targets['calories'] ?? '--'}', 'kcal', AppColors.neonLime),
+              _macroTile('Protein',
+                  '${targets['protein'] ?? '--'}', 'g', AppColors.neonTeal),
+              _macroTile('Carbs',
+                  '${targets['carbs'] ?? '--'}', 'g', const Color(0xFFFF9800)),
+              _macroTile('Fat',
+                  '${targets['fat'] ?? '--'}', 'g', const Color(0xFFCE93D8)),
             ],
           ),
         ],
@@ -343,23 +351,40 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     );
   }
 
-  Widget _macroTile(String label, String value, String unit, Color color) {
-    return Column(
-      children: [
-        Text(label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400, fontSize: 12)),
-        const SizedBox(height: 4),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+  Widget _macroTile(
+      String label, String value, String unit, Color color) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Column(
           children: [
-            Text(value, style: AppTextStyles.heading3.copyWith(color: color)),
-            const SizedBox(width: 2),
-            Text(unit, style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
+            Text(value,
+                style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18)),
+            Text(unit,
+                style: TextStyle(
+                    color: color.withValues(alpha: 0.7),
+                    fontSize: 10)),
+            const SizedBox(height: 2),
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white60, fontSize: 10)),
           ],
         ),
-      ],
+      ),
     );
   }
+
+  // ─── Today Tab ────────────────────────────────────────────────────────────
 
   Widget _buildTodayTab(Map<String, dynamic>? plan) {
     if (plan == null) {
@@ -433,7 +458,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     if (status == 'medicalhold:bpcrisis') {
       return _buildAlertCard(
         title: '⚠️ High Blood Pressure Alert',
-        message: 'Your BP reading requires medical clearance before exercise. Please consult a doctor before your next session.',
+        message:
+            'Your BP reading requires medical clearance before exercise. Please consult a doctor before your next session.',
         color: AppColors.error,
         isPulsing: false,
       );
@@ -441,15 +467,17 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     if (status == 'medicalhold:fever') {
       return _buildAlertCard(
         title: '🤒 Rest Today',
-        message: 'Your body temperature is elevated. Complete rest is recommended. Stay hydrated and recover fully.',
-        color: const Color(0xFFFF9800), // neonOrange
+        message:
+            'Your body temperature is elevated. Complete rest is recommended. Stay hydrated and recover fully.',
+        color: const Color(0xFFFF9800),
         isPulsing: false,
       );
     }
     if (status == 'medicalhold:cardiacevent') {
       return _buildAlertCard(
         title: '⚠️ Cardiac Alert Detected',
-        message: 'An irregular heart rate event was detected. Please consult a doctor before resuming exercise.',
+        message:
+            'An irregular heart rate event was detected. Please consult a doctor before resuming exercise.',
         color: AppColors.error,
         isPulsing: true,
       );
@@ -457,9 +485,12 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     return const SizedBox.shrink();
   }
 
+  // ─── Week Tab ─────────────────────────────────────────────────────────────
+
   Widget _buildWeekTab() {
     if (_isLoadingWorkoutPlan) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.neonLime));
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.neonLime));
     }
 
     if (_cachedWorkoutPlan == null) {
@@ -469,7 +500,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.smart_toy_rounded, color: AppColors.neonLime, size: 80),
+              const Icon(Icons.smart_toy_rounded,
+                  color: AppColors.neonLime, size: 80),
               const SizedBox(height: 24),
               Text('No workout plan yet', style: AppTextStyles.heading2),
               const SizedBox(height: 16),
@@ -483,10 +515,13 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                 onPressed: _generateWorkoutPlan,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.neonLime,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text('Generate Plan', style: AppTextStyles.button),
+                child:
+                    Text('Generate Plan', style: AppTextStyles.button),
               ),
             ],
           ),
@@ -495,13 +530,15 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     }
 
     final plan = _cachedWorkoutPlan!;
-    final weeklyFocus = plan['weeklyFocus'] as String? ?? 'Build strength and improve conditioning';
+    final weeklyFocus = plan['weeklyFocus'] as String? ??
+        'Build strength and improve conditioning';
     final generatedAt = plan['generatedAt'] as Timestamp?;
     final weeklyPlan = plan['weeklyPlan'] as List<dynamic>? ?? [];
 
     int currentDayIndex = 0;
     if (generatedAt != null) {
-      final daysSince = DateTime.now().difference(generatedAt.toDate()).inDays;
+      final daysSince =
+          DateTime.now().difference(generatedAt.toDate()).inDays;
       currentDayIndex = daysSince.clamp(0, 6);
     }
 
@@ -519,20 +556,25 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('This Week\'s Focus', style: AppTextStyles.caption),
+                  Text('This Week\'s Focus',
+                      style: AppTextStyles.caption),
                   const SizedBox(height: 8),
                   Text(
                     weeklyFocus,
-                    style: AppTextStyles.heading3.copyWith(color: AppColors.neonLime, fontStyle: FontStyle.italic),
+                    style: AppTextStyles.heading3.copyWith(
+                        color: AppColors.neonLime,
+                        fontStyle: FontStyle.italic),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
             ...List.generate(weeklyPlan.length, (index) {
-              final dayPlan = weeklyPlan[index] as Map<String, dynamic>;
+              final dayPlan =
+                  weeklyPlan[index] as Map<String, dynamic>;
               final isToday = index == currentDayIndex;
-              return _buildDayExpandableCard(index + 1, dayPlan, isToday);
+              return _buildDayExpandableCard(
+                  index + 1, dayPlan, isToday);
             }),
             const SizedBox(height: 24),
             if (generatedAt != null)
@@ -549,9 +591,12 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     );
   }
 
-  Widget _buildDayExpandableCard(int dayNumber, Map<String, dynamic> dayPlan, bool isToday) {
-    final sessionType = dayPlan['sessionType'] as String? ?? 'Workout';
-    final estimatedMinutes = dayPlan['estimatedMinutes'] as int? ?? 0;
+  Widget _buildDayExpandableCard(
+      int dayNumber, Map<String, dynamic> dayPlan, bool isToday) {
+    final sessionType =
+        dayPlan['sessionType'] as String? ?? 'Workout';
+    final estimatedMinutes =
+        dayPlan['estimatedMinutes'] as int? ?? 0;
     final isRestDay = dayPlan['isRestDay'] as bool? ?? false;
     final exercises = dayPlan['exercises'] as List<dynamic>? ?? [];
 
@@ -561,21 +606,27 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         color: AppColors.surfaceDark,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isToday ? AppColors.neonLime : Colors.white.withValues(alpha: 0.05),
+          color: isToday
+              ? AppColors.neonLime
+              : Colors.white.withValues(alpha: 0.05),
           width: isToday ? 2 : 1,
         ),
       ),
       child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        data: Theme.of(context)
+            .copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          iconColor: isToday ? AppColors.neonLime : AppColors.gray400,
+          iconColor:
+              isToday ? AppColors.neonLime : AppColors.gray400,
           collapsedIconColor: AppColors.gray400,
           title: Row(
             children: [
               Text(
                 'Day $dayNumber',
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: isToday ? AppColors.neonLime : AppColors.white,
+                  color: isToday
+                      ? AppColors.neonLime
+                      : AppColors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -583,7 +634,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               Expanded(
                 child: Text(
                   sessionType,
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: AppColors.white),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -591,21 +643,28 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           ),
           subtitle: Text(
             isRestDay ? 'Rest' : '${estimatedMinutes}m',
-            style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+            style: AppTextStyles.caption
+                .copyWith(color: AppColors.gray400),
           ),
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              padding: const EdgeInsets.only(
+                  left: 16, right: 16, bottom: 16),
               child: isRestDay
                   ? Center(
                       child: Text(
                         'Active Recovery Day',
-                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(color: AppColors.gray400),
                       ),
                     )
                   : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: exercises.map((e) => _buildExerciseCard(e as Map<String, dynamic>)).toList(),
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: exercises
+                          .map((e) => _buildExerciseCard(
+                              e as Map<String, dynamic>))
+                          .toList(),
                     ),
             ),
           ],
@@ -622,7 +681,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     return 'just now';
   }
 
-  // --- Reused widgets from Today tab ---
+  // ─── Shared Widgets ───────────────────────────────────────────────────────
 
   Widget _buildRecoveryStatusCard(Map<String, dynamic>? plan) {
     if (_isLoadingWearable) {
@@ -633,7 +692,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Center(
-          child: CircularProgressIndicator(color: AppColors.neonLime),
+          child:
+              CircularProgressIndicator(color: AppColors.neonLime),
         ),
       );
     }
@@ -642,11 +702,13 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       return _buildGlassCard(
         child: Column(
           children: [
-            const Icon(Icons.watch_rounded, color: AppColors.gray400, size: 48),
+            const Icon(Icons.watch_rounded,
+                color: AppColors.gray400, size: 48),
             const SizedBox(height: 16),
             Text(
               'Sync your wearable to see recovery data',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppColors.gray400),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -705,7 +767,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     }
 
     Widget chip = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: chipColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
@@ -713,12 +776,15 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       ),
       child: Text(
         chipText,
-        style: AppTextStyles.bodyLarge.copyWith(color: chipColor, fontWeight: FontWeight.bold),
+        style: AppTextStyles.bodyLarge
+            .copyWith(color: chipColor, fontWeight: FontWeight.bold),
       ),
     );
 
     if (isPulsing) {
-      chip = chip.animate(onPlay: (c) => c.repeat(reverse: true)).fade(begin: 0.5, end: 1.0);
+      chip = chip
+          .animate(onPlay: (c) => c.repeat(reverse: true))
+          .fade(begin: 0.5, end: 1.0);
     }
 
     return _buildGlassCard(
@@ -734,12 +800,30 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
             mainAxisSpacing: 16,
             crossAxisSpacing: 16,
             children: [
-              _buildMetricTile('💤 Sleep', '${s.totalSleepMinutes} min', s.sleepQuality),
-              _buildMetricTile('❤️ Resting HR', s.restingHeartRate != null ? '${s.restingHeartRate!.toInt()} bpm' : '—', null),
-              _buildMetricTile('📊 HRV', s.heartRateVariability != null ? '${s.heartRateVariability!.toInt()} ms' : '—', null),
-              _buildMetricTile('👣 Steps', '${s.steps}', 'today'),
-              _buildMetricTile('🔥 Active Cal', '${s.activeCaloriesBurned.toInt()} kcal', null),
-              _buildMetricTile('🌡️ Temp', s.bodyTemperature != null ? '${s.bodyTemperature!.toStringAsFixed(1)}°C' : '—', null),
+              _buildMetricTile('💤 Sleep',
+                  '${s.totalSleepMinutes} min', s.sleepQuality),
+              _buildMetricTile(
+                  '❤️ Resting HR',
+                  s.restingHeartRate != null
+                      ? '${s.restingHeartRate!.toInt()} bpm'
+                      : '—',
+                  null),
+              _buildMetricTile(
+                  '📊 HRV',
+                  s.heartRateVariability != null
+                      ? '${s.heartRateVariability!.toInt()} ms'
+                      : '—',
+                  null),
+              _buildMetricTile(
+                  '👣 Steps', '${s.steps}', 'today'),
+              _buildMetricTile('🔥 Active Cal',
+                  '${s.activeCaloriesBurned.toInt()} kcal', null),
+              _buildMetricTile(
+                  '🌡️ Temp',
+                  s.bodyTemperature != null
+                      ? '${s.bodyTemperature!.toStringAsFixed(1)}°C'
+                      : '—',
+                  null),
             ],
           ),
         ],
@@ -747,7 +831,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     );
   }
 
-  Widget _buildMetricTile(String title, String value, String? subtitle) {
+  Widget _buildMetricTile(
+      String title, String value, String? subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -758,10 +843,15 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Text(value, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white, fontWeight: FontWeight.bold)),
+            Text(value,
+                style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold)),
             if (subtitle != null) ...[
               const SizedBox(width: 4),
-              Text('($subtitle)', style: AppTextStyles.caption.copyWith(fontSize: 10)),
+              Text('($subtitle)',
+                  style:
+                      AppTextStyles.caption.copyWith(fontSize: 10)),
             ],
           ],
         ),
@@ -780,7 +870,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       decoration: BoxDecoration(
         color: AppColors.surfaceDark.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(16),
-        border: const Border(left: BorderSide(color: AppColors.neonLime, width: 4)),
+        border: const Border(
+            left: BorderSide(color: AppColors.neonLime, width: 4)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -788,88 +879,77 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.smart_toy_rounded, color: AppColors.neonLime),
+              const Icon(Icons.smart_toy_rounded,
+                  color: AppColors.neonLime),
               const SizedBox(width: 8),
-              Text('Your AI Coach', style: AppTextStyles.heading3),
+              Text('Your AjAX Coach',
+                  style: AppTextStyles.heading3),
             ],
           ),
           const SizedBox(height: 12),
-          Text(coachNote, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white)),
-
-          if (plan['trainerOverride'] != null) ...[
-            const SizedBox(height: 16),
-            Chip(
-              label: const Text('🏋️ Trainer has reviewed this plan'),
-              backgroundColor: AppColors.neonTeal.withValues(alpha: 0.15),
-              labelStyle: const TextStyle(color: AppColors.neonTeal, fontWeight: FontWeight.w600),
-              side: const BorderSide(color: AppColors.neonTeal),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.cardSurface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.fitness_center_rounded, color: AppColors.neonTeal, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      plan['trainerOverride']['trainerNote'] as String? ?? '',
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          Text(coachNote,
+              style: AppTextStyles.bodyLarge
+                  .copyWith(color: AppColors.white)),
           const SizedBox(height: 12),
           if (bpNote != null)
             Chip(
               label: Text(bpNote),
-              backgroundColor: const Color(0xFFFF9800).withValues(alpha: 0.2), // AppColors.neonOrange
-              labelStyle: const TextStyle(color: Color(0xFFFF9800)),
+              backgroundColor:
+                  const Color(0xFFFF9800).withValues(alpha: 0.2),
+              labelStyle:
+                  const TextStyle(color: Color(0xFFFF9800)),
               avatar: const Icon(Icons.favorite_rounded,
-                           color: Color(0xFFFF9800), size: 14),
+                  color: Color(0xFFFF9800), size: 14),
             ),
           if (recoveryNote != null)
             Chip(
               label: Text(recoveryNote),
-              backgroundColor: Colors.yellow.withValues(alpha: 0.15),
-              labelStyle: TextStyle(color: Colors.yellow.shade700),
+              backgroundColor:
+                  Colors.yellow.withValues(alpha: 0.15),
+              labelStyle:
+                  TextStyle(color: Colors.yellow.shade700),
               avatar: Icon(Icons.bedtime_rounded,
-                           color: Colors.yellow.shade700, size: 14),
+                  color: Colors.yellow.shade700, size: 14),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildAlertCard({required String title, required String message, required Color color, required bool isPulsing}) {
+  Widget _buildAlertCard({
+    required String title,
+    required String message,
+    required Color color,
+    required bool isPulsing,
+  }) {
     Widget card = Container(
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.5), width: 2),
+        border:
+            Border.all(color: color.withValues(alpha: 0.5), width: 2),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.heading3.copyWith(color: color)),
+          Text(title,
+              style:
+                  AppTextStyles.heading3.copyWith(color: color)),
           const SizedBox(height: 12),
-          Text(message, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white)),
+          Text(message,
+              style: AppTextStyles.bodyLarge
+                  .copyWith(color: AppColors.white)),
         ],
       ),
     );
 
     if (isPulsing) {
-      return card.animate(onPlay: (c) => c.repeat(reverse: true)).fade(begin: 0.7, end: 1.0);
+      return card
+          .animate(onPlay: (c) => c.repeat(reverse: true))
+          .fade(begin: 0.7, end: 1.0);
     }
+
     return card;
   }
 
@@ -877,27 +957,36 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     final weeklyPlan = plan['weeklyPlan'] as List<dynamic>? ?? [];
     if (weeklyPlan.isEmpty) return const SizedBox.shrink();
 
-    final generatedAt = (plan['generatedAt'] as Timestamp).toDate();
-    final daysSince = DateTime.now().difference(generatedAt).inDays;
+    final generatedAt =
+        (plan['generatedAt'] as Timestamp).toDate();
+    final daysSince =
+        DateTime.now().difference(generatedAt).inDays;
     final todayIndex = daysSince.clamp(0, 6);
-    final todayPlan = weeklyPlan[todayIndex] as Map<String, dynamic>;
+    final todayPlan =
+        weeklyPlan[todayIndex] as Map<String, dynamic>;
 
-    final sessionType = todayPlan['sessionType'] as String? ?? 'Workout';
-    final estimatedMinutes = todayPlan['estimatedMinutes'] as int? ?? 0;
+    final sessionType =
+        todayPlan['sessionType'] as String? ?? 'Workout';
+    final estimatedMinutes =
+        todayPlan['estimatedMinutes'] as int? ?? 0;
     final isRestDay = todayPlan['isRestDay'] as bool? ?? false;
-    final exercises = todayPlan['exercises'] as List<dynamic>? ?? [];
+    final exercises =
+        todayPlan['exercises'] as List<dynamic>? ?? [];
 
     if (isRestDay) {
       return _buildGlassCard(
         child: Column(
           children: [
-            const Icon(Icons.self_improvement_rounded, color: AppColors.neonTeal, size: 48),
+            const Icon(Icons.self_improvement_rounded,
+                color: AppColors.neonTeal, size: 48),
             const SizedBox(height: 16),
-            Text('Active Recovery Day', style: AppTextStyles.heading3),
+            Text('Active Recovery Day',
+                style: AppTextStyles.heading3),
             const SizedBox(height: 8),
             Text(
               'Light stretching, walking, or yoga recommended today.\nYour muscles are rebuilding — rest is part of the plan.',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppColors.gray400),
               textAlign: TextAlign.center,
             ),
           ],
@@ -912,13 +1001,18 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Today\'s Session', style: AppTextStyles.caption),
+              Text('Today\'s Session',
+                  style: AppTextStyles.caption),
               const SizedBox(height: 4),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(sessionType, style: AppTextStyles.heading3),
-                  Text('~${estimatedMinutes}m', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.neonLime)),
+                  Text(sessionType,
+                      style: AppTextStyles.heading3),
+                  Text('~${estimatedMinutes}m',
+                      style: AppTextStyles.bodyMedium
+                          .copyWith(color: AppColors.neonLime)),
                 ],
               ),
             ],
@@ -926,7 +1020,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         ),
         if (exercises.isNotEmpty) ...[
           const SizedBox(height: 16),
-          ...exercises.map((e) => _buildExerciseCard(e as Map<String, dynamic>)),
+          ...exercises.map((e) =>
+              _buildExerciseCard(e as Map<String, dynamic>)),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -937,17 +1032,22 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                   MaterialPageRoute(
                     builder: (context) => WorkoutLoggerScreen(
                       memberId: widget.memberId,
-                      preloadedExercises: List<Map<String, dynamic>>.from(exercises),
+                      preloadedExercises:
+                          List<Map<String, dynamic>>.from(
+                              exercises),
                     ),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.neonLime,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Start Today\'s Workout', style: AppTextStyles.button),
+              child: Text('Start Today\'s Workout',
+                  style: AppTextStyles.button),
             ),
           ),
         ],
@@ -961,7 +1061,9 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     final reps = exercise['reps'] as String? ?? '0';
     final rest = exercise['restSeconds'] as int? ?? 60;
     final coachingCue = exercise['coachingCue'] as String?;
-    final targetMuscles = (exercise['targetMuscles'] as List<dynamic>? ?? []).join(', ');
+    final targetMuscles =
+        (exercise['targetMuscles'] as List<dynamic>? ?? [])
+            .join(', ');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -969,18 +1071,25 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       decoration: BoxDecoration(
         color: AppColors.surfaceDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(name, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.neonLime, fontWeight: FontWeight.bold)),
+          Text(name,
+              style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.neonLime,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Row(
             children: [
-              Text('$sets sets × $reps', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white)),
+              Text('$sets sets × $reps',
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: AppColors.white)),
               const Spacer(),
-              Text('Rest: ${rest}s', style: AppTextStyles.caption),
+              Text('Rest: ${rest}s',
+                  style: AppTextStyles.caption),
             ],
           ),
           if (coachingCue != null) ...[
@@ -989,7 +1098,10 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('💡 '),
-                Expanded(child: Text(coachingCue, style: AppTextStyles.caption.copyWith(color: AppColors.gray400))),
+                Expanded(
+                    child: Text(coachingCue,
+                        style: AppTextStyles.caption.copyWith(
+                            color: AppColors.gray400))),
               ],
             ),
           ],
@@ -999,7 +1111,10 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('🎯 '),
-                Expanded(child: Text(targetMuscles, style: AppTextStyles.caption.copyWith(color: AppColors.gray400))),
+                Expanded(
+                    child: Text(targetMuscles,
+                        style: AppTextStyles.caption.copyWith(
+                            color: AppColors.gray400))),
               ],
             ),
           ],
@@ -1009,13 +1124,16 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
   }
 
   Widget _buildActionButtons() {
-    final generatedAt = _cachedWorkoutPlan?['generatedAt'] as Timestamp?;
+    final generatedAt =
+        _cachedWorkoutPlan?['generatedAt'] as Timestamp?;
     bool canRegenerate = true;
     String regenText = 'Regenerate Plan';
 
     if (generatedAt != null) {
       final generated = generatedAt.toDate();
-      final diff = generated.add(const Duration(hours: 24)).difference(DateTime.now());
+      final diff = generated
+          .add(const Duration(hours: 24))
+          .difference(DateTime.now());
       if (!diff.isNegative) {
         canRegenerate = false;
         final h = diff.inHours;
@@ -1029,15 +1147,24 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: canRegenerate ? _generateWorkoutPlan : null,
+            onPressed:
+                canRegenerate ? _generateWorkoutPlan : null,
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: canRegenerate ? AppColors.neonLime : AppColors.gray600),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(
+                  color: canRegenerate
+                      ? AppColors.neonLime
+                      : AppColors.gray600),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(
               regenText,
-              style: AppTextStyles.button.copyWith(color: canRegenerate ? AppColors.neonLime : AppColors.gray600),
+              style: AppTextStyles.button.copyWith(
+                  color: canRegenerate
+                      ? AppColors.neonLime
+                      : AppColors.gray600),
             ),
           ),
         ),
@@ -1046,11 +1173,17 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HealthProfileScreen(memberId: widget.memberId)),
+              MaterialPageRoute(
+                  builder: (context) => HealthProfileScreen(
+                      memberId: widget.memberId)),
             );
           },
-          icon: const Icon(Icons.fitness_center, color: AppColors.gray400, size: 20),
-          label: Text('Update your metrics for better AI recommendations', style: AppTextStyles.caption, textAlign: TextAlign.center),
+          icon: const Icon(Icons.fitness_center,
+              color: AppColors.gray400, size: 20),
+          label: Text(
+              'Update your metrics for better AI recommendations',
+              style: AppTextStyles.caption,
+              textAlign: TextAlign.center),
         ),
       ],
     );
@@ -1067,7 +1200,8 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
           decoration: BoxDecoration(
             color: AppColors.surfaceDark.withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: child,
         ),

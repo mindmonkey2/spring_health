@@ -48,8 +48,6 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
       final planDoc = await FirebaseFirestore.instance
           .collection('dietPlans')
           .doc(_authUid)
-          .collection('current')
-          .doc('plan')
           .get();
 
       if (planDoc.exists && planDoc.data() != null) {

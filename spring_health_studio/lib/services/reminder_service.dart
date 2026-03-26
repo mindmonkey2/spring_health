@@ -100,7 +100,7 @@ class ReminderService {
   // Send dues reminder to single member
   Future<bool> sendDuesReminder(MemberModel member) async {
     try {
-      await WhatsAppService.sendDuePaymentReminder(member);
+      await WhatsAppService.instance.sendDuePaymentReminder(member);
 
       // Log reminder
       await _logReminder(
@@ -125,7 +125,7 @@ class ReminderService {
   // Send expiry reminder to single member
   Future<bool> sendExpiryReminder(MemberModel member, {required int daysLeft}) async {
     try {
-      await WhatsAppService.sendExpiryReminder(member, daysLeft);
+      await WhatsAppService.instance.sendExpiryReminder(member, daysLeft);
 
       // Log reminder
       await _logReminder(
@@ -150,7 +150,7 @@ class ReminderService {
   // Send birthday wish to single member
   Future<bool> sendBirthdayWish(MemberModel member) async {
     try {
-      await WhatsAppService.sendBirthdayWish(member);
+      await WhatsAppService.instance.sendBirthdayWish(member);
 
       // Log reminder
       await _logReminder(
@@ -395,7 +395,7 @@ class ReminderService {
   // Send rejoin message to single expired member
   Future<bool> sendRejoinMessage(MemberModel member) async {
     try {
-      await WhatsAppService.sendRejoinMessage(member);
+      await WhatsAppService.instance.sendRejoinMessage(member);
 
       // Log reminder
       await _logReminder(

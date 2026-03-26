@@ -383,7 +383,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 16),
           _buildField(
             label: 'Contact Phone',
-            hint: '+91 XXXXX XXXXX',
+            hint: 'Phone number with country code',
             controller: _emergencyPhoneCtrl,
             icon: Icons.phone_outlined,
             color: AppColors.neonOrange,

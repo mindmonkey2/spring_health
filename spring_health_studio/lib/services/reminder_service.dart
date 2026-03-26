@@ -177,17 +177,25 @@ class ReminderService {
     final members = await getMembersWithDues(branch: branch);
     int sent = 0;
     int failed = 0;
+    const batchSize = 10;
 
-    for (var member in members) {
-      final success = await sendDuesReminder(member);
-      if (success) {
-        sent++;
-      } else {
-        failed++;
+    for (int i = 0; i < members.length; i += batchSize) {
+      final end = (i + batchSize < members.length) ? i + batchSize : members.length;
+      final batch = members.sublist(i, end);
+
+      final results = await Future.wait(batch.map((member) => sendDuesReminder(member)));
+
+      for (final success in results) {
+        if (success) {
+          sent++;
+        } else {
+          failed++;
+        }
       }
 
-      // Small delay to avoid rate limiting
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (end < members.length) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
 
     return {
@@ -202,18 +210,28 @@ class ReminderService {
     final members = await getMembersExpiringSoon(days: days, branch: branch);
     int sent = 0;
     int failed = 0;
+    const batchSize = 10;
 
-    for (var member in members) {
-      final daysLeft = member.expiryDate.difference(DateTime.now()).inDays;
-      final success = await sendExpiryReminder(member, daysLeft: daysLeft);
+    for (int i = 0; i < members.length; i += batchSize) {
+      final end = (i + batchSize < members.length) ? i + batchSize : members.length;
+      final batch = members.sublist(i, end);
 
-      if (success) {
-        sent++;
-      } else {
-        failed++;
+      final results = await Future.wait(batch.map((member) {
+        final daysLeft = member.expiryDate.difference(DateTime.now()).inDays;
+        return sendExpiryReminder(member, daysLeft: daysLeft);
+      }));
+
+      for (final success in results) {
+        if (success) {
+          sent++;
+        } else {
+          failed++;
+        }
       }
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (end < members.length) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
 
     return {
@@ -228,17 +246,25 @@ class ReminderService {
     final members = await getTodayBirthdays(branch: branch);
     int sent = 0;
     int failed = 0;
+    const batchSize = 10;
 
-    for (var member in members) {
-      final success = await sendBirthdayWish(member);
+    for (int i = 0; i < members.length; i += batchSize) {
+      final end = (i + batchSize < members.length) ? i + batchSize : members.length;
+      final batch = members.sublist(i, end);
 
-      if (success) {
-        sent++;
-      } else {
-        failed++;
+      final results = await Future.wait(batch.map((member) => sendBirthdayWish(member)));
+
+      for (final success in results) {
+        if (success) {
+          sent++;
+        } else {
+          failed++;
+        }
       }
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (end < members.length) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
 
     return {
@@ -445,17 +471,25 @@ class ReminderService {
 
     int sent = 0;
     int failed = 0;
+    const batchSize = 10;
 
-    for (var member in expiredMembers) {
-      final success = await sendRejoinMessage(member);
+    for (int i = 0; i < expiredMembers.length; i += batchSize) {
+      final end = (i + batchSize < expiredMembers.length) ? i + batchSize : expiredMembers.length;
+      final batch = expiredMembers.sublist(i, end);
 
-      if (success) {
-        sent++;
-      } else {
-        failed++;
+      final results = await Future.wait(batch.map((member) => sendRejoinMessage(member)));
+
+      for (final success in results) {
+        if (success) {
+          sent++;
+        } else {
+          failed++;
+        }
       }
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (end < expiredMembers.length) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
 
     return {

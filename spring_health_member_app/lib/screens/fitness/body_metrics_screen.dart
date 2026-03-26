@@ -46,8 +46,9 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   }
 
   void _openSheet(List<BodyMetricsModel> existing) {
-    final lastHeight =
-        existing.isNotEmpty ? existing.first.height : null;
+    final lastHeight = existing.isNotEmpty
+        ? existing.first.height
+        : widget.healthProfile?.heightCm;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -818,53 +819,65 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   // ─── Empty / Error ─────────────────────────────────────────────────────────
 
   Widget _buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: AppColors.cardSurface,
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: AppColors.neonLime.withValues(alpha: 0.3)),
-            ),
-            child: Icon(Icons.monitor_weight_outlined,
-                size: 56,
-                color: AppColors.neonLime.withValues(alpha: 0.5)),
+    return Column(
+      children: [
+        if (widget.healthProfile != null &&
+            _isBPCritical(widget.healthProfile!))
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildBPWarningBanner(),
           ),
-          const SizedBox(height: 24),
-          Text('No Metrics Yet', style: AppTextStyles.heading3),
-          const SizedBox(height: 8),
-          Text(
-            'Start tracking to see your progress over time',
-            style: AppTextStyles.bodyMedium
-                .copyWith(color: AppColors.gray400),
-            textAlign: TextAlign.center,
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.cardSurface,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: AppColors.neonLime.withValues(alpha: 0.3)),
+                  ),
+                  child: Icon(Icons.monitor_weight_outlined,
+                      size: 56,
+                      color: AppColors.neonLime.withValues(alpha: 0.5)),
+                ),
+                const SizedBox(height: 24),
+                Text('No Metrics Yet', style: AppTextStyles.heading3),
+                const SizedBox(height: 8),
+                Text(
+                  'Start tracking to see your progress over time',
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: AppColors.gray400),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                // BUG 2: already correct — passes [] as expected by _openSheet()
+                ElevatedButton.icon(
+                  onPressed: () => _openSheet([]),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.neonLime,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text(
+                    'LOG FIRST ENTRY',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                  ),
+                ),
+              ],
+            ).animate().fadeIn().scale(),
           ),
-          const SizedBox(height: 32),
-          // BUG 2: already correct — passes [] as expected by _openSheet()
-          ElevatedButton.icon(
-            onPressed: () => _openSheet([]),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.neonLime,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 28, vertical: 14),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-            ),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text(
-              'LOG FIRST ENTRY',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, letterSpacing: 1.5),
-            ),
-          ),
-        ],
-      ).animate().fadeIn().scale(),
+        ),
+      ],
     );
   }
 

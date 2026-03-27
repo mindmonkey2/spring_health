@@ -38,7 +38,7 @@ class WeeklyWarModel {
       endDate: _toDateTime(map['endDate']),
       exercise: map['exercise'] ?? '',
       unit: map['unit'] ?? 'reps',
-      category: map['category'] ?? '',
+      category: map['category'] ?? 'strength',
       status: map['status'] ?? 'active',
       prizePool: Map<String, int>.from(map['prizePool'] ?? {}),
       winnerId: map['winnerId'],

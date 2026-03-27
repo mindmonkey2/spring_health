@@ -110,13 +110,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         : await _unsub('workout_reminders_${widget.member.id}');
   }
 
+  Future<void> _handlePromoToggle(bool val) async {
+    setState(() => promotionalOffers = val);
+    await _savePref('pref_promo', val);
+  }
+
+  Future<void> _handleHapticToggle(bool val) async {
+    setState(() => hapticFeedback = val);
+    await _savePref('pref_haptic', val);
+    if (val) HapticFeedback.lightImpact();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loadingPrefs) {
       return Scaffold(
         backgroundColor: AppColors.backgroundBlack,
         body: Center(
-          child: CircularProgressIndicator(color: AppColors.neonLime),
+          child: const CircularProgressIndicator(color: AppColors.neonLime),
         ),
       );
     }
@@ -151,9 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.notifications_active_rounded,
               AppColors.neonLime,
               pushNotifications,
-              (v) {
-                if (v != null) _handlePushToggle(v);
-              },
+              _handlePushToggle,
               isMain: true,
             ),
             const SizedBox(height: 8),
@@ -164,9 +173,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppColors.neonTeal,
               announcementAlerts && pushNotifications,
               (v) {
-                if (v != null && pushNotifications) {
-                  _handleAnnouncementToggle(v);
-                }
+                if (pushNotifications) _handleAnnouncementToggle(v);
               },
               disabled: !pushNotifications,
             ),
@@ -178,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppColors.neonOrange,
               expiryReminders && pushNotifications,
               (v) {
-                if (v != null && pushNotifications) _handleExpiryToggle(v);
+                if (pushNotifications) _handleExpiryToggle(v);
               },
               disabled: !pushNotifications,
             ),
@@ -190,7 +197,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppColors.turquoise,
               checkInConfirmations && pushNotifications,
               (v) {
-                if (v != null && pushNotifications) _handleCheckinToggle(v);
+                if (pushNotifications) _handleCheckinToggle(v);
               },
               disabled: !pushNotifications,
             ),
@@ -202,10 +209,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppColors.gray400,
               promotionalOffers && pushNotifications,
               (v) {
-                if (v != null && pushNotifications) {
-                  setState(() => promotionalOffers = v);
-                  _savePref('pref_promo', v);
-                }
+                if (pushNotifications) _handlePromoToggle(v);
               },
               disabled: !pushNotifications,
             ),
@@ -222,13 +226,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.vibration_rounded,
               AppColors.neonTeal,
               hapticFeedback,
-              (v) {
-                if (v != null) {
-                  setState(() => hapticFeedback = v);
-                  _savePref('pref_haptic', v);
-                  if (v) HapticFeedback.lightImpact();
-                }
-              },
+              _handleHapticToggle,
             ),
             const SizedBox(height: 8),
             _buildToggle(
@@ -237,9 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.fingerprint_rounded,
               AppColors.neonLime,
               biometricLock,
-              (v) {
-                if (v != null) setState(() => biometricLock = v);
-              },
+              (v) => setState(() => biometricLock = v),
             ),
             const SizedBox(height: 24),
             _buildSectionHeader(
@@ -489,7 +485,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     IconData icon,
     Color color,
     bool value,
-    ValueChanged<bool?> onChanged, {
+    ValueChanged<bool> onChanged, {
     bool isMain = false,
     bool disabled = false,
   }) => AnimatedOpacity(
@@ -664,7 +660,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: AppColors.gray400)),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.gray400)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -699,7 +695,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.gray400)),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.gray400)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),

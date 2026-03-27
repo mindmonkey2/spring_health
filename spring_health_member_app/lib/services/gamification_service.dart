@@ -368,28 +368,37 @@ class GamificationService {
 
     // 🆕 Write XP notification to in-app feed
     final notifService = InAppNotificationService();
-    await notifService.addNotification(
-      type: NotificationType.xp,
-      title: '+$xp XP ${_xpEmoji(reason)}',
-      body: reason,
-      metadata: {
-        'xpGained': xp,
-        'bonusXp': badgeXpBonus,
-        'totalXp': totalNewXp,
-        'level': newLevel.level,
-      },
-    );
+    final notifications = <NotificationData>[
+      NotificationData(
+        type: NotificationType.xp,
+        title: '+$xp XP ${_xpEmoji(reason)}',
+        body: reason,
+        metadata: {
+          'xpGained': xp,
+          'bonusXp': badgeXpBonus,
+          'totalXp': totalNewXp,
+          'level': newLevel.level,
+        },
+      ),
+    ];
 
     // 🆕 Write a badge notification for each newly unlocked badge
     for (final badge in newlyEarned) {
-      await notifService.addNotification(
-        type: NotificationType.badge,
-        title: '🏅 Badge Unlocked: ${badge.title}',
-        body: badge.description,
-        metadata: {'badgeId': badge.id, 'xpReward': badge.xpReward},
+      notifications.add(
+        NotificationData(
+          type: NotificationType.badge,
+          title: '🏅 Badge Unlocked: ${badge.title}',
+          body: badge.description,
+          metadata: {'badgeId': badge.id, 'xpReward': badge.xpReward},
+        ),
       );
       debugPrint('🏅 Badge notification written: ${badge.title}');
     }
+
+    await notifService.addNotificationsForMemberBatch(
+      uid: memberId,
+      notifications: notifications,
+    );
 
     return newlyEarned;
   }

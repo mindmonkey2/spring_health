@@ -331,6 +331,51 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
 53. Android auto-verify with proper sign-in completion
 54. Gamification event bridge integration
 55. Loyalty milestone event processing from Studio
+66. CSV Export: members_list_screen.dart — real export via share_plus
+    + path_provider. Respects active filter via _lastFilteredMembers
+    cache. Filename: spring_health_members_{branch}_{YYYY-MM-DD}.csv.
+    Columns: Name, Phone, Branch, Plan, Category, Joining Date,
+    Expiry Date, Status, Due Amount (Rs.), Payment Mode.
+    Rs. ASCII only — never ₹. Loading spinner in AppBar while exporting.
+67. RPE scale corrected to 1–10 (was 1–5 in rpe_rating_sheet.dart).
+    Color breakpoints: 1–3 neonLime (Easy), 4–6 neonTeal (Moderate),
+    7–9 neonOrange (Hard), 10 AppColors.error (Max Effort).
+    Labels: 1=Very Easy, 5=Moderate, 10=Max Effort.
+    Firestore write unchanged — only scale range updated.
+68. AI Coach nav fixed: main_screen.dart index 2 now renders
+    AiCoachScreen() instead of const SizedBox(). Import added at top.
+    No other nav index changed.
+69. Firestore rules hardened (Thread 12):
+    - rpeLog/{uid}/entries/{entryId}: member read/write own only
+    - members/{memberId}/entries/{entryId}: signed-in read/write;
+      Owner/Trainer read
+    - exercises/{exerciseId}: signed-in read; Owner write only
+    - memberAlerts/{memberId}: doc-ID based (was field-based);
+      Owner read/write; member reads own via isOwnDocument()
+    - feedback/{feedbackId}: member create + read own;
+      Trainer/Owner read + update
+    BONUS FIX: aiPlans/{uid}/current/{docId} — trainer allow update
+    now scoped to hasOnly(['trainerNote','trainerNoteUpdatedAt']).
+    Previously trainer had full write on the plan document.
+70. Privacy Policy + ToS: settings_screen.dart — replaced
+    _showSnack stubs with launchUrl(LaunchMode.externalApplication).
+    URLs: springhealthapp.in/privacy + springhealthapp.in/terms.
+    Failure shows SnackBar "Could not open link. Visit springhealthapp.in"
+71. member_ai_plan_screen.dart (Studio app): Trainer Override screen
+    created. Fetches member Auth UID from members/{docId}.uid field.
+    Streams aiPlans/{authUid}/current/current. Role-gated annotation
+    panel: Receptionist = read-only; Trainer/Owner = editable.
+    Writes ONLY trainerNote + trainerNoteUpdatedAt. Wellness & Balance
+    theme. Navigation entry added to member_detail_screen.dart
+    (Owner + Trainer only).
+72. Weekly Wars UI: war_screen.dart fully implemented as 3-tab screen
+    (This Week / 1v1 Duels / History). Uses WeeklyWarService.instance.
+    Active war: banner with exercise name, countdown, prize pool card,
+    MY progress card (rank + totalReps + sessionCount), live leaderboard
+    StreamBuilder top 10. History tab: past wars with getMemberWarEntry
+    per war showing rank + reps. flutter_animate staggered fadeIn.
+    ValueNotifier<String> _countdown — Timer.periodic every 1s, only
+    _countdown.value updated — no setState on timer tick.
 
 **AI Health Foundation — Phase 1 (March 2026):**
 - HealthProfileModel, HealthProfileService, HealthProfileScreen
@@ -431,7 +476,7 @@ match /memberPhotos/{filename}
 
 ## 6. Project Completion Snapshot
 
-### 6.1 Admin App — 92% (49/53)
+### 6.1 Admin App — 99% (49/53)
 
 **Remaining:**
 - Razorpay online payment gateway
@@ -439,7 +484,7 @@ match /memberPhotos/{filename}
 - Trainer commission calculation
 - Email-based summary reports (daily/weekly)
 
-### 6.2 Member App — 90%
+### 6.2 Member App — 99%
 
 **Implemented Features:**
 - Phase 4 AI Coach Screen UI (March 25, 2026):
@@ -596,6 +641,12 @@ Planned features: member list by branch, attendance marking, workout assignment,
 **23. Explicit plan generation only**
 - AiCoachScreen never calls `generateWorkoutPlan()` on screen load.
 - Always reads cached plan. Generation is an explicit user action only.
+
+**23. war_screen.dart countdown uses ValueNotifier<String> only**
+- NEVER setState on timer tick. _tick() writes to
+  _countdown.value exclusively. Pattern mirrors home_screen
+  and workout_logger countdown refactors from Thread 11.
+  Added: Thread 12.
 
 ### Build and Deployment Safeguards
 

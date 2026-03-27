@@ -11,9 +11,18 @@ enum HealthPermissionStatus { granted, denied, notDetermined, unavailable }
 class HealthService {
   static final HealthService instance = HealthService._internal();
   factory HealthService() => instance;
-  HealthService._internal();
 
-  final Health _health = Health();
+  // Additive injectable constructor for testing
+  HealthService.forTest({Health? health, bool? isAndroid})
+      : _health = health ?? Health(),
+        _isAndroid = isAndroid ?? Platform.isAndroid;
+
+  HealthService._internal({Health? health, bool? isAndroid})
+      : _health = health ?? Health(),
+        _isAndroid = isAndroid ?? Platform.isAndroid;
+
+  final Health _health;
+  final bool _isAndroid;
   bool _isInitialized = false;
 
   static const List<HealthDataType> _types = [
@@ -52,7 +61,7 @@ class HealthService {
   Future<bool> isAvailable() async {
     try {
       await initialize();
-      if (Platform.isAndroid) {
+      if (_isAndroid) {
         final status = await _health
             .getHealthConnectSdkStatus(); // FIX 5: use _health, not Health()
         debugPrint('[HealthService] SDK status: $status');
@@ -75,7 +84,7 @@ class HealthService {
   Future<bool> requestPermissions() async {
     await initialize();
     try {
-      if (Platform.isAndroid) {
+      if (_isAndroid) {
         // FIX 3: Check SDK status BEFORE requesting — this was causing silent false
         final sdkStatus = await _health.getHealthConnectSdkStatus();
         debugPrint('[HealthService] SDK status before request: $sdkStatus');
@@ -120,7 +129,7 @@ class HealthService {
   Future<HealthPermissionStatus> checkPermissionStatus() async {
     await initialize();
     try {
-      if (Platform.isAndroid) {
+      if (_isAndroid) {
         final sdkStatus = await _health.getHealthConnectSdkStatus();
         debugPrint('[HealthService] checkPermissionStatus SDK: $sdkStatus');
         if (sdkStatus == HealthConnectSdkStatus.sdkUnavailable) {
@@ -419,7 +428,7 @@ class HealthService {
             'sleepHours': stats.sleepHours,
             'date': Timestamp.fromDate(stats.date),
             'updatedAt': FieldValue.serverTimestamp(),
-            'source': Platform.isIOS ? 'healthkit' : 'health_connect',
+            'source': !_isAndroid ? 'healthkit' : 'health_connect', // using _isAndroid
             'isRealData': stats.isRealData,
           }, SetOptions(merge: true));
       debugPrint('[HealthService] Saved to Firestore for $dateKey');

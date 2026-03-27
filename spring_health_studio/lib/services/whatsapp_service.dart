@@ -21,7 +21,8 @@ class WhatsAppService {
   // ═══════════════════════════════════════════════════════════════
 
   // Format phone number for WhatsApp (remove spaces, dashes, add country code)
-  String _formatPhoneNumber(String phone) {
+  @visibleForTesting
+  static String formatPhoneNumber(String phone) {
     // Remove all non-digit characters
     String cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
 
@@ -43,7 +44,7 @@ class WhatsAppService {
     required String message,
   }) async {
     try {
-      final formattedPhone = _formatPhoneNumber(phoneNumber);
+      final formattedPhone = formatPhoneNumber(phoneNumber);
       final encodedMessage = Uri.encodeComponent(message);
 
       // WhatsApp API URL

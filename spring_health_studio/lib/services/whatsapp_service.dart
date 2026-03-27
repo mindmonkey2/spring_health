@@ -21,7 +21,7 @@ class WhatsAppService {
   // ═══════════════════════════════════════════════════════════════
 
   // Format phone number for WhatsApp (remove spaces, dashes, add country code)
-  String _formatPhoneNumber(String phone) {
+  static String _formatPhoneNumber(String phone) {
     // Remove all non-digit characters
     String cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
 
@@ -38,7 +38,7 @@ class WhatsAppService {
   }
 
   // Send WhatsApp message
-  Future<bool> sendMessage({
+  static Future<bool> sendMessage({
     required String phoneNumber,
     required String message,
   }) async {

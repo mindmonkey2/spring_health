@@ -33,7 +33,7 @@ class MockWhatsAppService extends WhatsAppService {
   }
 }
 
-class MockFirestoreService extends FirestoreService {
+class MockFirestoreService implements FirestoreService {
   final List<MemberModel> members;
 
   MockFirestoreService(this.members);
@@ -42,6 +42,9 @@ class MockFirestoreService extends FirestoreService {
   Stream<List<MemberModel>> getMembers({String? branch}) {
     return Stream.value(members);
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

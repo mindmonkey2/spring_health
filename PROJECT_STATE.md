@@ -92,14 +92,21 @@ Mapped from `services/` across both applications:
 
 ## 3. Pending/Stubbed Features
 
-Found via code review indicating placeholders, "coming soon" texts, and pending integrations:
-- **Razorpay Integration**: Code exists in `spring_health_member_app/lib/screens/renewal/renewal_screen.dart` but is currently handling external payment states/events. The Renewal Service passes the Razorpay ID.
-- **Social Flex Zone**: UI Placeholder found at `spring_health_member_app/lib/screens/social/social_coming_soon_screen.dart` labelled "COMING SOON".
-- **Edit Profile**: Stubbed in `spring_health_member_app/lib/screens/profile/profile_screen.dart` with a snackbar "Edit Profile — Coming soon!".
-- **Trainer Additional Features**: A "Coming Soon" sub-label exists in `spring_health_member_app/lib/screens/trainers/trainer_screen.dart`.
-- **Settings**: Stubbed generic features in `spring_health_member_app/lib/screens/settings/settings_screen.dart` showing a "Coming soon!" snackbar.
-- **Class Booking**: Found in `spring_health_member_app/lib/screens/home/home_screen.dart` showing an alert "Class Booking — Coming Soon! 🗓️".
-- **Export Data Feature**: A snackbar in `spring_health_studio/lib/screens/members/members_list_screen.dart` indicates "Export feature coming soon!".
+Resolved in Thread 12:
+  ✓ CSV Export (Admin members list) — T11 carry-forward, done Thread 12
+  ✓ RPE scale corrected to 1–10 (was 1–5 — audit-discovered bug)
+  ✓ AI Coach nav wired — main_screen.dart SizedBox() removed
+  ✓ Firestore rules: 5 uncovered collections now secured + aiPlans
+    trainer write scope hardened
+  ✓ Privacy Policy + ToS — url_launcher live (springhealthapp.in)
+  ✓ member_ai_plan_screen.dart — Trainer Override screen (T11 carry-forward)
+  ✓ Weekly Wars UI — war_screen.dart 3-tab implementation complete
+
+STILL PENDING:
+  - Class Booking / Scheduling
+  - Razorpay (do not start without payment contract)
+  - Social Flex Zone (social_coming_soon_screen.dart)
+  - Trainer App (springhealthtrainer) — not started
 
 ## 4. Architectural Health
 

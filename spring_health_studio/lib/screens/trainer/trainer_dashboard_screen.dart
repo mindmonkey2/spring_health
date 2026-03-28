@@ -319,6 +319,7 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
                           MaterialPageRoute(
                             builder: (_) => TrainerMemberDetailScreen(
                               memberId: memberId,
+                              currentTrainerId: widget.trainerId,
                             ),
                           ),
                         );

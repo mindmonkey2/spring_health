@@ -84,8 +84,8 @@ class _TrainerMemberDetailScreenState extends State<TrainerMemberDetailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TrainerScanScreen(
-                          prefillMemberId: widget.memberId,
+                      builder: (_) => TrainerScanScreen(
+                        currentTrainerId: widget.currentTrainerId,
                         ),
                       ),
                     );

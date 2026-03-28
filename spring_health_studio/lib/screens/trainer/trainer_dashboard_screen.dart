@@ -90,7 +90,11 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const TrainerScanScreen()),
+                MaterialPageRoute(
+                  builder: (_) => TrainerScanScreen(
+                    currentTrainerId: widget.trainerId,
+                  ),
+                ),
               );
             },
           ),

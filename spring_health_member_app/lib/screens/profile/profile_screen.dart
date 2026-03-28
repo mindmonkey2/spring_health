@@ -19,6 +19,7 @@ import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../health/health_profile_screen.dart';
 import 'edit_profile_screen.dart';
+import 'member_goal_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final MemberModel member;
@@ -609,6 +610,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AppColors.neonTeal,
           subtitle: 'Track weight, BMI & measurements',
           onTap: () => _push(BodyMetricsScreen(memberId: _member.id)),
+        ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          'My Goal & Target',
+          Icons.flag_rounded,
+          AppColors.neonLime,
+          subtitle: 'Set or update your fitness goal',
+          onTap: () {
+            if (_member.uid != null) {
+              _push(MemberGoalScreen(authUid: _member.uid!));
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Profile error: Missing ID.')),
+              );
+            }
+          },
         ),
         const SizedBox(height: 12),
         _buildActionTile(

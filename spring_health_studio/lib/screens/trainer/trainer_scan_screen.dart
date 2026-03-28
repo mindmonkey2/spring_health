@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
 class TrainerScanScreen extends StatelessWidget {
-  const TrainerScanScreen({super.key});
+  final String? prefillMemberId;
+
+  const TrainerScanScreen({super.key, this.prefillMemberId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Scan Member')),
-      body: const Center(child: Text('Scan Screen Stub')),
+      body: Center(
+        child: Text(prefillMemberId != null
+            ? 'Scan Screen Stub - Pre-filled Member: $prefillMemberId'
+            : 'Scan Screen Stub'),
+      ),
     );
   }
 }

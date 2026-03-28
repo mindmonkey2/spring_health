@@ -6,7 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../models/user_model.dart';
 import '../owner/owner_dashboard.dart';
 import '../receptionist/receptionist_dashboard.dart';
-import '../trainers/trainer_dashboard_screen.dart';
+import '../trainer/trainer_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

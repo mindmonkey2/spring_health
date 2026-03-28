@@ -178,7 +178,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '₹${NumberFormat('#,##,###').format(totalPaid)}',
+            'Rs.${NumberFormat('#,##,###').format(totalPaid)}',
             style: AppTextStyles.heading1.copyWith(
               color: AppColors.neonLime,
               fontSize: 42,
@@ -327,7 +327,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '₹${NumberFormat('#,##,###').format(payment.amount)}',
+                      'Rs.${NumberFormat('#,##,###').format(payment.amount)}',
                       style: AppTextStyles.heading3.copyWith(
                         color: statusColor,
                       ),

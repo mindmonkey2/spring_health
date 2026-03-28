@@ -28,6 +28,7 @@ class MemberModel {
   final DateTime createdAt;
   final String? trainerId;
   final String? photoUrl;
+  final String? userId; // ✅ Added to track Firebase Auth UID
   final List<DocumentSentModel> documentHistory;
 
   MemberModel({
@@ -56,6 +57,7 @@ class MemberModel {
     required this.qrCode,
     required this.createdAt,
     this.trainerId,
+    this.userId,
     this.documentHistory = const [],
     this.photoUrl,
   });
@@ -115,7 +117,8 @@ class MemberModel {
       'qrCode': qrCode,
       'createdAt': Timestamp.fromDate(createdAt),
       'trainerId': trainerId,
-      'photoUrl': photoUrl,  // ✅ FIXED: was missing from toMap
+      'user_id': userId, // Mapped to user_id in Firestore
+      'photoUrl': photoUrl,
       'documentHistory':
           documentHistory.map((doc) => doc.toMap()).toList(),
     };
@@ -152,7 +155,8 @@ class MemberModel {
       qrCode: map['qrCode'] as String,
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       trainerId: map['trainerId'] as String?,
-      photoUrl: map['photoUrl'] as String?,  // ✅ FIXED: was missing from fromMap
+      userId: map['user_id'] as String?, // Reading from user_id field
+      photoUrl: map['photoUrl'] as String?,
       documentHistory: (map['documentHistory'] as List<dynamic>?)
               ?.map((item) =>
                   DocumentSentModel.fromMap(item as Map<String, dynamic>))
@@ -191,7 +195,8 @@ class MemberModel {
     String? qrCode,
     DateTime? createdAt,
     String? trainerId,
-    String? photoUrl,  // ✅ FIXED: was missing from copyWith
+    String? userId,
+    String? photoUrl,
     List<DocumentSentModel>? documentHistory,
   }) {
     return MemberModel(
@@ -220,7 +225,8 @@ class MemberModel {
       qrCode: qrCode ?? this.qrCode,
       createdAt: createdAt ?? this.createdAt,
       trainerId: trainerId ?? this.trainerId,
-      photoUrl: photoUrl ?? this.photoUrl,  // ✅ FIXED
+      userId: userId ?? this.userId,
+      photoUrl: photoUrl ?? this.photoUrl,
       documentHistory: documentHistory ?? this.documentHistory,
     );
   }

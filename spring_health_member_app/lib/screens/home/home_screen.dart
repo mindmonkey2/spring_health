@@ -19,6 +19,8 @@ import '../social/social_coming_soon_screen.dart';
 import '../../services/wearable_snapshot_service.dart';
 import '../../services/ai_coach_service.dart';
 import '../ai_coach/ai_coach_screen.dart';
+import '../../models/member_goal_model.dart';
+import '../../services/member_goal_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,10 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final _gamService = GamificationService();
   final _wearableService = WearableSnapshotService.instance;
   final _aiCoachService = AiCoachService();
+  final _goalService = MemberGoalService();
 
   String? _memberId;
   MemberModel? _member;
   MemberGamification? _gamification;
+  MemberGoalModel? _memberGoal;
   bool _isLoading = true;
   String? _error;
 
@@ -87,6 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final gamification = await _gamService.getOrCreate(memberId);
       _gamService.listenToEvents(memberId);
 
+      final goal = member.uid != null ? await _goalService.getActiveGoal(member.uid!) : null;
+
       // Load AI data concurrently
       String? recoveryStatus;
       String? coachNoteSnippet;
@@ -111,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _memberId = memberId;
           _member = member;
           _gamification = gamification;
+          _memberGoal = goal;
           _recoveryStatus = recoveryStatus;
           _coachNoteSnippet = coachNoteSnippet;
           _isLoading = false;
@@ -339,6 +346,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
+                // ── Goal Progress Card ───────────────────────────────
+                if (_memberGoal != null) ...[
+                  _buildGoalProgressCard(),
+                  const SizedBox(height: 24),
+                ],
+
                 // ── AI Personal Trainer Banner ───────────────────────
                 _buildAiCoachBanner().animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 28),
@@ -380,6 +393,78 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  // ── Goal Progress Card ────────────────────────────────────────────────────
+
+  Widget _buildGoalProgressCard() {
+    final goal = _memberGoal!;
+    final now = DateTime.now();
+    final totalDays = goal.deadline.difference(goal.createdAt).inDays;
+    final elapsedDays = now.difference(goal.createdAt).inDays;
+    final weeksLeft = (totalDays - elapsedDays) ~/ 7;
+
+    String progressText = '';
+    double progressPercent = 0.0;
+
+    if (goal.currentValue != null && goal.targetValue != null) {
+      // Since we don't track live updates yet, we just show target info.
+      progressText = '${goal.currentValue} -> ${goal.targetValue}${goal.targetUnit ?? ''}';
+      progressPercent = (elapsedDays / (totalDays > 0 ? totalDays : 1)).clamp(0.0, 1.0);
+    } else {
+      progressText = goal.goalType.replaceAll('_', ' ').toUpperCase();
+      progressPercent = (elapsedDays / (totalDays > 0 ? totalDays : 1)).clamp(0.0, 1.0);
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.flag_rounded, color: AppColors.neonLime, size: 20),
+                  const SizedBox(width: 8),
+                  Text('ACTIVE GOAL', style: AppTextStyles.caption.copyWith(color: AppColors.gray400, letterSpacing: 1.5)),
+                ],
+              ),
+              Text('$weeksLeft weeks to goal', style: AppTextStyles.caption.copyWith(color: AppColors.neonLime, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            progressText,
+            style: AppTextStyles.heading3,
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progressPercent,
+              backgroundColor: AppColors.gray800,
+              valueColor: const AlwaysStoppedAnimation(AppColors.neonLime),
+              minHeight: 6,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Pace: On track', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+              Text('${(progressPercent * 100).toInt()}%', style: AppTextStyles.caption.copyWith(color: AppColors.neonLime)),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 220.ms).slideY(begin: 0.1, end: 0);
   }
 
   // ── AI Coach Banner ───────────────────────────────────────────────────────

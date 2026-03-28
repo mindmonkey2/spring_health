@@ -8,6 +8,7 @@ import '../../services/member_service.dart';
 import '../../services/gamification_service.dart';
 import '../../models/member_model.dart';
 import '../../models/gamification_model.dart';
+import '../../models/member_goal_model.dart';
 import 'widgets/membership_card_widget.dart';
 import 'widgets/stats_overview_widget.dart';
 import '../workout/workout_logger_screen.dart';
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _memberId;
   MemberModel? _member;
   MemberGamification? _gamification;
+  MemberGoalModel? _memberGoal;
   bool _isLoading = true;
   String? _error;
 
@@ -87,6 +89,20 @@ class _HomeScreenState extends State<HomeScreen> {
       final gamification = await _gamService.getOrCreate(memberId);
       _gamService.listenToEvents(memberId);
 
+      // Load Member Goal
+      MemberGoalModel? goalModel;
+      try {
+        final authUid = _authService.currentUser?.uid;
+        if (authUid != null) {
+          final goalDoc = await FirebaseFirestore.instance.collection('memberGoals').doc(authUid).get();
+          if (goalDoc.exists) {
+            goalModel = MemberGoalModel.fromMap(goalDoc.data()!, goalDoc.id);
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading member goal: $e');
+      }
+
       // Load AI data concurrently
       String? recoveryStatus;
       String? coachNoteSnippet;
@@ -111,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _memberId = memberId;
           _member = member;
           _gamification = gamification;
+          _memberGoal = goalModel;
           _recoveryStatus = recoveryStatus;
           _coachNoteSnippet = coachNoteSnippet;
           _isLoading = false;
@@ -339,6 +356,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
+                // ── Goal Progress Card ───────────────────────────────
+                if (_memberGoal != null) ...[
+                  _buildGoalProgressCard(_memberGoal!),
+                  const SizedBox(height: 24),
+                ],
+
                 // ── AI Personal Trainer Banner ───────────────────────
                 _buildAiCoachBanner().animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 28),
@@ -378,6 +401,65 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ── Goal Progress Card ────────────────────────────────────────────────────
+
+  Widget _buildGoalProgressCard(MemberGoalModel goal) {
+    int completedMilestones = goal.milestones.where((m) => m['completed'] == true).length;
+    double progress = goal.milestones.isEmpty ? 0 : completedMilestones / goal.milestones.length;
+
+    Color paceColor = goal.currentPace.toLowerCase().contains('behind') ? AppColors.error : AppColors.neonLime;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'GOAL: ${goal.primaryGoal.toUpperCase()}',
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: paceColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: paceColor),
+                ),
+                child: Text(
+                  goal.currentPace.toUpperCase(),
+                  style: AppTextStyles.caption.copyWith(color: paceColor, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: AppColors.gray400.withValues(alpha: 0.3),
+              color: AppColors.neonLime,
+              minHeight: 8,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${(progress * 100).toInt()}% Completed',
+            style: AppTextStyles.caption.copyWith(color: Colors.white),
+          ),
+        ],
       ),
     );
   }

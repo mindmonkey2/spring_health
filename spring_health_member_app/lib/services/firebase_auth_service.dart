@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseAuthService {
   // Rule 2: singleton — use .instance, never instantiate directly
@@ -84,85 +85,44 @@ class FirebaseAuthService {
     }
   }
 
-  // ─── Member lookup ─────────────────────────────────────────────────────────
-  // Returns {'id': firestoreDocId, ...memberData} or null.
-  // Called ONLY after user is authenticated (post-OTP). Never before.
-
-  Future<Map<String, dynamic>?> checkMemberExists(String phoneNumber) async {
-    try {
-      final clean = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-      debugPrint('🔍 Checking member with phone: $clean');
-
-      final formats = [clean, '+91$clean'];
-
-      for (final format in formats) {
-        QuerySnapshot snap = await _firestore
-            .collection('members')
-            .where('phone', isEqualTo: format)
-            .where('isArchived', isEqualTo: false)
-            .limit(1)
-            .get();
-
-        if (snap.docs.isEmpty) {
-          snap = await _firestore
-              .collection('members')
-              .where('phone', isEqualTo: format)
-              .limit(1)
-              .get();
-        }
-
-        if (snap.docs.isNotEmpty) {
-          final doc = snap.docs.first;
-          final data = doc.data() as Map<String, dynamic>;
-          debugPrint('✅ Member found: ${data['name']} (${doc.id})');
-          return {'id': doc.id, ...data};
-        }
-      }
-
-      debugPrint('❌ No member found with phone: $clean');
-      return null;
-    } catch (e) {
-      debugPrint('❌ Error checking member: $e');
-      return null;
-    }
-  }
-
   // ─── Store memberId after successful sign-in ───────────────────────────────
   // Rule 20: NEVER writes to users/{uid} — phone OTP members have NO users doc.
 
   Future<void> _storeMemberIdFromUser(User user) async {
     try {
-      final phone = (user.phoneNumber ?? '')
-          .replaceAll('+91', '')
-          .replaceAll('+', '')
-          .replaceAll(RegExp(r'[^0-9]'), '');
+      final snap = await _firestore
+          .collection('members')
+          .where('uid', isEqualTo: user.uid)
+          .limit(1)
+          .get();
 
-      if (phone.isEmpty) {
-        debugPrint('⚠ No phone number on authenticated user');
-        return;
-      }
-
-      final memberData = await checkMemberExists(phone);
-
-      if (memberData != null) {
-        final memberId = memberData['id'] as String;
-        debugPrint('✅ Linked member: ${memberData['name']} (ID: $memberId)');
+      if (snap.docs.isNotEmpty) {
+        final doc = snap.docs.first;
+        final memberId = doc.id;
+        final data = doc.data();
+        debugPrint('✅ Linked member: ${data['name']} (ID: $memberId)');
 
         await _saveMemberId(memberId);
 
-        await _firestore.collection('members').doc(memberId).update({
-          'uid': user.uid,
-          'last_app_login': FieldValue.serverTimestamp(),
-        });
-
-        debugPrint('✅ memberId cached and uid linked to member doc');
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null) {
+          await _firestore.collection('members').doc(memberId).update({
+            'fcmToken': token,
+          });
+          debugPrint('✅ memberId cached and fcmToken updated on member doc');
+        } else {
+          debugPrint('✅ memberId cached, no fcmToken available');
+        }
       } else {
-        debugPrint('⚠ No member record found for phone: $phone');
-        // Do NOT write to users/{uid} — Rule 20
-        // getCurrentMemberId phone fallback will handle this on next app open
+        debugPrint('⚠ No member record found for uid: ${user.uid}');
+        await _auth.signOut();
+        throw Exception(
+          'Phone number not found in the gym database. Please contact the front desk to set up your membership.',
+        );
       }
     } catch (e) {
       debugPrint('❌ Error in _storeMemberIdFromUser: $e');
+      rethrow;
     }
   }
 
@@ -293,34 +253,29 @@ class FirebaseAuthService {
         return cached;
       }
 
-      // ── 2. Phone fallback (user is authenticated at this point) ─────────
-      final phone = currentUser!.phoneNumber;
-      if (phone == null || phone.isEmpty) {
-        debugPrint('❌ No phone number on authenticated user');
-        return null;
-      }
-
+      // ── 2. UID fallback (user is authenticated at this point) ─────────
       debugPrint(
-        '🔄 memberId not cached — falling back to phone lookup: $phone',
+        '🔄 memberId not cached — falling back to uid lookup: ${currentUser!.uid}',
       );
-      final memberData = await checkMemberExists(phone);
 
-      if (memberData == null) {
-        debugPrint('❌ Member not found via phone fallback');
+      final snap = await _firestore
+          .collection('members')
+          .where('uid', isEqualTo: currentUser!.uid)
+          .limit(1)
+          .get();
+
+      if (snap.docs.isEmpty) {
+        debugPrint('❌ Member not found via uid fallback');
         return null;
       }
 
-      final memberId = memberData['id'] as String;
+      final doc = snap.docs.first;
+      final memberId = doc.id;
 
       await _saveMemberId(memberId);
 
-      await _firestore.collection('members').doc(memberId).update({
-        'uid': currentUser!.uid,
-        'last_app_login': FieldValue.serverTimestamp(),
-      });
-
       debugPrint(
-        '✅ memberId resolved via phone fallback and cached: $memberId',
+        '✅ memberId resolved via uid fallback and cached: $memberId',
       );
       return memberId;
     } catch (e) {

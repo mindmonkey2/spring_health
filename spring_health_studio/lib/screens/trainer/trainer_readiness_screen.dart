@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../services/trainer_ajax_service.dart';
 import '../../theme/app_colors.dart';
+import '../../models/member_model.dart';
 import 'trainer_warmup_screen.dart';
 
 class TrainerReadinessScreen extends StatefulWidget {
@@ -70,11 +73,88 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
   }
 
   void _startWarmup() {
-    // Navigate to TrainerWarmupScreen
+    final sessionRef = FirebaseFirestore.instance.collection('trainingSessions').doc();
+    final String newSessionId = sessionRef.id;
+
+    final readinessScore = widget.contextData['readinessScore'] ?? 70.0;
+
+    // Initial data for warmup state
+    sessionRef.set({
+      'sessionId': newSessionId,
+      'memberId': widget.contextData['memberId'],
+      'trainerId': widget.trainerId,
+      'status': 'analyzing',
+      'date': FieldValue.serverTimestamp(),
+      'readinessScore': readinessScore,
+      'sorenessReported': _selectedSoreness.toList(),
+      'energyLevel': _energyLevel,
+      'hasInjury': _hasInjury,
+      'injuryNote': _injuryNotesController.text,
+      'deselectedEquipment': _deselectedEquipment.toList(),
+    });
+
+    final memberId = widget.contextData['memberId'] as String;
+    final allEquipment = List<String>.from(widget.contextData['gymEquipment'] ?? []);
+    final availableEquipment = allEquipment.where((eq) => !_deselectedEquipment.contains(eq)).toList();
+
+    // Fetch the full member model quickly from cache/local context if possible
+    // For now, we reconstruct a basic MemberModel from contextData to satisfy the signature
+    // In a real app, you might fetch it from Firestore again if not fully in context.
+    // However, TrainerScanScreen already fetches member info, so we can use what's available.
+    final memberDataMap = {
+      'assignedTrainerId': widget.trainerId,
+      'name': widget.contextData['memberName'] ?? 'Member',
+      'branch': '', // Dummy or fetch if available
+      'phone': '',
+      'email': '',
+      'gender': '',
+      'category': '',
+      'plan': '',
+      'joiningDate': Timestamp.now(),
+      'expiryDate': Timestamp.now(),
+      'paymentMode': '',
+      'discount': 0.0,
+      'amountPaid': 0.0,
+      'totalAmount': 0.0,
+      'receiptNo': '',
+    };
+    final member = MemberModel.fromMap(memberDataMap, id: memberId);
+
+    final trainerContext = {
+      'sorenessReported': _selectedSoreness.toList(),
+      'energyLevel': _energyLevel,
+      'hasInjury': _hasInjury,
+      'injuryNote': _injuryNotesController.text,
+      'readinessScore': readinessScore,
+    };
+
+    final isFirstSession = widget.contextData['isFirstSession'] == true;
+    final memberAge = widget.contextData['age'] ?? 30;
+
+    TrainerAjaxService.generateSessionPlans(
+      sessionId: newSessionId,
+      member: member,
+      memberAge: memberAge,
+      isFirstSession: isFirstSession,
+      trainerContext: trainerContext,
+      bodyMetricsContext: {
+        'bmr': widget.contextData['bmr'],
+        'tdee': widget.contextData['tdee'],
+        'caloricTarget': widget.contextData['caloricTarget'],
+        'weightKg': widget.contextData['latestMetrics']?['weight'] ?? 70.0,
+      },
+      goalContext: widget.contextData['goalsData'] as Map<String, dynamic>?,
+      flexibilityContext: widget.contextData['flexibilityData'] as Map<String, dynamic>?,
+      wearableData: widget.contextData['wearableData'] as Map<String, dynamic>?,
+      lastSession: widget.contextData['lastSessionData'] as Map<String, dynamic>?,
+      memberIntelligence: widget.contextData['memberIntelligence'] as Map<String, dynamic>?,
+      availableEquipment: availableEquipment,
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const TrainerWarmupScreen(),
+        builder: (_) => TrainerWarmupScreen(sessionId: newSessionId),
       ),
     );
   }

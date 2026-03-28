@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../workout/member_session_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -346,6 +348,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
+                // ── Active Session / Nutrition Banners ────────────────
+                _buildDynamicBanners(),
+                const SizedBox(height: 24),
+
                 // ── Goal Progress Card ───────────────────────────────
                 if (_memberGoal != null) ...[
                   _buildGoalProgressCard(),
@@ -395,6 +401,235 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ── Dynamic Banners (Active Session & Nutrition) ──────────────────────────
+
+  Widget _buildDynamicBanners() {
+    if (_member == null || _member!.uid == null) return const SizedBox.shrink();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('trainingSessions')
+          .where('memberAuthUid', isEqualTo: _member!.uid!)
+          .orderBy('sessionStartTime', descending: true)
+          .limit(1)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final doc = snapshot.data!.docs.first;
+        final data = doc.data() as Map<String, dynamic>;
+        final status = data['status'] as String?;
+
+        if (['warmup', 'active', 'analyzing', 'assessment'].contains(status)) {
+          return _buildActiveSessionBanner(doc.id, data);
+        } else if (status == 'complete' && data['nutritionSentAt'] != null) {
+          return _buildNutritionCountdownCard(data);
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildActiveSessionBanner(String sessionId, Map<String, dynamic> data) {
+    final trainerName = data['trainerName'] ?? 'Your Trainer';
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MemberSessionScreen(
+              sessionId: sessionId,
+              memberName: _member!.name,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.neonLime, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.neonLime.withValues(alpha: 0.2),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.neonLime.withValues(alpha: 0.2),
+              ),
+              child: const Icon(Icons.fitness_center, color: AppColors.neonLime, size: 28)
+                  .animate(onPlay: (c) => c.repeat(reverse: true))
+                  .scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2), duration: 800.ms),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Trainer Session — LIVE',
+                    style: AppTextStyles.heading3.copyWith(color: AppColors.neonLime),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$trainerName has your workout ready',
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.neonLime,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'VIEW',
+                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNutritionCountdownCard(Map<String, dynamic> data) {
+    final nutritionSentAt = (data['nutritionSentAt'] as Timestamp).toDate();
+    final expiryTime = nutritionSentAt.add(const Duration(hours: 2));
+
+    // Quick synchronous check so we don't render a dead card
+    if (DateTime.now().isAfter(expiryTime)) {
+      return const SizedBox.shrink();
+    }
+
+    final ValueNotifier<String> nutritionCountdown = ValueNotifier<String>('');
+
+    void updateCountdown() {
+      final now = DateTime.now();
+      if (now.isAfter(expiryTime)) {
+        nutritionCountdown.value = 'EXPIRED';
+      } else {
+        final diff = expiryTime.difference(now);
+        final hours = diff.inHours.toString().padLeft(2, '0');
+        final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
+        final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
+        nutritionCountdown.value = '$hours:$minutes:$seconds';
+      }
+    }
+
+    updateCountdown();
+    // Start periodic timer
+    // Note: To truly clean this up perfectly, it should be bound to the state lifecycle,
+    // but a ValueListenableBuilder inside the widget handles the UI update cleanly without setState.
+    // For a stateless builder block, we can use a Future loop or Stream.
+    final timerStream = Stream.periodic(const Duration(seconds: 1)).map((_) {
+      final now = DateTime.now();
+      if (now.isAfter(expiryTime)) return 'EXPIRED';
+      final diff = expiryTime.difference(now);
+      return '${diff.inHours.toString().padLeft(2, '0')}:${(diff.inMinutes % 60).toString().padLeft(2, '0')}:${(diff.inSeconds % 60).toString().padLeft(2, '0')}';
+    });
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.neonTeal.withValues(alpha: 0.1),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.restaurant, color: AppColors.neonTeal),
+                  const SizedBox(width: 8),
+                  Text(
+                    'PROTEIN WINDOW OPEN',
+                    style: AppTextStyles.heading3.copyWith(color: AppColors.neonTeal),
+                  ),
+                ],
+              ),
+              StreamBuilder<String>(
+                stream: timerStream,
+                initialData: nutritionCountdown.value,
+                builder: (context, snapshot) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.neonTeal.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      snapshot.data ?? '00:00:00',
+                      style: const TextStyle(
+                        color: AppColors.neonTeal,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Have 30g protein now for recovery',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
+          ),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AiCoachScreen(memberId: _memberId!),
+                  ),
+                );
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('View Meal Plan', style: TextStyle(color: AppColors.neonTeal, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward, color: AppColors.neonTeal, size: 16),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.1, end: 0);
+  }
+
   // ── Goal Progress Card ────────────────────────────────────────────────────
 
   Widget _buildGoalProgressCard() {
@@ -407,64 +642,81 @@ class _HomeScreenState extends State<HomeScreen> {
     String progressText = '';
     double progressPercent = 0.0;
 
+    // Fallback pace text if not implemented locally based on bodyMetrics
+    String paceText = 'On track';
+    IconData paceIcon = Icons.check;
+
     if (goal.currentValue != null && goal.targetValue != null) {
-      // Since we don't track live updates yet, we just show target info.
-      progressText = '${goal.currentValue} -> ${goal.targetValue}${goal.targetUnit ?? ''}';
+      // Calculate progress assuming current/target exist
+      progressText = '${goal.currentValue} → ${goal.targetValue}${goal.targetUnit ?? ''}';
+
+      // Attempt to read currentPace if it exists on goal document's map representation
+      // For now we will assume On Track as default if it's missing from the model definition.
+      // If we need to strictly read from model, we must update the model. But we can default to 'On track' here.
+
+      // Placeholder logic if we had initial value:
+      // progressPercent = (current - initial) / (target - initial)
+      // Since we don't have initial, we just approximate by elapsed time for UI demonstration
       progressPercent = (elapsedDays / (totalDays > 0 ? totalDays : 1)).clamp(0.0, 1.0);
     } else {
       progressText = goal.goalType.replaceAll('_', ' ').toUpperCase();
       progressPercent = (elapsedDays / (totalDays > 0 ? totalDays : 1)).clamp(0.0, 1.0);
     }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.flag_rounded, color: AppColors.neonLime, size: 20),
-                  const SizedBox(width: 8),
-                  Text('ACTIVE GOAL', style: AppTextStyles.caption.copyWith(color: AppColors.gray400, letterSpacing: 1.5)),
-                ],
-              ),
-              Text('$weeksLeft weeks to goal', style: AppTextStyles.caption.copyWith(color: AppColors.neonLime, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            progressText,
-            style: AppTextStyles.heading3,
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progressPercent,
-              backgroundColor: AppColors.gray800,
-              valueColor: const AlwaysStoppedAnimation(AppColors.neonLime),
-              minHeight: 6,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to Goal Screen (To be implemented or connected)
+        ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Goal Details coming soon.')),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.track_changes, color: AppColors.neonLime, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  '$weeksLeft weeks to ${goal.goalType.replaceAll('_', ' ')}',
+                  style: AppTextStyles.heading3,
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Pace: On track', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
-              Text('${(progressPercent * 100).toInt()}%', style: AppTextStyles.caption.copyWith(color: AppColors.neonLime)),
-            ],
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: 220.ms).slideY(begin: 0.1, end: 0);
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progressPercent,
+                backgroundColor: AppColors.gray800,
+                valueColor: const AlwaysStoppedAnimation(AppColors.neonLime),
+                minHeight: 8,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(progressText, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white)),
+                Row(
+                  children: [
+                    Text('Pace: $paceText ', style: AppTextStyles.caption.copyWith(color: AppColors.gray400)),
+                    Icon(paceIcon, color: paceText == 'Behind' ? AppColors.error : AppColors.neonLime, size: 16),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ).animate().fadeIn(delay: 220.ms).slideY(begin: 0.1, end: 0),
+    );
   }
 
   // ── AI Coach Banner ───────────────────────────────────────────────────────

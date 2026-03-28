@@ -103,7 +103,7 @@ class _TrainerMemberDetailScreenState extends State<TrainerMemberDetailScreen> w
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const TrainerScanScreen()),
+                MaterialPageRoute(builder: (_) => TrainerScanScreen(user: widget.currentUser)),
               );
             },
             icon: const Icon(Icons.qr_code_scanner),

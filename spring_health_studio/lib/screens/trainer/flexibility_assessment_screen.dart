@@ -4,15 +4,23 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:spring_health_studio/theme/app_colors.dart';
 import 'package:spring_health_studio/screens/trainer/trainer_readiness_screen.dart';
+import 'package:spring_health_studio/models/member_model.dart';
+import 'package:spring_health_studio/models/user_model.dart';
 
 class FlexibilityAssessmentScreen extends StatefulWidget {
   final String authUid;
   final String memberName;
+  final MemberModel member;
+  final UserModel user;
+  final int age;
 
   const FlexibilityAssessmentScreen({
     super.key,
     required this.authUid,
     required this.memberName,
+    required this.member,
+    required this.user,
+    required this.age,
   });
 
   @override
@@ -118,7 +126,12 @@ class _FlexibilityAssessmentScreenState
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => TrainerReadinessScreen(authUid: widget.authUid),
+            builder: (_) => TrainerReadinessScreen(
+              authUid: widget.authUid,
+              user: widget.user,
+              member: widget.member,
+              age: widget.age,
+            ),
           ),
         );
       }
@@ -141,7 +154,12 @@ class _FlexibilityAssessmentScreenState
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => TrainerReadinessScreen(authUid: widget.authUid),
+        builder: (_) => TrainerReadinessScreen(
+          authUid: widget.authUid,
+          user: widget.user,
+          member: widget.member,
+          age: widget.age,
+        ),
       ),
     );
   }

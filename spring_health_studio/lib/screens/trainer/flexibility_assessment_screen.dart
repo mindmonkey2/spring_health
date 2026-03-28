@@ -8,12 +8,14 @@ class FlexibilityAssessmentScreen extends StatefulWidget {
   final String memberAuthUid;
   final String memberName;
   final String trainerId;
+  final Map<String, dynamic>? contextData;
 
   const FlexibilityAssessmentScreen({
     super.key,
     required this.memberAuthUid,
     required this.memberName,
     required this.trainerId,
+    this.contextData,
   });
 
   @override
@@ -68,12 +70,17 @@ class _FlexibilityAssessmentScreenState extends State<FlexibilityAssessmentScree
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => TrainerReadinessScreen(
-          flexibilityData: null,
-          memberAuthUid: widget.memberAuthUid,
-          memberName: widget.memberName,
-          trainerId: widget.trainerId,
-        ),
+        builder: (context) {
+          final data = widget.contextData ?? {
+            'memberAuthUid': widget.memberAuthUid,
+            'memberName': widget.memberName,
+          };
+          data['flexibilityData'] = null;
+          return TrainerReadinessScreen(
+            contextData: data,
+            trainerId: widget.trainerId,
+          );
+        },
       ),
     );
   }
@@ -150,12 +157,17 @@ class _FlexibilityAssessmentScreenState extends State<FlexibilityAssessmentScree
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => TrainerReadinessScreen(
-              flexibilityData: flexibilityData,
-              memberAuthUid: widget.memberAuthUid,
-              memberName: widget.memberName,
-              trainerId: widget.trainerId,
-            ),
+            builder: (context) {
+              final data = widget.contextData ?? {
+                'memberAuthUid': widget.memberAuthUid,
+                'memberName': widget.memberName,
+              };
+              data['flexibilityData'] = flexibilityData;
+              return TrainerReadinessScreen(
+                contextData: data,
+                trainerId: widget.trainerId,
+              );
+            },
           ),
         );
       }

@@ -149,3 +149,4 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
   18. Member document lookup pattern:
       The Member App looks up a member's document by first finding the `member_id` from the current user's document in the `users` collection. It then looks up the `members` collection using that `member_id` as the document ID. The `user_id` field on the member document links back to the Firebase Auth `uid`. This is a critical architectural rule — must match exactly what Studio writes when creating members.
 Thread 13 - AjAX Trainer Loop: Task 5 (Flexibility Assessment Screen) fully implemented.
+Thread 13 - AjAX Trainer Loop: Task 6 (QR Scan + Readiness Screen) fully implemented.

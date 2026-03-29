@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseAuthService {
   // Rule 2: singleton — use .instance, never instantiate directly
@@ -132,37 +133,50 @@ class FirebaseAuthService {
 
   Future<void> _storeMemberIdFromUser(User user) async {
     try {
-      final phone = (user.phoneNumber ?? '')
-          .replaceAll('+91', '')
-          .replaceAll('+', '')
-          .replaceAll(RegExp(r'[^0-9]'), '');
-
-      if (phone.isEmpty) {
-        debugPrint('⚠ No phone number on authenticated user');
-        return;
+      final phone = user.phoneNumber;
+      if (phone == null || phone.isEmpty) {
+        debugPrint('❌ No phone number on auth user');
+        await _auth.signOut();
+        throw Exception(
+          'Phone number not found. Please contact the front desk.',
+        );
       }
 
-      final memberData = await checkMemberExists(phone);
+      final snap = await _firestore
+          .collection('members')
+          .where('phone', isEqualTo: phone)
+          .limit(1)
+          .get();
 
-      if (memberData != null) {
-        final memberId = memberData['id'] as String;
-        debugPrint('✅ Linked member: ${memberData['name']} (ID: $memberId)');
+      if (snap.docs.isNotEmpty) {
+        final doc = snap.docs.first;
+        final memberId = doc.id;  // Firestore doc ID, NOT auth UID
+        final data = doc.data();
+        final name = data['name'] ?? 'Unknown';
+        debugPrint('✅ Linked member: $name (ID: $memberId)');
 
         await _saveMemberId(memberId);
 
-        await _firestore.collection('members').doc(memberId).update({
-          'uid': user.uid,
-          'last_app_login': FieldValue.serverTimestamp(),
-        });
-
-        debugPrint('✅ memberId cached and uid linked to member doc');
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null) {
+          await _firestore
+              .collection('members')
+              .doc(memberId)
+              .update({'fcmToken': token});
+          debugPrint('✅ memberId cached and fcmToken updated');
+        } else {
+          debugPrint('✅ memberId cached, no fcmToken available');
+        }
       } else {
-        debugPrint('⚠ No member record found for phone: $phone');
-        // Do NOT write to users/{uid} — Rule 20
-        // getCurrentMemberId phone fallback will handle this on next app open
+        debugPrint('⚠ No member found for phone: $phone');
+        await _auth.signOut();
+        throw Exception(
+          'Phone number not registered. Please contact the front desk.',
+        );
       }
     } catch (e) {
-      debugPrint('❌ Error in _storeMemberIdFromUser: $e');
+      debugPrint('❌ _storeMemberIdFromUser error: $e');
+      rethrow;
     }
   }
 
@@ -293,31 +307,29 @@ class FirebaseAuthService {
         return cached;
       }
 
-      // ── 2. Phone fallback (user is authenticated at this point) ─────────
+      // ── 2. Phone fallback ─────────────────────────
+      debugPrint('🔄 memberId not cached — falling back to phone lookup');
+
       final phone = currentUser!.phoneNumber;
       if (phone == null || phone.isEmpty) {
-        debugPrint('❌ No phone number on authenticated user');
+        debugPrint('❌ No phone number on current user');
         return null;
       }
 
-      debugPrint(
-        '🔄 memberId not cached — falling back to phone lookup: $phone',
-      );
-      final memberData = await checkMemberExists(phone);
+      final snap = await _firestore
+          .collection('members')
+          .where('phone', isEqualTo: phone)
+          .limit(1)
+          .get();
 
-      if (memberData == null) {
+      if (snap.docs.isEmpty) {
         debugPrint('❌ Member not found via phone fallback');
         return null;
       }
 
-      final memberId = memberData['id'] as String;
+      final memberId = snap.docs.first.id; // Firestore doc ID
 
       await _saveMemberId(memberId);
-
-      await _firestore.collection('members').doc(memberId).update({
-        'uid': currentUser!.uid,
-        'last_app_login': FieldValue.serverTimestamp(),
-      });
 
       debugPrint(
         '✅ memberId resolved via phone fallback and cached: $memberId',

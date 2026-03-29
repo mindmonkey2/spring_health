@@ -16,6 +16,7 @@ import '../reminders/reminders_dashboard.dart';
 // ── TASK 1 FIX: replaced CreateAnnouncementScreen with AnnouncementsListScreen
 import '../announcements/announcements_list_screen.dart';
 import '../gamification/admin_gamification_dashboard_screen.dart';
+import '../equipment/equipment_manager_screen.dart';
 
 class OwnerDashboard extends StatefulWidget {
   const OwnerDashboard({super.key});
@@ -996,6 +997,13 @@ class _OwnerDashboardState extends State<OwnerDashboard>
         'icon': Icons.fitness_center_rounded,
         'gradient': const [Color(0xFF8B5CF6), Color(0xFF6B21A8)],
         'route': TrainersListScreen(branch: selectedBranch),
+        'badge': 0,
+      },
+      {
+        'title': 'Gym Equipment',
+        'icon': Icons.fitness_center,
+        'gradient': const [Color(0xFF8B5CF6), Color(0xFF6B21A8)],
+        'route': const EquipmentManagerScreen(),
         'badge': 0,
       },
       // Gamification — already in original file ✅

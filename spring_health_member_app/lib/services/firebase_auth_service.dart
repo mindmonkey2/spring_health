@@ -88,44 +88,51 @@ class FirebaseAuthService {
   // Returns {'id': firestoreDocId, ...memberData} or null.
   // Called ONLY after user is authenticated (post-OTP). Never before.
 
-  Future<Map<String, dynamic>?> checkMemberExists(String phoneNumber) async {
-    try {
-      final clean = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-      debugPrint('🔍 Checking member with phone: $clean');
+  Future<Map<String, dynamic>?> checkMemberExists(
+    String phoneNumber) async {
+      try {
+        final raw = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+        // Strip 91 prefix if present to get pure 10-digit number
+        final tenDigit = (raw.startsWith('91') && raw.length == 12)
+        ? raw.substring(2)
+        : raw;
 
-      final formats = [clean, '+91$clean'];
+        // Try all formats — Firestore may store with or without +91
+        final formats = [tenDigit, '+91$tenDigit', '91$tenDigit'];
+        debugPrint('🔍 Trying formats: $formats');
 
-      for (final format in formats) {
-        QuerySnapshot snap = await _firestore
-            .collection('members')
-            .where('phone', isEqualTo: format)
-            .where('isArchived', isEqualTo: false)
-            .limit(1)
-            .get();
+        for (final format in formats) {
+          // Single field query only — NO isArchived compound query
+          // Compound queries require Firestore composite indexes
+          // isArchived check done in Dart below instead
+          final snap = await _firestore
+          .collection('members')
+          .where('phone', isEqualTo: format)
+          .limit(1)
+          .get();
 
-        if (snap.docs.isEmpty) {
-          snap = await _firestore
-              .collection('members')
-              .where('phone', isEqualTo: format)
-              .limit(1)
-              .get();
+          if (snap.docs.isNotEmpty) {
+            final doc = snap.docs.first;
+            final data = doc.data();
+            final isArchived = data['isArchived'] as bool? ?? false;
+            if (isArchived) {
+              debugPrint('⚠ Member archived, skipping: $format');
+              continue;
+            }
+            debugPrint('✅ Member found! Format: $format ID: ${doc.id}');
+            return {'id': doc.id, ...data};
+          }
+          debugPrint('❌ No match: $format');
         }
 
-        if (snap.docs.isNotEmpty) {
-          final doc = snap.docs.first;
-          final data = doc.data() as Map<String, dynamic>;
-          debugPrint('✅ Member found: ${data['name']} (${doc.id})');
-          return {'id': doc.id, ...data};
-        }
+        debugPrint('❌ Member not found for: $phoneNumber');
+        return null;
+      } catch (e, stack) {
+        debugPrint('❌ checkMemberExists error: $e');
+        debugPrint('$stack');
+        return null;
       }
-
-      debugPrint('❌ No member found with phone: $clean');
-      return null;
-    } catch (e) {
-      debugPrint('❌ Error checking member: $e');
-      return null;
     }
-  }
 
   // ─── Store memberId after successful sign-in ───────────────────────────────
   // Rule 20: NEVER writes to users/{uid} — phone OTP members have NO users doc.

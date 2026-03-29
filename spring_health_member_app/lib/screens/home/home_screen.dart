@@ -19,6 +19,8 @@ import '../social/social_coming_soon_screen.dart';
 import '../../services/wearable_snapshot_service.dart';
 import '../../services/ai_coach_service.dart';
 import '../ai_coach/ai_coach_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../profile/member_goal_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -339,6 +341,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
+                // ── Goal Progress Card ───────────────────────────────
+                _buildGoalProgressCard().animate().fadeIn(delay: 225.ms),
+                const SizedBox(height: 24),
+
                 // ── AI Personal Trainer Banner ───────────────────────
                 _buildAiCoachBanner().animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 28),
@@ -379,6 +385,159 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // ── Goal Progress Card ────────────────────────────────────────────────────
+
+  Widget _buildGoalProgressCard() {
+    final uid = FirebaseAuthService.instance.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('memberGoals').doc(uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const SizedBox.shrink();
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (data == null) return const SizedBox.shrink();
+
+        // Ensure standard fields exist
+        if (!data.containsKey('currentValue') || !data.containsKey('targetValue')) {
+            return const SizedBox.shrink();
+        }
+
+        final currentValue = (data['currentValue'] as num?)?.toDouble() ?? 0.0;
+        final targetValue = (data['targetValue'] as num?)?.toDouble() ?? 0.0;
+        final startValue = (data['startValue'] as num?)?.toDouble() ?? 0.0;
+        final unit = data['unit'] ?? '';
+        final goalTypeRaw = data['goalType'] ?? '';
+
+        final goalLabelMap = {
+          'weight_loss': 'Weight Loss',
+          'muscle_gain': 'Muscle Gain',
+          'strength': 'Strength',
+          'endurance': 'Endurance',
+          'flexibility': 'Flexibility',
+          'general_fitness': 'General Fitness',
+        };
+        final goalLabel = goalLabelMap[goalTypeRaw] ?? goalTypeRaw;
+
+        DateTime deadline = DateTime.now();
+        if (data['deadline'] != null) {
+          deadline = (data['deadline'] as Timestamp).toDate();
+        }
+
+        int weeksLeft = deadline.difference(DateTime.now()).inDays ~/ 7;
+        if (weeksLeft < 0) weeksLeft = 0;
+
+        double progress = 0.0;
+        if ((targetValue - startValue).abs() > 0.0001) {
+            progress = (currentValue - startValue) / (targetValue - startValue);
+        }
+        progress = progress.clamp(0.0, 1.0);
+
+        String paceLabel = 'Not started';
+        Color paceColor = AppColors.gray400;
+
+        if (progress > 0) {
+            final startDate = (data['startDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+            final daysElapsed = DateTime.now().difference(startDate).inDays;
+            final totalDays = deadline.difference(startDate).inDays;
+
+            if (totalDays > 0) {
+                final expectedProgress = daysElapsed / totalDays;
+                if (progress >= expectedProgress * 1.1) {
+                    paceLabel = 'Ahead of pace';
+                    paceColor = AppColors.neonTeal;
+                } else if (progress < expectedProgress * 0.9) {
+                    paceLabel = 'Behind pace';
+                    paceColor = AppColors.neonOrange;
+                } else {
+                    paceLabel = 'On track';
+                    paceColor = AppColors.neonLime;
+                }
+            } else {
+                paceLabel = 'On track';
+                paceColor = AppColors.neonLime;
+            }
+        }
+
+        return GestureDetector(
+          onTap: () {
+             Navigator.push(
+               context,
+               MaterialPageRoute(builder: (_) => MemberGoalScreen(memberAuthUid: uid)),
+             );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardSurface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.neonTeal, width: 1.5),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.flag, color: AppColors.neonLime, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '$weeksLeft weeks to $goalLabel',
+                        style: const TextStyle(
+                          color: AppColors.neonLime,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8,
+                    color: AppColors.neonLime,
+                    backgroundColor: AppColors.gray800,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${currentValue.toStringAsFixed(1)} $unit',
+                      style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'of ${targetValue.toStringAsFixed(1)} $unit',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 8, color: paceColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      paceLabel,
+                      style: TextStyle(color: paceColor, fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

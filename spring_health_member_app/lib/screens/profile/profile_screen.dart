@@ -19,6 +19,7 @@ import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../health/health_profile_screen.dart';
 import 'edit_profile_screen.dart';
+import 'member_goal_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final MemberModel member;
@@ -572,6 +573,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AppColors.neonLime,
           subtitle: 'Update email & emergency contact',
           onTap: () => _push(EditProfileScreen(member: _member)),
+        ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          'My Goal & Target',
+          Icons.flag,
+          AppColors.neonLime,
+          subtitle: 'Set and track your main fitness goal',
+          onTap: () => _push(MemberGoalScreen(
+            memberAuthUid: FirebaseAuthService.instance.currentUser!.uid,
+          )),
         ),
         const SizedBox(height: 12),
         _buildActionTile(

@@ -10,17 +10,17 @@ import '../../models/member_model.dart';
 import '../../models/trainer_feedback_model.dart';
 import '../auth/login_screen.dart';
 
-class TrainerDashboardScreen extends StatefulWidget {
+class TrainersListDashboardScreen extends StatefulWidget {
   final UserModel user;
 
-  const TrainerDashboardScreen({super.key, required this.user});
+  const TrainersListDashboardScreen({super.key, required this.user});
 
   @override
-  State<TrainerDashboardScreen> createState() =>
-      _TrainerDashboardScreenState();
+  State<TrainersListDashboardScreen> createState() =>
+      _TrainersListDashboardScreenState();
 }
 
-class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
+class _TrainersListDashboardScreenState extends State<TrainersListDashboardScreen> {
   final ValueNotifier<int> _tabNotifier = ValueNotifier(0);
   final AuthService _authService = AuthService();
   final FirestoreService _firestoreService = FirestoreService();

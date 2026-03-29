@@ -359,7 +359,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
                         this.setState(() {}); // Update parent state as well
                       },
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('1 (Easy)', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),

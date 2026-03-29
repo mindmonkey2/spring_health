@@ -83,24 +83,18 @@ service cloud.firestore {
     // - Member (phone OTP): read own doc by uid field or doc ID
     // - Member: update only photoUrl, uid, fcmToken fields
     match /members/{memberId} {
-      allow read: if isStaff() ||
-                     (isTrainer() && 'trainerId' in resource.data &&
-                      resource.data.trainerId == request.auth.uid) ||
-                     (isSignedIn() && (
-                       isOwnDocument(memberId) ||
-                       ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
-                       ('user_id' in resource.data && resource.data.user_id == request.auth.uid)
-                     ));
-      allow create: if isStaff();
-      allow update: if isStaff() ||
-                       (isSignedIn() && (
-                         isOwnDocument(memberId) ||
-                         ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
-                         ('user_id' in resource.data && resource.data.user_id == request.auth.uid)
-                       ) &&
-                       request.resource.data.diff(resource.data).affectedKeys()
-                         .hasOnly(['photoUrl', 'uid', 'fcmToken']));
-      allow delete: if isStaff();
+      allow read: if isOwner()
+        || isTrainer()
+        || isReceptionist()
+        || (isSignedIn() && isOwnRecord(resource.data));
+      allow create: if isOwner() || isReceptionist();
+      allow update: if isOwner() || isReceptionist();
+      allow delete: if isOwner();
+    }
+
+    match /members/{memberId}/entries/{entryId} {
+      allow read, write: if isSignedIn();
+      allow read: if isOwner() || isTrainer();
     }
 
     // -------------------------------------------------------------------------

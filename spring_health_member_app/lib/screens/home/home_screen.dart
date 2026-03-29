@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../workout/member_session_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,6 @@ import '../../services/wearable_snapshot_service.dart';
 import '../../services/ai_coach_service.dart';
 import '../ai_coach/ai_coach_screen.dart';
 import '../../models/member_goal_model.dart';
-import '../../services/member_goal_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,12 +37,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final _gamService = GamificationService();
   final _wearableService = WearableSnapshotService.instance;
   final _aiCoachService = AiCoachService();
-  final _goalService = MemberGoalService();
 
   String? _memberId;
   MemberModel? _member;
   MemberGamification? _gamification;
-  MemberGoalModel? _memberGoal;
   bool _isLoading = true;
   String? _error;
 
@@ -93,8 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final gamification = await _gamService.getOrCreate(memberId);
       _gamService.listenToEvents(memberId);
 
-      final goal = member.uid != null ? await _goalService.getActiveGoal(member.uid!) : null;
-
       // Load AI data concurrently
       String? recoveryStatus;
       String? coachNoteSnippet;
@@ -119,7 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _memberId = memberId;
           _member = member;
           _gamification = gamification;
-          _memberGoal = goal;
           _recoveryStatus = recoveryStatus;
           _coachNoteSnippet = coachNoteSnippet;
           _isLoading = false;
@@ -353,10 +348,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
 
                 // ── Goal Progress Card ───────────────────────────────
-                if (_memberGoal != null) ...[
-                  _buildGoalProgressCard(),
-                  const SizedBox(height: 24),
-                ],
+                if (FirebaseAuth.instance.currentUser?.uid != null) ...[
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('memberGoals')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
+                        return const SizedBox.shrink();
+                      }
+                      final goalData = snapshot.data!.data() as Map<String, dynamic>;
+                      final memberGoal = MemberGoalModel.fromMap(goalData, snapshot.data!.id);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: _buildGoalProgressCard(memberGoal),
+                      );
+                    },
+                  ),
+                ] else
+                  const SizedBox.shrink(),
 
                 // ── AI Personal Trainer Banner ───────────────────────
                 _buildAiCoachBanner().animate().fadeIn(delay: 250.ms),
@@ -404,13 +415,17 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Dynamic Banners (Active Session & Nutrition) ──────────────────────────
 
   Widget _buildDynamicBanners() {
-    if (_member == null || _member!.uid == null) return const SizedBox.shrink();
+    final String? memberAuthUid = FirebaseAuth.instance.currentUser?.uid;
+    if (memberAuthUid == null) return const SizedBox.shrink();
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('trainingSessions')
-          .where('memberAuthUid', isEqualTo: _member!.uid!)
-          .orderBy('sessionStartTime', descending: true)
+          .where('memberAuthUid', isEqualTo: memberAuthUid)
+          .where('status', whereIn: [
+            'warmup', 'active',
+            'analyzing', 'assessment'
+          ])
           .limit(1)
           .snapshots(),
       builder: (context, snapshot) {
@@ -632,8 +647,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Goal Progress Card ────────────────────────────────────────────────────
 
-  Widget _buildGoalProgressCard() {
-    final goal = _memberGoal!;
+  Widget _buildGoalProgressCard(MemberGoalModel goal) {
     final now = DateTime.now();
     final totalDays = goal.deadline.difference(goal.createdAt).inDays;
     final elapsedDays = now.difference(goal.createdAt).inDays;

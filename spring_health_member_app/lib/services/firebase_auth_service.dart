@@ -90,25 +90,20 @@ class FirebaseAuthService {
 
   Future<void> _storeMemberIdFromUser(User user) async {
     try {
-      final snap = await _firestore
-          .collection('members')
-          .where('uid', isEqualTo: user.uid)
-          .limit(1)
-          .get();
+      final docSnapshot =
+          await _firestore.collection('members').doc(user.uid).get();
 
-      if (snap.docs.isNotEmpty) {
-        final doc = snap.docs.first;
-        final memberId = doc.id;
-        final data = doc.data();
-        debugPrint('✅ Linked member: ${data['name']} (ID: $memberId)');
+      if (docSnapshot.exists) {
+        final memberId = docSnapshot.id;
+        final data = docSnapshot.data();
+        final name = data != null && data.containsKey('name') ? data['name'] : 'Unknown';
+        debugPrint('✅ Linked member: $name (ID: $memberId)');
 
         await _saveMemberId(memberId);
 
         final token = await FirebaseMessaging.instance.getToken();
         if (token != null) {
-          await _firestore.collection('members').doc(memberId).update({
-            'fcmToken': token,
-          });
+          await docSnapshot.reference.update({'fcmToken': token});
           debugPrint('✅ memberId cached and fcmToken updated on member doc');
         } else {
           debugPrint('✅ memberId cached, no fcmToken available');
@@ -117,7 +112,7 @@ class FirebaseAuthService {
         debugPrint('⚠ No member record found for uid: ${user.uid}');
         await _auth.signOut();
         throw Exception(
-          'Phone number not found in the gym database. Please contact the front desk to set up your membership.',
+          'Phone number not registered. Please contact the front desk.',
         );
       }
     } catch (e) {
@@ -255,27 +250,25 @@ class FirebaseAuthService {
 
       // ── 2. UID fallback (user is authenticated at this point) ─────────
       debugPrint(
-        '🔄 memberId not cached — falling back to uid lookup: ${currentUser!.uid}',
+        '🔄 memberId not cached — falling back to doc lookup: ${currentUser!.uid}',
       );
 
-      final snap = await _firestore
+      final docSnapshot = await _firestore
           .collection('members')
-          .where('uid', isEqualTo: currentUser!.uid)
-          .limit(1)
+          .doc(currentUser!.uid)
           .get();
 
-      if (snap.docs.isEmpty) {
-        debugPrint('❌ Member not found via uid fallback');
+      if (!docSnapshot.exists) {
+        debugPrint('❌ Member not found via doc fallback');
         return null;
       }
 
-      final doc = snap.docs.first;
-      final memberId = doc.id;
+      final memberId = docSnapshot.id;
 
       await _saveMemberId(memberId);
 
       debugPrint(
-        '✅ memberId resolved via uid fallback and cached: $memberId',
+        '✅ memberId resolved via doc fallback and cached: $memberId',
       );
       return memberId;
     } catch (e) {

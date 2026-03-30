@@ -448,7 +448,7 @@ class _ReceptionistDashboardWebState extends State<ReceptionistDashboardWeb> {
                       ),
                       StatCard(
                         title: 'Pending Dues',
-                        value: '₹${(_stats['totalDues'] ?? 0).toStringAsFixed(0)}',
+                        value: 'Rs.${(_stats['totalDues'] ?? 0).toStringAsFixed(0)}',
                         icon: Icons.account_balance_wallet,
                         color: softCoral,
                         onTap: () {
@@ -508,7 +508,7 @@ class _ReceptionistDashboardWebState extends State<ReceptionistDashboardWeb> {
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            '₹${(_stats['monthlyRevenue'] ?? 0).toStringAsFixed(2)}',
+                            'Rs.${(_stats['monthlyRevenue'] ?? 0).toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
@@ -530,7 +530,7 @@ class _ReceptionistDashboardWebState extends State<ReceptionistDashboardWeb> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '₹${(_stats['monthlyCash'] ?? 0).toStringAsFixed(0)}',
+                                      'Rs.${(_stats['monthlyCash'] ?? 0).toStringAsFixed(0)}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,
@@ -550,7 +550,7 @@ class _ReceptionistDashboardWebState extends State<ReceptionistDashboardWeb> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '₹${(_stats['monthlyUpi'] ?? 0).toStringAsFixed(0)}',
+                                      'Rs.${(_stats['monthlyUpi'] ?? 0).toStringAsFixed(0)}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,
@@ -570,7 +570,7 @@ class _ReceptionistDashboardWebState extends State<ReceptionistDashboardWeb> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '₹${(_stats['totalDiscount'] ?? 0).toStringAsFixed(0)}',
+                                      'Rs.${(_stats['totalDiscount'] ?? 0).toStringAsFixed(0)}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,

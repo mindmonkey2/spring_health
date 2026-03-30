@@ -1,0 +1,22 @@
+[33m78dfa88[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #91 from mindmonkey2/fix/firebase-auth-member-lookup-14856921071080295492
+[33m676b1a9[m fix: restore phone-based member lookup, revert wrong UID doc lookup from PRs 87-88
+[33mab024cf[m Merge pull request #86 from mindmonkey2/live-session-boards-task9-15988003756952307056
+[33m0975f2a[m feat: Implement Live Session Board for Trainer and Member Apps
+[33mfd48516[m Merge pull request #85 from mindmonkey2/feat/trainer-warmup-screen-8743358690203132761
+[33m29507c4[m feat: Implement Trainer Warmup Screen & Plan Selection flow
+[33ma2ab441[m Merge pull request #83 from mindmonkey2/jules-9003778355076745217-14a9972b
+[33m43907a2[m 🧹 fix: no changes needed for code health issue
+[33me94a27b[m Merge pull request #84 from mindmonkey2/feat/trainer-ajax-service-8674350932101175337
+[33mf21d046[m feat: implement TrainerAjaxService
+[33m5bf3524[m 🧹 fix: remove hardcoded phone hint text
+[33m227441e[m Merge pull request #82 from mindmonkey2/feature/trainer-readiness-scanner-10845320523934388845
+[33m0ae98dd[m feat(trainer): implement qr scan and readiness screen
+[33m2a75546[m Merge pull request #81 from mindmonkey2/feature/trainer-flexibility-assessment-12560808493990675508
+[33mbe82570[m feat(studio): add trainer flexibility assessment screen
+[33md010ecf[m Merge pull request #80 from mindmonkey2/feat/trainer-member-detail-screen-18409405054516347607
+[33m80efaff[m feat: implement trainer member detail screen and overview tabs
+[33m3394e2a[m Merge pull request #79 from mindmonkey2/feat/trainer-dashboard-ui-6664329044895237750
+[33m1ecb76c[m Hello! Jules here. I've finished implementing the trainer dashboard screens and updated the login routing for you. Here is a summary of the changes I made:
+[33m578901e[m Merge pull request #78 from mindmonkey2/feat/equipment-manager-screen-7464311354116102011
+[33m0535bf5[m feat: create gym equipment manager screen for owner dashboard
+[33m4d84cc1[m Merge pull request #77 from mindmonkey2/fix/safe-discount-read-16581679506514753660

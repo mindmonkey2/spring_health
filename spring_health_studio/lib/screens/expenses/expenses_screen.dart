@@ -208,7 +208,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                             ),
                           ),
                           Text(
-                            '₹${total.toStringAsFixed(2)}',
+                            'Rs.${total.toStringAsFixed(2)}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -297,7 +297,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '₹${expense.amount.toStringAsFixed(0)}', // ✅ No decimals to save space
+                'Rs. ${expense.amount.toStringAsFixed(0)}', // ✅ No decimals to save space
                 style: const TextStyle(
                   fontSize: 16, // ✅ Reduced from 18
                   fontWeight: FontWeight.bold,
@@ -356,7 +356,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('Amount', '₹${expense.amount.toStringAsFixed(2)}'),
+            _buildDetailRow('Amount', 'Rs.${expense.amount.toStringAsFixed(2)}'),
             const SizedBox(height: 12),
             _buildDetailRow('Description', expense.description),
             const SizedBox(height: 12),

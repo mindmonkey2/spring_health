@@ -426,7 +426,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                       children: [
                         const Text('Total Fee:', style: TextStyle(fontSize: 16)),
                         Text(
-                          '₹${_totalFee.toStringAsFixed(2)}',
+                          'Rs.${_totalFee.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -446,7 +446,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                           decoration: InputDecoration(
                             labelText: 'Discount',
                             prefixIcon: const Icon(Icons.discount),
-                            prefixText: '₹ ',
+                            prefixText: 'Rs. ',
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             filled: true,
                             fillColor: AppColors.background,
@@ -461,7 +461,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                           decoration: InputDecoration(
                             labelText: 'Due Amount',
                             prefixIcon: const Icon(Icons.pending_actions),
-                            prefixText: '₹ ',
+                            prefixText: 'Rs. ',
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             filled: true,
                             fillColor: AppColors.background,
@@ -487,7 +487,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '₹${_finalAmount.toStringAsFixed(2)}',
+                          'Rs.${_finalAmount.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -516,7 +516,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                             decoration: InputDecoration(
                               labelText: 'Cash Amount *',
                               prefixIcon: const Icon(Icons.money),
-                              prefixText: '₹ ',
+                              prefixText: 'Rs. ',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             keyboardType: TextInputType.number,
@@ -529,7 +529,7 @@ class _EditMemberScreenState extends State<EditMemberScreen> {
                             decoration: InputDecoration(
                               labelText: 'UPI Amount *',
                               prefixIcon: const Icon(Icons.qr_code),
-                              prefixText: '₹ ',
+                              prefixText: 'Rs. ',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             keyboardType: TextInputType.number,

@@ -151,7 +151,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Payment of ₹${collectionAmount.toStringAsFixed(0)} received from ${updatedMember.name}',
+                'Payment of Rs.${collectionAmount.toStringAsFixed(0)} received from ${updatedMember.name}',
                 style: const TextStyle(fontSize: 15),
               ),
               const SizedBox(height: 16),
@@ -165,17 +165,17 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSummaryRow('Amount Paid:', '₹${collectionAmount.toStringAsFixed(0)}'),
+                    _buildSummaryRow('Amount Paid:', 'Rs.${collectionAmount.toStringAsFixed(0)}'),
                     _buildSummaryRow('Payment Mode:', _selectedPaymentMode),
                     if (_selectedPaymentMode == 'Mixed') ...[
-                      _buildSummaryRow(' • Cash:', '₹${cashAmount.toStringAsFixed(0)}'),
-                      _buildSummaryRow(' • UPI:', '₹${upiAmount.toStringAsFixed(0)}'),
+                      _buildSummaryRow(' • Cash:', 'Rs.${cashAmount.toStringAsFixed(0)}'),
+                      _buildSummaryRow(' • UPI:', 'Rs.${upiAmount.toStringAsFixed(0)}'),
                     ],
                     const Divider(height: 16),
                     _buildSummaryRow(
                       'Remaining Due:',
                       newDueAmount > 0
-                      ? '₹${newDueAmount.toStringAsFixed(0)}'
+                      ? 'Rs.${newDueAmount.toStringAsFixed(0)}'
                     : 'Check Fully Paid',
                     valueColor: newDueAmount > 0 ? Colors.orange : Colors.green,
                     ),
@@ -319,7 +319,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                             ),
                           ),
                           Text(
-                            '₹${widget.member.dueAmount.toStringAsFixed(2)}',
+                            'Rs.${widget.member.dueAmount.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -351,7 +351,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                 ),
                 filled: true,
                 fillColor: Colors.grey[50],
-                helperText: 'Maximum: ₹${widget.member.dueAmount.toStringAsFixed(0)}',
+                helperText: 'Maximum: Rs.${widget.member.dueAmount.toStringAsFixed(0)}',
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -397,7 +397,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                       decoration: InputDecoration(
                         labelText: 'Cash Amount *',
                         prefixIcon: const Icon(Icons.money),
-                        prefixText: '₹ ',
+                        prefixText: 'Rs. ',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -415,7 +415,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                       decoration: InputDecoration(
                         labelText: 'UPI Amount *',
                         prefixIcon: const Icon(Icons.qr_code),
-                        prefixText: '₹ ',
+                        prefixText: 'Rs. ',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -441,7 +441,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Cash + UPI must equal ₹${collectionAmount.toStringAsFixed(0)}',
+                        'Cash + UPI must equal Rs.${collectionAmount.toStringAsFixed(0)}',
                         style: TextStyle(fontSize: 12, color: Colors.orange[700]),
                       ),
                     ),
@@ -466,7 +466,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                     children: [
                       const Text('Collecting:'),
                       Text(
-                        '₹${collectionAmount.toStringAsFixed(2)}',
+                        'Rs.${collectionAmount.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -481,7 +481,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                     children: [
                       const Text('Remaining Due:'),
                       Text(
-                        '₹${(widget.member.dueAmount - collectionAmount).toStringAsFixed(2)}',
+                        'Rs.${(widget.member.dueAmount - collectionAmount).toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

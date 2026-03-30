@@ -186,7 +186,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                           Expanded(
                             child: _buildMetricCard(
                               'Revenue',
-                              '₹${(data['profitLoss']?['revenue'] ?? 0).toStringAsFixed(0)}',
+                              'Rs.${(data['profitLoss']?['revenue'] ?? 0).toStringAsFixed(0)}',
                               Icons.trending_up,
                               sageGreen,
                             ),
@@ -195,7 +195,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                           Expanded(
                             child: _buildMetricCard(
                               'Expenses',
-                              '₹${(data['profitLoss']?['expenses'] ?? 0).toStringAsFixed(0)}',
+                              'Rs.${(data['profitLoss']?['expenses'] ?? 0).toStringAsFixed(0)}',
                               Icons.trending_down,
                               softCoral,
                             ),
@@ -348,7 +348,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
           ),
           const SizedBox(height: 16),
           Text(
-            '₹${profit.toStringAsFixed(2)}',
+            'Rs.${profit.toStringAsFixed(2)}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 36,
@@ -472,7 +472,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                         reservedSize: 50,
                         getTitlesWidget: (value, meta) {
                           return Text(
-                            '₹${(value / 1000).toStringAsFixed(0)}k',
+                            'Rs.${(value / 1000).toStringAsFixed(0)}k',
                             style: const TextStyle(fontSize: 10),
                           );
                         },
@@ -792,7 +792,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                                     ),
                                   ),
                                   Text(
-                                    '₹${entry.value.toStringAsFixed(0)} (${percentage.toStringAsFixed(1)}%)',
+                                    'Rs.${entry.value.toStringAsFixed(0)} (${percentage.toStringAsFixed(1)}%)',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey[600],
@@ -847,7 +847,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                     touchTooltipData: BarTouchTooltipData(
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         return BarTooltipItem(
-                          '₹${rod.toY.toStringAsFixed(0)}',
+                          'Rs.${rod.toY.toStringAsFixed(0)}',
                           const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -879,7 +879,7 @@ class _AnalyticsDashboardState extends State<AnalyticsDashboard> {
                         reservedSize: 50,
                         getTitlesWidget: (value, meta) {
                           return Text(
-                            '₹${(value / 1000).toStringAsFixed(0)}k',
+                            'Rs.${(value / 1000).toStringAsFixed(0)}k',
                             style: const TextStyle(fontSize: 10),
                           );
                         },

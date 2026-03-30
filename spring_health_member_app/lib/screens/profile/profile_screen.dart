@@ -142,13 +142,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final uid = FirebaseAuth.instance.currentUser!.uid;
       setState(() => _isUploadingPhoto = true);
 
+      // Correct storage path for member photos
       final ref = FirebaseStorage.instance
-          .ref()
-          .child('member_photos')
-          .child('$uid.jpg');
+      .ref()
+      .child('member_photos')
+      .child(_member.id)        // Firestore doc ID e.g. 69533bc5-04d3
+      .child('profile.jpg');
 
-      await ref.putFile(imageFile, SettableMetadata(contentType: 'image/jpeg'));
+      await ref.putFile(imageFile);
       final downloadUrl = await ref.getDownloadURL();
+
+      // Then write URL back to member doc
+      await FirebaseFirestore.instance
+      .collection('members')
+      .doc(_member.id)
+      .update({'photoUrl': downloadUrl});
 
       await FirebaseFirestore.instance.collection('members').doc(uid).update({
         'photoUrl': downloadUrl,

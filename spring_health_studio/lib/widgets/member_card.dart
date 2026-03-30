@@ -199,7 +199,7 @@ class MemberCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Due: ₹${member.dueAmount.toStringAsFixed(0)}',
+                                'Due: Rs.${member.dueAmount.toStringAsFixed(0)}',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.error,

@@ -118,15 +118,15 @@ class WhatsAppService {
     Thank you for your payment! Money
 
     *Payment Details:*
-     Amount Paid: ₹${payment.amount.toStringAsFixed(2)}
+     Amount Paid: Rs.${payment.amount.toStringAsFixed(2)}
      Date: ${app_date_utils.DateUtils.formatDate(payment.paymentDate)}
      Mode: ${payment.paymentMode}
-    ${payment.cashAmount > 0 ? ' Cash: ₹${payment.cashAmount.toStringAsFixed(0)}\n' : ''}${payment.upiAmount > 0 ? 'Phone UPI: ₹${payment.upiAmount.toStringAsFixed(0)}\n' : ''}
+    ${payment.cashAmount > 0 ? ' Cash: Rs.${payment.cashAmount.toStringAsFixed(0)}\n' : ''}${payment.upiAmount > 0 ? 'Phone UPI: Rs.${payment.upiAmount.toStringAsFixed(0)}\n' : ''}
 
     *Member Details:*
      ID: ${member.id}
      Valid Till: ${app_date_utils.DateUtils.formatDate(member.expiryDate)}
-    ${member.dueAmount > 0 ? ' Pending Due: ₹${member.dueAmount.toStringAsFixed(0)}\n' : 'Check No Pending Dues\n'}
+    ${member.dueAmount > 0 ? ' Pending Due: Rs.${member.dueAmount.toStringAsFixed(0)}\n' : 'Check No Pending Dues\n'}
 
     Thank you for choosing Spring Health Studio!
 
@@ -181,7 +181,7 @@ class WhatsAppService {
     You have a pending payment at *Spring Health Studio*.
 
     *Payment Details:*
-     Due Amount: ₹${member.dueAmount.toStringAsFixed(0)}
+     Due Amount: Rs.${member.dueAmount.toStringAsFixed(0)}
      Membership: ${app_date_utils.DateUtils.formatDate(member.joiningDate)} to ${app_date_utils.DateUtils.formatDate(member.expiryDate)}
 
     *Please clear your dues at the earliest.*
@@ -530,15 +530,15 @@ class WhatsAppService {
       Thank you for your payment!
 
       Money *Payment Details:*
-      • Amount Paid: ₹${payment.amount.toStringAsFixed(0)}
+      • Amount Paid: Rs.${payment.amount.toStringAsFixed(0)}
       • Date: ${app_date_utils.DateUtils.formatDate(payment.paymentDate)}
       • Mode: ${payment.paymentMode}
-      ${payment.paymentMode == 'Mixed' ? '  • Cash: ₹${payment.cashAmount.toStringAsFixed(0)}\n  • UPI: ₹${payment.upiAmount.toStringAsFixed(0)}' : ''}
+      ${payment.paymentMode == 'Mixed' ? '  • Cash: Rs.${payment.cashAmount.toStringAsFixed(0)}\n  • UPI: Rs.${payment.upiAmount.toStringAsFixed(0)}' : ''}
 
        *Member Details:*
       • ID: ${member.id}
       • Valid Till: ${app_date_utils.DateUtils.formatDate(member.expiryDate)}
-      ${member.dueAmount > 0 ? '• Remaining Due: ₹${member.dueAmount.toStringAsFixed(0)}' : '• Check No Pending Dues'}
+      ${member.dueAmount > 0 ? '• Remaining Due: Rs.${member.dueAmount.toStringAsFixed(0)}' : '• Check No Pending Dues'}
 
       Attachment *Invoice Attached*
 

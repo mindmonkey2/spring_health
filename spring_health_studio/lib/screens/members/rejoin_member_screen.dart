@@ -185,7 +185,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
     if (totalPaid > _finalAmount) {
       final confirm = await _showConfirmDialog(
         'Overpayment Detected',
-        'Payment (₹${totalPaid.toStringAsFixed(0)}) exceeds final amount (₹${_finalAmount.toStringAsFixed(0)}). Continue?',
+        'Payment (Rs.${totalPaid.toStringAsFixed(0)}) exceeds final amount (Rs.${_finalAmount.toStringAsFixed(0)}). Continue?',
       );
       if (confirm != true) return;
     }
@@ -368,9 +368,9 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
               _buildSummaryRow('Start Date', app_date_utils.DateUtils.formatDate(_joiningDate)),
               _buildSummaryRow('New Expiry', app_date_utils.DateUtils.formatDate(_expiryDate)),
               const Divider(height: 16),
-              _buildSummaryRow('Amount Paid', '₹${(cash + upi).toStringAsFixed(0)}'),
+              _buildSummaryRow('Amount Paid', 'Rs.${(cash + upi).toStringAsFixed(0)}'),
               if (_dueAmount > 0)
-                _buildSummaryRow('Due Amount', '₹${_dueAmount.toStringAsFixed(0)}', valueColor: Colors.red),
+                _buildSummaryRow('Due Amount', 'Rs.${_dueAmount.toStringAsFixed(0)}', valueColor: Colors.red),
             ]),
             const SizedBox(height: 16),
             _buildDocumentPrompt(),
@@ -899,7 +899,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                 ),
               ),
               Text(
-                '₹${_finalAmount.toStringAsFixed(2)}',
+                'Rs.${_finalAmount.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -971,7 +971,7 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
                         ],
                       ),
                       Text(
-                        '₹${_dueAmount.toStringAsFixed(2)}',
+                        'Rs.${_dueAmount.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

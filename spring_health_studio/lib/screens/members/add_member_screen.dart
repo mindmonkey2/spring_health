@@ -294,11 +294,11 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                     _buildSummaryRow('Plan:', '${member.category} - ${member.plan}'),
                     _buildSummaryRow('Expiry:', app_date_utils.DateUtils.formatDate(member.expiryDate)),
                     const Divider(height: 16),
-                    _buildSummaryRow('Amount Paid:', '₹${(cash + upi).toStringAsFixed(0)}'),
+                    _buildSummaryRow('Amount Paid:', 'Rs.${(cash + upi).toStringAsFixed(0)}'),
                     if (member.dueAmount > 0)
                       _buildSummaryRow(
                         'Due Amount:',
-                        '₹${member.dueAmount.toStringAsFixed(0)}',
+                        'Rs.${member.dueAmount.toStringAsFixed(0)}',
                         valueColor: AppColors.error,
                       ),
                   ],
@@ -650,7 +650,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         ),
                       ),
                       Text(
-                        '₹${_finalAmount.toStringAsFixed(2)}',
+                        'Rs.${_finalAmount.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -742,7 +742,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                                 ],
                               ),
                               Text(
-                                '₹${_dueAmount.toStringAsFixed(2)}',
+                                'Rs.${_dueAmount.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,

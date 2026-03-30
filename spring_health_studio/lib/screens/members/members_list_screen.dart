@@ -166,7 +166,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Exported ${_lastFilteredMembers.length} members ✓'),
+                'Exported ${_lastFilteredMembers.length} members '),
             backgroundColor: AppColors.success,
           ),
         );

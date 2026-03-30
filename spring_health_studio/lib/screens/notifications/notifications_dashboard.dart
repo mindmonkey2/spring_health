@@ -329,7 +329,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
       onSendAll: members.isNotEmpty ? () => _sendBulkDues(members) : null,
       memberBuilder: (member) => _buildMemberTile(
         member: member,
-        subtitle: 'Due: ₹${member.dueAmount.toStringAsFixed(0)}',
+        subtitle: 'Due: Rs.${member.dueAmount.toStringAsFixed(0)}',
         color: accentOrange,
         icon: Icons.account_balance_wallet_rounded,
         onSend: () => _sendSingleDue(member),

@@ -305,7 +305,7 @@ class ReminderService {
       You have a pending payment at *Spring Health Studio*.
 
       *Payment Details:*
-       Due Amount: ₹[Amount]
+       Due Amount: Rs.[Amount]
        Membership: [Start Date] to [End Date]
 
       *Please clear your dues at the earliest.*

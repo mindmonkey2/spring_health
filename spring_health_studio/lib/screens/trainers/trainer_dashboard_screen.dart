@@ -12,6 +12,7 @@ import '../auth/login_screen.dart';
 import '../members/member_ai_plan_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../members/members_list_screen.dart';
+import '../trainer/trainer_member_detail_screen.dart';
 
 class TrainerDashboardScreen extends StatefulWidget {
   final UserModel user;
@@ -1095,7 +1096,11 @@ class _HomeTabState extends State<_HomeTab> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => const MembersListScreen(),
+                                      builder: (_) => TrainerMemberDetailScreen(
+                                        member: m,
+                                        trainerId: widget.trainer.id,
+                                        trainerName: widget.trainer.name,
+                                      ),
                                     ),
                                   );
                                 },

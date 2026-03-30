@@ -334,5 +334,40 @@ service cloud.firestore {
       }
     }
 
+    match /gymEquipment/{branch} {
+      allow read:  if isSignedIn();
+      allow write: if isOwner();
+    }
+
+    match /memberGoals/{memberAuthUid} {
+      allow read:  if isOwner() || isTrainer() ||
+        (isSignedIn() && request.auth.uid == memberAuthUid);
+      allow write: if isOwner() || isTrainer() ||
+        (isSignedIn() && request.auth.uid == memberAuthUid);
+    }
+
+    match /trainingSessions/{sessionId} {
+      allow create: if isTrainer();
+      allow read, write: if isOwner();
+      allow read, write: if isTrainer() &&
+        'trainerId' in resource.data &&
+        resource.data.trainerId == request.auth.uid;
+      allow read: if isSignedIn() &&
+        'memberAuthUid' in resource.data &&
+        resource.data.memberAuthUid == request.auth.uid;
+      allow update: if isSignedIn() &&
+        'memberAuthUid' in resource.data &&
+        resource.data.memberAuthUid == request.auth.uid &&
+        request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasOnly(['exercises', 'activeExerciseIndex', 'sessionRpe']);
+    }
+
+    match /memberIntelligence/{memberAuthUid} {
+      allow read:  if isOwner() || isTrainer() ||
+        (isSignedIn() && request.auth.uid == memberAuthUid);
+      allow write: if isOwner() || isTrainer();
+    }
+
   }
 }

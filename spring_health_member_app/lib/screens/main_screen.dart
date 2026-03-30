@@ -56,7 +56,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       Icons.fitness_center_outlined,
       'Train',
     ),
-    _NavItem(Icons.smart_toy_rounded, Icons.smart_toy_outlined, 'AI Coach'),
+    _NavItem(Icons.smart_toy_rounded, Icons.smart_toy_outlined, 'AjAX'),
     _NavItem(
       Icons.notifications_rounded,
       Icons.notifications_outlined,

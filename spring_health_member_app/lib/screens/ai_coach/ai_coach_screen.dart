@@ -180,7 +180,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         backgroundColor: AppColors.backgroundBlack,
         appBar: AppBar(
           backgroundColor: AppColors.backgroundBlack,
-          title: Text('AjAX — AI Coach', style: AppTextStyles.heading2),
+          title: Text('AjAX', style: AppTextStyles.heading2),
           bottom: const TabBar(
             indicatorColor: AppColors.neonLime,
             labelColor: AppColors.neonLime,

@@ -50,6 +50,7 @@ dependencies:
   csv: ^7.1.0
 
   flutter_animate: any
+  firebase_ai: ^2.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -9,6 +9,9 @@ import '../../models/trainer_model.dart';
 import '../../models/member_model.dart';
 import '../../models/trainer_feedback_model.dart';
 import '../auth/login_screen.dart';
+import '../members/member_ai_plan_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../members/members_list_screen.dart';
 
 class TrainerDashboardScreen extends StatefulWidget {
   final UserModel user;
@@ -44,7 +47,8 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
     // ✅ FIXED: use trainerId (TRN001), not authUid
     final trainer = await _firestoreService
         .getTrainerById(widget.user.trainerId!);
-    if (mounted) {
+    if (!context.mounted) return;
+                                      if (mounted) {
       setState(() {
         _trainerProfile = trainer;
         _loadingProfile = false;
@@ -77,7 +81,8 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
 
     if (confirmed == true) {
       await _authService.signOut();
-      if (mounted) {
+      if (!context.mounted) return;
+                                      if (mounted) {
         // ✅ FIXED: Navigate back to login after logout
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -144,16 +149,19 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
         builder: (context, index, _) {
           switch (index) {
             case 0:
-              return _MyClientsTab(
+              return _HomeTab(
                   trainer: _trainerProfile!, firestoreService: _firestoreService);
             case 1:
-              return _DietPlansTab(
+              return _MyClientsTab(
                   trainer: _trainerProfile!, firestoreService: _firestoreService);
             case 2:
+              return _DietPlansTab(
+                  trainer: _trainerProfile!, firestoreService: _firestoreService);
+            case 3:
               return _FeedbackTab(
                   trainer: _trainerProfile!, firestoreService: _firestoreService);
             default:
-              return _MyClientsTab(
+              return _HomeTab(
                   trainer: _trainerProfile!, firestoreService: _firestoreService);
           }
         },
@@ -172,6 +180,11 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
             currentIndex: index,
             onTap: (i) => _tabNotifier.value = i,
             items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.people_outline),
                 activeIcon: Icon(Icons.people),
@@ -812,4 +825,792 @@ class _FeedbackCard extends StatelessWidget {
       ),
     );
   }
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  TAB 0 — HOME
+// ═══════════════════════════════════════════════════════════
+
+class _HomeTab extends StatefulWidget {
+  final TrainerModel trainer;
+  final FirestoreService firestoreService;
+
+  const _HomeTab({
+    required this.trainer,
+    required this.firestoreService,
+  });
+
+  @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  final Map<String, bool> _expandedFeedback = {};
+  final Map<String, TextEditingController> _replyControllers = {};
+
+  @override
+  void dispose() {
+    for (var controller in _replyControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section A: Quick Stats Row
+          _buildQuickStats(context),
+
+          const SizedBox(height: 20),
+
+          // Section B: My Assigned Members Card
+          _buildMyMembersCard(context),
+
+          const SizedBox(height: 20),
+
+          // Section C: Today's Sessions Card
+          _buildSessionsTodayCard(context),
+
+          const SizedBox(height: 20),
+
+          // Section D: Pending Trainer Feedback Card
+          _buildPendingFeedbackCard(context),
+
+          const SizedBox(height: 20),
+
+          // Section E: Member AI Plan Quick Access
+          _buildMemberAiPlanAccess(context),
+
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickStats(BuildContext context) {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    return Row(
+      children: [
+        // Tile 1: Assigned Members
+        Expanded(
+          child: StreamBuilder<List<MemberModel>>(
+            stream: widget.firestoreService.getMembersByTrainer(widget.trainer.id),
+            builder: (context, snapshot) {
+              final count = snapshot.data?.length ?? 0;
+              return _buildStatTile('Assigned\nMembers', count.toString());
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+
+        // Tile 2: Feedback Pending
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('trainerFeedback')
+                .where('trainerId', isEqualTo: widget.trainer.id)
+                .where('trainerReply', isNull: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              final count = snapshot.data?.docs.length ?? 0;
+              return _buildStatTile('Feedback\nPending', count.toString());
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+
+        // Tile 3: Sessions Today
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('attendance')
+                .where('branch', isEqualTo: widget.trainer.branch)
+                .where('checkInTime',
+                    isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
+                .where('checkInTime',
+                    isLessThanOrEqualTo: Timestamp.fromDate(todayEnd))
+                .snapshots(),
+            builder: (context, snapshot) {
+              final count = snapshot.data?.docs.length ?? 0;
+              return _buildStatTile('Sessions\nToday', count.toString());
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatTile(String label, String value) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.primary, width: 1),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMyMembersCard(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'My Members',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                StreamBuilder<List<MemberModel>>(
+                  stream: widget.firestoreService.getMembersByTrainer(widget.trainer.id),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data?.length ?? 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            StreamBuilder<List<MemberModel>>(
+              stream: widget.firestoreService.getMembersByTrainer(widget.trainer.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                }
+
+                final members = snapshot.data ?? [];
+                if (members.isEmpty) {
+                  return Text(
+                    'Showing all members. Assign trainer field not set.',
+                    style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
+                  );
+                }
+
+                final displayMembers = members.take(5).toList();
+                final remainingCount = members.length - 5;
+
+                return SizedBox(
+                  height: 80,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        ...displayMembers.map((m) => Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const MembersListScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Column(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                                      child: Text(
+                                        m.name.isNotEmpty ? m.name[0].toUpperCase() : '?',
+                                        style: GoogleFonts.poppins(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      m.name.split(' ').first,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )),
+                        if (remainingCount > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const MembersListScreen(),
+                                  ),
+                                );
+                              },
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 28,
+                                    backgroundColor: Colors.grey.withValues(alpha: 0.1),
+                                    child: Text(
+                                      '+$remainingCount',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.grey[700],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'more',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSessionsTodayCard(BuildContext context) {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Today's Sessions",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: AppColors.primary,
+                  ),
+                ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('attendance')
+                      .where('branch', isEqualTo: widget.trainer.branch)
+                      .where('checkInTime',
+                          isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
+                      .where('checkInTime',
+                          isLessThanOrEqualTo: Timestamp.fromDate(todayEnd))
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data?.docs.length ?? 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: GoogleFonts.inter(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('attendance')
+                  .where('branch', isEqualTo: widget.trainer.branch)
+                  .where('checkInTime',
+                      isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
+                  .where('checkInTime',
+                      isLessThanOrEqualTo: Timestamp.fromDate(todayEnd))
+                  .orderBy('checkInTime', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Text(
+                    'Failed to load sessions: ${snapshot.error}',
+                    style: GoogleFonts.inter(color: AppColors.error, fontSize: 13),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'No sessions recorded today.',
+                        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = docs[index].data() as Map<String, dynamic>;
+                    final memberName = doc['memberName'] as String? ?? 'Unknown';
+                    final checkInTime = (doc['checkInTime'] as Timestamp).toDate();
+                    final formattedTime = DateFormat('hh:mm a').format(checkInTime);
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        child: Text(
+                          memberName.isNotEmpty ? memberName[0].toUpperCase() : '?',
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        memberName,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        formattedTime,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildPendingFeedbackCard(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Pending Feedback',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: AppColors.primary,
+                  ),
+                ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('trainerFeedback')
+                      .where('trainerId', isEqualTo: widget.trainer.id)
+                      .where('trainerReply', isNull: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data?.docs.length ?? 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: GoogleFonts.inter(
+                          color: AppColors.warning,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('trainerFeedback')
+                  .where('trainerId', isEqualTo: widget.trainer.id)
+                  .where('trainerReply', isNull: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'All caught up!',
+                        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: docs.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
+                    final docId = doc.id;
+                    final memberName = data['memberName'] as String? ?? 'Unknown';
+                    final comment = data['comment'] as String? ?? 'No comment provided.';
+
+                    final isExpanded = _expandedFeedback[docId] ?? false;
+
+                    if (!_replyControllers.containsKey(docId)) {
+                      _replyControllers[docId] = TextEditingController();
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            memberName,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: Text(
+                            comment.length > 60 ? '${comment.substring(0, 60)}...' : comment,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(
+                              isExpanded ? Icons.close : Icons.reply,
+                              color: AppColors.primary,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _expandedFeedback[docId] = !isExpanded;
+                              });
+                            },
+                          ),
+                        ),
+                        if (isExpanded)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _replyControllers[docId],
+                                    decoration: InputDecoration(
+                                      hintText: 'Write your reply...',
+                                      hintStyle: GoogleFonts.inter(fontSize: 12),
+                                      isDense: true,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                      ),
+                                    ),
+                                    style: GoogleFonts.inter(fontSize: 13),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final text = _replyControllers[docId]?.text.trim() ?? '';
+                                    if (text.isEmpty) return;
+
+                                    try {
+                                      await FirebaseFirestore.instance
+                                          .collection('trainerFeedback')
+                                          .doc(docId)
+                                          .update({
+                                        'trainerReply': text,
+                                        'repliedAt': Timestamp.now(),
+                                      });
+
+                                      if (!context.mounted) return;
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Reply sent'),
+                                            backgroundColor: AppColors.success,
+                                          ),
+                                        );
+                                        setState(() {
+                                          _expandedFeedback[docId] = false;
+                                          _replyControllers[docId]?.clear();
+                                        });
+                                      }
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Failed to send reply'),
+                                            backgroundColor: AppColors.error,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text('Send', style: GoogleFonts.inter(fontSize: 12, color: Colors.white)),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildMemberAiPlanAccess(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'AI Plans',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            StreamBuilder<List<MemberModel>>(
+              stream: widget.firestoreService.getMembersByTrainer(widget.trainer.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                }
+
+                final members = snapshot.data ?? [];
+                if (members.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'No assigned members yet.',
+                        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+
+                // Take last 3 assigned members
+                final displayMembers = members.length > 3
+                    ? members.sublist(members.length - 3)
+                    : members;
+
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: displayMembers.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final member = displayMembers[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        child: Text(
+                          member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
+                          style: GoogleFonts.poppins(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        member.name,
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.article_outlined, color: AppColors.primary),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MemberAiPlanScreen(
+                                memberName: member.name,
+                                memberDocId: member.id,
+                                currentUserRole: 'Trainer',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MemberAiPlanScreen(
+                              memberName: member.name,
+                              memberDocId: member.id,
+                              currentUserRole: 'Trainer',
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

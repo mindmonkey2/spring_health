@@ -19,6 +19,7 @@ import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../health/health_profile_screen.dart';
 import 'edit_profile_screen.dart';
+import 'member_goal_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final MemberModel member;
@@ -142,13 +143,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final uid = FirebaseAuth.instance.currentUser!.uid;
       setState(() => _isUploadingPhoto = true);
 
+      // Correct storage path for member photos
       final ref = FirebaseStorage.instance
-          .ref()
-          .child('member_photos')
-          .child('$uid.jpg');
+      .ref()
+      .child('member_photos')
+      .child(_member.id)        // Firestore doc ID e.g. 69533bc5-04d3
+      .child('profile.jpg');
 
-      await ref.putFile(imageFile, SettableMetadata(contentType: 'image/jpeg'));
+      await ref.putFile(imageFile);
       final downloadUrl = await ref.getDownloadURL();
+
+      // Then write URL back to member doc
+      await FirebaseFirestore.instance
+      .collection('members')
+      .doc(_member.id)
+      .update({'photoUrl': downloadUrl});
 
       await FirebaseFirestore.instance.collection('members').doc(uid).update({
         'photoUrl': downloadUrl,
@@ -572,6 +581,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AppColors.neonLime,
           subtitle: 'Update email & emergency contact',
           onTap: () => _push(EditProfileScreen(member: _member)),
+        ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          'My Goal & Target',
+          Icons.flag,
+          AppColors.neonLime,
+          subtitle: 'Set and track your main fitness goal',
+          onTap: () => _push(MemberGoalScreen(
+            memberAuthUid: FirebaseAuthService.instance.currentUser!.uid,
+          )),
         ),
         const SizedBox(height: 12),
         _buildActionTile(

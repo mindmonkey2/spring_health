@@ -102,6 +102,23 @@ Resolved in Thread 12:
   ✓ member_ai_plan_screen.dart — Trainer Override screen (T11 carry-forward)
   ✓ Weekly Wars UI — war_screen.dart 3-tab implementation complete
 
+Resolved in Thread 13_1:
+  - AjAX rename: bottom nav + AiCoachScreen AppBar. flutter analyze 0.
+  - No-emoji audit: zero grep hits both apps. Rs. ASCII enforced.
+    flutter analyze 0 both apps.
+  - 1v1 Duels UI: buildDuelsTab complete. ValueNotifier countdown.
+    flutter analyze 0.
+  - Trainer Dashboard: all 5 Home tab sections delivered. Branch-scoped
+    sessions. Inline feedback reply. MemberAiPlanScreen reused.
+    flutter analyze 0 both apps.
+
+L1-Pending (manual device tests — do NOT code):
+  - Profile pic upload — Firebase Storage active, verify on device
+  - Body metrics — log new entry, confirm Firestore write
+  - Attendance history — confirm list loads with real data
+  - Payment history — confirm list loads with real data
+  - Personal bests — log one, confirm Firestore write + display
+
 STILL PENDING:
   - Class Booking / Scheduling
   - Razorpay (do not start without payment contract)

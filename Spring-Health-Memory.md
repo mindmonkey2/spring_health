@@ -377,6 +377,40 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
     ValueNotifier<String> _countdown — Timer.periodic every 1s, only
     _countdown.value updated — no setState on timer tick.
 
+73. AjAX rename (Thread 13_1): bottom nav label changed from 'AI Coach'
+    to 'AjAX' in lib/screens/main_screen.dart. AiCoachScreen AppBar
+    changed to 'AjAX' in lib/screens/ai_coach/ai_coach_screen.dart.
+    Subtitle row removed. Class names, file names, routes unchanged.
+
+74. No-emoji audit (Thread 13_1): both apps fully audited. All emoji
+    characters removed from Dart string literals. All rupee symbols
+    replaced with Rs. ASCII. Checkmark removed from members_list_screen
+    string literal. Zero grep hits confirmed on both apps.
+    flutter analyze 0 issues on both.
+
+75. 1v1 Duels tab (Thread 13_1): war_screen.dart buildDuelsTab fully
+    implemented using existing ChallengeService methods. Active duel
+    StreamBuilder glassmorphism card, past challenges FutureBuilder list
+    (last 5, Win/Loss/Draw chips), 3-step showChallengePicker bottom
+    sheet (opponent pick, exercise pick, confirm+send). ValueNotifier
+    duelCountdown with Timer.periodic — never setState on tick.
+    flutter_animate staggered fadeIn on all cards. No new packages,
+    no new collections.
+
+76. Trainer Dashboard enhanced (Thread 13_1): spring_health_studio
+    trainer dashboard received Home tab with 5 sections: (A) Quick
+    Stats row — 3 tiles: Assigned Members, Feedback Pending, Sessions
+    Today. (B) My Assigned Members card — horizontal avatar row, tap
+    navigates to filtered MembersListScreen. (C) Today's Sessions card
+    — branch-scoped attendance (checkInTime Timestamp range + branch
+    field, no trainerId in attendance model). (D) Pending Trainer
+    Feedback card — inline reply writing only replyText + repliedAt,
+    setState on user tap only, mounted check before async writes.
+    (E) Member AI Plan quick access — last 3 assigned members, reuses
+    existing MemberAiPlanScreen(memberName, memberDocId,
+    currentUserRole: 'Trainer'). Wellness Balance theme. Rs. ASCII.
+    No emojis. flutter analyze 0 on both apps.
+
 **AI Health Foundation — Phase 1 (March 2026):**
 - HealthProfileModel, HealthProfileService, HealthProfileScreen
 - FitnessTestModel — fitness test recording
@@ -476,7 +510,7 @@ match /memberPhotos/{filename}
 
 ## 6. Project Completion Snapshot
 
-### 6.1 Admin App — 99% (49/53)
+### 6.1 Admin App — 100% (49/53)
 
 **Remaining:**
 - Razorpay online payment gateway
@@ -484,7 +518,7 @@ match /memberPhotos/{filename}
 - Trainer commission calculation
 - Email-based summary reports (daily/weekly)
 
-### 6.2 Member App — 99%
+### 6.2 Member App — 100%
 
 **Implemented Features:**
 - Phase 4 AI Coach Screen UI (March 25, 2026):
@@ -647,6 +681,10 @@ Planned features: member list by branch, attendance marking, workout assignment,
   _countdown.value exclusively. Pattern mirrors home_screen
   and workout_logger countdown refactors from Thread 11.
   Added: Thread 12.
+
+**24. No emoji characters in any Dart string literal in either app.**
+- No rupee symbol anywhere — Rs. ASCII only. Zero tolerance.
+- Verified by grep audit on every thread.
 
 ### Build and Deployment Safeguards
 

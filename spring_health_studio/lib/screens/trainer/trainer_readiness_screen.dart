@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/member_model.dart';
 import '../../theme/app_colors.dart';
+import '../../services/trainer_ajax_service.dart';
 import 'trainer_warmup_screen.dart';
 
 class TrainerReadinessScreen extends StatefulWidget {
@@ -113,9 +114,27 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
         'warmupStartTime': Timestamp.now(),
       });
 
-      // Stub AjAX call
-      await Future.delayed(const Duration(seconds: 2));
-      await docRef.update({'status': 'warmup'});
+      // Call actual AjAX service
+      await TrainerAjaxService.generateSessionPlans(
+        sessionId: docRef.id,
+        member: widget.member,
+        memberAge: widget.sessionData['memberAge'] ?? 0,
+        isFirstSession: false,
+        trainerContext: {
+          'soreness': _selectedSoreness.toList(),
+          'energyLevel': _energyLevel,
+          'hasInjury': _hasInjury,
+          'injuryNote': _hasInjury ? _injuryController.text : null,
+          'readinessScore': widget.sessionData['readinessScore'],
+        },
+        bodyMetricsContext: widget.sessionData['bodyMetricsData'] ?? {},
+        goalContext: widget.sessionData['goalContext'],
+        flexibilityContext: widget.flexibilityData,
+        wearableData: widget.sessionData['wearableData'],
+        lastSession: widget.sessionData['lastSessionData'],
+        memberIntelligence: widget.sessionData['memberIntelligence'],
+        availableEquipment: _selectedEquipment.toList(),
+      );
 
       if (!mounted) return;
 

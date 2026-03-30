@@ -1,0 +1,52 @@
+Alright, so here's the layout:
+In war_screen.dart, we will replace `_buildDuelsTab()` method entirely.
+
+SECTION 1 — ACTIVE CHALLENGE CARD
+We use `ChallengeService.instance.getActiveChallengeStream()` ... Wait, ChallengeService isn't a singleton yet! Let me check `war_screen.dart` to see how it's used.
+Ah, `war_screen.dart` has `final _challengeService = ChallengeService();`. I should use `_challengeService.getActiveChallengeStream()`.
+
+State A - No active challenge:
+Return the glassmorphism card as instructed.
+Icon: neonOrange Icons.flash_on size 36
+ElevatedButton "Start a Duel" -> calls `_showChallengePicker(context)`.
+
+State B - Active challenge:
+Use `challenge` from snapshot.data.
+Wait, "challenge.teamA" vs "challenge.teamB". The prompt says:
+"Row: challenger name Text vs challenged name Text. Show 'You' wherever the current member's memberId matches. Use exact field names from ChallengeModel."
+ChallengeModel has `teamA` and `teamB`, which are `ChallengeTeam` objects.
+Each team has `memberIds` array, and `name`. We will check if `widget.memberId` is in `challenge.teamA.memberIds` or `teamB.memberIds`. Actually, the prompt says "challenger name Text vs challenged name Text". But `ChallengeModel` only has `teamA` and `teamB`.
+Wait, ChallengeTeam has `name`. So we use `challenge.teamA.name` and `challenge.teamB.name`. But we need to replace it with 'You' if `widget.memberId` is in `challenge.teamA.memberIds`.
+Text: exercise/title field from ChallengeModel -> `challenge.title`.
+Two LinearProgressBar rows... we don't have LinearProgressBar in standard flutter. Wait, the prompt says "Two LinearProgressBar rows". Oh, standard Flutter has `LinearProgressIndicator`! I will use `LinearProgressIndicator`.
+Wait, the prompt says "Two LinearProgressBar rows". I'll assume they meant `LinearProgressIndicator` or a custom row with a bar. I will just build a custom bar or use `LinearProgressIndicator` if that works. Let's just use `LinearProgressIndicator`.
+Score fields: `teamA.totalScore`, `teamB.totalScore`.
+
+Countdown:
+ValueNotifier<String> duelCountdown = ValueNotifier('--'); in `_WarScreenState`.
+We already have `final _countdown = ValueNotifier<String>('');` in `_WarScreenState`! Wait, it's used for the main war timer. The prompt specifically says:
+"Use a final ValueNotifier<String> duelCountdown = ValueNotifier('--');
+Declare it as a class-level field in the _WarScreenState (or equivalent State class).
+Initialize a Timer.periodic(Duration(minutes: 1), ...) in initState that calls duelCountdown.value = _formatCountdown(endDate); — NEVER call setState. Cancel the timer in dispose()."
+
+I need to add `final ValueNotifier<String> duelCountdown = ValueNotifier('--');`
+And `Timer? _duelTimer;`
+And add it to `initState` and `dispose`.
+And helper `_formatCountdown(DateTime end)`.
+
+Status chip: uses `challenge.status.name`.
+
+SECTION 2 — CHALLENGE HISTORY LIST
+Wait, ChallengeService has NO method for past challenges.
+So we must show:
+"If any service method you need does not exist, show a Coming Soon card for that specific section ONLY — do NOT invent a fake Firestore call."
+So I will just show a "Coming Soon" card for the History list.
+Wait, prompt: "If NO such method exists: use this hardcoded list of 5 exercises ... Do NOT invent a new Firestore call."
+For History List:
+"Use a FutureBuilder. Use whichever ChallengeService method returns past/completed challenges for the current member... If any service method you need does not exist, show a Coming Soon card for that specific section ONLY"
+Since `ChallengeService` has NO getPastChallenges method, I will return the "Coming Soon" Card.
+
+SECTION 3 — _showChallengePicker
+Bottom Sheet.
+Step 0: Pick Opponent. Service to get members: MemberService doesn't have a `getAllMembers` method. `FirestoreService` doesn't either. I will check `MemberService` or `FirestoreService` again to be absolutely sure.
+Let me check `MemberService` and `FirestoreService` for `getAllMembers` or similar.

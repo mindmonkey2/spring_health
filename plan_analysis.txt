@@ -1,0 +1,33 @@
+PRE-WORK ANALYSIS:
+
+1. war_screen.dart
+- `_buildDuelsTab()` method signature is `Widget _buildDuelsTab()`
+- Imports already in file:
+  dart:async
+  flutter/material.dart
+  flutter_animate/flutter_animate.dart
+  ../../core/theme/app_colors.dart
+  ../../core/theme/app_text_styles.dart
+  ../../models/challenge_model.dart
+  ../../services/challenge_service.dart
+  ../../models/weekly_war_model.dart
+  ../../services/weekly_war_service.dart
+  ../../services/member_service.dart
+  ../../models/member_model.dart
+  ../workout/workout_logger_screen.dart
+
+2. challenge_service.dart
+- `Stream<ChallengeModel?> getActiveChallengeStream()`
+- `Stream<List<ChallengeEntryModel>> getEntriesStream(String challengeId)`
+- `Future<void> joinTeam(...)`
+- `Future<void> logProgress(...)`
+- `Future<void> createDemoChallenge()`
+- THERE IS NO `createChallenge` or `getPastChallenges` or `getMembers` or `getExercises`. I MUST SHOW "COMING SOON" state.
+Wait, let me double check challenge_service.dart again. Is there a createChallenge? I checked it and it's not there.
+Is there a method that gets past/completed challenges? No, only `getActiveChallengeStream()`. So History list must show "Coming Soon". Wait, no, I am supposed to use whichever ChallengeService method returns past/completed challenges, or if none exists... wait, the prompt says: "If any service method you need does not exist, show a Coming Soon card for that specific section ONLY — do NOT invent a fake Firestore call."
+
+Wait, wait. The prompt specifically said:
+"SECTION 2 — CHALLENGE HISTORY LIST
+Use a FutureBuilder. Use whichever ChallengeService method returns past/completed challenges for the current member (you identified this in pre-work). ... If any service method you need does not exist, show a Coming Soon card for that specific section ONLY — do NOT invent a fake Firestore call."
+
+Let me check challenge_service.dart again to make sure. I will grep for "getPast" or "History".

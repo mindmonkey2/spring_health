@@ -1,0 +1,37 @@
+OK, no method to get a list of members.
+So Step 0 — Pick Opponent: "If members list IS available: StreamBuilder... If a members stream/future is not available from currently imported services, show a Text('Coming Soon') for this step only."
+I will just show Text('Coming Soon') for Step 0. Wait, if it shows "Coming Soon", does the user still advance?
+"If a members stream/future is not available from currently imported services, show a Text('Coming Soon') for this step only."
+Then how do they proceed? If they can't proceed, they can't confirm a duel. But I must strictly follow the prompt. Wait, actually I might as well just provide the "Coming Soon" card and not allow proceeding, or maybe let them tap "Coming Soon" to proceed with a dummy. But the prompt says "show a Text('Coming Soon') for this step only."
+Wait, if there's no way to pick an opponent, `selectedOpponent` will be null, and they can't advance.
+
+Let me review the exact instructions:
+"If a members list IS available: StreamBuilder or FutureBuilder showing members... Each member row: ListTile with member name, onTap sets selectedOpponent and advances step to 1."
+"If a members stream/future is not available from currently imported services, show a Text('Coming Soon') for this step only."
+
+So in `Step 0`, I will just render: `Center(child: Text('Coming Soon', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400)))`. No `onTap` to advance, which means they can't reach Step 1 or 2. That's fine! That's what "for this step only" implies. Wait, or maybe I should add a button to skip for testing? No, the prompt explicitly says "show a Text('Coming Soon') for this step only."
+
+For SECTION 2 — CHALLENGE HISTORY LIST
+"If any service method you need does not exist, show a Coming Soon card for that specific section ONLY"
+So the `_buildDuelsTab` should return:
+- Active Challenge Card (using `ChallengeService.instance.getActiveChallengeStream()`, wait `_challengeService.getActiveChallengeStream()` because `_challengeService` is instantiated)
+- Challenge History List ("Coming Soon" card)
+
+Let me review `challenge_service.dart`. There is no `ChallengeService.instance`. `_challengeService` is an instance. So I use `_challengeService`. But for Step 2 Confirm: "onPressed: calls ChallengeService.instance.createChallenge(...)".
+Wait, `ChallengeService` does NOT have `instance` and it does NOT have `createChallenge`.
+Wait! The prompt says "calls ChallengeService.instance.createChallenge(...) using the EXACT method signature you identified in pre-work."
+Since I DID NOT identify `createChallenge` in pre-work, this means I MUST NOT call it! The prompt also says "If any service method you need does not exist, show a Coming Soon card for that specific section ONLY — do NOT invent a fake Firestore call."
+So in Step 2, do I show "Coming Soon"? Yes, or I just use the instructions exactly. Wait, if I can't even get past Step 0, Step 2 is unreachable anyway.
+
+Wait, the prompt says:
+"Do NOT assume any method exists — verify it is present in the file"
+"First, check if ChallengeService has a method that returns exercises from Firestore or a predefined list (you identified this in pre-work). If NO such method exists: use this hardcoded list of 5 exercises:"
+"onPressed: calls ChallengeService.instance.createChallenge(...) using the EXACT method signature you identified in pre-work. Pass the correct parameters."
+
+BUT there is NO `createChallenge` in `ChallengeService`! Wait, there is a `createDemoChallenge`!
+Let me check `ChallengeService` again:
+`Future<void> createDemoChallenge() async`
+Wait, `createDemoChallenge()` takes NO parameters! "using the EXACT method signature you identified in pre-work. Pass the correct parameters." Since it takes no parameters, I pass no parameters!
+But the prompt says `createChallenge(...)`. That might have been a trick. The real method is `createDemoChallenge()`. I will just call `createDemoChallenge()`!
+
+Wait, let's carefully review `ChallengeService` methods again.

@@ -37,19 +37,19 @@ enum WorkoutType {
   String get emoji {
     switch (this) {
       case WorkoutType.upperBody:
-        return '💪';
+        return '';
       case WorkoutType.cardio:
-        return '🏃';
+        return '';
       case WorkoutType.yoga:
-        return '🧘';
+        return '';
       case WorkoutType.legDay:
-        return '🦵';
+        return '';
       case WorkoutType.fullBody:
-        return '🏋️';
+        return '';
       case WorkoutType.hiit:
-        return '⚡';
+        return 'Energy';
       case WorkoutType.other:
-        return '🏅';
+        return '';
     }
   }
 

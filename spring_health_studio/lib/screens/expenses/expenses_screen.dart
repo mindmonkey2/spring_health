@@ -248,7 +248,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Widget _buildExpenseCard(ExpenseModel expense) {
-    final icon = ExpenseCategories.categoryIcons[expense.category] ?? '📦';
+    final icon = ExpenseCategories.categoryIcons[expense.category] ?? 'Box';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -340,7 +340,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         title: Row(
           children: [
             Text(
-              ExpenseCategories.categoryIcons[expense.category] ?? '📦',
+              ExpenseCategories.categoryIcons[expense.category] ?? 'Box',
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(width: 12),

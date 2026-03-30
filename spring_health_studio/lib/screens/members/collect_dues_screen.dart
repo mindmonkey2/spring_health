@@ -145,7 +145,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
           member: updatedMember,
           documentType: 'receipt',
           payment: payment,
-          title: 'Payment Received! 💰',
+          title: 'Payment Received! Money',
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +176,7 @@ class _CollectDuesScreenState extends State<CollectDuesScreen> {
                       'Remaining Due:',
                       newDueAmount > 0
                       ? '₹${newDueAmount.toStringAsFixed(0)}'
-                    : '✅ Fully Paid',
+                    : 'Check Fully Paid',
                     valueColor: newDueAmount > 0 ? Colors.orange : Colors.green,
                     ),
                   ],

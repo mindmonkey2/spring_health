@@ -81,7 +81,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              '⚠️ Your blood pressure reading is elevated. '
+              ' Your blood pressure reading is elevated. '
               'Please consult a doctor before intense exercise.',
               style: TextStyle(
                 color: Colors.white,
@@ -1080,7 +1080,7 @@ class _AddMetricsBottomSheetState extends State<AddMetricsBottomSheet> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Metrics saved! Keep it up 💪'),
+            content: Text('Metrics saved! Keep it up '),
             backgroundColor: AppColors.neonLime,
             behavior: SnackBarBehavior.floating,
           ),

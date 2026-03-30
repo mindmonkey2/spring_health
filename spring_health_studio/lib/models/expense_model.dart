@@ -73,17 +73,17 @@ class ExpenseCategories {
   ];
 
   static const Map<String, String> categoryIcons = {
-    'Rent': '🏢',
-    'Utilities': '⚡',
-    'Salaries': '💰',
-    'Equipment Purchase': '🛒',
-    'Equipment Maintenance': '🔧',
-    'Supplements': '💊',
-    'Marketing': '📢',
-    'Cleaning Supplies': '🧹',
-    'Office Supplies': '📎',
-    'Insurance': '🛡️',
-    'Taxes': '📊',
-    'Miscellaneous': '📦',
+    'Rent': 'Office',
+    'Utilities': 'Energy',
+    'Salaries': 'Money',
+    'Equipment Purchase': 'Cart',
+    'Equipment Maintenance': 'Wrench',
+    'Supplements': 'Pill',
+    'Marketing': 'Announcement',
+    'Cleaning Supplies': 'Broom',
+    'Office Supplies': 'Attachment',
+    'Insurance': '',
+    'Taxes': 'Chart',
+    'Miscellaneous': 'Box',
   };
 }

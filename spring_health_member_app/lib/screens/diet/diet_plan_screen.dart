@@ -126,7 +126,7 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
             ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text(
-              'Generate 🤖',
+              'Generate ',
               style: TextStyle(color: Colors.black),
             ),
           ),
@@ -656,7 +656,7 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
         onPressed: _canGenerate ? _onGenerateTapped : null,
         icon: Icon(_canGenerate ? Icons.auto_awesome : Icons.timer_outlined),
         label: Text(
-          _canGenerate ? 'Refresh Plan 🤖' : _cooldownLabel,
+          _canGenerate ? 'Refresh Plan ' : _cooldownLabel,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),

@@ -146,7 +146,7 @@ class _QrCheckInScreenState extends State<QrCheckInScreen>
         });
       }
     } catch (e) {
-      debugPrint('⚠️ QrCheckInScreen processEvent error: $e');
+      debugPrint(' QrCheckInScreen processEvent error: $e');
     }
   }
 
@@ -516,7 +516,7 @@ class _QrCheckInScreenState extends State<QrCheckInScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('⚡', style: TextStyle(fontSize: 16)),
+                      const Text('Energy', style: TextStyle(fontSize: 16)),
                       const SizedBox(width: 6),
                       Text(
                         '+$_earnedXp XP EARNED',
@@ -552,7 +552,7 @@ class _QrCheckInScreenState extends State<QrCheckInScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('🏅', style: TextStyle(fontSize: 14)),
+                      const Text('', style: TextStyle(fontSize: 14)),
                       const SizedBox(width: 6),
                       Text(
                         'BADGE: ${_newBadges[i].title.toUpperCase()}',
@@ -621,21 +621,21 @@ class _QrCheckInScreenState extends State<QrCheckInScreen>
       child: Row(
         children: [
           _statCell(
-            emoji: '🔥',
+            emoji: '',
             value: '$streak',
             label: 'Streak',
             color: AppColors.neonOrange,
           ),
           _verticalDivider(),
           _statCell(
-            emoji: '⚡',
+            emoji: 'Energy',
             value: '$totalXp',
             label: 'Total XP',
             color: AppColors.neonLime,
           ),
           _verticalDivider(),
           _statCell(
-            emoji: '🏆',
+            emoji: 'Trophy',
             value: level.title,
             label: 'Level',
             color: AppColors.neonTeal,

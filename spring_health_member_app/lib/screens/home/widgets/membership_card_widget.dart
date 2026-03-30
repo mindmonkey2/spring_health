@@ -43,7 +43,7 @@ class MembershipCardWidget extends StatelessWidget {
             children: [
               // Title with animated glow
               Text(
-                '🔥 SCAN FOR CHECK-IN',
+                ' SCAN FOR CHECK-IN',
                 style: AppTextStyles.heading3.copyWith(
                   color: AppColors.neonLime,
                   letterSpacing: 2,

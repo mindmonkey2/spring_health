@@ -153,7 +153,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     if (!mounted) return;
     AiLoadingOverlay.show(
       context,
-      message: '🤖 Your AI coach is building\nyour plan...',
+      message: ' Your AI coach is building\nyour plan...',
     );
 
     try {
@@ -482,7 +482,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
   Widget _buildMedicalHoldCard(String status) {
     if (status == 'medicalhold:bpcrisis') {
       return _buildAlertCard(
-        title: '⚠️ High Blood Pressure Alert',
+        title: ' High Blood Pressure Alert',
         message:
             'Your BP reading requires medical clearance before exercise. Please consult a doctor before your next session.',
         color: AppColors.error,
@@ -491,7 +491,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     }
     if (status == 'medicalhold:fever') {
       return _buildAlertCard(
-        title: '🤒 Rest Today',
+        title: ' Rest Today',
         message:
             'Your body temperature is elevated. Complete rest is recommended. Stay hydrated and recover fully.',
         color: const Color(0xFFFF9800),
@@ -500,7 +500,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     }
     if (status == 'medicalhold:cardiacevent') {
       return _buildAlertCard(
-        title: '⚠️ Cardiac Alert Detected',
+        title: ' Cardiac Alert Detected',
         message:
             'An irregular heart rate event was detected. Please consult a doctor before resuming exercise.',
         color: AppColors.error,
@@ -763,33 +763,33 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     switch (s.recoveryStatus) {
       case 'fully_recovered':
         chipColor = AppColors.neonLime;
-        chipText = '🟢 Fully Recovered';
+        chipText = 'Ready Fully Recovered';
         break;
       case 'recovered':
         chipColor = AppColors.neonLime;
-        chipText = '✅ Recovered';
+        chipText = 'Check Recovered';
         break;
       case 'moderate':
         chipColor = const Color(0xFFFF9800);
-        chipText = '🟡 Moderate';
+        chipText = ' Moderate';
         break;
       case 'fatigued':
         chipColor = AppColors.error;
-        chipText = '🔴 Fatigued';
+        chipText = ' Fatigued';
         break;
       case 'sick':
         chipColor = AppColors.error;
-        chipText = '🤒 Rest Today';
+        chipText = ' Rest Today';
         isPulsing = true;
         break;
       case 'cardiac_flag':
         chipColor = AppColors.error;
-        chipText = '⚠️ Cardiac Alert';
+        chipText = ' Cardiac Alert';
         isPulsing = true;
         break;
       default:
         chipColor = AppColors.gray600;
-        chipText = '📡 No Wearable Data';
+        chipText = 'No Data No Wearable Data';
     }
 
     Widget chip = Container(
@@ -828,32 +828,32 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
             crossAxisSpacing: 16,
             children: [
               _buildMetricTile(
-                '💤 Sleep',
+                ' Sleep',
                 '${s.totalSleepMinutes} min',
                 s.sleepQuality,
               ),
               _buildMetricTile(
-                '❤️ Resting HR',
+                ' Resting HR',
                 s.restingHeartRate != null
                     ? '${s.restingHeartRate!.toInt()} bpm'
                     : '—',
                 null,
               ),
               _buildMetricTile(
-                '📊 HRV',
+                'Chart HRV',
                 s.heartRateVariability != null
                     ? '${s.heartRateVariability!.toInt()} ms'
                     : '—',
                 null,
               ),
-              _buildMetricTile('👣 Steps', '${s.steps}', 'today'),
+              _buildMetricTile(' Steps', '${s.steps}', 'today'),
               _buildMetricTile(
-                '🔥 Active Cal',
+                ' Active Cal',
                 '${s.activeCaloriesBurned.toInt()} kcal',
                 null,
               ),
               _buildMetricTile(
-                '🌡️ Temp',
+                ' Temp',
                 s.bodyTemperature != null
                     ? '${s.bodyTemperature!.toStringAsFixed(1)}°C'
                     : '—',
@@ -1138,7 +1138,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('💡 '),
+                const Text('Tip '),
                 Expanded(
                   child: Text(
                     coachingCue,
@@ -1155,7 +1155,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('🎯 '),
+                const Text(' '),
                 Expanded(
                   child: Text(
                     targetMuscles,

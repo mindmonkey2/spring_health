@@ -54,25 +54,25 @@ class MembershipAlertService {
 
       if (isExpired && alerted['expired'] != true) {
         alertKey = 'expired';
-        title = '⚠️ Membership Expired';
+        title = ' Membership Expired';
         body =
             'Your ${member.plan} membership has expired. '
             'Visit reception to renew and regain full access.';
       } else if (!isExpired && days <= 1 && alerted['day1'] != true) {
         alertKey = 'day1';
-        title = '🚨 Last Day — Membership Expires Today';
+        title = 'Alert Last Day — Membership Expires Today';
         body =
             'Your ${member.plan} membership expires today. '
             'Head to the front desk to renew now.';
       } else if (!isExpired && days <= 3 && alerted['day3'] != true) {
         alertKey = 'day3';
-        title = '⏰ Expiring in $days Days';
+        title = ' Expiring in $days Days';
         body =
             'Your ${member.plan} membership expires in $days days. '
             'Renew soon to avoid any interruption.';
       } else if (!isExpired && days <= 7 && alerted['day7'] != true) {
         alertKey = 'day7';
-        title = '📅 Membership Expiring Soon — $days Days Left';
+        title = 'Date Membership Expiring Soon — $days Days Left';
         body =
             'Your ${member.plan} membership expires in $days days. '
             'Plan your renewal early to stay uninterrupted.';
@@ -102,9 +102,9 @@ class MembershipAlertService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      debugPrint('🔔 Membership alert sent: $title');
+      debugPrint('Notification Membership alert sent: $title');
     } catch (e) {
-      debugPrint('⚠️ MembershipAlertService error: $e');
+      debugPrint(' MembershipAlertService error: $e');
       // Non-fatal — app continues normally
     }
   }

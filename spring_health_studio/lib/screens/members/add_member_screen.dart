@@ -270,7 +270,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         builder: (context) => DocumentSendDialog(
           member: member,
           documentType: 'welcome',
-          title: 'Member Added Successfully! 🎉',
+          title: 'Member Added Successfully! ',
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

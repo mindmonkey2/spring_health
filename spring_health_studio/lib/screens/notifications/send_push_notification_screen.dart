@@ -217,7 +217,7 @@ class _SendPushNotificationScreenState
                 children: [
                   if (widget.branch == null) ...[
                     _TargetChip(
-                      label: '🌐 All Members',
+                      label: ' All Members',
                       subtitle: 'Both Hanamkonda & Warangal',
                       selected: _targetType == 'all',
                       color: _green,
@@ -225,7 +225,7 @@ class _SendPushNotificationScreenState
                     ),
                     const SizedBox(height: 8),
                     _TargetChip(
-                      label: '🏢 Specific Branch',
+                      label: 'Office Specific Branch',
                       subtitle: 'Hanamkonda or Warangal only',
                       selected: _targetType == 'branch',
                       color: _teal,
@@ -244,7 +244,7 @@ class _SendPushNotificationScreenState
                     const SizedBox(height: 8),
                   ],
                   _TargetChip(
-                    label: '👤 Single Member',
+                    label: ' Single Member',
                     subtitle: 'Search by phone number',
                     selected: _targetType == 'member',
                     color: _orange,
@@ -345,10 +345,10 @@ class _SendPushNotificationScreenState
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _typeChip('📢', 'Announcement', 'announcement', _green),
-                  _typeChip('⏰', 'Reminder', 'reminder', _orange),
-                  _typeChip('🎁', 'Offer', 'offer', Colors.purple),
-                  _typeChip('⚔️', 'Challenge', 'challenge', Colors.indigo),
+                  _typeChip('Announcement', 'Announcement', 'announcement', _green),
+                  _typeChip('', 'Reminder', 'reminder', _orange),
+                  _typeChip('', 'Offer', 'offer', Colors.purple),
+                  _typeChip('', 'Challenge', 'challenge', Colors.indigo),
                 ],
               ),
             ).animate().fadeIn(delay: 60.ms).slideY(begin: 0.04, end: 0),

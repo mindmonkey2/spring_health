@@ -684,7 +684,7 @@ class _FeedbackCard extends StatelessWidget {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
-                        content: Text('Reply submitted ✅'),
+                        content: Text('Reply submitted Check'),
                         backgroundColor: AppColors.success),
                   );
                 }

@@ -583,7 +583,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    "⚠️ Your blood pressure reading is in the high range. Please consult a doctor before starting any intense exercise. We've noted this in your fitness profile.",
+                    " Your blood pressure reading is in the high range. Please consult a doctor before starting any intense exercise. We've noted this in your fitness profile.",
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.error,
                     ),
@@ -765,26 +765,26 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
 
   Widget _buildFitnessGoalCard() {
     final goals = [
-      {'val': 'weight_loss', 'icon': '🎯', 'label': 'Weight Loss'},
-      {'val': 'muscle_gain', 'icon': '💪', 'label': 'Muscle Gain'},
-      {'val': 'strength', 'icon': '🏋️', 'label': 'Strength'},
-      {'val': 'endurance', 'icon': '🏃', 'label': 'Endurance'},
+      {'val': 'weight_loss', 'icon': '', 'label': 'Weight Loss'},
+      {'val': 'muscle_gain', 'icon': '', 'label': 'Muscle Gain'},
+      {'val': 'strength', 'icon': '', 'label': 'Strength'},
+      {'val': 'endurance', 'icon': '', 'label': 'Endurance'},
       {
         'val': 'body_recomposition',
-        'icon': '⚖️',
+        'icon': '',
         'label': 'Body Recomposition',
       },
-      {'val': 'general_fitness', 'icon': '🌿', 'label': 'General Fitness'},
+      {'val': 'general_fitness', 'icon': '', 'label': 'General Fitness'},
       {
         'val': 'athletic_performance',
-        'icon': '⚡',
+        'icon': 'Energy',
         'label': 'Athletic Performance',
       },
-      {'val': 'flexibility', 'icon': '🧘', 'label': 'Flexibility'},
-      {'val': 'stress_relief', 'icon': '😌', 'label': 'Stress Relief'},
+      {'val': 'flexibility', 'icon': '', 'label': 'Flexibility'},
+      {'val': 'stress_relief', 'icon': '', 'label': 'Stress Relief'},
       {
         'val': 'health_maintenance',
-        'icon': '❤️',
+        'icon': '',
         'label': 'Health Maintenance',
       },
     ];

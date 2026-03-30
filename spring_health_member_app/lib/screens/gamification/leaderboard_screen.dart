@@ -759,7 +759,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       case 'totalXp':
         return '${entry.totalXp} XP';
       case 'currentStreak':
-        return '${entry.currentStreak}🔥';
+        return '${entry.currentStreak}';
       case 'totalWorkouts':
         return '${entry.totalWorkouts}';
       default:

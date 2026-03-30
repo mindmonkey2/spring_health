@@ -212,7 +212,7 @@ class XpScreen extends StatelessWidget {
                   Text(
                     level.level < 6
                         ? '$xpToNext XP to next level'
-                        : '🏆 Legendary',
+                        : 'Trophy Legendary',
                     style: AppTextStyles.caption.copyWith(
                       color: level.color,
                       fontWeight: FontWeight.bold,
@@ -611,7 +611,7 @@ class XpScreen extends StatelessWidget {
                 ),
                 if (event.badgeEarned != null)
                   Text(
-                    '🏅 Badge earned: ${event.badgeEarned}',
+                    ' Badge earned: ${event.badgeEarned}',
                     style: AppTextStyles.caption.copyWith(color: Colors.amber),
                   ),
               ],
@@ -699,8 +699,8 @@ class XpScreen extends StatelessWidget {
                 ),
                 child: Text(
                   earned
-                      ? '✅ Earned +${badge.xpReward} XP'
-                      : '🔒 Earn +${badge.xpReward} XP on unlock',
+                      ? 'Check Earned +${badge.xpReward} XP'
+                      : ' Earn +${badge.xpReward} XP on unlock',
                   style: TextStyle(
                     color: AppColors.neonLime,
                     fontWeight: FontWeight.bold,
@@ -769,7 +769,7 @@ class XpScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Personal Bests 🏆',
+                    'Personal Bests Trophy',
                     style: AppTextStyles.heading3.copyWith(
                       color: AppColors.white,
                     ),

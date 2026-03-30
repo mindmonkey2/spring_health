@@ -17,7 +17,7 @@ class EmailService {
   }) async {
     if (_username.isEmpty || _password.isEmpty) {
       if (kDebugMode) {
-        debugPrint('❌ SMTP credentials not configured. Please build with --dart-define=SMTP_USERNAME=... and --dart-define=SMTP_PASSWORD=...');
+        debugPrint(' SMTP credentials not configured. Please build with --dart-define=SMTP_USERNAME=... and --dart-define=SMTP_PASSWORD=...');
       }
       return false;
     }
@@ -46,7 +46,7 @@ class EmailService {
       final sendReport = await send(message, smtpServer, timeout: const Duration(seconds: 30));
 
       if (kDebugMode) {
-        debugPrint('✅ Email sent successfully to $recipientEmail');
+        debugPrint('Check Email sent successfully to $recipientEmail');
         debugPrint('Send report: ${sendReport.toString()}');
       }
 
@@ -54,7 +54,7 @@ class EmailService {
     } on MailerException catch (e) {
       // Better error handling for mailer-specific exceptions
       if (kDebugMode) {
-        debugPrint('❌ MailerException: ${e.toString()}');
+        debugPrint(' MailerException: ${e.toString()}');
         for (var p in e.problems) {
           debugPrint('Problem: ${p.code}: ${p.msg}');
         }
@@ -63,12 +63,12 @@ class EmailService {
     } on SocketException catch (e) {
       // Network issues
       if (kDebugMode) {
-        debugPrint('❌ Network error: ${e.message}');
+        debugPrint(' Network error: ${e.message}');
       }
       return false;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Error sending email: $e');
+        debugPrint(' Error sending email: $e');
       }
       return false;
     }
@@ -107,25 +107,25 @@ class EmailService {
   <body>
   <div class="container">
   <div class="header">
-  <h1>🏋️ SPRING HEALTH STUDIO</h1>
+  <h1> SPRING HEALTH STUDIO</h1>
   <p style="margin: 5px 0 0 0; font-size: 14px;">Your Wellness Journey Begins</p>
   </div>
 
   <div class="content">
-  <h2>Welcome, $name! 🎉</h2>
+  <h2>Welcome, $name! </h2>
   <p>Thank you for joining Spring Health Studio. We're excited to have you as part of our fitness family!</p>
 
   <div class="info-box">
-  <p style="margin: 0;"><strong>📋 Your Membership ID:</strong> <span style="font-size: 18px; color: #10B981;">$memberId</span></p>
+  <p style="margin: 0;"><strong> Your Membership ID:</strong> <span style="font-size: 18px; color: #10B981;">$memberId</span></p>
   </div>
 
-  <p><strong>📎 Attached Documents:</strong></p>
+  <p><strong>Attachment Attached Documents:</strong></p>
   <ul>
   <li><strong>Invoice</strong> - Your payment receipt and membership details</li>
   <li><strong>Membership Card</strong> - Present this at the gym for check-in</li>
   </ul>
 
-  <h3 style="color: #10B981;">📌 Important Notes:</h3>
+  <h3 style="color: #10B981;"> Important Notes:</h3>
   <ul>
   <li>Keep your membership card handy for QR code scanning at check-in</li>
   <li>You can print your membership card or show the digital version</li>
@@ -134,7 +134,7 @@ class EmailService {
   </ul>
 
   <p style="font-size: 16px; font-weight: bold; color: #10B981; margin-top: 20px;">
-  💪 Let's achieve your fitness goals together!
+   Let's achieve your fitness goals together!
   </p>
   </div>
 

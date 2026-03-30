@@ -342,7 +342,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '🤖 AI Plan loaded — modify as needed',
+                                    ' AI Plan loaded — modify as needed',
                                     style: AppTextStyles.caption.copyWith(
                                       color: AppColors.neonLime,
                                     ),
@@ -1125,7 +1125,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              'WORKOUT COMPLETE! 💪',
+              'WORKOUT COMPLETE! ',
               style: AppTextStyles.heading3.copyWith(
                 color: AppColors.neonLime,
                 letterSpacing: 1.5,
@@ -1196,7 +1196,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
             if (newBadges.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                '🏅 NEW BADGE${newBadges.length > 1 ? 'S' : ''} UNLOCKED!',
+                ' NEW BADGE${newBadges.length > 1 ? 'S' : ''} UNLOCKED!',
                 style: AppTextStyles.caption.copyWith(
                   color: Colors.amber,
                   letterSpacing: 1.5,

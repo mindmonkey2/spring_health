@@ -474,7 +474,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
                   if (todayBirthdays > 0)
                     Expanded(
                       child: buildHighlightCard(
-                        '🎂',
+                        'Birthday',
                         '$todayBirthdays',
                         'Birthday${todayBirthdays > 1 ? 's' : ''}',
                       ),
@@ -484,7 +484,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
                   if (expiringThisWeek > 0)
                     Expanded(
                       child: buildHighlightCard(
-                          '⏰', '$expiringThisWeek', 'Expiring'),
+                          '', '$expiringThisWeek', 'Expiring'),
                     ),
                   if ((todayBirthdays > 0 || expiringThisWeek > 0) &&
                       todayCheckIns > 0)
@@ -492,7 +492,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
                   if (todayCheckIns > 0)
                     Expanded(
                       child: buildHighlightCard(
-                          '✅', '$todayCheckIns', 'Check-ins'),
+                          'Check', '$todayCheckIns', 'Check-ins'),
                     ),
                 ],
               ),

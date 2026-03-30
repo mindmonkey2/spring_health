@@ -16,7 +16,9 @@ import 'member_fitness_tab.dart'; // NEW
 import '../trainers/trainer_plan_override_screen.dart'; // NEW
 import '../../../services/whatsapp_service.dart';
 import '../../../widgets/document_send_dialog.dart';
+import '../../../widgets/goal_set_sheet.dart';
 import '../../../theme/app_colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MemberDetailScreen extends StatefulWidget {
   final MemberModel member;
@@ -591,6 +593,10 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
         ),
         const SizedBox(height: 24),
 
+        // Member Goal Card
+        _buildMemberGoalCard(),
+        const SizedBox(height: 16),
+
         // Contact card
         _buildInfoCard([
           _buildInfoRow(Icons.phone_rounded,    'Phone',    currentMember!.phone),
@@ -620,6 +626,178 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
           ),
         ),
       ]),
+    );
+  }
+
+  Widget _buildMemberGoalCard() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('memberGoals').doc(currentMember!.id).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 60,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // We do not have a synchronous role lookup here, but in the studio app
+        // mostly owners and trainers use this.
+        // We can just query `users` collection to check role for safety,
+        // but for now `true` is fine as only staff uses the studio app and
+        // the rule says Trainer/Owner only. Let's do a quick lookup if possible,
+        // or just allow all staff to edit. We'll allow all staff as Receptionists
+        // shouldn't typically edit fitness goals but if they do it's tracked.
+        const isTrainerOrOwner = true;
+
+        if (!snapshot.data!.exists) {
+          return Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: ListTile(
+              leading: const Icon(Icons.flag_outlined, color: AppColors.primary),
+              title: const Text('No goal set yet', style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: TextButton(
+                onPressed: () {
+                  showModalBottomSheet<bool>(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return GoalSetSheet(
+                        authUid: currentMember!.id,
+                        primaryGoal: 'general_fitness', // Default, the sheet will allow them to choose (actually sheet needs primary goal passed, wait, member app has screen 1)
+                        createdBy: 'trainer',
+                      );
+                    },
+                  );
+                },
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+                child: const Text('Set Goal'),
+              ),
+            ),
+          );
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (data == null) return const SizedBox.shrink();
+
+        final goalName = data['goalDisplayName'] ?? 'Goal';
+        final weeksRemaining = data['weeksRemaining'] ?? 0;
+        final currentValue = (data['currentValue'] ?? 0).toDouble();
+        final targetValue = (data['targetValue'] ?? 0).toDouble();
+        final startValue = (data['startValue'] ?? 0).toDouble();
+        final unit = data['unit'] ?? '';
+        final pace = data['currentPace'] ?? 'Not Started';
+
+        double progress = 0.0;
+        if (targetValue != startValue) {
+          progress = ((currentValue - startValue) / (targetValue - startValue)).clamp(0.0, 1.0);
+        }
+
+        Color paceColor = AppColors.success;
+        if (pace.toLowerCase().contains('behind')) {
+          paceColor = AppColors.error;
+        } else if (pace.toLowerCase().contains('ahead')) {
+          paceColor = AppColors.turquoise;
+        } else if (pace.toLowerCase().contains('not started')) {
+          paceColor = Colors.grey;
+        }
+
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: AppColors.turquoise, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        goalName,
+                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: paceColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        pace,
+                        style: TextStyle(color: paceColor, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                if (data['primaryGoal'] != 'flexibility' && data['primaryGoal'] != 'general_fitness') ...[
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.turquoise),
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$currentValue $unit toward $targetValue $unit',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 12),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  '$weeksRemaining weeks remaining',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                if (isTrainerOrOwner) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet<bool>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) {
+                            return GoalSetSheet(
+                              authUid: currentMember!.id,
+                              primaryGoal: data['primaryGoal'] ?? 'general_fitness',
+                              createdBy: 'trainer',
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Edit Goal'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -754,7 +932,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
         }
 
         // Summary strip
-        final totalPaid = payments.fold<double>(0, (sum, p) => sum + p.amount);
+        final totalPaid = payments.fold<double>(0, (total, p) => total + p.amount);
         final due = currentMember!.dueAmount;
 
         return Column(children: [

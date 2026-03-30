@@ -446,6 +446,36 @@ class _ClientCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 6),
+                  FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance.collection('memberGoals').doc(client.id).get(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
+                        return const SizedBox.shrink();
+                      }
+                      final data = snapshot.data!.data() as Map<String, dynamic>?;
+                      if (data == null) return const SizedBox.shrink();
+
+                      final goalName = data['goalDisplayName'] ?? 'Goal';
+                      final weeksRemaining = data['weeksRemaining'] ?? 0;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          '$goalName · $weeksRemaining wks',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

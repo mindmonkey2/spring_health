@@ -19,6 +19,8 @@ import '../social/social_coming_soon_screen.dart';
 import '../../services/wearable_snapshot_service.dart';
 import '../../services/ai_coach_service.dart';
 import '../ai_coach/ai_coach_screen.dart';
+import '../profile/member_goal_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -339,6 +341,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
+                // ── Goal Progress Banner ─────────────────────────────
+                _buildGoalProgressBanner().animate().fadeIn(delay: 220.ms),
+
                 // ── AI Personal Trainer Banner ───────────────────────
                 _buildAiCoachBanner().animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 28),
@@ -379,6 +384,118 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // ── Goal Progress Banner ──────────────────────────────────────────────────
+
+  Widget _buildGoalProgressBanner() {
+    final uid = _authService.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('memberGoals').doc(uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const SizedBox.shrink();
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (data == null) return const SizedBox.shrink();
+
+        final goalName = data['goalDisplayName'] ?? 'Goal';
+        final weeksRemaining = data['weeksRemaining'] ?? 0;
+        final currentValue = (data['currentValue'] ?? 0).toDouble();
+        final targetValue = (data['targetValue'] ?? 0).toDouble();
+        final startValue = (data['startValue'] ?? 0).toDouble();
+        final unit = data['unit'] ?? '';
+        final pace = data['currentPace'] ?? 'On track';
+
+        double progress = 0.0;
+        if (targetValue != startValue) {
+          progress = ((currentValue - startValue) / (targetValue - startValue)).clamp(0.0, 1.0);
+        }
+
+        Color paceColor = AppColors.neonLime;
+        if (pace.toLowerCase().contains('behind')) {
+          paceColor = AppColors.error;
+        } else if (pace.toLowerCase().contains('ahead')) {
+          paceColor = AppColors.neonTeal;
+        }
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MemberGoalScreen()),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardSurface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.neonTeal.withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Goal: $goalName',
+                      style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '$weeksRemaining wks left',
+                      style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+                    ),
+                  ],
+                ),
+                if (data['primaryGoal'] != 'flexibility' && data['primaryGoal'] != 'general_fitness') ...[
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: AppColors.gray400.withValues(alpha: 0.3),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.neonLime),
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '$currentValue $unit toward $targetValue $unit',
+                        style: AppTextStyles.caption.copyWith(color: Colors.white),
+                      ),
+                      Text(
+                        'Pace: $pace',
+                        style: AppTextStyles.caption.copyWith(color: paceColor, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Pace: $pace',
+                    style: AppTextStyles.caption.copyWith(color: paceColor, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

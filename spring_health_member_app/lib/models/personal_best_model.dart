@@ -65,17 +65,17 @@ extension CoreExerciseExtension on CoreExercise {
   String get emoji {
     switch (this) {
       case CoreExercise.pushUps:
-        return '💪';
+        return '';
       case CoreExercise.pullUps:
-        return '🏋️';
+        return '';
       case CoreExercise.squats:
-        return '🦵';
+        return '';
       case CoreExercise.plank:
-        return '⏱️';
+        return '';
       case CoreExercise.burpees:
-        return '🔥';
+        return '';
       case CoreExercise.sitUps:
-        return '🎯';
+        return '';
     }
   }
 }

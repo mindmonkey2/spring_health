@@ -298,88 +298,88 @@ class ReminderService {
   Map<String, String> getMessageTemplates() {
     return {
       'dues_payment': '''
-      💰 *Payment Reminder* 💰
+      Money *Payment Reminder* Money
 
       Hi [Member Name]!
 
       You have a pending payment at *Spring Health Studio*.
 
       *Payment Details:*
-      ⚠️ Due Amount: ₹[Amount]
-      📅 Membership: [Start Date] to [End Date]
+       Due Amount: ₹[Amount]
+       Membership: [Start Date] to [End Date]
 
       *Please clear your dues at the earliest.*
 
       Visit our [Branch] branch or contact us to make the payment.
 
-      Thank you! 🙏
+      Thank you!
 
       *Spring Health Studio*
       [Branch] Branch
       ''',
       'expiry_3_days': '''
-      ⚠️ *Membership Expiring Soon!* ⚠️
+       *Membership Expiring Soon!*
 
       Hi [Member Name]!
 
       Your membership at *Spring Health Studio* is expiring soon!
 
       *Current Membership:*
-      📅 Valid Till: [Expiry Date]
-      ⏰ Days Remaining: 3 days
+       Valid Till: [Expiry Date]
+       Days Remaining: 3 days
 
       *Don't Miss Out!*
-      ✅ Renew now to continue your fitness journey
-      ✅ Contact us to renew your membership
-      ✅ Visit our [Branch] branch
+      Check Renew now to continue your fitness journey
+      Check Contact us to renew your membership
+      Check Visit our [Branch] branch
 
-      Stay consistent, stay fit! 💪
+      Stay consistent, stay fit!
 
       *Spring Health Studio*
       [Branch] Branch
       ''',
       'expiry_1_day': '''
-      🚨 *Membership Expiring Tomorrow!* 🚨
+      Alert *Membership Expiring Tomorrow!* Alert
 
       Hi [Member Name]!
 
       Your membership at *Spring Health Studio* expires tomorrow!
 
       *Current Membership:*
-      📅 Valid Till: [Expiry Date]
-      ⏰ Days Remaining: 1 day
+       Valid Till: [Expiry Date]
+       Days Remaining: 1 day
 
       *Act Now!*
-      ✅ Renew today to avoid interruption
-      ✅ Contact us immediately
-      ✅ Visit our [Branch] branch
+      Check Renew today to avoid interruption
+      Check Contact us immediately
+      Check Visit our [Branch] branch
 
-      Stay consistent, stay fit! 💪
+      Stay consistent, stay fit!
 
       *Spring Health Studio*
       [Branch] Branch
       ''',
       'birthday': '''
-      🎂🎉 *HAPPY BIRTHDAY!* 🎉🎂
+       *HAPPY BIRTHDAY!*
 
       Dear [Member Name]!
 
-      Wishing you a fantastic birthday filled with joy, health, and happiness! 🥳
+      Wishing you a fantastic birthday filled with joy, health, and happiness!
 
       May this year bring you:
-      💪 Stronger muscles
-      🏃 Better stamina
-      😊 Great health
-      🎯 Achieved fitness goals
+       Stronger muscles
+       Better stamina
+       Great health
+       Achieved fitness goals
 
       Thank you for being a valued member of our fitness family!
 
-      Enjoy your special day! 🎈
+      Enjoy your special day!
 
       *Spring Health Studio Team*
       [Branch] Branch
 
-      *PS:* Visit us today and get a special birthday surprise! 🎁
+      *PS:* Visit us today and get a special birthday surprise!
       ''',
     };
   }

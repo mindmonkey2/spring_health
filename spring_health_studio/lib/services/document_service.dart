@@ -223,8 +223,8 @@ class DocumentSendResult {
   String get message {
     if (success) {
       String msg = 'Documents sent successfully! ';
-      if (whatsappSent) msg += '📱 WhatsApp ';
-      if (emailSent) msg += '📧 Email';
+      if (whatsappSent) msg += 'Phone WhatsApp ';
+      if (emailSent) msg += ' Email';
       return msg;
     } else {
       return error ?? 'Failed to send documents';

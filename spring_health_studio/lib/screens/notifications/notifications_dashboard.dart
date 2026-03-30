@@ -270,7 +270,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   Widget _buildBirthdaySection() {
     final members = _birthdayMembers ?? [];
     return _buildExpandableSection(
-      title: '🎂 Birthday Wishes',
+      title: ' Birthday Wishes',
       subtitle: '${members.length} member${members.length != 1 ? 's' : ''}',
       members: members,
       emptyMessage: 'No birthdays today',
@@ -294,10 +294,10 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   Widget _buildExpiringSection() {
     final members = _expiringMembers ?? [];
     return _buildExpandableSection(
-      title: '⚠️ Expiring Soon (7 days)',
+      title: ' Expiring Soon (7 days)',
       subtitle: '${members.length} member${members.length != 1 ? 's' : ''}',
       members: members,
-      emptyMessage: 'No memberships expiring soon! 👍',
+      emptyMessage: 'No memberships expiring soon! ',
       gradient: [accentYellow, const Color(0xFFFFAA00)],
       isExpanded: _expiringExpanded,
       onExpand: () => setState(() => _expiringExpanded = !_expiringExpanded),
@@ -319,10 +319,10 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   Widget _buildDuesSection() {
     final members = _duesMembers ?? [];
     return _buildExpandableSection(
-      title: '💰 Pending Dues',
+      title: 'Money Pending Dues',
       subtitle: '${members.length} member${members.length != 1 ? 's' : ''}',
       members: members,
-      emptyMessage: 'No pending dues! 🎉',
+      emptyMessage: 'No pending dues! ',
       gradient: [accentOrange, const Color(0xFFEE5A6F)],
       isExpanded: _duesExpanded,
       onExpand: () => setState(() => _duesExpanded = !_duesExpanded),
@@ -341,7 +341,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   Widget _buildExpiredSection() {
     final members = _expiredMembers ?? [];
     return _buildExpandableSection(
-      title: '🚫 Expired Memberships',
+      title: 'Blocked Expired Memberships',
       subtitle: '${members.length} member${members.length != 1 ? 's' : ''}',
       members: members,
       emptyMessage: 'No expired memberships',
@@ -541,7 +541,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Birthday wish sent to ${member.name} 🎂'),
+          content: Text('Birthday wish sent to ${member.name} '),
           backgroundColor: Colors.green,
         ),
       );
@@ -553,7 +553,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Expiry reminder sent to ${member.name} ⚠️'),
+          content: Text('Expiry reminder sent to ${member.name} '),
           backgroundColor: Colors.orange,
         ),
       );
@@ -565,7 +565,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Due reminder sent to ${member.name} 💰'),
+          content: Text('Due reminder sent to ${member.name} Money'),
           backgroundColor: Colors.red,
         ),
       );
@@ -577,7 +577,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Rejoin message sent to ${member.name} 🎉'),
+          content: Text('Rejoin message sent to ${member.name} '),
           backgroundColor: Colors.purple,
         ),
       );
@@ -591,21 +591,21 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
   Future<void> _sendBulkBirthdays(List<MemberModel> members) async {
     final result = await _reminderService.sendBulkBirthdayWishes(branch: widget.branch);
     if (mounted) {
-      _showResultDialog('Birthday Wishes 🎂', result);
+      _showResultDialog('Birthday Wishes ', result);
     }
   }
 
   Future<void> _sendBulkExpiring(List<MemberModel> members) async {
     final result = await _reminderService.sendBulkExpiryReminders(days: 7, branch: widget.branch);
     if (mounted) {
-      _showResultDialog('Expiry Reminders ⚠️', result);
+      _showResultDialog('Expiry Reminders ', result);
     }
   }
 
   Future<void> _sendBulkDues(List<MemberModel> members) async {
     final result = await _reminderService.sendBulkDuesReminders(branch: widget.branch);
     if (mounted) {
-      _showResultDialog('Due Payment Reminders 💰', result);
+      _showResultDialog('Due Payment Reminders Money', result);
     }
   }
 
@@ -700,7 +700,7 @@ class _NotificationsDashboardState extends State<NotificationsDashboard> {
 
     if (mounted) {
       Navigator.pop(context); // Close loading dialog
-      _showResultDialog('Rejoin Messages 🎉', result);
+      _showResultDialog('Rejoin Messages ', result);
     }
   }
 

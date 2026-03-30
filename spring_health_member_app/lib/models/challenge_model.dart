@@ -20,7 +20,7 @@ class ChallengeTeam {
   factory ChallengeTeam.fromMap(Map<String, dynamic> map) => ChallengeTeam(
     id: map['id'] as String? ?? '',
     name: map['name'] as String? ?? '',
-    emoji: map['emoji'] as String? ?? '⚡',
+    emoji: map['emoji'] as String? ?? 'Energy',
     totalScore: (map['totalScore'] as num?)?.toInt() ?? 0,
     memberIds: List<String>.from(map['memberIds'] as List? ?? []),
   );
@@ -98,11 +98,11 @@ class ChallengeModel {
   String get typeEmoji {
     switch (type) {
       case ChallengeType.stepWars:
-        return '🚶';
+        return '';
       case ChallengeType.caloriesCrusher:
-        return '🔥';
+        return '';
       case ChallengeType.workoutWarrior:
-        return '💪';
+        return '';
     }
   }
 

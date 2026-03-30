@@ -327,7 +327,7 @@ class _MemberAttendanceScreenState extends State<MemberAttendanceScreen> {
           child: _buildStreakCard(
             value: currentStreak,
             label: 'Current Streak',
-            sublabel: currentStreak > 0 ? 'Keep going! 🔥' : 'Start today!',
+            sublabel: currentStreak > 0 ? 'Keep going! ' : 'Start today!',
             color: currentStreak > 0 ? AppColors.neonOrange : AppColors.gray400,
             pulsing: currentStreak > 0,
           ),

@@ -359,7 +359,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Version 1.0.0  ·  Built with ❤',
+                    'Version 1.0.0  ·  Built with ',
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.gray600,
                     ),

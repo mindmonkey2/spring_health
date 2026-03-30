@@ -596,7 +596,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 12),
         _buildActionTile(
-          'Personal Bests 🏆',
+          'Personal Bests Trophy',
           Icons.emoji_events_rounded,
           AppColors.warning,
           subtitle: 'Track your reps, beat your limits',

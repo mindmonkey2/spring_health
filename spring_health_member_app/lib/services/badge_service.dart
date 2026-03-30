@@ -128,7 +128,7 @@ class BadgeService {
       notifications.add(
         NotificationData(
           type: NotificationType.badge,
-          title: '🏅 Badge Unlocked!',
+          title: ' Badge Unlocked!',
           body: 'You earned: ${badgeDef['label']}',
           metadata: {'badgeId': badgeId},
         ),

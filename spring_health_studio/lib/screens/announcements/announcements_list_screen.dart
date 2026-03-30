@@ -124,12 +124,12 @@ with SingleTickerProviderStateMixin {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           children: [
             if (active.isNotEmpty) ...[
-              _sectionLabel('🟢 Active (${active.length})', sageGreen),
+              _sectionLabel('Ready Active (${active.length})', sageGreen),
               ...active.map(_announcementCard),
             ],
             if (archived.isNotEmpty) ...[
               const SizedBox(height: 8),
-              _sectionLabel('⬜ Archived (${archived.length})',
+              _sectionLabel(' Archived (${archived.length})',
               Colors.grey),
               ...archived.map(_announcementCard),
             ],

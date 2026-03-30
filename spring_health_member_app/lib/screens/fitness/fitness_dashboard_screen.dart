@@ -127,9 +127,9 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
           didSync
               ? (todayStats.steps == 0)
                     ? '0 steps found. Ensure Samsung Health/Google Fit is syncing data to Health Connect.'
-                    : '✅ Synced from Health Connect!'
+                    : 'Check Synced from Health Connect!'
               : _hasHealthPermission
-              ? '⚠️ Connected but no data yet — check Samsung Health sharing'
+              ? ' Connected but no data yet — check Samsung Health sharing'
               : 'Connect Health Connect to sync your stats.',
         ),
         backgroundColor: didSync
@@ -158,7 +158,7 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '⚡ Connected to '
+                  'Energy Connected to '
                   '${Platform.isIOS ? "Apple Health" : "Health Connect"}! '
                   'Loading your real data…',
                 ),
@@ -347,7 +347,7 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
                       ),
                     ),
                     child: Text(
-                      todayStats.isRealData ? '● LIVE' : '◌ NOT SYNCED',
+                      todayStats.isRealData ? ' LIVE' : ' NOT SYNCED',
                       style: TextStyle(
                         color: todayStats.isRealData
                             ? AppColors.success

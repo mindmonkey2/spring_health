@@ -82,10 +82,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             .getCurrentMemberId();
         if (memberId != null) {
           await WearableSnapshotService.instance.syncTodaySnapshot(memberId);
-          debugPrint('✅ Wearable snapshot synced');
+          debugPrint('Check Wearable snapshot synced');
         }
       } catch (e) {
-        debugPrint('⚠️ Wearable sync skipped: $e');
+        debugPrint(' Wearable sync skipped: $e');
         // Silent fail — never block app startup
       }
     });

@@ -16,9 +16,9 @@ void main() async {
   // ✅ Initialize push notifications
   try {
     await NotificationService().initialize();
-    debugPrint('✅ Notification service initialized successfully');
+    debugPrint('Check Notification service initialized successfully');
   } catch (e) {
-    debugPrint('⚠️ Notification service initialization failed: $e');
+    debugPrint(' Notification service initialization failed: $e');
     // App continues to work without notifications
   }
 
@@ -26,7 +26,7 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light, // 🔧 was Brightness.dark
+      statusBarIconBrightness: Brightness.light, // was Brightness.dark
       systemNavigationBarColor: Color(0xFF0A0A0A), // 🆕 match backgroundBlack
       systemNavigationBarIconBrightness: Brightness.light, // 🆕 white nav icons
     ),

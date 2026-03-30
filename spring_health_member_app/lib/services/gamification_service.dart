@@ -362,7 +362,7 @@ class GamificationService {
     });
 
     debugPrint(
-      '🎮 XP awarded: +$xp (badge bonus: +$badgeXpBonus) '
+      'Game XP awarded: +$xp (badge bonus: +$badgeXpBonus) '
       'for "$reason". New total: $totalNewXp',
     );
 
@@ -387,12 +387,12 @@ class GamificationService {
       notifications.add(
         NotificationData(
           type: NotificationType.badge,
-          title: '🏅 Badge Unlocked: ${badge.title}',
+          title: ' Badge Unlocked: ${badge.title}',
           body: badge.description,
           metadata: {'badgeId': badge.id, 'xpReward': badge.xpReward},
         ),
       );
-      debugPrint('🏅 Badge notification written: ${badge.title}');
+      debugPrint(' Badge notification written: ${badge.title}');
     }
 
     await notifService.addNotificationsForMemberBatch(
@@ -406,12 +406,12 @@ class GamificationService {
   // 🆕 Contextual emoji for XP notification titles
   String _xpEmoji(String reason) {
     final r = reason.toLowerCase();
-    if (r.contains('check')) return '📍';
-    if (r.contains('workout')) return '💪';
-    if (r.contains('streak')) return '🔥';
-    if (r.contains('payment')) return '✅';
-    if (r.contains('profile')) return '⭐';
-    return '⚡';
+    if (r.contains('check')) return 'Location';
+    if (r.contains('workout')) return '';
+    if (r.contains('streak')) return '';
+    if (r.contains('payment')) return 'Check';
+    if (r.contains('profile')) return '';
+    return 'Energy';
   }
 
   // ─────────────────────────────────────────────
@@ -489,7 +489,7 @@ class GamificationService {
           .get();
       return (higherCount.count ?? 0) + 1;
     } catch (e) {
-      debugPrint('⚠️ getMemberRank error: $e');
+      debugPrint(' getMemberRank error: $e');
       return null;
     }
   }

@@ -354,7 +354,7 @@ class _ChecklistBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(isComplete ? '🏆' : '🎯', style: const TextStyle(fontSize: 28)),
+          Text(isComplete ? 'Trophy' : '', style: const TextStyle(fontSize: 28)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -522,7 +522,7 @@ class _ExerciseCardState extends State<_ExerciseCard> {
         content: Row(
           children: [
             Text(
-              isPB ? '🏆 NEW PERSONAL BEST! ' : '✅ Logged! ',
+              isPB ? 'Trophy NEW PERSONAL BEST! ' : 'Check Logged! ',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black,

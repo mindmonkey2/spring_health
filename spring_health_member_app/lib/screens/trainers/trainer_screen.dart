@@ -531,7 +531,7 @@ class _TrainerScreenState extends State<TrainerScreen>
             onTap: () => ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  '📬 In-app messaging is planned for a future update!',
+                  'Mail In-app messaging is planned for a future update!',
                 ),
                 behavior: SnackBarBehavior.floating,
               ),
@@ -833,19 +833,19 @@ class _TrainerScreenState extends State<TrainerScreen>
                     Wrap(
                       spacing: 12,
                       children: [
-                        _macro('🔥', '${meal.calories}', 'kcal', color),
+                        _macro('', '${meal.calories}', 'kcal', color),
                         if (meal.protein != null)
                           _macro(
-                            '💪',
+                            '',
                             meal.protein!,
                             'prot',
                             AppColors.neonLime,
                           ),
                         if (meal.carbs != null)
-                          _macro('🌾', meal.carbs!, 'carbs', AppColors.warning),
+                          _macro('Carbs', meal.carbs!, 'carbs', AppColors.warning),
                         if (meal.fats != null)
                           _macro(
-                            '🥑',
+                            'Fats',
                             meal.fats!,
                             'fats',
                             AppColors.neonOrange,
@@ -923,7 +923,7 @@ class _TrainerScreenState extends State<TrainerScreen>
       ),
       child: Column(
         children: [
-          const Text('🥗', style: TextStyle(fontSize: 48))
+          const Text('', style: TextStyle(fontSize: 48))
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.08, duration: 1200.ms),
           const SizedBox(height: 14),
@@ -945,7 +945,7 @@ class _TrainerScreenState extends State<TrainerScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('🏋️', style: TextStyle(fontSize: 72))
+          const Text('', style: TextStyle(fontSize: 72))
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.1, duration: 1400.ms),
           const SizedBox(height: 24),
@@ -995,7 +995,7 @@ class _TrainerScreenState extends State<TrainerScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('🤷', style: TextStyle(fontSize: 64)),
+                const Text('', style: TextStyle(fontSize: 64)),
                 const SizedBox(height: 16),
                 Text('No Trainers Found', style: AppTextStyles.heading3),
                 const SizedBox(height: 8),

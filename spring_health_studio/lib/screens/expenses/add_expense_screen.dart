@@ -150,13 +150,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               decoration: InputDecoration(
                 labelText: 'Category',
                 prefixIcon: Text(
-                  ExpenseCategories.categoryIcons[_selectedCategory] ?? '📦',
+                  ExpenseCategories.categoryIcons[_selectedCategory] ?? 'Box',
                   style: const TextStyle(fontSize: 24),
                 ),
                 border: const OutlineInputBorder(),
               ),
               items: ExpenseCategories.categories.map((category) {
-                final icon = ExpenseCategories.categoryIcons[category] ?? '📦';
+                final icon = ExpenseCategories.categoryIcons[category] ?? 'Box';
               return DropdownMenuItem(
                 value: category,
                 child: Row(

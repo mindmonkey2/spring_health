@@ -87,7 +87,7 @@ class _StatsOverviewWidgetState extends State<StatsOverviewWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
-              '✅ Health Connect synced! Your real stats are live.',
+              'Check Health Connect synced! Your real stats are live.',
             ),
             backgroundColor: AppColors.neonTeal,
             behavior: SnackBarBehavior.floating,

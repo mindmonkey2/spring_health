@@ -490,7 +490,7 @@ class _LeaderboardTile extends StatelessWidget {
           backgroundColor: rankColor(entry.rank).withValues(alpha: 0.15),
           child: Text(
             entry.rank <= 3
-                ? ['🥇', '🥈', '🥉'][entry.rank - 1]
+                ? ['1st', '2nd', '3rd'][entry.rank - 1]
                 : '${entry.rank}',
             style: TextStyle(
                 color: rankColor(entry.rank),
@@ -677,14 +677,14 @@ class _LeaderboardTile extends StatelessWidget {
   // FIX 3: StatefulBuilder tracks selection — AWARD button now responds
   Future<void> _showBadgeDialog(BuildContext context) async {
     const badges = [
-      ('🏆', 'Champion', 'champion'),
-      ('⚡', 'Power Week', 'power_week'),
-      ('🔥', 'On Fire', 'on_fire'),
-      ('💎', 'Diamond Member', 'diamond'),
-      ('🎯', 'Goal Crusher', 'goal_crusher'),
-      ('🦁', 'Iron Week', 'iron_week'),
-      ('🚀', 'Rocket Start', 'rocket_start'),
-      ('⭐', 'All Star', 'all_star'),
+      ('Trophy', 'Champion', 'champion'),
+      ('Energy', 'Power Week', 'power_week'),
+      ('', 'On Fire', 'on_fire'),
+      ('', 'Diamond Member', 'diamond'),
+      ('', 'Goal Crusher', 'goal_crusher'),
+      ('Lion', 'Iron Week', 'iron_week'),
+      ('Boost', 'Rocket Start', 'rocket_start'),
+      ('', 'All Star', 'all_star'),
     ];
 
     String? selected;

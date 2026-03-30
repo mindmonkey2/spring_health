@@ -135,7 +135,7 @@ with SingleTickerProviderStateMixin {
               }
 
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return _buildEmptyState('No pending dues! 🎉');
+                return _buildEmptyState('No pending dues! ');
               }
 
               return Column(
@@ -205,7 +205,7 @@ with SingleTickerProviderStateMixin {
               }
 
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return _buildEmptyState('No memberships expiring soon! 👍');
+                return _buildEmptyState('No memberships expiring soon! ');
               }
 
               return Column(

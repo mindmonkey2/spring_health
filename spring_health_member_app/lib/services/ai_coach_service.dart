@@ -756,7 +756,7 @@ Use Indian foods exclusively or predominantly:
       }
       return null;
     } catch (e) {
-      debugPrint('⚠️ Error getting cached workout plan: \$e');
+      debugPrint(' Error getting cached workout plan: \$e');
       return null;
     }
   }
@@ -774,7 +774,7 @@ Use Indian foods exclusively or predominantly:
       }
       return null;
     } catch (e) {
-      debugPrint('⚠️ Error getting cached diet plan: \$e');
+      debugPrint(' Error getting cached diet plan: \$e');
       return null;
     }
   }

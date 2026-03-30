@@ -81,7 +81,7 @@ class SocialComingSoonScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               Text(
-                'Spring Social is in the lab. 🧪',
+                'Spring Social is in the lab. ',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.neonLime,
                   fontWeight: FontWeight.bold,

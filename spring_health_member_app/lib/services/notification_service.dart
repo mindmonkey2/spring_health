@@ -13,7 +13,7 @@ import '../services/in_app_notification_service.dart';
 // ── Background handler — must be top-level ────────────────────────────────
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('📱 Background notification: ${message.notification?.title}');
+  debugPrint('Phone Background notification: ${message.notification?.title}');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -53,10 +53,10 @@ class NotificationService {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.denied) {
-        debugPrint('❌ Notification permission denied');
+        debugPrint(' Notification permission denied');
         return;
       }
-      debugPrint('✅ Notification permission: ${settings.authorizationStatus}');
+      debugPrint('Check Notification permission: ${settings.authorizationStatus}');
 
       // 2. Local notifications
       await _initLocalNotifications();
@@ -74,9 +74,9 @@ class NotificationService {
       if (initial != null) _onTap(initial);
 
       _isInitialized = true;
-      debugPrint('✅ Notification service initialized successfully');
+      debugPrint('Check Notification service initialized successfully');
     } catch (e) {
-      debugPrint('❌ NotificationService init error: $e');
+      debugPrint(' NotificationService init error: $e');
     }
   }
 
@@ -87,16 +87,16 @@ class NotificationService {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        debugPrint('⚠️ saveFCMToken: no logged-in user');
+        debugPrint(' saveFCMToken: no logged-in user');
         return;
       }
 
       final token = await _messaging.getToken();
       if (token == null) {
-        debugPrint('⚠️ saveFCMToken: could not get FCM token');
+        debugPrint(' saveFCMToken: could not get FCM token');
         return;
       }
-      debugPrint('📱 FCM Token: $token');
+      debugPrint('Phone FCM Token: $token');
 
       // ✅ FIX: Save to fcmTokens/{authUid} — NOT members/{authUid}
       // Member docs use custom UUIDs, not Firebase Auth UIDs.
@@ -112,7 +112,7 @@ class NotificationService {
 
       // Listen for token refresh
       _messaging.onTokenRefresh.listen((newToken) async {
-        debugPrint('🔄 FCM token refreshed');
+        debugPrint(' FCM token refreshed');
         await _db.collection('fcmTokens').doc(user.uid).update({
           'token': newToken,
           'updatedAt': FieldValue.serverTimestamp(),
@@ -120,9 +120,9 @@ class NotificationService {
         await _updateMemberFcmToken(user.uid, newToken);
       });
 
-      debugPrint('✅ FCM token saved');
+      debugPrint('Check FCM token saved');
     } catch (e) {
-      debugPrint('❌ Error saving FCM token: $e');
+      debugPrint(' Error saving FCM token: $e');
     }
   }
 
@@ -142,10 +142,10 @@ class NotificationService {
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
         'platform': Platform.isAndroid ? 'android' : 'ios',
       });
-      debugPrint('✅ Member fcmToken updated');
+      debugPrint('Check Member fcmToken updated');
     } catch (e) {
       // Non-fatal — fcmTokens collection is the source of truth
-      debugPrint('⚠️ Could not update member fcmToken: $e');
+      debugPrint(' Could not update member fcmToken: $e');
     }
   }
 
@@ -156,9 +156,9 @@ class NotificationService {
       await _messaging.subscribeToTopic('announcements_all');
       final slug = branch.toLowerCase().replaceAll(' ', '_');
       await _messaging.subscribeToTopic('announcements_$slug');
-      debugPrint('✅ Subscribed to topics: all, $branch');
+      debugPrint('Check Subscribed to topics: all, $branch');
     } catch (e) {
-      debugPrint('❌ Subscribe error: $e');
+      debugPrint(' Subscribe error: $e');
     }
   }
 
@@ -167,9 +167,9 @@ class NotificationService {
       await _messaging.unsubscribeFromTopic('announcements_all');
       final slug = branch.toLowerCase().replaceAll(' ', '_');
       await _messaging.unsubscribeFromTopic('announcements_$slug');
-      debugPrint('✅ Unsubscribed from topics');
+      debugPrint('Check Unsubscribed from topics');
     } catch (e) {
-      debugPrint('❌ Unsubscribe error: $e');
+      debugPrint(' Unsubscribe error: $e');
     }
   }
 
@@ -190,7 +190,7 @@ class NotificationService {
     await _localNotifs.initialize(
       settings: const InitializationSettings(android: android, iOS: ios),
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        debugPrint('🔔 Notification tapped: ${response.payload}');
+        debugPrint(' Notification tapped: ${response.payload}');
         navigatorKey.currentState?.push(
           MaterialPageRoute(builder: (_) => const NotificationsScreen()),
         );
@@ -217,7 +217,7 @@ class NotificationService {
       importance: Importance.defaultImportance,
     );
 
-    debugPrint('✅ Local notifications initialized');
+    debugPrint('Check Local notifications initialized');
   }
 
   Future<void> _createChannel({
@@ -244,7 +244,7 @@ class NotificationService {
   // ── Private: Message handlers ─────────────────────────────────────────────
 
   void _onForeground(RemoteMessage message) {
-    debugPrint('📱 Foreground: ${message.notification?.title}');
+    debugPrint('Phone Foreground: ${message.notification?.title}');
     if (message.notification == null) return;
 
     final type = message.data['type'] as String? ?? 'announcement';
@@ -267,7 +267,7 @@ class NotificationService {
   }
 
   void _onTap(RemoteMessage message) {
-    debugPrint('👆 Notification tapped: ${message.data}');
+    debugPrint(' Notification tapped: ${message.data}');
     navigatorKey.currentState?.push(
       MaterialPageRoute(builder: (_) => const NotificationsScreen()),
     );

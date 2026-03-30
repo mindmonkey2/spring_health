@@ -150,15 +150,15 @@ class _MemberFitnessTabState extends State<MemberFitnessTab> {
                        Row(
                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                          children: [
-                           _gamStat('🔥', '$streak', 'Streak'),
+                           _gamStat('', '$streak', 'Streak'),
                            _vDivider(),
-                           _gamStat('🏆', '$longest', 'Best'),
+                           _gamStat('Trophy', '$longest', 'Best'),
                            _vDivider(),
-                           _gamStat('💪', '$workouts', 'Workouts'),
+                           _gamStat('', '$workouts', 'Workouts'),
                            _vDivider(),
-                           _gamStat('✅', '$checkIns', 'Check-ins'),
+                           _gamStat('Check', '$checkIns', 'Check-ins'),
                            _vDivider(),
-                           _gamStat('🏅', '$badges', 'Badges'),
+                           _gamStat('', '$badges', 'Badges'),
                          ],
                        ),
 
@@ -309,13 +309,13 @@ class _MemberFitnessTabState extends State<MemberFitnessTab> {
     }
 
     String _levelTitle(int xp) {
-      if (xp >= 5000) return '⚡ Legend';
-      if (xp >= 3000) return '🏆 Champion';
-      if (xp >= 2000) return '💪 Elite';
-      if (xp >= 1000) return '🔥 Advanced';
-      if (xp >= 500)  return '⭐ Intermediate';
-      if (xp >= 100)  return '🌱 Beginner';
-      return '🆕 Newcomer';
+      if (xp >= 5000) return 'Energy Legend';
+      if (xp >= 3000) return 'Trophy Champion';
+      if (xp >= 2000) return ' Elite';
+      if (xp >= 1000) return ' Advanced';
+      if (xp >= 500)  return ' Intermediate';
+      if (xp >= 100)  return 'Seedling Beginner';
+      return ' Newcomer';
     }
 }
 

@@ -147,7 +147,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
           dateFormatter.format(m.expiryDate),
           isActive ? 'Active' : 'Expired',
           'Rs. ${m.dueAmount.toStringAsFixed(0)}',
-          m.paymentMode,           // ✅ non-nullable — no ?? needed
+          m.paymentMode,           // Check non-nullable — no ?? needed
         ];
         buffer.writeln(row.map(_csvEscape).join(','));
       }
@@ -156,7 +156,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(buffer.toString());
 
-      // ✅ share_plus v4–v8 compatible API
+      // Check share_plus v4–v8 compatible API
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'text/csv')],
         subject: 'Spring Health Members Export',
@@ -353,7 +353,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                 final allMembers = snapshot.data!;
                 final filteredMembers = _filterMembers(allMembers);
 
-                // ✅ Cache filtered list for export — updated every build
+                // Check Cache filtered list for export — updated every build
                 _lastFilteredMembers = filteredMembers;
 
                 if (filteredMembers.isEmpty) {

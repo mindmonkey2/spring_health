@@ -303,11 +303,11 @@ class _WarScreenState extends State<WarScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _prizeItem('🥇', '1st', '${war.prizePool['1st'] ?? 500}'),
-              _prizeItem('🥈', '2nd', '${war.prizePool['2nd'] ?? 300}'),
-              _prizeItem('🥉', '3rd', '${war.prizePool['3rd'] ?? 150}'),
+              _prizeItem('1st', '1st', '${war.prizePool['1st'] ?? 500}'),
+              _prizeItem('2nd', '2nd', '${war.prizePool['2nd'] ?? 300}'),
+              _prizeItem('3rd', '3rd', '${war.prizePool['3rd'] ?? 150}'),
               _prizeItem(
-                '🏅',
+                '',
                 'Part.',
                 '${war.prizePool['participation'] ?? 20}',
               ),

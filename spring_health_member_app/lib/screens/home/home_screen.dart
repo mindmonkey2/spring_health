@@ -138,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String get _motivationalSubtitle {
     final streak = _gamification?.currentStreak ?? 0;
-    if (streak >= 14) return '🔥 $streak DAYS UNSTOPPABLE!';
-    if (streak >= 7) return '💪 $streak DAY STREAK — KEEP IT UP!';
-    if (streak >= 3) return '⚡ $streak DAYS STRONG!';
+    if (streak >= 14) return ' $streak DAYS UNSTOPPABLE!';
+    if (streak >= 7) return ' $streak DAY STREAK — KEEP IT UP!';
+    if (streak >= 3) return 'Energy $streak DAYS STRONG!';
     return 'READY TO TRAIN?';
   }
 
@@ -173,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '🏅 BADGE UNLOCKED!',
+                ' BADGE UNLOCKED!',
                 style: AppTextStyles.caption.copyWith(
                   color: badge.color,
                   letterSpacing: 2,
@@ -232,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   child: const Text(
-                    'AWESOME! 💪',
+                    'AWESOME! ',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -386,33 +386,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildAiCoachBanner() {
     Color chipColor = AppColors.neonLime;
-    String chipText = '🟢 Ready to Train';
+    String chipText = ' Ready to Train';
 
     if (_recoveryStatus != null) {
       switch (_recoveryStatus) {
         case 'fully_recovered':
           chipColor = AppColors.neonLime;
-          chipText = '🟢 Fully Recovered';
+          chipText = 'Ready Fully Recovered';
           break;
         case 'recovered':
           chipColor = AppColors.neonLime;
-          chipText = '✅ Recovered';
+          chipText = 'Check Recovered';
           break;
         case 'moderate':
           chipColor = const Color(0xFFFF9800);
-          chipText = '🟡 Moderate';
+          chipText = ' Moderate';
           break;
         case 'fatigued':
           chipColor = AppColors.error;
-          chipText = '🔴 Fatigued';
+          chipText = ' Fatigued';
           break;
         case 'sick':
           chipColor = AppColors.error;
-          chipText = '🤒 Rest Today';
+          chipText = ' Rest Today';
           break;
         case 'cardiac_flag':
           chipColor = AppColors.error;
-          chipText = '⚠️ Cardiac Alert';
+          chipText = ' Cardiac Alert';
           break;
       }
     }
@@ -807,7 +807,7 @@ class _HomeScreenState extends State<HomeScreen> {
           delay: 750,
           onTap: () => ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Class Booking — Coming Soon! 🗓️'),
+              content: Text('Class Booking — Coming Soon! '),
               behavior: SnackBarBehavior.floating,
             ),
           ),
@@ -1034,7 +1034,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$streak DAY STREAK 🔥',
+                  '$streak DAY STREAK ',
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.neonOrange,
                     fontWeight: FontWeight.bold,
@@ -1052,7 +1052,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const Text('🔥', style: TextStyle(fontSize: 28)),
+          const Text('', style: TextStyle(fontSize: 28)),
         ],
       ),
     ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0);

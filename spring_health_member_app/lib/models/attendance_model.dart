@@ -174,11 +174,11 @@ class AttendanceModel {
   // Time of day label for stats
   String get timeOfDay {
     final h = checkInTime.hour;
-    if (h < 7) return 'Early Bird 🌅';
-    if (h < 12) return 'Morning 🌤️';
-    if (h < 17) return 'Afternoon ☀️';
-    if (h < 20) return 'Evening 🌆';
-    return 'Night Owl 🌙';
+    if (h < 7) return 'Early Bird ';
+    if (h < 12) return 'Morning ';
+    if (h < 17) return 'Afternoon ';
+    if (h < 20) return 'Evening ';
+    return 'Night Owl ';
   }
 
   // ══════════════════════════════════════════════════════════

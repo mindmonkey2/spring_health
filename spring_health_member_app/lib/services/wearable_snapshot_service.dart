@@ -59,15 +59,15 @@ class WearableSnapshotService {
           if (isRequested) {
             availableTypes.add(type);
           } else {
-            debugPrint('⚠️ Health permissions not granted: $type');
+            debugPrint(' Health permissions not granted: $type');
           }
         } catch (e) {
-          debugPrint('⚠️ Health type $type not available on platform: $e');
+          debugPrint(' Health type $type not available on platform: $e');
         }
       }
 
       if (availableTypes.isEmpty) {
-        debugPrint('⚠️ No health permissions granted');
+        debugPrint(' No health permissions granted');
         return null;
       }
 
@@ -311,13 +311,13 @@ class WearableSnapshotService {
             await profileService.saveHealthProfile(updatedProfile);
           }
         } catch (e) {
-          debugPrint('⚠️ Failed to update HealthProfile from wearables: $e');
+          debugPrint(' Failed to update HealthProfile from wearables: $e');
         }
       }
 
       return rawSnapshot;
     } catch (e) {
-      debugPrint('⚠️ Error syncing wearable snapshot: $e');
+      debugPrint(' Error syncing wearable snapshot: $e');
       return null;
     }
   }
@@ -339,7 +339,7 @@ class WearableSnapshotService {
           .map((doc) => WearableSnapshotModel.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      debugPrint('⚠️ Error getting latest wearable snapshots: $e');
+      debugPrint(' Error getting latest wearable snapshots: $e');
       return [];
     }
   }
@@ -361,7 +361,7 @@ class WearableSnapshotService {
       }
       return null;
     } catch (e) {
-      debugPrint('⚠️ Error getting today wearable snapshot: $e');
+      debugPrint(' Error getting today wearable snapshot: $e');
       return null;
     }
   }

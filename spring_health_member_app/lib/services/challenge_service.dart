@@ -140,14 +140,14 @@ class ChallengeService {
             teamA: const ChallengeTeam(
               id: 'teamA',
               name: 'Alpha Squad',
-              emoji: '🔥',
+              emoji: '',
               totalScore: 0,
               memberIds: [],
             ),
             teamB: const ChallengeTeam(
               id: 'teamB',
               name: 'Beast Mode',
-              emoji: '⚡',
+              emoji: 'Energy',
               totalScore: 0,
               memberIds: [],
             ),

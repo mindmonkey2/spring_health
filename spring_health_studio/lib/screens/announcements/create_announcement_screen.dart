@@ -93,7 +93,7 @@ extends State<CreateAnnouncementScreen> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('📢 Announcement sent successfully!'),
+          content: Text(' Announcement sent successfully!'),
           backgroundColor: AppColors.success,
           duration: Duration(seconds: 3),
         ),
@@ -408,7 +408,7 @@ extends State<CreateAnnouncementScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '📍 $branchText',
+                    'Location $branchText',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,

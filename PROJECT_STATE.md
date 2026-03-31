@@ -102,6 +102,49 @@ Resolved in Thread 12:
   ✓ member_ai_plan_screen.dart — Trainer Override screen (T11 carry-forward)
   ✓ Weekly Wars UI — war_screen.dart 3-tab implementation complete
 
+Resolved in Thread 13_2:
+  ✓ Thread 13_2 — Firestore schema:
+    4 new collections added to studio app:
+    memberGoals/{memberAuthUid}, trainingSessions/{sessionId},
+    memberIntelligence/{memberAuthUid}, gymEquipment/{branch}.
+    4 new models: MemberGoalModel, TrainingSessionModel,
+    MemberIntelligenceModel, GymEquipmentModel.
+    All use fromMap(data, id) pattern. No fromFirestore.
+    firebase_ai: ^2.2.0 added to studio pubspec only.
+    Firestore rules deployed for all 4 collections.
+
+  ✓ MemberModel has no auth UID field (Thread 13_2):
+    MemberModel.id = Firestore document ID only.
+    No uid, userId, authUid, firebaseUid field exists.
+    Auth UID is stored in trainingSessions.memberAuthUid.
+    All writes to memberGoals, memberIntelligence,
+    notifications, workouts must use
+    sessionData['memberAuthUid'] — not member.id.
+
+  ✓ Thread 13_2 — AjAX trainer loop complete:
+    Studio app received full trainer session flow:
+    FlexibilityAssessmentScreen (7-test, first session only),
+    TrainerScanScreen (QR + attendance + parallel data fetch
+    + readiness score computed locally, default 70, clamp 0-100),
+    TrainerReadinessScreen (4 info cards + trainer input form
+    + gymEquipment chips + session doc create),
+    TrainerAjaxService (firebase_ai Gemini 2.0 Flash,
+    responseMimeType json, temperature 0.4),
+    TrainerWarmupScreen (ValueNotifier countdown, 3 plan cards,
+    AjAX recommended badge by readiness score),
+    TrainerSessionScreen (ValueNotifier elapsed timer,
+    transaction-based set logging, end session writes to
+    workouts + memberIntelligence + memberGoals + notifications).
+    Member app: MemberSessionScreen (Neon Dark, StreamBuilder
+    on trainingSessions, goal insight card, log set bottom sheet,
+    nutrition card on complete).
+    Equipment Manager: OwnerDashboard quick action,
+    gymEquipment Firestore read/write with merge.
+    Member Goal: MemberGoalScreen 4-step flow,
+    home screen goal progress card, trainer dashboard chips,
+    shared GoalSetSheet widget.
+    flutter analyze 0 issues both apps.
+
 STILL PENDING:
   - Class Booking / Scheduling
   - Razorpay (do not start without payment contract)
@@ -148,3 +191,10 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 
   18. Member document lookup pattern:
       The Member App looks up a member's document by first finding the `member_id` from the current user's document in the `users` collection. It then looks up the `members` collection using that `member_id` as the document ID. The `user_id` field on the member document links back to the Firebase Auth `uid`. This is a critical architectural rule — must match exactly what Studio writes when creating members.
+
+
+  19. MemberModel.id is Firestore doc ID not auth UID.
+      Never use member.uid or member.userId — field does not exist.
+      Auth UID for Firestore writes comes from
+      trainingSessions.memberAuthUid (in session screens) or
+      from the QR scan fetch (in scan screen).

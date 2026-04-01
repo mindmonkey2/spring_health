@@ -64,6 +64,8 @@ class MemberModel {
   //  COMPUTED GETTERS
   // ═══════════════════════════════════════════════════════
 
+  String get uid => id;
+
   /// True if membership has passed its expiry date
   bool get isExpired => DateTime.now().isAfter(expiryDate);
 

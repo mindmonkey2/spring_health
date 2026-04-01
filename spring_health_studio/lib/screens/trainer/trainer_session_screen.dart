@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../models/member_model.dart';
+import 'trainer_stretching_screen.dart';
 
 class TrainerSessionScreen extends StatefulWidget {
   final String sessionId;
@@ -30,8 +31,8 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
   final Map<int, TextEditingController> _weightControllers = {};
   final TextEditingController _trainerNotesController = TextEditingController();
   final TextEditingController _ajaxNoteController = TextEditingController();
-  double _sessionRpe = 5;
-  bool _isSavingEndSession = false;
+  bool _isNavigatingToStretching = false;
+  bool _hasNavigatedToStretching = false;
 
   @override
   void initState() {
@@ -70,13 +71,14 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
     super.dispose();
   }
 
+  // ignore: unused_element
   Future<void> _endSession(Map<String, dynamic> sessionData) async {
-    setState(() => _isSavingEndSession = true);
+    // setState(() => _isSavingEndSession = true);
 
     try {
       final db = FirebaseFirestore.instance;
       final totalDurationMinutes = _elapsed ~/ 60;
-      final rpe = _sessionRpe.toInt();
+      const rpe = 5; // _sessionRpe.toInt();
       final notes = _trainerNotesController.text;
       final ajaxNote = _ajaxNoteController.text.trim();
       final now = Timestamp.now();
@@ -85,7 +87,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
           List<Map<String, dynamic>>.from(sessionData['exercises'] ?? []);
 
       await db
-          .collection('trainingSessions')
+          .collection('sessions')
           .doc(widget.sessionId)
           .update({
         'status': 'complete',
@@ -94,6 +96,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
         'trainerNotes': notes,
         'sessionRpe': rpe,
         'nutritionSentAt': now,
+        'memberAuthUid': widget.member.uid,
       });
 
       final workoutExercises = exercises.map((ex) {
@@ -116,7 +119,8 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       }).toList();
 
       await db.collection('workouts').add({
-        'memberId': (sessionData['memberAuthUid'] as String? ?? ''),
+        'memberId': widget.member.id,
+        'memberAuthUid': widget.member.uid,
         'exercises': workoutExercises,
         'durationMinutes': totalDurationMinutes,
         'date': now,
@@ -204,7 +208,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to end session: $e')));
-        setState(() => _isSavingEndSession = false);
+        // setState(() => _isSavingEndSession = false);
       }
     }
   }
@@ -221,7 +225,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
 
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('trainingSessions')
+          .collection('sessions')
           .doc(widget.sessionId);
 
       await FirebaseFirestore.instance
@@ -260,7 +264,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       Map<String, dynamic> exercise, int totalExercises) async {
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('trainingSessions')
+          .collection('sessions')
           .doc(widget.sessionId);
 
       await FirebaseFirestore.instance
@@ -309,7 +313,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
         ),
         title: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
-              .collection('trainingSessions')
+              .collection('sessions')
               .doc(widget.sessionId)
               .snapshots(),
           builder: (context, snapshot) {
@@ -365,7 +369,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('trainingSessions')
+            .collection('sessions')
             .doc(widget.sessionId)
             .snapshots(),
         builder: (context, snapshot) {
@@ -386,106 +390,47 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
           final allComplete = exercises.isNotEmpty &&
               exercises.every((ex) => ex['status'] == 'complete');
 
+          if (allComplete && !_hasNavigatedToStretching) {
+            _hasNavigatedToStretching = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (!mounted) return;
+              setState(() => _isNavigatingToStretching = true);
+              final allMuscles = exercises
+                  .expand((ex) => List<String>.from(ex['targetMuscles'] ?? []))
+                  .toSet().toList();
+
+              await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionId).set({
+                'musclesWorked': allMuscles,
+                'status': 'stretching'
+              }, SetOptions(merge: true));
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => TrainerStretchingScreen(
+                  sessionId: widget.sessionId,
+                  member: widget.member,
+                  trainerId: widget.trainerId,
+                  musclesWorked: allMuscles,
+                )),
+              );
+            });
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: exercises.length + (allComplete ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == exercises.length) {
-                return Card(
-                  color: AppColors.surface,
-                  margin:
-                      const EdgeInsets.only(top: 24, bottom: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(
-                        color: AppColors.turquoise),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'End Session',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                return _isNavigatingToStretching
+                    ? const Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Center(
+                          child: CircularProgressIndicator(
                               color: AppColors.turquoise),
                         ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _trainerNotesController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'Trainer notes',
-                            border: OutlineInputBorder(),
-                            alignLabelWithHint: true,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Overall session RPE: ${_sessionRpe.toInt()}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600),
-                        ),
-                        Slider(
-                          value: _sessionRpe,
-                          min: 1,
-                          max: 10,
-                          divisions: 9,
-                          label: _sessionRpe.toInt().toString(),
-                          activeColor: AppColors.turquoise,
-                          onChanged: (val) {
-                            setState(() => _sessionRpe = val);
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _ajaxNoteController,
-                          maxLines: 1,
-                          decoration: const InputDecoration(
-                            labelText:
-                                'AjAX memory note (optional)',
-                            hintText:
-                                'One sentence stored as trainer observation',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _isSavingEndSession
-                              ? null
-                              : () => _endSession(data),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.success,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _isSavingEndSession
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2),
-                                )
-                              : const Text(
-                                  'END SESSION',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                      )
+                    : const SizedBox.shrink();
               }
 
               final ex = exercises[index];

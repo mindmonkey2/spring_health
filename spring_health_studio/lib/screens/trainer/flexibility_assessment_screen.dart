@@ -70,6 +70,7 @@ class _FlexibilityAssessmentScreenState
       context,
       MaterialPageRoute(
         builder: (context) => TrainerReadinessScreen(
+          sessionId: widget.pendingSessionData['sessionId'] as String,
           member: widget.member,
           trainerId: widget.trainerId,
           sessionData: widget.pendingSessionData,
@@ -153,6 +154,7 @@ class _FlexibilityAssessmentScreenState
         context,
         MaterialPageRoute(
           builder: (context) => TrainerReadinessScreen(
+            sessionId: widget.pendingSessionData['sessionId'] as String,
             member: widget.member,
             trainerId: widget.trainerId,
             sessionData: widget.pendingSessionData,

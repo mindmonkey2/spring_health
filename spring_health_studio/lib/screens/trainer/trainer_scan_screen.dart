@@ -331,6 +331,7 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => TrainerReadinessScreen(
+              sessionId: sessionData['sessionId'] as String,
               member: member,
               trainerId: widget.trainerId,
               sessionData: sessionData,

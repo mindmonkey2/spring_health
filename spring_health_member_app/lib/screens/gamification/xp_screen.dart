@@ -4,7 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/gamification_model.dart';
 import '../../services/gamification_service.dart';
-import 'personal_best_screen.dart';
+import '../fitness/personal_bests_screen.dart';
 
 class XpScreen extends StatelessWidget {
   final String memberId;
@@ -738,7 +738,7 @@ class XpScreen extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const PersonalBestScreen()),
+          MaterialPageRoute(builder: (_) => PersonalBestsScreen(memberId: memberId)),
         );
       },
       child: Container(

@@ -137,6 +137,9 @@ class WorkoutLog {
   final int totalVolume; // total kg lifted
   final int totalSets;
   final int caloriesBurned; // ✅ NEW — fixes undefined_named_parameter error
+  final String? source;
+  final String? muscleGroup;
+  final int? rpe;
 
   WorkoutLog({
     required this.id,
@@ -149,6 +152,9 @@ class WorkoutLog {
     required this.totalVolume,
     required this.totalSets,
     this.caloriesBurned = 0, // ✅ default so existing callers don't break
+    this.source,
+    this.muscleGroup,
+    this.rpe,
   });
 
   // ✅ Computed getters
@@ -188,6 +194,9 @@ class WorkoutLog {
     int? totalVolume,
     int? totalSets,
     int? caloriesBurned,
+    String? source,
+    String? muscleGroup,
+    int? rpe,
   }) => WorkoutLog(
     id: id ?? this.id,
     memberId: memberId ?? this.memberId,
@@ -199,6 +208,9 @@ class WorkoutLog {
     totalVolume: totalVolume ?? this.totalVolume,
     totalSets: totalSets ?? this.totalSets,
     caloriesBurned: caloriesBurned ?? this.caloriesBurned,
+    source: source ?? this.source,
+    muscleGroup: muscleGroup ?? this.muscleGroup,
+    rpe: rpe ?? this.rpe,
   );
 
   // ✅ Empty factory — useful for UI init
@@ -214,10 +226,9 @@ class WorkoutLog {
     caloriesBurned: 0,
   );
 
-  factory WorkoutLog.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory WorkoutLog.fromMap(Map<String, dynamic> data, String id) {
     return WorkoutLog(
-      id: doc.id,
+      id: id,
       memberId: data['memberId'] as String? ?? '',
       title: data['title'] as String? ?? 'Workout',
       date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -230,7 +241,14 @@ class WorkoutLog {
       totalSets: data['totalSets'] as int? ?? 0,
       caloriesBurned:
           data['caloriesBurned'] as int? ?? 0, // ✅ reads from Firestore
+      source: data['source'] as String?,
+      muscleGroup: data['muscleGroup'] as String?,
+      rpe: data['rpe'] as int?,
     );
+  }
+
+  factory WorkoutLog.fromFirestore(DocumentSnapshot doc) {
+    return WorkoutLog.fromMap(doc.data() as Map<String, dynamic>, doc.id);
   }
 
   Map<String, dynamic> toMap() => {
@@ -243,5 +261,8 @@ class WorkoutLog {
     'totalVolume': totalVolume,
     'totalSets': totalSets,
     'caloriesBurned': caloriesBurned, // ✅ writes to Firestore
+    'source': source,
+    'muscleGroup': muscleGroup,
+    'rpe': rpe,
   };
 }

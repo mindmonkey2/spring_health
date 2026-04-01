@@ -14,7 +14,7 @@ import '../../services/firebase_auth_service.dart';
 import '../auth/login_screen.dart';
 import '../attendance/member_attendance_screen.dart';
 import '../fitness/body_metrics_screen.dart';
-import '../gamification/personal_best_screen.dart';
+import '../fitness/personal_bests_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../health/health_profile_screen.dart';
@@ -617,7 +617,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icons.emoji_events_rounded,
           AppColors.warning,
           subtitle: 'Track your reps, beat your limits',
-          onTap: () => _push(const PersonalBestScreen()),
+          onTap: () => _push(PersonalBestsScreen(memberId: _member.id)),
         ),
         const SizedBox(height: 12),
         _buildActionTile(

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/workout_model.dart';
 import '../../services/workout_service.dart';
+import '../../services/gamification_service.dart';
+import '../../widgets/rpe_rating_sheet.dart';
 import 'workout_detail_screen.dart';
 import 'workout_logger_screen.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
   final String memberId;
@@ -17,30 +20,12 @@ class WorkoutHistoryScreen extends StatefulWidget {
   State<WorkoutHistoryScreen> createState() => _WorkoutHistoryScreenState();
 }
 
-class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen>
-    with SingleTickerProviderStateMixin {
+class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   final _workoutService = WorkoutService();
 
   List<WorkoutLog> _allWorkouts = [];
-  List<WorkoutLog> _filtered = [];
   bool _isLoading = true;
   String? _error;
-
-  // Filters
-  String _selectedFilter = 'All';
-  String _sortBy = 'Newest';
-
-  static const _filters = [
-    'All',
-    'Chest',
-    'Back',
-    'Legs',
-    'Shoulders',
-    'Arms',
-    'Core',
-    'Cardio',
-  ];
-  static const _sortOptions = ['Newest', 'Oldest', 'Most Volume', 'Longest'];
 
   @override
   void initState() {
@@ -60,7 +45,6 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen>
           _allWorkouts = workouts;
           _isLoading = false;
         });
-        _applyFilters();
       }
     } catch (e) {
       if (mounted) {
@@ -72,819 +56,964 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen>
     }
   }
 
-  void _applyFilters() {
-    List<WorkoutLog> result = List.from(_allWorkouts);
-
-    // Category filter
-    if (_selectedFilter != 'All') {
-      result = result
-          .where(
-            (w) => w.exercises.any(
-              (e) => e.category.toLowerCase() == _selectedFilter.toLowerCase(),
-            ),
-          )
-          .toList();
-    }
-
-    // Sort
-    switch (_sortBy) {
-      case 'Newest':
-        result.sort((a, b) => b.date.compareTo(a.date));
-        break;
-      case 'Oldest':
-        result.sort((a, b) => a.date.compareTo(b.date));
-        break;
-      case 'Most Volume':
-        result.sort((a, b) => b.totalVolume.compareTo(a.totalVolume));
-        break;
-      case 'Longest':
-        result.sort((a, b) => b.durationMinutes.compareTo(a.durationMinutes));
-        break;
-    }
-
-    setState(() => _filtered = result);
-  }
-
-  // ─────────────────────────────────────
-  // COMPUTED STATS
-  // ─────────────────────────────────────
-  int get _totalVolume =>
-      _allWorkouts.fold(0, (total, w) => total + w.totalVolume);
-
-  int get _totalSessions => _allWorkouts.length;
-
-  int get _totalMinutes =>
-      _allWorkouts.fold(0, (total, w) => total + w.durationMinutes);
-
-  int get _thisWeekSessions {
-    final now = DateTime.now();
-    final weekStart = now.subtract(Duration(days: now.weekday - 1));
-    return _allWorkouts
-        .where(
-          (w) => w.date.isAfter(
-            DateTime(weekStart.year, weekStart.month, weekStart.day),
-          ),
-        )
-        .length;
-  }
-
-  // Group workouts by month
-  Map<String, List<WorkoutLog>> get _groupedByMonth {
-    final grouped = <String, List<WorkoutLog>>{};
-    for (final w in _filtered) {
-      final key = DateFormat('MMMM yyyy').format(w.date);
-      grouped.putIfAbsent(key, () => []).add(w);
-    }
-    return grouped;
-  }
+  // Action Bar logic will be added here
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundBlack,
+        backgroundColor: AppColors.cardSurface,
         elevation: 0,
         title: Text(
-          'WORKOUT HISTORY',
-          style: AppTextStyles.heading2.copyWith(letterSpacing: 2),
+          'My Workouts',
+          style: AppTextStyles.heading3.copyWith(color: AppColors.white),
         ),
-        actions: [
-          // Sort dropdown
-          PopupMenuButton<String>(
-            icon: Icon(Icons.sort_rounded, color: AppColors.neonLime),
-            color: AppColors.cardSurface,
-            onSelected: (val) {
-              setState(() => _sortBy = val);
-              _applyFilters();
-            },
-            itemBuilder: (_) => _sortOptions
-                .map(
-                  (s) => PopupMenuItem(
-                    value: s,
-                    child: Row(
-                      children: [
-                        Icon(
-                          _sortBy == s
-                              ? Icons.check_rounded
-                              : Icons.circle_outlined,
-                          color: _sortBy == s
-                              ? AppColors.neonLime
-                              : AppColors.gray600,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          s,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: _sortBy == s
-                                ? AppColors.neonLime
-                                : AppColors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          IconButton(
-            onPressed: _loadWorkouts,
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.neonLime),
-          ),
-        ],
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.neonLime),
+      );
+    }
+    if (_error != null) {
+      return Center(
+        child: Text(_error!, style: const TextStyle(color: AppColors.error)),
+      );
+    }
+
+    return RefreshIndicator(
+      color: AppColors.neonLime,
+      backgroundColor: AppColors.cardSurface,
+      onRefresh: _loadWorkouts,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildActionBar(),
+            const SizedBox(height: 32),
+            _buildThisWeekSection(),
+            const SizedBox(height: 32),
+            _buildStrengthTrends(),
+            const SizedBox(height: 32),
+            _buildRecentWorkouts(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── SECTION 1: ACTION BAR ───────────────────────────────────────
+
+  Widget _buildActionBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          onPressed: _showStartWorkoutSheet,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text(
+            'START WORKOUT',
+            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.neonLime,
+            foregroundColor: Colors.black,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: _showQuickLogSheet,
+          icon: const Icon(Icons.flash_on_rounded, size: 18),
+          label: const Text('Quick Log'),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.neonLime,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: AppColors.neonLime.withValues(alpha: 0.3),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showStartWorkoutSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => _TemplatePickerSheet(
+        memberId: widget.memberId,
+        onTemplateSelected: (templateName, preloaded) async {
+          Navigator.pop(context);
           final saved = await Navigator.push<bool>(
             context,
             MaterialPageRoute(
-              builder: (_) => WorkoutLoggerScreen(memberId: widget.memberId),
+              builder: (_) => WorkoutLoggerScreen(
+                memberId: widget.memberId,
+                preloadedExercises: preloaded,
+              ),
             ),
           );
           if (saved == true) _loadWorkouts();
         },
-        backgroundColor: AppColors.neonLime,
-        foregroundColor: Colors.black,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'LOG WORKOUT',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
-        ),
       ),
-      body: _isLoading
-          ? _buildLoading()
-          : _error != null
-          ? _buildError()
-          : _allWorkouts.isEmpty
-          ? _buildEmptyState()
-          : _buildContent(),
     );
   }
 
-  // ─────────────────────────────────────
-  // CONTENT
-  // ─────────────────────────────────────
-  Widget _buildContent() {
-    return RefreshIndicator(
-      onRefresh: _loadWorkouts,
-      color: AppColors.neonLime,
+  void _showQuickLogSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
       backgroundColor: AppColors.cardSurface,
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          // Stats Summary
-          SliverToBoxAdapter(child: _buildStatsSummary()),
-
-          // Category Filter chips
-          SliverToBoxAdapter(child: _buildFilterChips()),
-
-          // Results count
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Row(
-                children: [
-                  Text(
-                    '${_filtered.length} WORKOUT${_filtered.length != 1 ? 'S' : ''}',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.gray400,
-                      letterSpacing: 1.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (_selectedFilter != 'All')
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.neonTeal.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _selectedFilter,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.neonTeal,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-          // Grouped workout list
-          if (_filtered.isEmpty)
-            SliverToBoxAdapter(child: _buildNoResults())
-          else
-            ..._buildGroupedList(),
-
-          // Bottom padding for FAB
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-    );
-  }
-
-  // ─────────────────────────────────────
-  // STATS SUMMARY
-  // ─────────────────────────────────────
-  Widget _buildStatsSummary() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.neonLime.withValues(alpha: 0.15),
-            AppColors.neonTeal.withValues(alpha: 0.08),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'ALL TIME STATS',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.neonLime,
-              letterSpacing: 2,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildStat(
-                '$_totalSessions',
-                'Sessions',
-                Icons.fitness_center_rounded,
-                AppColors.neonLime,
-              ),
-              _buildStatDivider(),
-              _buildStat(
-                '${(_totalMinutes / 60).toStringAsFixed(1)}h',
-                'Total Time',
-                Icons.timer_rounded,
-                AppColors.neonTeal,
-              ),
-              _buildStatDivider(),
-              _buildStat(
-                '${_totalVolume}kg',
-                'Volume',
-                Icons.monitor_weight_rounded,
-                AppColors.neonOrange,
-              ),
-              _buildStatDivider(),
-              _buildStat(
-                '$_thisWeekSessions',
-                'This Week',
-                Icons.calendar_today_rounded,
-                Colors.purpleAccent,
-              ),
-            ],
-          ),
-        ],
-      ),
-    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
-  }
-
-  Widget _buildStat(String value, String label, IconData icon, Color color) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: AppTextStyles.heading3.copyWith(color: color),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.gray400,
-              fontSize: 9,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatDivider() => Container(
-    width: 1,
-    height: 40,
-    color: Colors.white.withValues(alpha: 0.07),
-  );
-
-  // ─────────────────────────────────────
-  // FILTER CHIPS
-  // ─────────────────────────────────────
-  Widget _buildFilterChips() {
-    return SizedBox(
-      height: 42,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _filters.length,
-        itemBuilder: (context, index) {
-          final filter = _filters[index];
-          final isSelected = filter == _selectedFilter;
-          final color = filter == 'All'
-              ? AppColors.neonLime
-              : _getCategoryColor(filter);
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () {
-                setState(() => _selectedFilter = filter);
-                _applyFilters();
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? color.withValues(alpha: 0.2)
-                      : AppColors.cardSurface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected ? color : Colors.white10,
-                  ),
-                ),
-                child: Text(
-                  filter,
-                  style: TextStyle(
-                    color: isSelected ? color : AppColors.gray400,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-          );
+      builder: (context) => _QuickLogSheet(
+        memberId: widget.memberId,
+        onSaved: () {
+          Navigator.pop(context);
+          _loadWorkouts();
         },
       ),
-    ).animate().fadeIn(delay: 100.ms);
+    );
   }
 
-  // ─────────────────────────────────────
-  // GROUPED LIST
-  // ─────────────────────────────────────
-  List<Widget> _buildGroupedList() {
-    final grouped = _groupedByMonth;
-    final slivers = <Widget>[];
+  // ─── SECTION 2: THIS WEEK ────────────────────────────────────────
 
-    grouped.forEach((month, workouts) {
-      // Month header
-      slivers.add(
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-            child: Row(
+  Widget _buildThisWeekSection() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final startOfWeekDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+
+    // Get workouts for this week
+    final thisWeekWorkouts = _allWorkouts.where((w) {
+      final wDate = DateTime(w.date.year, w.date.month, w.date.day);
+      return wDate.isAfter(startOfWeekDate.subtract(const Duration(days: 1)));
+    }).toList();
+
+    int totalMinutes = 0;
+    final Set<String> muscleGroups = {};
+    for (var w in thisWeekWorkouts) {
+      totalMinutes += w.durationMinutes;
+      if (w.muscleGroup != null) muscleGroups.add(w.muscleGroup!);
+      for (var e in w.exercises) {
+        muscleGroups.add(e.category);
+      }
+    }
+
+    final hours = totalMinutes ~/ 60;
+    final mins = totalMinutes % 60;
+    final durationStr = hours > 0 ? '${hours}h ${mins}min' : '${mins}min';
+    final muscleStr = muscleGroups.isNotEmpty ? muscleGroups.take(3).join(', ') : 'Rest';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'THIS WEEK',
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            letterSpacing: 1.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(7, (index) {
+            final dayDate = startOfWeekDate.add(Duration(days: index));
+            final isToday = dayDate.day == now.day && dayDate.month == now.month && dayDate.year == now.year;
+            final isLogged = thisWeekWorkouts.any((w) {
+              return w.date.year == dayDate.year && w.date.month == dayDate.month && w.date.day == dayDate.day;
+            });
+
+            final dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index];
+
+            return Column(
               children: [
-                Text(
-                  month.toUpperCase(),
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.neonTeal,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isLogged ? AppColors.neonLime : (isToday ? AppColors.gray800 : Colors.transparent),
+                    border: Border.all(
+                      color: isLogged ? AppColors.neonLime : (isToday ? AppColors.neonLime : Colors.white.withValues(alpha: 0.1)),
+                    ),
+                  ),
+                  child: Center(
+                    child: isLogged
+                        ? const Icon(Icons.check_rounded, size: 16, color: Colors.black)
+                        : (isToday ? Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.neonLime, shape: BoxShape.circle)) : const SizedBox()),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    height: 1,
-                    color: AppColors.neonTeal.withValues(alpha: 0.2),
-                  ),
-                ),
-                const SizedBox(width: 10),
+                const SizedBox(height: 8),
                 Text(
-                  '${workouts.length} session${workouts.length > 1 ? 's' : ''}',
+                  dayName,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.gray600,
-                    fontSize: 10,
+                    color: isToday ? AppColors.white : AppColors.gray400,
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ],
-            ),
+            );
+          }),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.cardSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.bolt_rounded, color: AppColors.neonOrange, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${thisWeekWorkouts.length} sessions · $durationStr',
+                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      muscleStr,
+                      style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-      );
+      ],
+    );
+  }
 
-      // Workout cards for this month
-      slivers.add(
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildWorkoutCard(workouts[index], index),
-            ),
-            childCount: workouts.length,
+  // ─── SECTION 3: STRENGTH TRENDS ──────────────────────────────────
+
+  Widget _buildStrengthTrends() {
+    if (_allWorkouts.isEmpty) return const SizedBox();
+
+    // Map: Exercise Name -> Map of Date -> max weight
+    final Map<String, Map<DateTime, double>> exerciseStats = {};
+
+    for (var w in _allWorkouts) {
+      final wDate = DateTime(w.date.year, w.date.month, w.date.day);
+      for (var e in w.exercises) {
+        double maxWeight = 0;
+        for (var set in e.sets) {
+          if (set.isCompleted && set.weight > maxWeight) {
+            maxWeight = set.weight;
+          }
+        }
+        if (maxWeight > 0) {
+          exerciseStats.putIfAbsent(e.name, () => {});
+          final currentMax = exerciseStats[e.name]![wDate] ?? 0;
+          if (maxWeight > currentMax) {
+            exerciseStats[e.name]![wDate] = maxWeight;
+          }
+        }
+      }
+    }
+
+    if (exerciseStats.isEmpty) return const SizedBox();
+
+    // Find top 5 most logged exercises
+    final sortedExercises = exerciseStats.keys.toList()
+      ..sort((a, b) => exerciseStats[b]!.length.compareTo(exerciseStats[a]!.length));
+
+    final topExercises = sortedExercises.take(5).toList();
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        title: Text(
+          'STRENGTH TRENDS',
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            letterSpacing: 1.5,
           ),
         ),
-      );
+        tilePadding: EdgeInsets.zero,
+        iconColor: AppColors.neonLime,
+        collapsedIconColor: AppColors.gray400,
+        children: topExercises.map((exName) {
+          final stats = exerciseStats[exName]!;
+          return _buildTrendCard(exName, stats);
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildTrendCard(String exerciseName, Map<DateTime, double> stats) {
+    final now = DateTime.now();
+    final fourteenDaysAgo = now.subtract(const Duration(days: 14));
+    final twentyEightDaysAgo = now.subtract(const Duration(days: 28));
+    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+
+    // Calculate avgs
+    double last14Sum = 0;
+    int last14Count = 0;
+    double prev14Sum = 0;
+    int prev14Count = 0;
+
+    stats.forEach((date, maxWeight) {
+      if (date.isAfter(fourteenDaysAgo)) {
+        last14Sum += maxWeight;
+        last14Count++;
+      } else if (date.isAfter(twentyEightDaysAgo)) {
+        prev14Sum += maxWeight;
+        prev14Count++;
+      }
     });
 
-    return slivers;
-  }
+    final last14Avg = last14Count > 0 ? last14Sum / last14Count : 0.0;
+    final prev14Avg = prev14Count > 0 ? prev14Sum / prev14Count : 0.0;
 
-  // ─────────────────────────────────────
-  // WORKOUT CARD
-  // ─────────────────────────────────────
-  Widget _buildWorkoutCard(WorkoutLog workout, int index) {
-    // Determine dominant category
-    final categoryCounts = <String, int>{};
-    for (final e in workout.exercises) {
-      categoryCounts[e.category] = (categoryCounts[e.category] ?? 0) + 1;
+    final diff = last14Avg - prev14Avg;
+    String arrow = '→';
+    Color trendColor = AppColors.gray400;
+    if (diff > 0.5) {
+      arrow = '↑';
+      trendColor = AppColors.neonLime;
+    } else if (diff < -0.5) {
+      arrow = '↓';
+      trendColor = AppColors.error;
     }
-    final dominantCategory = categoryCounts.entries
-        .reduce((a, b) => a.value >= b.value ? a : b)
-        .key;
-    final color = _getCategoryColor(dominantCategory);
 
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => WorkoutDetailScreen(workout: workout),
-        ),
+    // Chart data
+    final sortedDates = stats.keys.toList()..sort();
+    final recentDates = sortedDates.where((d) => d.isAfter(thirtyDaysAgo)).toList();
+
+    List<FlSpot> spots = [];
+    if (recentDates.length >= 2) {
+      for (int i = 0; i < recentDates.length; i++) {
+        spots.add(FlSpot(i.toDouble(), stats[recentDates[i]]!));
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.cardSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Row 1: Title + Date
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Category icon
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getCategoryIcon(dominantCategory),
-                    color: color,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        workout.title,
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.white,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        DateFormat(
-                          'EEE, dd MMM yyyy • hh:mm a',
-                        ).format(workout.date),
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray400,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.gray600),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-
-            // Row 2: Stats chips
-            Row(
-              children: [
-                _buildChip(
-                  Icons.timer_rounded,
-                  '${workout.durationMinutes}m',
-                  AppColors.neonTeal,
-                ),
-                const SizedBox(width: 8),
-                _buildChip(
-                  Icons.fitness_center_rounded,
-                  '${workout.exercises.length} ex',
-                  AppColors.neonLime,
-                ),
-                const SizedBox(width: 8),
-                _buildChip(
-                  Icons.monitor_weight_rounded,
-                  '${workout.totalVolume}kg',
-                  AppColors.neonOrange,
-                ),
-                const SizedBox(width: 8),
-                _buildChip(
-                  Icons.local_fire_department_rounded,
-                  '${workout.caloriesBurned} cal',
-                  Colors.redAccent,
-                ),
-              ],
-            ),
-
-            // Row 3: Muscle group tags
-            if (workout.exercises.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              _buildMuscleTags(workout),
-            ],
-
-            // Row 4: Notes snippet
-            if ((workout.notes ?? '').isNotEmpty) ...[
-              const SizedBox(height: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                exerciseName,
+                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.white, fontWeight: FontWeight.bold),
+              ),
               Row(
                 children: [
-                  Icon(Icons.notes_rounded, size: 12, color: AppColors.gray600),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      workout.notes ?? '',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.gray400,
-                        fontStyle: FontStyle.italic,
+                  Text(
+                    arrow,
+                    style: TextStyle(color: trendColor, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${diff > 0 ? '+' : ''}${diff.toStringAsFixed(1)}kg',
+                    style: AppTextStyles.bodyMedium.copyWith(color: trendColor),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (spots.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 60,
+              child: LineChart(
+                LineChartData(
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(show: false),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      color: AppColors.neonTeal,
+                      barWidth: 2,
+                      isStrokeCapRound: true,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: AppColors.neonTeal.withValues(alpha: 0.1),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ─── SECTION 4: RECENT WORKOUTS ──────────────────────────────────
+
+  Widget _buildRecentWorkouts() {
+    if (_allWorkouts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            children: [
+              Icon(Icons.fitness_center_rounded, size: 48, color: AppColors.gray600),
+              const SizedBox(height: 16),
+              Text(
+                'No workouts logged yet',
+                style: AppTextStyles.bodyLarge.copyWith(color: AppColors.gray400),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final recentList = _allWorkouts.take(20).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'RECENT WORKOUTS',
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.gray400,
+            letterSpacing: 1.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: recentList.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final w = recentList[index];
+            final hasPR = w.exercises.any((e) => e.sets.any((s) => s.isPersonalRecord));
+
+            final topExercises = w.exercises.take(3).map((e) => e.name).join(', ');
+            final subText = topExercises.isNotEmpty ? topExercises : (w.muscleGroup ?? 'Quick Log');
+
+            return InkWell(
+              onTap: () {
+                if (w.source != 'quick_log') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WorkoutDetailScreen(
+                        workout: w,
+                      ),
+                    ),
+                  ).then((_) => _loadWorkouts());
+                }
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.cardSurface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          w.title,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (hasPR)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.neonLime.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: AppColors.neonLime.withValues(alpha: 0.5)),
+                            ),
+                            child: Text(
+                              'PR',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.neonLime,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${DateFormat('MMM d, yyyy').format(w.date)} · ${w.durationMinutes} min',
+                      style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      subText,
+                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
-          ],
+            );
+          },
         ),
-      ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.05, end: 0),
+      ],
     );
   }
+}
 
-  Widget _buildChip(IconData icon, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+class _QuickLogSheet extends StatefulWidget {
+  final String memberId;
+  final VoidCallback onSaved;
+
+  const _QuickLogSheet({
+    required this.memberId,
+    required this.onSaved,
+  });
+
+  @override
+  State<_QuickLogSheet> createState() => _QuickLogSheetState();
+}
+
+class _QuickLogSheetState extends State<_QuickLogSheet> {
+  final _workoutService = WorkoutService();
+  final _gamService = GamificationService();
+
+  String? _selectedMuscleGroup;
+  double _durationMinutes = 45;
+  int _rpe = 5;
+  bool _isSaving = false;
+
+  final _muscleGroups = [
+    'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Cardio', 'Full Body'
+  ];
+
+  Future<void> _saveQuickLog() async {
+    if (_selectedMuscleGroup == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a muscle group'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    final workout = WorkoutLog(
+      id: '',
+      memberId: widget.memberId,
+      title: '$_selectedMuscleGroup Quick Log',
+      date: DateTime.now(),
+      durationMinutes: _durationMinutes.toInt(),
+      exercises: [], // Empty for quick log
+      totalVolume: 0,
+      totalSets: 0,
+      source: 'quick_log',
+      muscleGroup: _selectedMuscleGroup,
+      rpe: _rpe,
     );
-  }
 
-  Widget _buildMuscleTags(WorkoutLog workout) {
-    final categories = workout.exercises
-        .map((e) => e.category)
-        .toSet()
-        .toList();
+    try {
+      await _workoutService.saveWorkout(workout);
 
-    return Wrap(
-      spacing: 6,
-      runSpacing: 4,
-      children: categories.map((cat) {
-        final color = _getCategoryColor(cat);
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            cat,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+      // Award base 10 XP for quick log
+      await _gamService.awardXp(
+        widget.memberId,
+        'Quick Log Completed',
+        10,
+        isWorkout: true,
+      );
+
+      // Explicitly fire gamification_events so it satisfies the strict gamificationEvents prompt rule
+      await FirebaseFirestore.instance.collection('gamification_events').add({
+        'memberId': widget.memberId,
+        'type': 'quick_log',
+        'event': 'workout_quick_log',
+        'xpEarned': 10,
+        'timestamp': FieldValue.serverTimestamp(),
+        'processed': false,
+      });
+
+      if (mounted) widget.onSaved();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save: $e'),
+            backgroundColor: AppColors.error,
           ),
         );
-      }).toList(),
-    );
+        setState(() => _isSaving = false);
+      }
+    }
   }
 
-  // ─────────────────────────────────────
-  // STATES
-  // ─────────────────────────────────────
-  Widget _buildLoading() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: AppColors.neonLime),
-          const SizedBox(height: 16),
-          Text(
-            'LOADING WORKOUTS...',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.gray400,
-              letterSpacing: 2,
-            ),
-          ),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 20,
+        right: 20,
+        top: 24,
       ),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.error_outline_rounded, size: 64, color: AppColors.error),
-          const SizedBox(height: 16),
           Text(
-            _error!,
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.error),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _loadWorkouts,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('RETRY'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.neonLime,
-              foregroundColor: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: AppColors.cardSurface,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.neonLime.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Icon(
-              Icons.fitness_center_rounded,
-              size: 48,
-              color: AppColors.neonLime,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'No Workouts Yet',
+            'Quick Log',
             style: AppTextStyles.heading3.copyWith(color: AppColors.white),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+
+          // 1. Muscle Group
           Text(
-            'Log your first workout to start tracking!',
+            'Muscle Group',
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
           ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final saved = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      WorkoutLoggerScreen(memberId: widget.memberId),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _muscleGroups.map((group) {
+              final isSelected = _selectedMuscleGroup == group;
+              return ChoiceChip(
+                label: Text(group),
+                selected: isSelected,
+                onSelected: (val) {
+                  if (val) setState(() => _selectedMuscleGroup = group);
+                },
+                selectedColor: AppColors.neonLime.withValues(alpha: 0.2),
+                backgroundColor: AppColors.cardSurface,
+                labelStyle: TextStyle(
+                  color: isSelected ? AppColors.neonLime : AppColors.gray400,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.neonLime
+                        : Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
               );
-              if (saved == true) _loadWorkouts();
-            },
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('LOG FIRST WORKOUT'),
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // 2. Duration Slider
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Duration',
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+              ),
+              Text(
+                '${_durationMinutes.toInt()} min',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.neonLime,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: _durationMinutes,
+            min: 15,
+            max: 120,
+            divisions: 21, // (120-15)/5
+            activeColor: AppColors.neonLime,
+            inactiveColor: Colors.white.withValues(alpha: 0.1),
+            onChanged: (val) => setState(() => _durationMinutes = val),
+          ),
+          const SizedBox(height: 16),
+
+          // 3. RPE
+          Text(
+            'Effort (RPE)',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'RPE $_rpe',
+                  style: AppTextStyles.heading2.copyWith(color: AppColors.white),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final newRpe = await showModalBottomSheet<int>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (ctx) => RpeRatingSheet(
+                        sessionId: 'quick_log',
+                        muscleGroups: _selectedMuscleGroup != null ? [_selectedMuscleGroup!] : [],
+                      ),
+                    );
+                    if (newRpe != null) {
+                      setState(() => _rpe = newRpe);
+                    }
+                  },
+                  child: const Text(
+                    'CHANGE',
+                    style: TextStyle(color: AppColors.neonLime),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Save Button
+          ElevatedButton(
+            onPressed: _isSaving ? null : _saveQuickLog,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.neonLime,
               foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.black,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    'SAVE QUICK LOG',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
           ),
+          const SizedBox(height: 24),
         ],
-      ),
-    ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
-  }
-
-  Widget _buildNoResults() {
-    return Padding(
-      padding: const EdgeInsets.all(40),
-      child: Center(
-        child: Column(
-          children: [
-            Icon(Icons.search_off_rounded, size: 48, color: AppColors.gray600),
-            const SizedBox(height: 12),
-            Text(
-              'No $_selectedFilter workouts found',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.gray400,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() => _selectedFilter = 'All');
-                _applyFilters();
-              },
-              child: Text(
-                'CLEAR FILTER',
-                style: TextStyle(color: AppColors.neonLime),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
+}
 
-  // ─────────────────────────────────────
-  // HELPERS
-  // ─────────────────────────────────────
-  Color _getCategoryColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'chest':
-        return AppColors.neonOrange;
-      case 'back':
-        return AppColors.neonTeal;
-      case 'legs':
-        return AppColors.neonLime;
-      case 'shoulders':
-        return AppColors.turquoise;
-      case 'arms':
-        return Colors.purpleAccent;
-      case 'core':
-        return Colors.amber;
-      case 'cardio':
-        return Colors.redAccent;
-      default:
-        return AppColors.gray400;
-    }
-  }
+class _TemplatePickerSheet extends StatefulWidget {
+  final String memberId;
+  final void Function(String, List<Map<String, dynamic>>?) onTemplateSelected;
 
-  IconData _getCategoryIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'chest':
-        return Icons.accessibility_new_rounded;
-      case 'back':
-        return Icons.airline_seat_recline_normal_rounded;
-      case 'legs':
-        return Icons.directions_run_rounded;
-      case 'shoulders':
-        return Icons.fitness_center_rounded;
-      case 'arms':
-        return Icons.sports_gymnastics_rounded;
-      case 'core':
-        return Icons.rotate_90_degrees_cw_rounded;
-      case 'cardio':
-        return Icons.favorite_rounded;
-      default:
-        return Icons.fitness_center_rounded;
-    }
+  const _TemplatePickerSheet({
+    required this.memberId,
+    required this.onTemplateSelected,
+  });
+
+  @override
+  State<_TemplatePickerSheet> createState() => _TemplatePickerSheetState();
+}
+
+class _TemplatePickerSheetState extends State<_TemplatePickerSheet> {
+  // Hardcoded default templates
+  final _templates = [
+    {
+      'name': 'Push Day',
+      'icon': Icons.push_pin_rounded,
+      'color': AppColors.neonOrange,
+      'exercises': ['Bench Press', 'Overhead Press', 'Triceps Extension', 'Lateral Raises'],
+    },
+    {
+      'name': 'Pull Day',
+      'icon': Icons.back_hand_rounded,
+      'color': AppColors.neonTeal,
+      'exercises': ['Pull-Ups', 'Barbell Row', 'Lat Pulldown', 'Bicep Curls'],
+    },
+    {
+      'name': 'Legs',
+      'icon': Icons.directions_run_rounded,
+      'color': AppColors.neonLime,
+      'exercises': ['Squats', 'Romanian Deadlifts', 'Leg Press', 'Calf Raises'],
+    },
+    {
+      'name': 'Full Body',
+      'icon': Icons.fitness_center_rounded,
+      'color': AppColors.rankA,
+      'exercises': ['Squats', 'Bench Press', 'Pull-Ups', 'Plank'],
+    },
+    {
+      'name': 'Cardio',
+      'icon': Icons.favorite_rounded,
+      'color': AppColors.error,
+      'exercises': ['Treadmill', 'Cycling', 'Rowing Machine'],
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Choose Template',
+            style: AppTextStyles.heading3.copyWith(color: AppColors.white),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+
+          // Custom Workout Button
+          ElevatedButton.icon(
+            onPressed: () => widget.onTemplateSelected('Custom', null),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'CUSTOM WORKOUT',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.neonLime,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          Text(
+            'Templates',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.gray400),
+          ),
+          const SizedBox(height: 12),
+
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: _templates.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final t = _templates[index];
+                final exList = t['exercises'] as List<String>;
+                return InkWell(
+                  onTap: () {
+                    final preloaded = exList.map((e) => {'name': e}).toList();
+                    widget.onTemplateSelected(t['name'] as String, preloaded);
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: (t['color'] as Color).withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            t['icon'] as IconData,
+                            color: t['color'] as Color,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t['name'] as String,
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                exList.join(' · '),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.gray400,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded, color: AppColors.gray600),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
   }
 }

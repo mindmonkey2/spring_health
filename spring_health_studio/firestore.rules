@@ -3,6 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -15,6 +19,11 @@ service cloud.firestore {
     function isReceptionist() {
       return isAuthenticated() && 
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Receptionist';
+    }
+
+    function isTrainer() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Trainer';
     }
     
     function getUserBranch() {
@@ -71,6 +80,15 @@ service cloud.firestore {
       
       allow create: if isAuthenticated();
       allow update, delete: if isOwner();
+    }
+
+    // Sessions collection
+    match /sessions/{sessionId} {
+      allow create, update: if isTrainer() || isOwner();
+      allow read: if isTrainer() || isOwner()
+        || (isSignedIn()
+            && resource.data.memberAuthUid == request.auth.uid);
+      allow delete: if isOwner();
     }
   }
 }

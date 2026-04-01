@@ -241,4 +241,146 @@ class TrainerAjaxService {
         });
     }
   }
+
+  static Future<void> analyzeAndGenerate({
+    required String memberId,
+    required String memberAuthUid,
+    required String sessionId,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+    final now = DateTime.now();
+    final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+    final results = await Future.wait([
+      firestore.collection('workouts')
+          .where('memberId', isEqualTo: memberId)
+          .orderBy('date', descending: true)
+          .limit(7)
+          .get(),
+      firestore.collection('personalbests').doc(memberId).get(),
+      firestore.collection('healthProfiles').doc(memberId).get(),
+      firestore.collection('aiPlans').doc(memberAuthUid).collection('current').doc('current').get(),
+      firestore.collection('wearableSnapshots').doc(memberAuthUid).collection('daily').doc(todayStr).get(),
+      firestore.collection('members').doc(memberId).get(),
+    ]);
+
+    final lastWorkoutsSnapshot = results[0] as QuerySnapshot;
+    final personalBestsSnapshot = results[1] as DocumentSnapshot;
+    // final healthProfileSnapshot = results[2] as DocumentSnapshot;
+    // final aiPlanSnapshot = results[3] as DocumentSnapshot;
+    final wearableSnapshot = results[4] as DocumentSnapshot;
+    final memberSnapshot = results[5] as DocumentSnapshot;
+
+    final memberData = memberSnapshot.data() as Map<String, dynamic>? ?? {};
+    final category = (memberData['category'] as String?)?.toLowerCase() ?? 'standard';
+
+    int exerciseCount = (category == 'premium') ? 6 : 4; // base count
+
+    List<String> avoidMuscles = [];
+    if (lastWorkoutsSnapshot.docs.isNotEmpty) {
+      final lastWorkoutData = lastWorkoutsSnapshot.docs.first.data() as Map<String, dynamic>;
+      final lastDate = (lastWorkoutData['date'] as Timestamp?)?.toDate();
+      if (lastDate != null && now.difference(lastDate).inDays <= 1) {
+        final muscles = List<String>.from(lastWorkoutData['musclesWorked'] ?? []);
+        avoidMuscles.addAll(muscles);
+      }
+    }
+
+    final wearableData = wearableSnapshot.data() as Map<String, dynamic>?;
+    final recoveryScore = (wearableData?['recoveryScore'] as num?)?.toInt() ?? 100;
+
+    int setReduction = (recoveryScore < 40) ? 1 : 0;
+
+    final allMuscles = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'quads', 'hamstrings', 'glutes', 'core', 'calves'];
+    final availableMuscles = allMuscles.where((m) => !avoidMuscles.contains(m)).toList();
+
+    if (availableMuscles.isEmpty) {
+      availableMuscles.addAll(allMuscles);
+    }
+
+    final personalBestsData = personalBestsSnapshot.data() as Map<String, dynamic>? ?? {};
+
+    List<Map<String, dynamic>> generatedExercises = [];
+
+    // Always include a compound movement
+    final compounds = ['Squat', 'Deadlift', 'Bench Press', 'Barbell Row'];
+    final selectedCompound = compounds[now.microsecond % compounds.length];
+
+    double compoundWeight = 20.0;
+    if (personalBestsData.containsKey(selectedCompound)) {
+      final pb = (personalBestsData[selectedCompound]['weightKg'] as num?)?.toDouble() ?? 20.0;
+      compoundWeight = pb * 0.85; // 85% of PB
+    }
+
+    generatedExercises.add({
+      'exerciseName': selectedCompound,
+      'sets': 4 - setReduction > 0 ? 4 - setReduction : 1,
+      'reps': 8,
+      'weightKg': compoundWeight,
+      'targetMuscles': _getMusclesForCompound(selectedCompound),
+      'status': 'active',
+      'completedSets': 0,
+      'trainerNote': (recoveryScore < 40) ? 'Lighter session due to low recovery.' : '',
+    });
+
+    for (int i = 1; i < exerciseCount; i++) {
+      final muscle = availableMuscles[i % availableMuscles.length];
+      final exerciseName = _getExerciseForMuscle(muscle, i);
+
+      double weight = 10.0;
+      if (personalBestsData.containsKey(exerciseName)) {
+        final pb = (personalBestsData[exerciseName]['weightKg'] as num?)?.toDouble() ?? 10.0;
+        weight = pb * 0.85;
+      }
+
+      generatedExercises.add({
+        'exerciseName': exerciseName,
+        'sets': 3 - setReduction > 0 ? 3 - setReduction : 1,
+        'reps': 10,
+        'weightKg': weight,
+        'targetMuscles': [muscle],
+        'status': 'pending',
+        'completedSets': 0,
+        'trainerNote': '',
+      });
+    }
+
+    String nextFocus = availableMuscles.last;
+    if (avoidMuscles.isNotEmpty) {
+      nextFocus = avoidMuscles.first; // Next time hit what we rested today
+    }
+
+    await firestore.collection('sessions').doc(sessionId).set({
+      'exercises': generatedExercises,
+      'status': 'planning',
+      'aiSummary': 'Generated session focused on ${availableMuscles.take(2).join(' and ')}.',
+      'nextSessionFocus': nextFocus,
+    }, SetOptions(merge: true));
+  }
+
+  static List<String> _getMusclesForCompound(String compound) {
+    switch (compound) {
+      case 'Squat': return ['quads', 'glutes'];
+      case 'Deadlift': return ['hamstrings', 'back', 'glutes'];
+      case 'Bench Press': return ['chest', 'triceps', 'shoulders'];
+      case 'Barbell Row': return ['back', 'biceps'];
+      default: return [];
+    }
+  }
+
+  static String _getExerciseForMuscle(String muscle, int salt) {
+    switch (muscle) {
+      case 'chest': return (salt % 2 == 0) ? 'Incline Dumbbell Press' : 'Cable Crossovers';
+      case 'back': return (salt % 2 == 0) ? 'Lat Pulldown' : 'Seated Cable Row';
+      case 'shoulders': return (salt % 2 == 0) ? 'Overhead Press' : 'Lateral Raises';
+      case 'biceps': return (salt % 2 == 0) ? 'Barbell Curl' : 'Hammer Curls';
+      case 'triceps': return (salt % 2 == 0) ? 'Tricep Pushdown' : 'Overhead Tricep Extension';
+      case 'quads': return (salt % 2 == 0) ? 'Leg Press' : 'Leg Extensions';
+      case 'hamstrings': return (salt % 2 == 0) ? 'Romanian Deadlift' : 'Leg Curls';
+      case 'glutes': return (salt % 2 == 0) ? 'Hip Thrusts' : 'Cable Pull-throughs';
+      case 'core': return (salt % 2 == 0) ? 'Plank' : 'Russian Twists';
+      case 'calves': return (salt % 2 == 0) ? 'Standing Calf Raise' : 'Seated Calf Raise';
+      default: return 'Custom Exercise';
+    }
+  }
 }

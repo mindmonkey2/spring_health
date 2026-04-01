@@ -29,9 +29,6 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
 
   final Map<int, TextEditingController> _repsControllers = {};
   final Map<int, TextEditingController> _weightControllers = {};
-  final TextEditingController _trainerNotesController = TextEditingController();
-  final TextEditingController _ajaxNoteController = TextEditingController();
-  bool _isNavigatingToStretching = false;
   bool _hasNavigatedToStretching = false;
 
   @override
@@ -60,8 +57,6 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
   void dispose() {
     _timer?.cancel();
     _sessionTimer.dispose();
-    _trainerNotesController.dispose();
-    _ajaxNoteController.dispose();
     for (var c in _repsControllers.values) {
       c.dispose();
     }
@@ -69,148 +64,6 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       c.dispose();
     }
     super.dispose();
-  }
-
-  // ignore: unused_element
-  Future<void> _endSession(Map<String, dynamic> sessionData) async {
-    // setState(() => _isSavingEndSession = true);
-
-    try {
-      final db = FirebaseFirestore.instance;
-      final totalDurationMinutes = _elapsed ~/ 60;
-      const rpe = 5; // _sessionRpe.toInt();
-      final notes = _trainerNotesController.text;
-      final ajaxNote = _ajaxNoteController.text.trim();
-      final now = Timestamp.now();
-
-      final exercises =
-          List<Map<String, dynamic>>.from(sessionData['exercises'] ?? []);
-
-      await db
-          .collection('sessions')
-          .doc(widget.sessionId)
-          .update({
-        'status': 'complete',
-        'sessionEndTime': now,
-        'totalDurationMinutes': totalDurationMinutes,
-        'trainerNotes': notes,
-        'sessionRpe': rpe,
-        'nutritionSentAt': now,
-        'memberAuthUid': widget.member.uid,
-      });
-
-      final workoutExercises = exercises.map((ex) {
-        final completedSets =
-            List<Map<String, dynamic>>.from(ex['completedSets'] ?? []);
-        return {
-          'name': ex['name'],
-          'category': ex['category'] ?? 'Trainer Session',
-          'sets': completedSets
-              .asMap()
-              .entries
-              .map((e) => {
-                    'setNumber': e.key + 1,
-                    'weight': e.value['weightKg'] ?? 0,
-                    'reps': e.value['reps'] ?? 0,
-                    'isCompleted': true,
-                  })
-              .toList(),
-        };
-      }).toList();
-
-      await db.collection('workouts').add({
-        'memberId': widget.member.id,
-        'memberAuthUid': widget.member.uid,
-        'exercises': workoutExercises,
-        'durationMinutes': totalDurationMinutes,
-        'date': now,
-        'source': 'trainer_session',
-        'sessionId': widget.sessionId,
-        'trainerId': widget.trainerId,
-      });
-
-      final goalsSnap = await db
-          .collection('memberGoals')
-          .doc((sessionData['memberAuthUid'] as String? ?? ''))
-          .get();
-      if (goalsSnap.exists) {
-        await db
-            .collection('memberGoals')
-            .doc((sessionData['memberAuthUid'] as String? ?? ''))
-            .update({'lastPaceCheck': now});
-      }
-
-      final intelDoc =
-          db.collection('memberIntelligence').doc((sessionData['memberAuthUid'] as String? ?? ''));
-      final intelSnap = await intelDoc.get();
-
-      double newAvgRpe = rpe.toDouble();
-      if (intelSnap.exists) {
-        final intelData = intelSnap.data()!;
-        final currentTotal =
-            (intelData['totalSessionsLogged'] ?? 0) as int;
-        final currentAvg =
-            (intelData['avgSessionRpe'] ?? 0.0) as double;
-        newAvgRpe =
-            ((currentAvg * currentTotal) + rpe) / (currentTotal + 1);
-      }
-
-      final Map<String, dynamic> intelUpdate = {
-        'totalSessionsLogged': FieldValue.increment(1),
-        'lastSessionDate': now,
-        'avgSessionRpe': newAvgRpe,
-      };
-
-      if (ajaxNote.isNotEmpty) {
-        if (intelSnap.exists) {
-          final intelData = intelSnap.data()!;
-          List<String> observations =
-              List<String>.from(intelData['trainerObservations'] ?? []);
-          if (observations.length >= 10) {
-            observations.removeAt(0);
-            observations.add(
-                '${DateTime.now().toIso8601String()}: $ajaxNote');
-            intelUpdate['trainerObservations'] = observations;
-          } else {
-            intelUpdate['trainerObservations'] = FieldValue.arrayUnion(
-                ['${DateTime.now().toIso8601String()}: $ajaxNote']);
-          }
-        } else {
-          intelUpdate['trainerObservations'] = FieldValue.arrayUnion(
-              ['${DateTime.now().toIso8601String()}: $ajaxNote']);
-        }
-      }
-
-      await intelDoc.set(intelUpdate, SetOptions(merge: true));
-
-      final nextWeighIn =
-          sessionData['nextWeighInDate'] as Timestamp? ?? now;
-      await db
-          .collection('notifications')
-          .doc((sessionData['memberAuthUid'] as String? ?? ''))
-          .collection('items')
-          .add({
-        'type': 'weigh_in_reminder',
-        'title': 'Weigh-in Day',
-        'body':
-            'Log your weight before eating. Helps AjAX calibrate your plan.',
-        'scheduledFor': nextWeighIn,
-        'delivered': false,
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Session complete! Data saved.')),
-        );
-        Navigator.popUntil(context, (route) => route.isFirst);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to end session: $e')));
-        // setState(() => _isSavingEndSession = false);
-      }
-    }
   }
 
   Future<void> _logSet(
@@ -393,8 +246,6 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
           if (allComplete && !_hasNavigatedToStretching) {
             _hasNavigatedToStretching = true;
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-              if (!mounted) return;
-              setState(() => _isNavigatingToStretching = true);
               final allMuscles = exercises
                   .expand((ex) => List<String>.from(ex['targetMuscles'] ?? []))
                   .toSet().toList();
@@ -419,20 +270,8 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: exercises.length + (allComplete ? 1 : 0),
+            itemCount: exercises.length,
             itemBuilder: (context, index) {
-              if (index == exercises.length) {
-                return _isNavigatingToStretching
-                    ? const Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                              color: AppColors.turquoise),
-                        ),
-                      )
-                    : const SizedBox.shrink();
-              }
-
               final ex = exercises[index];
               final status =
                   ex['status'] as String? ?? 'pending';

@@ -1,4 +1,4 @@
-// lib/screens/trainers/add_trainer_screen.dart
+// lib/screens/trainer/add_trainer_screen.dart
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/trainer_model.dart';

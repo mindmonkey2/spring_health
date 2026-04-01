@@ -7,7 +7,7 @@ import 'theme/app_colors.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/owner/owner_dashboard.dart';
 import 'screens/receptionist/receptionist_dashboard.dart';
-import 'screens/trainers/trainer_dashboard_screen.dart';
+import 'screens/trainer/trainer_dashboard_screen.dart';
 import 'screens/members/add_member_screen.dart';
 import 'services/firestore_service.dart';
 import 'models/user_model.dart';

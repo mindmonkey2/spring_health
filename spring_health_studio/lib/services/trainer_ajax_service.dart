@@ -388,6 +388,194 @@ class TrainerAjaxService {
     }, SetOptions(merge: true));
   }
 
+  static Future<List<Map<String, dynamic>>> generateStretching(
+    List<String> musclesWorked,
+  ) async {
+    // Rule-based stretch selection (no external call needed):
+    // Map each muscle group to 1-2 stretch exercises:
+    const stretchMap = {
+      'chest':     [{ 'exerciseName': 'Doorway Chest Stretch',
+                      'durationSeconds': 30, 'targetMuscle': 'chest' }],
+      'back':      [{ 'exerciseName': 'Child\'s Pose',
+                      'durationSeconds': 40, 'targetMuscle': 'back' }],
+      'shoulders': [{ 'exerciseName': 'Cross-Body Shoulder Stretch',
+                      'durationSeconds': 30, 'targetMuscle': 'shoulders' }],
+      'biceps':    [{ 'exerciseName': 'Wrist Flexor Stretch',
+                      'durationSeconds': 30, 'targetMuscle': 'biceps' }],
+      'triceps':   [{ 'exerciseName': 'Overhead Tricep Stretch',
+                      'durationSeconds': 30, 'targetMuscle': 'triceps' }],
+      'quads':     [{ 'exerciseName': 'Standing Quad Stretch',
+                      'durationSeconds': 35, 'targetMuscle': 'quads' }],
+      'hamstrings':[{ 'exerciseName': 'Seated Hamstring Stretch',
+                      'durationSeconds': 40, 'targetMuscle': 'hamstrings' }],
+      'glutes':    [{ 'exerciseName': 'Pigeon Pose',
+                      'durationSeconds': 40, 'targetMuscle': 'glutes' }],
+      'core':      [{ 'exerciseName': 'Cobra Stretch',
+                      'durationSeconds': 30, 'targetMuscle': 'core' }],
+      'calves':    [{ 'exerciseName': 'Standing Calf Stretch',
+                      'durationSeconds': 30, 'targetMuscle': 'calves' }],
+    };
+
+    final result = <Map<String, dynamic>>[];
+    for (final muscle in musclesWorked) {
+      final stretches = stretchMap[muscle];
+      if (stretches != null) {
+        for (final s in stretches) {
+          result.add({ ...s, 'status': 'pending' });
+        }
+      }
+    }
+
+    // Deduplicate, cap at 6 stretches
+    final seen = <String>{};
+    final deduped = result.where((s) {
+      final name = s['exerciseName'] as String;
+      return seen.add(name);
+    }).take(6).toList();
+
+    // If no muscles matched: return 3 generic full-body stretches
+    if (deduped.isEmpty) {
+      return [
+        { 'exerciseName': 'Standing Forward Fold',
+          'durationSeconds': 40, 'targetMuscle': 'full body',
+          'status': 'pending' },
+        { 'exerciseName': 'Child\'s Pose',
+          'durationSeconds': 40, 'targetMuscle': 'back',
+          'status': 'pending' },
+        { 'exerciseName': 'Hip Flexor Stretch',
+          'durationSeconds': 35, 'targetMuscle': 'hip flexors',
+          'status': 'pending' },
+      ];
+    }
+    return deduped;
+  }
+
+  static Future<void> finalizeSession(String sessionId) async {
+    final db = FirebaseFirestore.instance;
+    final sessionSnap = await db.collection('sessions').doc(sessionId).get();
+    if (!sessionSnap.exists) return;
+    final sessionData = sessionSnap.data()!;
+
+    // IDEMPOTENCY GUARD — critical rule from master plan
+    if (sessionData['sessionXpAwarded'] == true) return;
+
+    final memberId = sessionData['memberId'] as String;
+    final memberAuthUid = sessionData['memberAuthUid'] as String;
+    final trainerId = sessionData['trainerId'] as String;
+    final exercises = List<Map<String,dynamic>>.from(
+      sessionData['exercises'] ?? []);
+    final musclesWorked = List<String>.from(
+      sessionData['musclesWorked'] ?? []);
+    final createdAt = (sessionData['createdAt'] as Timestamp).toDate();
+    final now = DateTime.now();
+    final durationMinutes = now.difference(createdAt).inMinutes;
+
+    // 1. Write to workouts collection
+    final workoutExercises = exercises.map((ex) {
+      final completedSets = (ex['completedSets'] as int?) ?? 0;
+      return {
+        'name': ex['exerciseName'],
+        'category': 'Trainer Session',
+        'sets': List.generate(completedSets, (i) => {
+          'setNumber': i + 1,
+          'weight': ex['weightKg'] ?? 0,
+          'reps': ex['reps'] ?? 0,
+          'isCompleted': true,
+        }),
+      };
+    }).toList();
+
+    await db.collection('workouts').add({
+      'memberId': memberId,
+      'memberAuthUid': memberAuthUid,
+      'exercises': workoutExercises,
+      'durationMinutes': durationMinutes,
+      'date': Timestamp.now(),
+      'source': 'trainer_session',
+      'sessionId': sessionId,
+      'trainerId': trainerId,
+      'musclesWorked': musclesWorked,
+    });
+
+    // 2. PB detection
+    // For each exercise: check if max weight in this session exceeds
+    // stored PB in personalbests/{memberId}
+    final pbDoc = await db.collection('personalbests').doc(memberId).get();
+    final pbData = Map<String,dynamic>.from(pbDoc.data() ?? {});
+    final pbUpdates = <String,dynamic>{};
+
+    for (final ex in exercises) {
+      final name = ex['exerciseName'] as String;
+      final weight = (ex['weightKg'] as num?)?.toDouble() ?? 0.0;
+      if (weight <= 0) continue;
+      final existing = (pbData[name]?['weightKg'] as num?)?.toDouble() ?? 0.0;
+      if (weight > existing) {
+        pbUpdates[name] = {
+          'weightKg': weight,
+          'reps': ex['reps'] ?? 0,
+          'date': Timestamp.now(),
+        };
+      }
+    }
+
+    if (pbUpdates.isNotEmpty) {
+      await db.collection('personalbests').doc(memberId)
+        .set(pbUpdates, SetOptions(merge: true));
+    }
+
+    // 3. Award 100 XP — trainer session is worth more than self-logged (75 XP)
+    await db.collection('gamificationEvents').add({
+      'memberId': memberId,
+      'type': 'trainer_session_complete',
+      'xp': 100,
+      'processed': false,
+      'createdAt': Timestamp.now(),
+    });
+
+    // 4. Write tomorrow's AI context to wearableSnapshots
+    final today = DateTime.now();
+    final dateKey =
+      '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
+    await db.collection('wearableSnapshots')
+      .doc(memberAuthUid)
+      .collection('daily')
+      .doc(dateKey)
+      .set({
+        'musclesWorked': musclesWorked,
+        'sessionDurationMinutes': durationMinutes,
+        'source': 'trainer_session',
+        'sessionId': sessionId,
+        'nextSessionFocus': sessionData['nextSessionFocus'] ?? '',
+      }, SetOptions(merge: true));
+
+    // 5. Send notification to member
+    final trainerNote = sessionData['trainerNotes'] as String? ?? '';
+    final aiSummary = sessionData['aiSummary'] as String? ?? '';
+    final notifBody = trainerNote.isNotEmpty
+      ? (trainerNote.length > 100
+          ? '${trainerNote.substring(0,100)}...'
+          : trainerNote)
+      : (aiSummary.isNotEmpty ? aiSummary : 'Session complete. Your diet plan is ready.');
+
+    await db.collection('notifications')
+      .doc(memberAuthUid)
+      .collection('items')
+      .add({
+        'type': 'session_complete',
+        'title': 'Great session!',
+        'body': notifBody,
+        'read': false,
+        'createdAt': Timestamp.now(),
+      });
+
+    // 6. Mark session complete — set sessionXpAwarded FIRST (idempotency)
+    await db.collection('sessions').doc(sessionId).update({
+      'sessionXpAwarded': true,
+      'status': 'complete',
+      'completedAt': Timestamp.now(),
+    });
+  }
+
   static List<String> _getMusclesForCompound(String compound) {
     switch (compound) {
       case 'Squat': return ['quads', 'glutes'];

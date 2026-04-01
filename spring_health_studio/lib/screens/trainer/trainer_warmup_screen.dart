@@ -6,6 +6,7 @@ import '../../models/session_model.dart';
 import '../../theme/app_colors.dart';
 import 'trainer_session_screen.dart';
 import '../../services/trainer_ajax_service.dart';
+import '../../services/session_service.dart';
 
 class TrainerWarmupScreen extends StatefulWidget {
   final String sessionId;
@@ -26,34 +27,13 @@ class TrainerWarmupScreen extends StatefulWidget {
 class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
   final ValueNotifier<String> _countdown = ValueNotifier('05:00');
   Timer? _timer;
+  bool _aiTriggered = false;
+  bool _navigating = false;
 
   @override
   void initState() {
     super.initState();
     _startCountdown();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (widget.member.uid == null || widget.member.uid!.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Warning: Member has no auth UID. AI analysis might fail.')),
-          );
-        }
-      }
-
-      final snap = await FirebaseFirestore.instance
-          .collection('sessions')
-          .doc(widget.sessionId)
-          .get();
-      final currentStatus = (snap.data()?['status'] as String?) ?? '';
-      if (currentStatus == 'warmup') {
-        await TrainerAjaxService.analyzeAndGenerate(
-          memberId: widget.member.id,
-          memberAuthUid: widget.member.uid ?? '',
-          sessionId: widget.sessionId,
-        );
-      }
-    });
   }
 
   void _startCountdown() {
@@ -76,6 +56,63 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
     _timer?.cancel();
     _countdown.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkAndTriggerAi(SessionModel session) async {
+    if (_aiTriggered) return;
+
+    // Check if the session is currently in warmup status and hasn't transitioned yet
+    if (session.status == 'warmup') {
+      _aiTriggered = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await TrainerAjaxService.analyzeAndGenerate(
+            memberId: widget.member.id,
+            memberAuthUid: widget.member.id,
+            sessionId: widget.sessionId,
+          );
+        } catch (e) {
+          debugPrint('Error triggering AI generation: $e');
+        }
+      });
+    }
+  }
+
+  Future<void> _handleSessionTransition(SessionModel session) async {
+    if (_navigating) return;
+
+    final bool allWarmupsComplete = session.warmup.isNotEmpty &&
+        session.warmup.every((w) => w['status'] == 'completed');
+
+    if (allWarmupsComplete && session.status == 'warmup') {
+      // Transition to planning to wait for AI, or if AI is done it will skip to planning/active
+      await SessionService().updateStatus(widget.sessionId, 'planning');
+      return;
+    }
+
+    if (session.status == 'active' || (session.status == 'planning' && allWarmupsComplete)) {
+       // If AI finished planning and warmup is done, or somehow already active
+      _navigating = true;
+
+      if (session.status == 'planning') {
+        await SessionService().updateStatus(widget.sessionId, 'active');
+      }
+
+      if (!mounted) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TrainerSessionScreen(
+              sessionId: widget.sessionId,
+              member: widget.member,
+              trainerId: widget.trainerId,
+            ),
+          ),
+        );
+      });
+    }
   }
 
   @override
@@ -103,308 +140,135 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
 
           final sessionMap = snapshot.data!.data() as Map<String, dynamic>;
           final sessionModel = SessionModel.fromMap(sessionMap, widget.sessionId);
-          final plans = (sessionMap['plans'] as Map?) ?? {};
-          final readinessScore = (sessionMap['readinessScore'] as num?)?.toInt() ?? 60;
-          final goalInsight = sessionMap['goalInsight'] as String?;
-          final sessionFocus = sessionMap['sessionFocus'] as String?;
-          final isFoundationSession = sessionMap['isFoundationSession'] as bool? ?? false;
 
-          if (sessionModel.status == 'active') {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(context, MaterialPageRoute(
-                builder: (_) => TrainerSessionScreen(
-                  sessionId: widget.sessionId,
-                  member: widget.member,
-                  trainerId: widget.trainerId,
-                ),
-              ));
-            });
-            return const Center(child: CircularProgressIndicator());
-          }
+          _checkAndTriggerAi(sessionModel);
+          _handleSessionTransition(sessionModel);
 
-          if (sessionModel.status == 'warmup') {
-            if (plans.isNotEmpty) {
-               return _buildWarmupState(sessionModel, plans, goalInsight, sessionFocus, readinessScore);
-            }
-            return _buildAnalyzingState(isFoundationSession);
-          } else if (sessionModel.status == 'planning') {
-             return _buildWarmupState(sessionModel, plans, goalInsight, sessionFocus, readinessScore);
-          }
-
-          return const Center(child: Text('Invalid session state'));
+          return _buildWarmupList(sessionModel);
         },
       ),
     );
   }
 
-  Widget _buildAnalyzingState(bool isFoundationSession) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+  Widget _buildWarmupList(SessionModel session) {
+    if (session.warmup.isEmpty) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Warming up ${widget.member.name}...',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const Text(
+              'Waiting for warmup to be generated...',
+              style: TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 24),
             ValueListenableBuilder<String>(
               valueListenable: _countdown,
               builder: (_, val, __) => Text(
                 val,
                 style: const TextStyle(
-                  fontSize: 72,
+                  fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: AppColors.turquoise,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'AjAX is analyzing health data\nand generating 3 personalized plans...',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (isFoundationSession)
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: AppColors.turquoise),
-                ),
-                color: AppColors.surface,
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Foundation Session',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'First session for this member. AjAX is building their baseline plan. Go easy — form and mobility first.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildWarmupState(SessionModel sessionModel, Map plans, String? goalInsight, String? sessionFocus, int readinessScore) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Center(
-            child: Chip(
-              label: Text(
-                'AjAX Ready',
-                style: TextStyle(color: AppColors.textOnPrimary, fontWeight: FontWeight.bold),
+          Center(
+            child: ValueListenableBuilder<String>(
+              valueListenable: _countdown,
+              builder: (_, val, __) => Text(
+                val,
+                style: const TextStyle(
+                  fontSize: 56,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.turquoise,
+                ),
               ),
-              backgroundColor: AppColors.success,
             ),
           ),
           const SizedBox(height: 16),
-          if (goalInsight != null && goalInsight.isNotEmpty)
-            Card(
+          const Text(
+            'Warmup Protocol',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          ...session.warmup.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final item = entry.value;
+            final isComplete = item['status'] == 'completed';
+
+            return Card(
+              color: AppColors.surface,
+              margin: const EdgeInsets.only(bottom: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.turquoise),
+                side: BorderSide(
+                  color: isComplete ? AppColors.success : AppColors.border,
+                ),
               ),
-              color: AppColors.surface,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'AJAX GOAL INSIGHT',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.turquoiseDark,
-                        letterSpacing: 1.2,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: isComplete ? AppColors.success.withValues(alpha: 0.2) : AppColors.turquoise.withValues(alpha: 0.1),
+                  child: Icon(
+                    isComplete ? Icons.check : Icons.fitness_center,
+                    color: isComplete ? AppColors.success : AppColors.turquoise,
+                  ),
+                ),
+                title: Text(
+                  item['name'] ?? 'Exercise',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    decoration: isComplete ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                subtitle: Text('${item['durationSeconds'] ?? 0}s • ${item['notes'] ?? ''}'),
+                trailing: isComplete
+                    ? const Icon(Icons.check_circle, color: AppColors.success)
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.turquoise,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () => _markWarmupComplete(idx),
+                        child: const Text('DONE', style: TextStyle(color: AppColors.background)),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      goalInsight,
-                      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
-                    ),
-                  ],
-                ),
               ),
-            ),
-          const SizedBox(height: 16),
-          if (sessionFocus != null && sessionFocus.isNotEmpty)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Chip(
-                label: Text(
-                  sessionFocus,
-                  style: const TextStyle(color: AppColors.turquoiseDark),
-                ),
-                backgroundColor: const Color(0x1A4ECDC4),
-              ),
-            ),
-          const SizedBox(height: 24),
-          const Text(
-            'Select a plan to begin:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ...['low', 'medium', 'high'].map((intensity) {
-            final planData = plans[intensity];
-            if (planData == null) return const SizedBox.shrink();
-            return _buildPlanCard(intensity, Map<String, dynamic>.from(planData as Map), sessionModel, readinessScore);
+            );
           }),
         ],
       ),
     );
   }
 
-  Widget _buildPlanCard(String intensity, Map<String, dynamic> plan, SessionModel sessionModel, int readinessScore) {
-    Color cardTint;
-    if (intensity == 'low') {
-      cardTint = const Color(0x1A607D8B);
-    } else if (intensity == 'medium') {
-      cardTint = const Color(0x1A4ECDC4);
-    } else {
-      cardTint = const Color(0x1A8B9FF7);
+  Future<void> _markWarmupComplete(int index) async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('sessions')
+          .doc(widget.sessionId)
+          .get();
+      if (!snap.exists) return;
+
+      final currentWarmup = List<Map<String, dynamic>>.from(snap.data()?['warmup'] ?? []);
+      if (index >= 0 && index < currentWarmup.length) {
+        currentWarmup[index]['status'] = 'completed';
+        await FirebaseFirestore.instance
+            .collection('sessions')
+            .doc(widget.sessionId)
+            .update({'warmup': currentWarmup});
+      }
+    } catch (e) {
+      debugPrint('Error marking warmup complete: $e');
     }
-
-    bool isRecommended = false;
-    if (readinessScore < 40 && intensity == 'low') isRecommended = true;
-    if (readinessScore >= 40 && readinessScore <= 70 && intensity == 'medium') isRecommended = true;
-    if (readinessScore > 70 && intensity == 'high') isRecommended = true;
-
-    final exercisesList = (plan['exercises'] as List?)?.cast<Map<dynamic, dynamic>>() ?? [];
-    final first3 = exercisesList.take(3).map((e) => e['name']?.toString() ?? 'Exercise').join(', ');
-
-    // Attempt to determine mobility count if it exists in the data structure
-    // If not explicitly provided, we count exercises with category 'mobility'
-    int mobilityCount = 0;
-    if (plan.containsKey('mobilityCount')) {
-      mobilityCount = (plan['mobilityCount'] as num).toInt();
-    } else {
-      mobilityCount = exercisesList.where((e) => e['category']?.toString().toLowerCase() == 'mobility').length;
-    }
-
-    return Card(
-      color: cardTint,
-      margin: const EdgeInsets.only(bottom: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () => _selectPlan(intensity, plan, sessionModel),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    plan['label']?.toString() ?? 'Plan',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const Spacer(),
-                  Text('${plan['estimatedMinutes'] ?? 0} min', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
-                  Text('~${plan['estimatedCalories'] ?? 0} kcal'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                plan['reasoning']?.toString() ?? '',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Exercises: $first3',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-              ),
-              if (mobilityCount > 0)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    'Mobility work: $mobilityCount exercises',
-                    style: const TextStyle(color: AppColors.turquoiseDark, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              if (isRecommended)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: Chip(
-                    label: Text('Recommended', style: TextStyle(color: AppColors.textOnPrimary, fontSize: 12)),
-                    backgroundColor: AppColors.turquoise,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-              const Divider(height: 24, color: AppColors.border),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0x1A000000),
-                    foregroundColor: AppColors.textPrimary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () => _selectPlan(intensity, plan, sessionModel),
-                  child: const Text('SELECT THIS PLAN'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _selectPlan(String intensity, Map<String, dynamic> planData, SessionModel sessionModel) async {
-    final rawExercises = (planData['exercises'] as List?)?.cast<Map<dynamic, dynamic>>() ?? [];
-
-    final List<Map<String, dynamic>> exercises = rawExercises.asMap().entries.map((e) {
-      final map = Map<String, dynamic>.from(e.value);
-      map['status'] = e.key == 0 ? 'active' : 'pending';
-      map['completedSets'] = [];
-      map['order'] = e.key;
-      return map;
-    }).toList();
-
-    await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionId).update({
-      'selectedIntensity': intensity,
-      'exercises': exercises,
-      'status': 'active',
-      'sessionStartTime': FieldValue.serverTimestamp(),
-    });
-
-    if (!mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TrainerSessionScreen(
-          sessionId: widget.sessionId,
-          member: widget.member,
-          trainerId: widget.trainerId,
-        ),
-      ),
-    );
   }
 }

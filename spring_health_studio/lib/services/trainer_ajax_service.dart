@@ -266,10 +266,40 @@ class TrainerAjaxService {
 
     final lastWorkoutsSnapshot = results[0] as QuerySnapshot;
     final personalBestsSnapshot = results[1] as DocumentSnapshot;
-    // final healthProfileSnapshot = results[2] as DocumentSnapshot;
+    final healthSnap = results[2] as DocumentSnapshot;
     // final aiPlanSnapshot = results[3] as DocumentSnapshot;
     final wearableSnapshot = results[4] as DocumentSnapshot;
     final memberSnapshot = results[5] as DocumentSnapshot;
+
+    if (healthSnap.exists) {
+      final healthData = healthSnap.data() as Map<String, dynamic>? ?? {};
+      final medicalHold = healthData['medicalHold'] as bool? ?? false;
+      final holdReason = healthData['holdReason'] as String? ?? '';
+
+      if (medicalHold) {
+        await FirebaseFirestore.instance
+            .collection('sessions')
+            .doc(sessionId)
+            .set({
+          'status': 'medical_hold',
+          'medicalHoldReason': holdReason,
+          'aiSummary': 'Medical hold active — no workout generated. '
+                       'Consult member health profile.',
+        }, SetOptions(merge: true));
+        return;
+      }
+
+      final conditions = List<String>.from(healthData['conditions'] ?? []);
+      final allergies = List<String>.from(healthData['allergies'] ?? []);
+
+      await FirebaseFirestore.instance
+          .collection('sessions')
+          .doc(sessionId)
+          .set({
+        'memberConditions': conditions,
+        'memberAllergies': allergies,
+      }, SetOptions(merge: true));
+    }
 
     final memberData = memberSnapshot.data() as Map<String, dynamic>? ?? {};
     final category = (memberData['category'] as String?)?.toLowerCase() ?? 'standard';

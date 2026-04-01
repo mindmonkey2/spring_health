@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vibration/vibration.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/attendance_model.dart';
 import '../../services/firestore_service.dart';
+import '../../services/session_service.dart';
 import '../../theme/app_colors.dart';
 import 'trainer_readiness_screen.dart';
 import 'flexibility_assessment_screen.dart';
@@ -104,6 +106,48 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
           checkInTime: now,
         );
         await _firestoreService.recordAttendance(attendance);
+      }
+
+      // Step 4.5: Create Session
+      final memberDoc = await FirebaseFirestore.instance.collection('members').doc(member.id).get();
+      final memberAuthUid = memberDoc.data()?['uid'] as String? ?? '';
+
+      if (memberAuthUid.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Member account not linked')));
+        }
+        _resetScanner();
+        return;
+      }
+
+      final trainerUid = FirebaseAuth.instance.currentUser?.uid;
+      if (trainerUid == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trainer not authenticated.')));
+        }
+        _resetScanner();
+        return;
+      }
+
+      final trainerDoc = await FirebaseFirestore.instance.collection('users').doc(trainerUid).get();
+      final trainerName = trainerDoc.data()?['name'] as String? ?? 'Trainer';
+
+      String sessionId;
+      try {
+        sessionId = await SessionService.instance.createSession(
+          memberId: member.id,
+          memberAuthUid: memberAuthUid,
+          trainerId: widget.trainerId,
+          trainerUid: trainerUid,
+          trainerName: trainerName,
+          branch: member.branch,
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create session.')));
+        }
+        _resetScanner();
+        return;
       }
 
       if (await Vibration.hasVibrator()) {
@@ -254,6 +298,7 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
       }
 
       Map<String, dynamic> sessionData = {
+         'sessionId': sessionId,
          'readinessScore': score,
          'wearableData': snapData,
          'lastSessionData': lastSessionData,

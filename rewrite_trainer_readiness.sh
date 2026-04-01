@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > spring_health_studio/lib/screens/trainer/trainer_readiness_screen.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,15 +38,6 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.sessionId.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Session not found. Please rescan.')),
-        );
-        Navigator.pop(context);
-      });
-      return;
-    }
     _fetchData();
   }
 
@@ -155,13 +147,8 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Session Prep'),
-            Text(widget.member.name, style: const TextStyle(fontSize: 12, color: Colors.white70)),
-          ],
-        ),
+        title: Text('Session Prep'),
+        subtitle: Text(widget.member.name, style: TextStyle(fontSize: 12, color: Colors.white70)),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -265,8 +252,8 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
           children: [
             Text(widget.member.name, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
-            Text('Plan: ${widget.member.plan}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
-            Text('Category: ${widget.member.category}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
+            Text('Plan: \${widget.member.plan}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
+            Text('Category: \${widget.member.category}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
           ],
         ),
       ),
@@ -282,14 +269,14 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Yesterday's Session", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text('Yesterday\\'s Session', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 12),
             if (_yesterdaySession == null)
               Text('First session this week', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary))
             else ...[
-              Text('Exercises: ${(_yesterdaySession!['exercises'] as List?)?.length ?? 0}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
-              Text('Duration: ${_yesterdaySession!['durationSeconds'] ?? 0}s', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
-              Text('Muscles Worked: ${((_yesterdaySession!['musclesWorked'] as List?) ?? []).join(', ')}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
+              Text('Exercises: \${(_yesterdaySession!['exercises'] as List?)?.length ?? 0}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
+              Text('Duration: \${_yesterdaySession!['durationSeconds'] ?? 0}s', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
+              Text('Muscles Worked: \${((_yesterdaySession!['musclesWorked'] as List?) ?? []).join(', ')}', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
             ],
           ],
         ),
@@ -348,3 +335,4 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
     );
   }
 }
+INNER_EOF

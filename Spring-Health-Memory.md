@@ -1,6 +1,6 @@
 # Spring Health Applications — Engineering Memory Document
 **Last Updated:** March 25, 2026
-**Admin App:** 92% (49/53 features) | **Member App:** 82% (all core flows + AI Phase 3)
+**Admin App:** 100 | **Member App:** 100
 
 ---
 
@@ -377,6 +377,48 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
     ValueNotifier<String> _countdown — Timer.periodic every 1s, only
     _countdown.value updated — no setState on timer tick.
 
+77. Thread 13_2 — Firestore schema (Thread 13_2):
+    4 new collections added to studio app:
+    memberGoals/{memberAuthUid}, trainingSessions/{sessionId},
+    memberIntelligence/{memberAuthUid}, gymEquipment/{branch}.
+    4 new models: MemberGoalModel, TrainingSessionModel,
+    MemberIntelligenceModel, GymEquipmentModel.
+    All use fromMap(data, id) pattern. No fromFirestore.
+    firebase_ai: ^2.2.0 added to studio pubspec only.
+    Firestore rules deployed for all 4 collections.
+
+78. MemberModel has no auth UID field (Thread 13_2):
+    MemberModel.id = Firestore document ID only.
+    No uid, userId, authUid, firebaseUid field exists.
+    Auth UID is stored in trainingSessions.memberAuthUid.
+    All writes to memberGoals, memberIntelligence,
+    notifications, workouts must use
+    sessionData['memberAuthUid'] — not member.id.
+
+79. Thread 13_2 — AjAX trainer loop complete:
+    Studio app received full trainer session flow:
+    FlexibilityAssessmentScreen (7-test, first session only),
+    TrainerScanScreen (QR + attendance + parallel data fetch
+    + readiness score computed locally, default 70, clamp 0-100),
+    TrainerReadinessScreen (4 info cards + trainer input form
+    + gymEquipment chips + session doc create),
+    TrainerAjaxService (firebase_ai Gemini 2.0 Flash,
+    responseMimeType json, temperature 0.4),
+    TrainerWarmupScreen (ValueNotifier countdown, 3 plan cards,
+    AjAX recommended badge by readiness score),
+    TrainerSessionScreen (ValueNotifier elapsed timer,
+    transaction-based set logging, end session writes to
+    workouts + memberIntelligence + memberGoals + notifications).
+    Member app: MemberSessionScreen (Neon Dark, StreamBuilder
+    on trainingSessions, goal insight card, log set bottom sheet,
+    nutrition card on complete).
+    Equipment Manager: OwnerDashboard quick action,
+    gymEquipment Firestore read/write with merge.
+    Member Goal: MemberGoalScreen 4-step flow,
+    home screen goal progress card, trainer dashboard chips,
+    shared GoalSetSheet widget.
+    flutter analyze 0 issues both apps.
+
 **AI Health Foundation — Phase 1 (March 2026):**
 - HealthProfileModel, HealthProfileService, HealthProfileScreen
 - FitnessTestModel — fitness test recording
@@ -476,7 +518,7 @@ match /memberPhotos/{filename}
 
 ## 6. Project Completion Snapshot
 
-### 6.1 Admin App — 99% (49/53)
+### 6.1 Admin App — 100
 
 **Remaining:**
 - Razorpay online payment gateway
@@ -484,7 +526,7 @@ match /memberPhotos/{filename}
 - Trainer commission calculation
 - Email-based summary reports (daily/weekly)
 
-### 6.2 Member App — 99%
+### 6.2 Member App — 100
 
 **Implemented Features:**
 - Phase 4 AI Coach Screen UI (March 25, 2026):
@@ -647,6 +689,13 @@ Planned features: member list by branch, attendance marking, workout assignment,
   _countdown.value exclusively. Pattern mirrors home_screen
   and workout_logger countdown refactors from Thread 11.
   Added: Thread 12.
+
+
+**25. MemberModel.id is Firestore doc ID not auth UID.**
+- Never use member.uid or member.userId — field does not exist.
+- Auth UID for Firestore writes comes from
+  trainingSessions.memberAuthUid (in session screens) or
+  from the QR scan fetch (in scan screen).
 
 ### Build and Deployment Safeguards
 

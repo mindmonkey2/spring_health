@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../models/member_model.dart';
+import 'trainer_stretching_screen.dart';
 
 class TrainerSessionScreen extends StatefulWidget {
   final String sessionId;
@@ -28,10 +29,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
 
   final Map<int, TextEditingController> _repsControllers = {};
   final Map<int, TextEditingController> _weightControllers = {};
-  final TextEditingController _trainerNotesController = TextEditingController();
-  final TextEditingController _ajaxNoteController = TextEditingController();
-  double _sessionRpe = 5;
-  bool _isSavingEndSession = false;
+  bool _hasNavigatedToStretching = false;
 
   @override
   void initState() {
@@ -59,8 +57,6 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
   void dispose() {
     _timer?.cancel();
     _sessionTimer.dispose();
-    _trainerNotesController.dispose();
-    _ajaxNoteController.dispose();
     for (var c in _repsControllers.values) {
       c.dispose();
     }
@@ -68,145 +64,6 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       c.dispose();
     }
     super.dispose();
-  }
-
-  Future<void> _endSession(Map<String, dynamic> sessionData) async {
-    setState(() => _isSavingEndSession = true);
-
-    try {
-      final db = FirebaseFirestore.instance;
-      final totalDurationMinutes = _elapsed ~/ 60;
-      final rpe = _sessionRpe.toInt();
-      final notes = _trainerNotesController.text;
-      final ajaxNote = _ajaxNoteController.text.trim();
-      final now = Timestamp.now();
-
-      final exercises =
-          List<Map<String, dynamic>>.from(sessionData['exercises'] ?? []);
-
-      await db
-          .collection('trainingSessions')
-          .doc(widget.sessionId)
-          .update({
-        'status': 'complete',
-        'sessionEndTime': now,
-        'totalDurationMinutes': totalDurationMinutes,
-        'trainerNotes': notes,
-        'sessionRpe': rpe,
-        'nutritionSentAt': now,
-      });
-
-      final workoutExercises = exercises.map((ex) {
-        final completedSets =
-            List<Map<String, dynamic>>.from(ex['completedSets'] ?? []);
-        return {
-          'name': ex['name'],
-          'category': ex['category'] ?? 'Trainer Session',
-          'sets': completedSets
-              .asMap()
-              .entries
-              .map((e) => {
-                    'setNumber': e.key + 1,
-                    'weight': e.value['weightKg'] ?? 0,
-                    'reps': e.value['reps'] ?? 0,
-                    'isCompleted': true,
-                  })
-              .toList(),
-        };
-      }).toList();
-
-      await db.collection('workouts').add({
-        'memberId': (sessionData['memberAuthUid'] as String? ?? ''),
-        'exercises': workoutExercises,
-        'durationMinutes': totalDurationMinutes,
-        'date': now,
-        'source': 'trainer_session',
-        'sessionId': widget.sessionId,
-        'trainerId': widget.trainerId,
-      });
-
-      final goalsSnap = await db
-          .collection('memberGoals')
-          .doc((sessionData['memberAuthUid'] as String? ?? ''))
-          .get();
-      if (goalsSnap.exists) {
-        await db
-            .collection('memberGoals')
-            .doc((sessionData['memberAuthUid'] as String? ?? ''))
-            .update({'lastPaceCheck': now});
-      }
-
-      final intelDoc =
-          db.collection('memberIntelligence').doc((sessionData['memberAuthUid'] as String? ?? ''));
-      final intelSnap = await intelDoc.get();
-
-      double newAvgRpe = rpe.toDouble();
-      if (intelSnap.exists) {
-        final intelData = intelSnap.data()!;
-        final currentTotal =
-            (intelData['totalSessionsLogged'] ?? 0) as int;
-        final currentAvg =
-            (intelData['avgSessionRpe'] ?? 0.0) as double;
-        newAvgRpe =
-            ((currentAvg * currentTotal) + rpe) / (currentTotal + 1);
-      }
-
-      final Map<String, dynamic> intelUpdate = {
-        'totalSessionsLogged': FieldValue.increment(1),
-        'lastSessionDate': now,
-        'avgSessionRpe': newAvgRpe,
-      };
-
-      if (ajaxNote.isNotEmpty) {
-        if (intelSnap.exists) {
-          final intelData = intelSnap.data()!;
-          List<String> observations =
-              List<String>.from(intelData['trainerObservations'] ?? []);
-          if (observations.length >= 10) {
-            observations.removeAt(0);
-            observations.add(
-                '${DateTime.now().toIso8601String()}: $ajaxNote');
-            intelUpdate['trainerObservations'] = observations;
-          } else {
-            intelUpdate['trainerObservations'] = FieldValue.arrayUnion(
-                ['${DateTime.now().toIso8601String()}: $ajaxNote']);
-          }
-        } else {
-          intelUpdate['trainerObservations'] = FieldValue.arrayUnion(
-              ['${DateTime.now().toIso8601String()}: $ajaxNote']);
-        }
-      }
-
-      await intelDoc.set(intelUpdate, SetOptions(merge: true));
-
-      final nextWeighIn =
-          sessionData['nextWeighInDate'] as Timestamp? ?? now;
-      await db
-          .collection('notifications')
-          .doc((sessionData['memberAuthUid'] as String? ?? ''))
-          .collection('items')
-          .add({
-        'type': 'weigh_in_reminder',
-        'title': 'Weigh-in Day',
-        'body':
-            'Log your weight before eating. Helps AjAX calibrate your plan.',
-        'scheduledFor': nextWeighIn,
-        'delivered': false,
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Session complete! Data saved.')),
-        );
-        Navigator.popUntil(context, (route) => route.isFirst);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to end session: $e')));
-        setState(() => _isSavingEndSession = false);
-      }
-    }
   }
 
   Future<void> _logSet(
@@ -221,7 +78,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
 
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('trainingSessions')
+          .collection('sessions')
           .doc(widget.sessionId);
 
       await FirebaseFirestore.instance
@@ -260,7 +117,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       Map<String, dynamic> exercise, int totalExercises) async {
     try {
       final docRef = FirebaseFirestore.instance
-          .collection('trainingSessions')
+          .collection('sessions')
           .doc(widget.sessionId);
 
       await FirebaseFirestore.instance
@@ -309,7 +166,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
         ),
         title: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
-              .collection('trainingSessions')
+              .collection('sessions')
               .doc(widget.sessionId)
               .snapshots(),
           builder: (context, snapshot) {
@@ -365,7 +222,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('trainingSessions')
+            .collection('sessions')
             .doc(widget.sessionId)
             .snapshots(),
         builder: (context, snapshot) {
@@ -386,108 +243,35 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
           final allComplete = exercises.isNotEmpty &&
               exercises.every((ex) => ex['status'] == 'complete');
 
+          if (allComplete && !_hasNavigatedToStretching) {
+            _hasNavigatedToStretching = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              final allMuscles = exercises
+                  .expand((ex) => List<String>.from(ex['targetMuscles'] ?? []))
+                  .toSet().toList();
+
+              await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionId).set({
+                'musclesWorked': allMuscles,
+                'status': 'stretching'
+              }, SetOptions(merge: true));
+
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => TrainerStretchingScreen(
+                  sessionId: widget.sessionId,
+                  member: widget.member,
+                  trainerId: widget.trainerId,
+                  musclesWorked: allMuscles,
+                )),
+              );
+            });
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: exercises.length + (allComplete ? 1 : 0),
+            itemCount: exercises.length,
             itemBuilder: (context, index) {
-              if (index == exercises.length) {
-                return Card(
-                  color: AppColors.surface,
-                  margin:
-                      const EdgeInsets.only(top: 24, bottom: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(
-                        color: AppColors.turquoise),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'End Session',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: AppColors.turquoise),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _trainerNotesController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'Trainer notes',
-                            border: OutlineInputBorder(),
-                            alignLabelWithHint: true,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Overall session RPE: ${_sessionRpe.toInt()}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600),
-                        ),
-                        Slider(
-                          value: _sessionRpe,
-                          min: 1,
-                          max: 10,
-                          divisions: 9,
-                          label: _sessionRpe.toInt().toString(),
-                          activeColor: AppColors.turquoise,
-                          onChanged: (val) {
-                            setState(() => _sessionRpe = val);
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _ajaxNoteController,
-                          maxLines: 1,
-                          decoration: const InputDecoration(
-                            labelText:
-                                'AjAX memory note (optional)',
-                            hintText:
-                                'One sentence stored as trainer observation',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _isSavingEndSession
-                              ? null
-                              : () => _endSession(data),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.success,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _isSavingEndSession
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2),
-                                )
-                              : const Text(
-                                  'END SESSION',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
               final ex = exercises[index];
               final status =
                   ex['status'] as String? ?? 'pending';

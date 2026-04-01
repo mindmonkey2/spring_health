@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/member_model.dart';
-import '../../models/training_session_model.dart';
+import '../../models/session_model.dart';
 import '../../theme/app_colors.dart';
 import 'trainer_session_screen.dart';
+import '../../services/trainer_ajax_service.dart';
 
 class TrainerWarmupScreen extends StatefulWidget {
   final String sessionId;
@@ -30,6 +31,29 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
   void initState() {
     super.initState();
     _startCountdown();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.member.uid == null || widget.member.uid!.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Warning: Member has no auth UID. AI analysis might fail.')),
+          );
+        }
+      }
+
+      final snap = await FirebaseFirestore.instance
+          .collection('sessions')
+          .doc(widget.sessionId)
+          .get();
+      final currentStatus = (snap.data()?['status'] as String?) ?? '';
+      if (currentStatus == 'warmup') {
+        await TrainerAjaxService.analyzeAndGenerate(
+          memberId: widget.member.id,
+          memberAuthUid: widget.member.uid ?? '',
+          sessionId: widget.sessionId,
+        );
+      }
+    });
   }
 
   void _startCountdown() {
@@ -65,7 +89,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('trainingSessions')
+            .collection('sessions')
             .doc(widget.sessionId)
             .snapshots(),
         builder: (context, snapshot) {
@@ -78,12 +102,33 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
           }
 
           final sessionMap = snapshot.data!.data() as Map<String, dynamic>;
-          final session = TrainingSessionModel.fromMap(sessionMap, widget.sessionId);
+          final sessionModel = SessionModel.fromMap(sessionMap, widget.sessionId);
+          final plans = (sessionMap['plans'] as Map?) ?? {};
+          final readinessScore = (sessionMap['readinessScore'] as num?)?.toInt() ?? 60;
+          final goalInsight = sessionMap['goalInsight'] as String?;
+          final sessionFocus = sessionMap['sessionFocus'] as String?;
+          final isFoundationSession = sessionMap['isFoundationSession'] as bool? ?? false;
 
-          if (session.status == 'analyzing') {
-            return _buildAnalyzingState(session);
-          } else if (session.status == 'warmup' || session.plans.isNotEmpty) {
-            return _buildWarmupState(session);
+          if (sessionModel.status == 'active') {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacement(context, MaterialPageRoute(
+                builder: (_) => TrainerSessionScreen(
+                  sessionId: widget.sessionId,
+                  member: widget.member,
+                  trainerId: widget.trainerId,
+                ),
+              ));
+            });
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (sessionModel.status == 'warmup') {
+            if (plans.isNotEmpty) {
+               return _buildWarmupState(sessionModel, plans, goalInsight, sessionFocus, readinessScore);
+            }
+            return _buildAnalyzingState(isFoundationSession);
+          } else if (sessionModel.status == 'planning') {
+             return _buildWarmupState(sessionModel, plans, goalInsight, sessionFocus, readinessScore);
           }
 
           return const Center(child: Text('Invalid session state'));
@@ -92,7 +137,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
     );
   }
 
-  Widget _buildAnalyzingState(TrainingSessionModel session) {
+  Widget _buildAnalyzingState(bool isFoundationSession) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -125,7 +170,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            if (session.isFoundationSession == true)
+            if (isFoundationSession)
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -156,7 +201,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
     );
   }
 
-  Widget _buildWarmupState(TrainingSessionModel session) {
+  Widget _buildWarmupState(SessionModel sessionModel, Map plans, String? goalInsight, String? sessionFocus, int readinessScore) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -172,7 +217,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          if (session.goalInsight != null && session.goalInsight!.isNotEmpty)
+          if (goalInsight != null && goalInsight.isNotEmpty)
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -195,7 +240,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      session.goalInsight!,
+                      goalInsight,
                       style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                     ),
                   ],
@@ -203,12 +248,12 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
               ),
             ),
           const SizedBox(height: 16),
-          if (session.sessionFocus != null && session.sessionFocus!.isNotEmpty)
+          if (sessionFocus != null && sessionFocus.isNotEmpty)
             Align(
               alignment: Alignment.centerLeft,
               child: Chip(
                 label: Text(
-                  session.sessionFocus!,
+                  sessionFocus,
                   style: const TextStyle(color: AppColors.turquoiseDark),
                 ),
                 backgroundColor: const Color(0x1A4ECDC4),
@@ -221,16 +266,16 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
           ),
           const SizedBox(height: 16),
           ...['low', 'medium', 'high'].map((intensity) {
-            final planData = session.plans[intensity];
+            final planData = plans[intensity];
             if (planData == null) return const SizedBox.shrink();
-            return _buildPlanCard(intensity, Map<String, dynamic>.from(planData as Map), session);
+            return _buildPlanCard(intensity, Map<String, dynamic>.from(planData as Map), sessionModel, readinessScore);
           }),
         ],
       ),
     );
   }
 
-  Widget _buildPlanCard(String intensity, Map<String, dynamic> plan, TrainingSessionModel session) {
+  Widget _buildPlanCard(String intensity, Map<String, dynamic> plan, SessionModel sessionModel, int readinessScore) {
     Color cardTint;
     if (intensity == 'low') {
       cardTint = const Color(0x1A607D8B);
@@ -240,7 +285,6 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
       cardTint = const Color(0x1A8B9FF7);
     }
 
-    final readinessScore = session.readinessScore;
     bool isRecommended = false;
     if (readinessScore < 40 && intensity == 'low') isRecommended = true;
     if (readinessScore >= 40 && readinessScore <= 70 && intensity == 'medium') isRecommended = true;
@@ -263,7 +307,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
       margin: const EdgeInsets.only(bottom: 16.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => _selectPlan(intensity, plan, session),
+        onTap: () => _selectPlan(intensity, plan, sessionModel),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -321,7 +365,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: () => _selectPlan(intensity, plan, session),
+                  onPressed: () => _selectPlan(intensity, plan, sessionModel),
                   child: const Text('SELECT THIS PLAN'),
                 ),
               ),
@@ -332,7 +376,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
     );
   }
 
-  Future<void> _selectPlan(String intensity, Map<String, dynamic> planData, TrainingSessionModel session) async {
+  Future<void> _selectPlan(String intensity, Map<String, dynamic> planData, SessionModel sessionModel) async {
     final rawExercises = (planData['exercises'] as List?)?.cast<Map<dynamic, dynamic>>() ?? [];
 
     final List<Map<String, dynamic>> exercises = rawExercises.asMap().entries.map((e) {
@@ -343,7 +387,7 @@ class _TrainerWarmupScreenState extends State<TrainerWarmupScreen> {
       return map;
     }).toList();
 
-    await FirebaseFirestore.instance.collection('trainingSessions').doc(widget.sessionId).update({
+    await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionId).update({
       'selectedIntensity': intensity,
       'exercises': exercises,
       'status': 'active',

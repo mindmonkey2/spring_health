@@ -9,6 +9,9 @@ class SessionModel {
   final String trainerName;
   final String branch;
   final DateTime date;
+  // status values: 'created' | 'warmup' | 'planning' | 'active'
+  //                | 'stretching' | 'complete' | 'cancelled'
+  //                | 'medical_hold'
   final String status;
   final List<Map<String, dynamic>> warmup;
   final List<Map<String, dynamic>> exercises;

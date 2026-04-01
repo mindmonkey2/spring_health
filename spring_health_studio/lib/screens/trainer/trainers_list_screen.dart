@@ -1,4 +1,4 @@
-// lib/screens/trainers/trainers_list_screen.dart
+// lib/screens/trainer/trainers_list_screen.dart
 import 'package:flutter/material.dart';
 import '../../models/trainer_model.dart';
 import '../../services/firestore_service.dart';

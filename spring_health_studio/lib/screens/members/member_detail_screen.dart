@@ -13,7 +13,7 @@ import 'edit_member_screen.dart';
 import 'collect_dues_screen.dart';
 import 'rejoin_member_screen.dart';
 import 'member_fitness_tab.dart'; // NEW
-import '../trainers/trainer_plan_override_screen.dart'; // NEW
+import '../trainer/trainer_plan_override_screen.dart'; // NEW
 import '../../../services/whatsapp_service.dart';
 import '../../../widgets/document_send_dialog.dart';
 import '../../../widgets/goal_set_sheet.dart';

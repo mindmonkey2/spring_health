@@ -10,7 +10,7 @@ import '../reports/reports_screen.dart';
 import 'owner_dashboard_web.dart';
 import '../expenses/expenses_screen.dart';
 import '../analytics/analytics_dashboard.dart';
-import '../trainers/trainers_list_screen.dart';
+import '../trainer/trainers_list_screen.dart';
 import '../notifications/notifications_dashboard.dart';
 import '../reminders/reminders_dashboard.dart';
 // ── TASK 1 FIX: replaced CreateAnnouncementScreen with AnnouncementsListScreen

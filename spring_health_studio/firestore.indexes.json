@@ -185,6 +185,14 @@
         { "fieldPath": "memberAuthUid", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "trainerTeamBattles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "organizerTrainerId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

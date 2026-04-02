@@ -369,5 +369,28 @@ service cloud.firestore {
       allow write: if isOwner() || isTrainer();
     }
 
+    // Spring Social — schema reserved, UI pending
+    match /springSocial/{memberId} {
+      allow read, write: if isSignedIn()
+        && request.auth.uid == memberId;
+    }
+
+    match /socialFeed/{feedItemId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn();
+      allow update, delete: if isSignedIn()
+        && resource.data.memberId == request.auth.uid;
+    }
+
+    match /socialChallenges/{challengeId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn()
+        && (resource.data.challengerId == request.auth.uid
+            || resource.data.opponentId == request.auth.uid);
+      allow update: if isSignedIn()
+        && (resource.data.challengerId == request.auth.uid
+            || resource.data.opponentId == request.auth.uid);
+    }
+
   }
 }

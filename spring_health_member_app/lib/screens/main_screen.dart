@@ -21,7 +21,9 @@ import '../screens/ai_coach/ai_coach_screen.dart';
 import '../services/wearable_snapshot_service.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -33,7 +35,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   final _memberService = MemberService();
 
   // ── State ──────────────────────────────────────────────────────
-  int _currentIndex = 0;
+  late int _currentIndex;
   String? _memberId;
   MemberModel? _member;
   bool _isLoading = true;
@@ -72,6 +74,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex;
     WidgetsBinding.instance.addObserver(this); // ✅ lifecycle observer
     _init();
 

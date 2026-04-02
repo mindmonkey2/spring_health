@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/fitness_stats_model.dart';
@@ -9,6 +11,7 @@ import 'widgets/fitness_chart_widget.dart';
 import '../workout/workout_history_screen.dart';
 import '../../services/health_service.dart';
 import 'health_permission_screen.dart';
+import 'live_session_screen.dart';
 
 class FitnessDashboardScreen extends StatefulWidget {
   final String? memberId;
@@ -30,9 +33,24 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
+  late final Stream<QuerySnapshot>? _sessionStream;
+
   @override
   void initState() {
     super.initState();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _sessionStream = FirebaseFirestore.instance
+          .collection('sessions')
+          .where('memberAuthUid', isEqualTo: uid)
+          .where('status', whereNotIn: ['complete', 'cancelled'])
+          .orderBy('status')
+          .orderBy('createdAt', descending: true)
+          .limit(1)
+          .snapshots();
+    } else {
+      _sessionStream = null;
+    }
     _checkAndLoad();
   }
 
@@ -202,6 +220,34 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_sessionStream != null) {
+      return StreamBuilder<QuerySnapshot>(
+        stream: _sessionStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              backgroundColor: AppColors.backgroundBlack,
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.neonLime),
+              ),
+            );
+          }
+
+          if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+            final doc = snapshot.data!.docs.first;
+            final status = (doc.data() as Map<String, dynamic>)['status'] as String? ?? '';
+            if (status != 'complete' && status != 'cancelled') {
+              return LiveSessionScreen(sessionId: doc.id);
+            }
+          }
+          return _buildDashboard(context);
+        },
+      );
+    }
+    return _buildDashboard(context);
+  }
+
+  Widget _buildDashboard(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundBlack,
       appBar: AppBar(

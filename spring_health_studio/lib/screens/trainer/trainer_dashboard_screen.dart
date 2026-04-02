@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../members/members_list_screen.dart';
 import '../trainer/trainer_member_detail_screen.dart';
 import '../trainer/trainer_scan_screen.dart';
+import 'trainer_team_battle_screen.dart';
 
 class TrainerDashboardScreen extends StatefulWidget {
   final UserModel user;
@@ -162,6 +163,17 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
             case 3:
               return _FeedbackTab(
                   trainer: _trainerProfile!, firestoreService: _firestoreService);
+            case 4:
+              return StreamBuilder<List<MemberModel>>(
+                stream: _firestoreService.getMembersByTrainer(_trainerProfile!.id),
+                builder: (context, snapshot) {
+                  return TrainerTeamBattleScreen(
+                    trainerId: _trainerProfile!.id,
+                    trainerName: _trainerProfile!.name,
+                    assignedMembers: snapshot.data ?? [],
+                  );
+                },
+              );
             default:
               return _HomeTab(
                   trainer: _trainerProfile!, firestoreService: _firestoreService);
@@ -202,7 +214,13 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
                 activeIcon: Icon(Icons.star),
                 label: 'Feedback',
               ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.sports_kabaddi_outlined),
+                activeIcon: Icon(Icons.sports_kabaddi),
+                label: 'Battles',
+              ),
             ],
+            type: BottomNavigationBarType.fixed,
           );
         },
       ),

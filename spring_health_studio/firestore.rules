@@ -90,5 +90,13 @@ service cloud.firestore {
             && resource.data.memberAuthUid == request.auth.uid);
       allow delete: if isOwner();
     }
+
+    match /trainerTeamBattles/{battleId} {
+      allow create: if isTrainer();
+      allow read, update: if isOwner()
+        || (isTrainer()
+            && resource.data.organizerTrainerId == request.auth.uid);
+      allow delete: if isOwner();
+    }
   }
 }

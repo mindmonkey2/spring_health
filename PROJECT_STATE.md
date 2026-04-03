@@ -151,7 +151,12 @@ STILL PENDING:
   - Social Flex Zone (social_coming_soon_screen.dart)
   - Trainer App (springhealthtrainer) — not started
 
-## 4. Architectural Health
+## 4. Testing & Coverage
+- **Model Tests**:
+  - `spring_health_member_app/test/models/fitness_stats_model_test.dart`: Unit tests for `WorkoutType.fromString` covering all keywords, case-insensitivity, and default cases. (Verified via standalone logic test due to environment restrictions).
+
+## 5. Architectural Health
+## 5. Architectural Health
 
 Evaluating adherence to the directives outlined in `AGENTS.md`:
 
@@ -161,7 +166,7 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
   - *Current Status*: **CRITICAL FAILURE**. `flutter analyze spring_health_member_app` returns 8,304 issues. `flutter analyze spring_health_studio` returns 10,691 issues. Most issues relate to undefined identifiers, undefined classes/methods, uri not existing (like `cloud_firestore`, `flutter/material.dart`, etc.), and const initialization errors. This suggests a severely broken build state or missing dependency fetching steps (`flutter pub get`).
 - **Deprecations/Print Statements**: Did not deeply verify all occurrences, but given the severe compilation errors, the general health of the codebase requires an immediate dependency resolution and code correction pass.
 
-## 5. Known Rules
+## 6. Known Rules
 - **Member IDs in Health Collections**: `memberId` in `healthProfiles`, `bodyMetricsLogs`, and `fitnessTests` collections is the Firebase Auth UID (not Firestore member doc ID). Verify via `FirebaseAuthService.instance.currentUser.uid`.
 - **BP Warnings**: BP Stage 2 or Crisis must always show a non-dismissible warning.
 - **BMI Calculation**: BMI is always auto-calculated — never stored as a raw input field.
@@ -173,7 +178,7 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 - **WearableSnapshotService.syncTodaySnapshot() also updates HealthProfileModel**: do not manually update BP/weight/RHR from wearables elsewhere, let the service handle it
 - **firebase_ai package version must stay in sync with firebase_core**: Check pub.dev for compatible versions before updating
 
-## 6. Known Pitfalls and Rules
+## 7. Known Pitfalls and Rules
 
   16. Firestore rules deploy may silently skip upload
       if CLI detects no file change on disk.

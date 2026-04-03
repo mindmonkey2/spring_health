@@ -571,7 +571,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 }
 
-// ── Nav item data class ────────────────────────────────────────────────────
 class _NavItem {
   final IconData selectedIcon;
   final IconData unselectedIcon;

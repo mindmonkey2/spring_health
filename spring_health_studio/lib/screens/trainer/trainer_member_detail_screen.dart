@@ -7,17 +7,20 @@ import '../../models/member_model.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/member_card.dart';
 import '../members/member_ai_plan_screen.dart';
+import 'trainer_scan_screen.dart';
 
 class TrainerMemberDetailScreen extends StatefulWidget {
   final MemberModel member;
   final String trainerId;
   final String trainerName;
+  final String trainerBranch;
 
   const TrainerMemberDetailScreen({
     super.key,
     required this.member,
     required this.trainerId,
     required this.trainerName,
+    required this.trainerBranch,
   });
 
   @override
@@ -134,13 +137,13 @@ class _TrainerMemberDetailScreenState extends State<TrainerMemberDetailScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: ElevatedButton(
               onPressed: () {
-                // TODO: TrainerScanScreen(prefilledMemberId: member.id, trainerId: trainerId)
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => Scaffold(
-                      appBar: AppBar(title: const Text('Start Session')),
-                      body: const Center(child: Text('Coming in next task')),
+                    builder: (_) => TrainerScanScreen(
+                      trainerId: widget.trainerId,
+                      trainerBranch: widget.trainerBranch,
+                      prefilledMemberId: widget.member.id,
                     ),
                   ),
                 );

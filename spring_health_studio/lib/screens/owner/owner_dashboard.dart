@@ -578,7 +578,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
           crossAxisCount: 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          childAspectRatio: 1.3,
+          childAspectRatio: 1.1,
         ),
         itemCount: cards.length,
         itemBuilder: (context, i) {
@@ -629,7 +629,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
           ),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -652,13 +652,20 @@ class _OwnerDashboardState extends State<OwnerDashboard>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(value,
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: gradientColors[0])),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(value,
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: gradientColors[0])),
+                    ),
                     const SizedBox(height: 4),
                     Text(title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
@@ -1037,7 +1044,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
               crossAxisCount: 3,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 0.85,
+              childAspectRatio: 0.75,
             ),
             itemCount: actions.length,
             itemBuilder: (context, i) {
@@ -1086,7 +1093,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -1111,6 +1118,7 @@ class _OwnerDashboardState extends State<OwnerDashboard>
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

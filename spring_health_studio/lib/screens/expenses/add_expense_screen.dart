@@ -147,26 +147,28 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
             DropdownButtonFormField<String>(
               initialValue: _selectedCategory,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Category',
-                prefixIcon: Text(
-                  ExpenseCategories.categoryIcons[_selectedCategory] ?? 'Box',
-                  style: const TextStyle(fontSize: 24),
-                ),
-                border: const OutlineInputBorder(),
+                prefixIcon: Icon(Icons.category),
+                border: OutlineInputBorder(),
               ),
               items: ExpenseCategories.categories.map((category) {
                 final icon = ExpenseCategories.categoryIcons[category] ?? 'Box';
-              return DropdownMenuItem(
-                value: category,
-                child: Row(
-                  children: [
-                    Text(icon, style: const TextStyle(fontSize: 20)),
-                    const SizedBox(width: 12),
-                    Text(category),
-                  ],
-                ),
-              );
+                return DropdownMenuItem(
+                  value: category,
+                  child: Row(
+                    children: [
+                      Text(icon, style: const TextStyle(fontSize: 20)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          category,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               }).toList(),
               onChanged: (value) {
                 setState(() {

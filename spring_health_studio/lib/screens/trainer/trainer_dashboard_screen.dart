@@ -1136,6 +1136,7 @@ class _HomeTabState extends State<_HomeTab> {
                                         member: m,
                                         trainerId: widget.trainer.id,
                                         trainerName: widget.trainer.name,
+                                        trainerBranch: widget.trainer.branch,
                                       ),
                                     ),
                                   );

@@ -1,6 +1,6 @@
 # Spring Health Applications — Engineering Memory Document
 **Last Updated:** March 25, 2026
-**Admin App:** 100 | **Member App:** 100
+**Admin App:** 100 | **Member App:** 101
 
 ---
 
@@ -429,6 +429,9 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
 - Health Connect integration (steps, heart rate, HRV, sleep, calories)
 - AiCoachService, AiWorkoutPlanModel, AiDietPlanModel
 - Firestore: `wearableSnapshots`, `aiPlans`, `dietPlans`
+
+**Model Testing:**
+- `WorkoutType.fromString` (in `fitness_stats_model.dart`) is now fully covered by unit tests in `spring_health_member_app/test/models/fitness_stats_model_test.dart`. Tests cover keywords (upper, power, cardio, run, yoga, leg, full, hiit), case-insensitivity, substrings, and default 'other' fallback. (Verified April 2026).
 
 **Pending Features:**
 - Online member renewal with Razorpay

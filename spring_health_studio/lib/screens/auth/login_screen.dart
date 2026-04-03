@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
+  // ignore: unused_field
   final _firestoreService = FirestoreService();
 
   late AnimationController _floatController;
@@ -30,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   bool _isLoading = false;
   bool _obscurePassword = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -66,55 +68,23 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
-      final userCredential = await _authService.signInWithEmailPassword(
+      final UserModel user = await _authService.signInAndResolveUser(
         _emailController.text.trim(),
-        _passwordController.text,
+        _passwordController.text.trim(),
       );
 
       if (!mounted) return;
 
-      final userData = await _firestoreService
-          .getUserRole(userCredential.user!.uid);
-      final role = userData['role'] as String? ?? '';
-
-      if (!mounted) return;
-
-      // ✅ Build full UserModel from Firestore data
-      final userModel = UserModel.fromMap(
-        userData,
-        userCredential.user!.uid,
-      );
-
-      switch (role) {
+      switch (user.role) {
         case 'Owner':
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const OwnerDashboard()),
-          );
-          break;
-
-        case 'Trainer':
-          // ✅ FIXED: Pass complete UserModel with trainerId
-          if (userModel.trainerId == null || userModel.trainerId!.isEmpty) {
-            // Trainer account exists but no trainer_id set — show clear error
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Trainer profile not linked. Contact admin.',
-                  style: TextStyle(color: Colors.white),
-                ),
-                backgroundColor: AppColors.error,
-              ),
-            );
-            await _authService.signOut();
-            break;
-          }
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => TrainerDashboardScreen(user: userModel),
-            ),
           );
           break;
 
@@ -124,27 +94,27 @@ class _LoginScreenState extends State<LoginScreen>
           );
           break;
 
+        case 'Trainer':
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => TrainerDashboardScreen(user: user),
+            ),
+          );
+          break;
+
         default:
-          // ✅ FIXED: Unknown/member role is rejected with a clear message
           await _authService.signOut();
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text('Access denied for role: $role'),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            setState(() {
+              _errorMessage = 'Unauthorized access';
+            });
           }
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      setState(() {
+        _errorMessage = e.toString();
+      });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -356,6 +326,18 @@ class _LoginScreenState extends State<LoginScreen>
                                         ),
                                 ),
                               ),
+                              if (_errorMessage != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  _errorMessage!,
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.error,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ],
                           ),
                         ),

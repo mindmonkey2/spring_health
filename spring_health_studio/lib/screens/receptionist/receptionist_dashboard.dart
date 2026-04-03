@@ -367,7 +367,7 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1.4,
+              childAspectRatio: 1.2,
               children: [
                 StatCard(
                   title: 'Total Members',
@@ -526,7 +526,7 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(12, 16, 12, 20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [color, color.withValues(alpha: 0.7)],
@@ -562,6 +562,9 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
                 color: Colors.white,
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ],
         ),

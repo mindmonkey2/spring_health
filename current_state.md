@@ -800,6 +800,7 @@ Total LOW priority stubs: 88
 
 ### What is fully working
 - Both Member App and Studio App successfully pass `flutter analyze` with "No issues found!".
+- Firestore security rules for `gamification` and other member-owned collections are hardened via cross-collection ownership checks (`isMemberOwner`).
 - Basic project structure and core architectural patterns (services, models, screens) are established.
 - AI Personal Trainer logic (`ai_coach_service.dart`) in the Member App is complete, including `generateWorkoutPlan`, `generateDietPlan`, caching, and RPE integration.
 - The `DietPlanScreen` is fully implemented with expandable meal cards, daily targets, nutrition notes, and hydration tracking.

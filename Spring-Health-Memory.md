@@ -697,6 +697,12 @@ Planned features: member list by branch, attendance marking, workout assignment,
   trainingSessions.memberAuthUid (in session screens) or
   from the QR scan fetch (in scan screen).
 
+**26. Secure gamification and member-owned collections via `isMemberOwner(memberId)`.**
+- For collections where the document ID is the admin-assigned `memberId` (e.g., `gamification`), use the `isMemberOwner(memberId)` helper function in `firestore.rules`.
+- This function performs a cross-collection lookup to the `members` collection to verify that the `uid` field in the member document matches `request.auth.uid`.
+- This ensures that only the rightful owner of the member record (or authorized roles like Admin/Trainer) can modify their gamification data.
+- Fixed: April 2, 2026.
+
 ### Build and Deployment Safeguards
 
 - AGP 8.9.1 (required by `androidx.browser:browser:1.9.0`)

@@ -87,7 +87,7 @@ class _TrainerMemberDetailScreenState extends State<TrainerMemberDetailScreen>
           tabs: const [
             Tab(text: 'Overview'),
             Tab(text: 'Sessions'),
-            Tab(text: 'AI Plan'),
+            Tab(text: 'AjAX Plan'),
           ],
         ),
       ),

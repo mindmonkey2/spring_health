@@ -645,7 +645,7 @@ Use Indian foods exclusively or predominantly:
         throw Exception('invalid_plan_structure');
       }
     } catch (e) {
-      throw Exception('AI returned an invalid plan. Please try again.');
+      throw Exception('AjAX returned an invalid plan. Please try again.');
     }
 
     // 7. Write to Firestore
@@ -722,7 +722,7 @@ Use Indian foods exclusively or predominantly:
     try {
       plan = jsonDecode(jsonString);
     } catch (e) {
-      throw Exception('AI returned an invalid plan. Please try again.');
+      throw Exception('AjAX returned an invalid plan. Please try again.');
     }
 
     // 7. Write to Firestore

@@ -201,7 +201,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       return [
         const HomeScreen(),
         const FitnessDashboardScreen(),
-        const SizedBox(), // AI Coach placeholder
+        const SizedBox(), // AjAX Coach placeholder
         const AnnouncementsScreen(),
         _buildProfileErrorState(),
       ];

@@ -160,7 +160,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
           WorkoutExercise(
             id: _uuid.v4(),
             name: name,
-            category: 'AI Coach',
+            category: 'AjAX',
             sets: sets,
             notes: exMap['coachingCue'] as String?,
           ),
@@ -342,7 +342,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    ' AI Plan loaded — modify as needed',
+                                    ' AjAX Plan loaded — modify as needed',
                                     style: AppTextStyles.caption.copyWith(
                                       color: AppColors.neonLime,
                                     ),

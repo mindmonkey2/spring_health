@@ -76,7 +76,7 @@ class _TrainerPlanOverrideScreenState extends State<TrainerPlanOverrideScreen> {
       debugPrint('Error loading AI Plan: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading AI Plan: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text('Error loading AjAX Plan: $e'), backgroundColor: AppColors.error),
         );
       }
     } finally {
@@ -277,7 +277,7 @@ class _TrainerPlanOverrideScreenState extends State<TrainerPlanOverrideScreen> {
                             children: [
                               Icon(Icons.smart_toy_rounded, color: AppColors.primary),
                               SizedBox(width: 8),
-                              Text('Current AI Plan Focus', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              Text('Current AjAX Plan Focus', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                             ],
                           ),
                           const SizedBox(height: 8),

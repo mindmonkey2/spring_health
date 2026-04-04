@@ -499,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ── AI Coach Banner ───────────────────────────────────────────────────────
+  // ── AjAX Coach Banner ───────────────────────────────────────────────────────
 
   Widget _buildAiCoachBanner() {
     Color chipColor = AppColors.neonLime;
@@ -569,7 +569,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text('AI Personal Trainer', style: AppTextStyles.heading3),
+                Text('AjAX', style: AppTextStyles.heading3),
               ],
             ),
             const SizedBox(height: 12),
@@ -590,7 +590,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              _coachNoteSnippet ?? 'Generate your first AI plan.',
+              _coachNoteSnippet ?? 'Generate your first AjAX plan.',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
             ),
             const SizedBox(height: 12),

@@ -1586,7 +1586,7 @@ class _HomeTabState extends State<_HomeTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'AI Plans',
+              'AjAX Plans',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,

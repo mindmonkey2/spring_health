@@ -289,7 +289,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
       backgroundColor: AppColors.backgroundBlack,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundBlack,
-        title: Text('Health Profile & AI Goals', style: AppTextStyles.heading2),
+        title: Text('Health Profile & AjAX Goals', style: AppTextStyles.heading2),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppColors.neonLime,
@@ -1034,7 +1034,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen>
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  "Test your current fitness level. Results help your AI coach calibrate your workout intensity and exercise selection.",
+                  "Test your current fitness level. Results help your AjAX coach calibrate your workout intensity and exercise selection.",
                   style: AppTextStyles.bodyMedium,
                 ),
               ),

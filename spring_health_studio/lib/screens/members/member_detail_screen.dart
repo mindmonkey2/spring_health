@@ -92,7 +92,7 @@ class _MemberDetailScreenState extends State<MemberDetailScreen>
               _optionTile(Icons.refresh_rounded,  'Rejoin Membership',     AppColors.success,  'rejoin',
                   subtitle: 'Renew expired membership'),
             _optionTile(Icons.message_rounded,    'Send WhatsApp Reminder', AppColors.whatsApp, 'whatsapp'),
-            _optionTile(Icons.smart_toy_rounded,  'View AI Plan & Override', AppColors.primary, 'override_ai'),
+            _optionTile(Icons.smart_toy_rounded,  'View AjAX Plan & Override', AppColors.primary, 'override_ai'),
             _optionTile(
               currentMember?.isArchived == true ? Icons.unarchive_rounded : Icons.archive_rounded,
               currentMember?.isArchived == true ? 'Restore Member' : 'Archive Member',

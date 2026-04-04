@@ -592,10 +592,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 12),
         _buildActionTile(
-          'Health Profile & AI Goals',
+          'Health Profile & AjAX Goals',
           Icons.monitor_heart_outlined,
           AppColors.neonOrange,
-          subtitle: 'Metrics, BP, goals — powers your AI coach',
+          subtitle: 'Metrics, BP, goals — powers your AjAX coach',
           onTap: () => _push(HealthProfileScreen(memberId: _member.id)),
         ),
         const SizedBox(height: 12),

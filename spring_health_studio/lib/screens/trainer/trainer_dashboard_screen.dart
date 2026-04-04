@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../theme/app_colors.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
@@ -47,15 +48,41 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
   }
 
   Future<void> _loadTrainerProfile() async {
-    // ✅ FIXED: use trainerId (TRN001), not authUid
-    final trainer = await _firestoreService
-        .getTrainerById(widget.user.trainerId!);
-    if (!context.mounted) return;
-                                      if (mounted) {
-      setState(() {
-        _trainerProfile = trainer;
-        _loadingProfile = false;
-      });
+    try {
+      // Prefer trainerId from UserModel (populated at login)
+      String? tid = widget.user.trainerId;
+
+      // ✅ Safety fallback: re-query by authUid if trainerId is missing
+      if (tid == null || tid.isEmpty) {
+        final authUid = FirebaseAuth.instance.currentUser?.uid;
+        if (authUid == null) {
+          if (mounted) setState(() => _loadingProfile = false);
+          return;
+        }
+
+        final query = await FirebaseFirestore.instance
+        .collection('trainers')
+        .where('authUid', isEqualTo: authUid)
+        .limit(1)
+        .get();
+
+        if (query.docs.isEmpty) {
+          if (mounted) setState(() => _loadingProfile = false);
+          return;
+        }
+        tid = query.docs.first.id;
+      }
+
+      final trainer = await _firestoreService.getTrainerById(tid);
+      if (!context.mounted) return;
+      if (mounted) {
+        setState(() {
+          _trainerProfile = trainer;
+          _loadingProfile = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _loadingProfile = false);
     }
   }
 

@@ -68,7 +68,7 @@ class TrainerModel {
   factory TrainerModel.fromMap(Map<String, dynamic> map, String id) {
     return TrainerModel(
       id: id,
-      userId: map['userId'] as String? ?? '',
+      userId: map['authUid'] as String? ?? '',
       name: map['name'] as String? ?? '',
       phone: map['phone'] as String? ?? '',
       email: map['email'] as String? ?? '',

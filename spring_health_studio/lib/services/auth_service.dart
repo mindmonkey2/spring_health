@@ -28,45 +28,58 @@ class AuthService {
       );
       final firebaseUid = result.user!.uid;
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(firebaseUid)
-          .get();
-
-      if (!userDoc.exists) {
-        throw 'Account setup incomplete. Contact admin.';
-      }
-
-      final userData = userDoc.data()!;
-      final role = userData['role'] as String? ?? '';
-      final name = userData['name'] as String?;
-      final branch = userData['branch'] as String?;
-      final createdAt = userData['createdAt'] != null
-          ? (userData['createdAt'] as Timestamp).toDate()
-          : DateTime.now();
-
       String? trainerId;
+      String role = '';
+      String? name;
+      String? branch;
+      DateTime createdAt = DateTime.now();
 
-      if (role == 'Trainer') {
+      // ── Try users collection first ──────────────────────────────
+      final userDoc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(firebaseUid)
+      .get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        // ✅ FIXED: trim + case-insensitive
+        role   = (userData['role']   as String? ?? '').trim();
+        name   =  userData['name']   as String?;
+        branch =  userData['branch'] as String?;
+        createdAt = userData['createdAt'] != null
+        ? (userData['createdAt'] as Timestamp).toDate()
+        : DateTime.now();
+      }
+      // ── If no users doc, still allow trainer login ──────────────
+
+      if (role.toLowerCase() == 'trainer' || role.isEmpty) {
+        // ✅ FIXED: query trainers regardless of users doc state
         final trainerQuery = await FirebaseFirestore.instance
-            .collection('trainers')
-            .where('userId', isEqualTo: firebaseUid)
-            .limit(1)
-            .get();
+        .collection('trainers')
+        .where('authUid', isEqualTo: firebaseUid)
+        .limit(1)
+        .get();
 
         if (trainerQuery.docs.isEmpty) {
           throw 'Trainer profile not found. Contact admin.';
         }
+
+        final trainerData = trainerQuery.docs.first.data();
         trainerId = trainerQuery.docs.first.id;
+
+        // Backfill from trainers doc if users doc had no name/branch
+        name   ??= trainerData['name']   as String?;
+        branch ??= trainerData['branch'] as String?;
+        role     = 'Trainer'; // normalize casing
       }
 
       return UserModel(
-        uid: firebaseUid,
-        email: email,
-        role: role,
-        name: name,
-        branch: branch,
-        trainerId: trainerId,
+        uid:       firebaseUid,
+        email:     email,
+        role:      role,
+        name:      name,
+        branch:    branch,
+        trainerId: trainerId,  // ✅ now guaranteed non-null for trainers
         createdAt: createdAt,
       );
     } on FirebaseAuthException catch (e) {

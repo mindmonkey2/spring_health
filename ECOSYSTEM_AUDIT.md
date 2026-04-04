@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 
 # Spring Health Ecosystem — Function & Dependency Audit
@@ -1536,3 +1537,544 @@ Analyzing spring_health_studio...
 No issues found! (ran in 5.1s)
 
 ```
+=======
+# Spring Health Ecosystem Audit
+
+## 1. Executive Summary
+- **What this ecosystem is**: A unified digital ecosystem for Spring Health Studio fitness centers with two Flutter apps sharing a centralized Firebase backend
+- **Which apps exist**: 
+  - `spring_health_studio`: Administrative suite for Owners and Receptionists
+  - `spring_health_member_app`: Client-facing retention, fitness tracking, and community app
+- **Current maturity level**: Mature with extensive feature implementation, but with some inconsistencies between apps and potential runtime issues
+- **Biggest technical risks**: 
+  - Role-based access inconsistencies between Firestore rules and code
+  - Missing null safety in some model conversions
+  - Potential blank screens due to permission-denied errors from role mismatches
+  - Inconsistent field naming (memberId vs userid vs uid)
+
+## 2. Repo Structure
+```
+spring_health/
+├── spring_health_studio/          # Admin/studio app
+├── spring_health_member_app/      # Member-facing app
+├── firestore.rules                # Shared Firebase security rules
+├── firestore.indexes.json         # Shared Firestore indexes
+├── firebase.json                  # Firebase configuration
+├── AGENTS.md                      # AI agent directives
+└── current_state.md               # Project status documentation
+```
+
+**Purpose of each major app/folder**:
+- `spring_health_studio`: Multi-branch gym management system with role-based access (Owner, Receptionist, Trainer)
+- `spring_health_member_app`: Member-facing app for fitness tracking, AI coaching, payments, and community features
+
+## 3. Product Overview
+
+### 3.1 Studio App
+- **Purpose**: Administrative suite for gym management
+- **Key Users**: Owners, Receptionists, Trainers
+- **Core Functions**: Member management, attendance tracking, payments, reports, announcements, trainer management
+- **Tech Stack**: Flutter with Firebase backend, PDF generation, Razorpay payments (inferred from member app)
+
+### 3.2 Member App
+- **Purpose**: Client-facing retention, fitness tracking, and community app
+- **Key Users**: Gym Members
+- **Core Functions**: Workout tracking, AI coach, diet plans, payments, announcements, gamification, social features
+- **Tech Stack**: Flutter with Firebase backend, Health kit integration, Razorpay payments, Neon dark theme
+
+### 3.3 Shared Firebase Backend
+- **Database**: Firestore with normalized collections
+- **Authentication**: Firebase Auth with custom role claims
+- **Storage**: Firebase Storage for profile images, documents
+- **Messaging**: Firebase Cloud Messaging for notifications
+- **AI**: Firebase AI integration for workout/diet plan generation
+
+## 4. Role Model
+
+| Role | Studio App Access | Member App Access | Verification |
+|------|-------------------|-------------------|--------------|
+| Owner | Full access to all admin features | Read-only profile/view | ✅ Confirmed in Firestore rules |
+| Receptionist | Member management, attendance, basic reports | Read-only profile/view | ✅ Confirmed in Firestore rules |
+| Trainer | Session management, workout creation, member fitness tracking | View own profile, limited admin features | ✅ Confirmed in Firestore rules |
+| Member | No access | Full member app features | ✅ Confirmed in Firestore rules |
+
+**Mismatches between code and rules**: None detected in basic role definitions, but Firestore rules show some inconsistencies in field usage (e.g., memberId vs userid vs uid).
+
+## 5. App Architecture
+
+### 5.1 Studio app entry, navigation, dashboards
+- **Entry Point**: `lib/main.dart` with AuthWrapper handling Firebase session persistence
+- **Authentication Flow**: 
+  - Checks Firebase auth state changes
+  - Uses cached UID to prevent false logouts on restart
+  - Fetches user role from Firestore with caching
+- **Navigation**: Named routes defined in main.dart:
+  - `/`: AuthWrapper (redirects based on role)
+  - `/login`: LoginScreen
+  - `/owner-dashboard`: OwnerDashboard
+  - `/receptionist-dashboard`: ReceptionistDashboard
+  - `/add-member`: AddMemberScreen
+- **Dashboards**:
+  - Owner Dashboard: Full system access
+  - Receptionist Dashboard: Member and attendance management
+  - Trainer Dashboard: Session and workout management
+
+### 5.2 Member app entry, navigation, main tabs
+- **Entry Point**: `lib/main.dart` with splash screen initialization
+- **Authentication Flow**: 
+  - Firebase initialization
+  - Notification service setup
+  - System UI overlay styling for neon dark theme
+- **Navigation**: Bottom navigation bar with tabs (inferred from screen structure):
+  - Home
+  - Fitness
+  - Diet
+  - Trainers
+  - Social
+  - Clash
+  - Gamification
+  - Profile
+  - Settings
+
+### 5.3 Theme systems
+- **Studio App**: 
+  - "Wellness & Balance" Material Design
+  - Primary: Sage Green (`AppColors.primary`)
+  - Dark Accent: Teal (`AppColors.primaryDark`)
+  - Uses `PdfGoogleFonts` for Unicode-compliant font rendering in PDFs
+- **Member App**: 
+  - "Neon Dark" Cyber-Aesthetic with glassmorphism
+  - Background: Deep obsidian (`#09090B`)
+  - Accents: Neon Lime (`#D0FD3E`), Neon Teal (`#2DD4BF`), Neon Orange (`#FF6B35`)
+
+### 5.4 State management approach actually used
+- **Studio App**: 
+  - Uses `FutureBuilder` and `StreamBuilder` for async data
+  - Role caching in `AuthWrapper` to prevent refetching
+  - No evidence of external state management libraries (Provider, Riverpod, Bloc)
+  - Heavy reliance on direct Firestore service calls
+- **Member App**:
+  - Similar approach with `FutureBuilder`/`StreamBuilder`
+  - Uses `ValueNotifier` and `ValueListenableBuilder` for high-frequency updates (per AGENTS.md directive)
+  - Notification service with singleton pattern
+
+## 6. Feature Inventory
+
+| Area | Studio | Member | Status | Key files |
+|------|--------|--------|--------|-----------|
+| **Auth** | ✅ Email/password login | ✅ Email/password login | Complete | studio: `lib/screens/auth/login_screen.dart`, member: `lib/screens/auth/` |
+| **Members** | ✅ CRUD operations | ❌ View only | Partial | studio: `lib/screens/members/*`, member: N/A |
+| **Payments** | ✅ Expense tracking | ✅ Razorpay integration | Partial | studio: `lib/screens/expenses/*`, member: `lib/screens/payments/*`, `lib/models/payment_model.dart` |
+| **Attendance** | ✅ QR scanner & history | ✅ Check-in/check-out | Complete | studio: `lib/screens/attendance/*`, member: `lib/screens/attendance/*` |
+| **Reports** | ✅ Analytics dashboard | ❌ Limited | Partial | studio: `lib/screens/analytics/analytics_dashboard.dart` |
+| **Announcements** | ✅ CRUD | ✅ Read with readBy tracking | Complete | studio: `lib/screens/announcements/*`, member: `lib/screens/announcements/*` |
+| **Reminders** | ✅ Service layer | ❌ UI pending | Partial | studio: `services/reminder_service.dart` |
+| **Trainers** | ✅ Profile management | ✅ Browse trainers | Complete | studio: `lib/screens/trainer/*`, member: `lib/screens/trainers/*` |
+| **Workouts** | ❌ Basic tracking only | ✅ Full workout logging | Partial | member: `lib/screens/workout/*`, `lib/models/workout_model.dart` |
+| **AI Coach** | ❌ Admin view only | ✅ Plan generation | Partial | studio: `lib/screens/members/member_ai_plan_screen.dart`, member: `lib/screens/ai_coach/*` |
+| **Sessions** | ✅ Session service | ✅ Live session tracking | Complete | studio: `services/session_service.dart`, member: `lib/screens/clash/*` (live sessions) |
+| **Stretching/Live Sessions** | ❌ Not found | ✅ Clash system | Partial | member: `lib/screens/clash/*` |
+| **Gamification** | ✅ Admin service | ✅ Full system | Complete | studio: `services/admin_gamification_service.dart`, member: `lib/screens/gamification/*` |
+| **PB System** | ❌ Not found | ✅ Personal Best tracking | Partial | member: `lib/screens/fitness/*`, `lib/models/personal_best_model.dart` |
+| **Team Battles** | ✅ Service & model | ✅ UI components | Complete | studio: `services/team_battle_service.dart`, `lib/models/team_battle_model.dart`, member: `lib/screens/social/*` |
+| **Clashes/Wars** | ❌ Not found | ✅ Weekly war system | Partial | member: `lib/screens/clash/*`, `lib/models/weekly_war_model.dart` |
+| **Profile/Settings** | ❌ Limited | ✅ Full profile | Partial | member: `lib/screens/profile/*`, `lib/screens/settings/*` |
+| **Notifications** | ✅ Service layer | ✅ FCM + local notifications | Complete | studio: `services/notification_service.dart`, member: `services/notification_service.dart` |
+| **Diet Plans** | ❌ Admin view only | ✅ Full diet planning | Partial | studio: `lib/screens/members/*` (inferred), member: `lib/screens/diet/*`, `lib/models/diet_plan_model.dart` |
+
+## 7. Firebase Architecture
+
+### 7.1 Auth patterns
+- Firebase Auth with email/password providers
+- Role-based access control via Firestore `users` collection
+- No custom auth claims detected - roles stored in Firestore document
+- Session persistence handled in AuthWrapper with caching mechanism
+
+### 7.2 Firestore collections
+Confirmed collections from rules and indexes:
+
+| Collection | Purpose | Document ID | Key Fields | Verification |
+|------------|---------|-------------|------------|--------------|
+| **users** | App user accounts | Auth UID | role, branch, name, email | ✅ Rules lines 49-52 |
+| **members** | Gym member profiles | Firestore auto-ID | name, phone, branch, expiryDate, dueAmount, isArchived | ✅ Rules lines 57-62 |
+| **attendance** | Check-in records | Firestore auto-ID | memberId, branch, checkInTime, checkOutTime | ✅ Rules lines 70-76 |
+| **payments** | Financial transactions | Firestore auto-ID | memberId, amount, paymentDate, cashAmount, upiAmount, finalAmount | ✅ Rules lines 79-84 |
+| **announcements** | Gym notifications | Firestore auto-ID | title, content, targetBranches, isGlobal, readBy (array), createdAt | ✅ Rules lines 87-93 |
+| **trainers** | Trainer profiles | Firestore auto-ID | name, specialization, branch, isActive | ✅ Rules lines 96-101 |
+| **sessions** | Workout sessions | Firestore auto-ID | memberId, trainerId, sessionType, startTime, endTime, exercises | ✅ Rules lines 214-218 |
+| **gamification** | Member XP/stats | Firestore member doc ID | totalXp, currentStreak, workoutCount, level, rank | ✅ Rules lines 178-183 |
+| **gamificationEvents** | XP award events | Firestore auto-ID | memberId, xpAmount, reason, timestamp, processed | ✅ Rules lines 150-162, 164-175 |
+| **workouts** | Workout logs | Firestore auto-ID | memberId, date, exercises, duration, calories | ✅ Rules lines 199-203 |
+| **personalbests** | Personal records | Firestore auto-ID | memberId, exercise, weight, reps, recordedAt | ✅ Rules lines 205-211 |
+| **bodyMetrics** | Body measurements | Firestore auto-ID | memberId, weight, height, bodyFat, muscleMass, recordedAt | ✅ Rules lines 227-231 |
+| **healthProfiles** | AI health data | Firestore member doc ID | fitnessLevel, goals, medicalConditions, preferences | ✅ Rules lines 295-298 |
+| **aiPlans** | AI-generated plans | Firestore member doc ID | workoutPlan, dietPlan, trainerNote, createdAt | ✅ Rules lines 324-335 |
+| **wearableSnapshots** | Health device data | Firestore member doc ID | daily/{date} subcollection with steps, heartRate, calories | ✅ Rules lines 316-322 |
+| **trainerFeedback** | Trainer evaluations | Firestore auto-ID | trainerId, memberId, rating, comments, createdAt | ✅ Rules lines 104-112 |
+| **challenges** | Fitness challenges | Firestore auto-ID | name, description, startDate, endDate, targetMetric | ✅ Rules lines 136-140 |
+| **challengeEntries** | Challenge participants | Firestore auto-ID | memberId, challengeId, score, submittedAt | ✅ Rules lines 143-148 |
+| **weeklyWars** | Weekly team battles | Firestore auto-ID | name, startDate, endDate, teamA, teamB, winner | ✅ Rules lines 186-196 |
+| **trainingSessions** | Structured workout plans | Firestore auto-ID | trainerId, memberAuthUid, exercises, activeExerciseIndex, sessionRpe | ✅ Rules lines 349-364 |
+| **memberIntelligence** | AI member insights | Firestore member auth UID | insights, recommendations, lastUpdated | ✅ Rules lines 366-370 |
+
+### 7.3 Storage usage
+- Profile images for members/trainers
+- Document storage for PDFs (reports, plans)
+- AI-generated content storage
+- Verified via: `firebase_storage` dependency in both pubspecs and `storage_service.dart`
+
+### 7.4 FCM / notifications
+- FCM tokens stored in `/fcmTokens/{tokenId}` collection
+- Notification history in `/notificationHistory/{historyId}`
+- Real-time notifications via Firestore listeners
+- Local notifications for reminders and alerts
+- Verified via: `firebase_messaging` and `flutter_local_notifications` dependencies
+
+### 7.5 Rules and indexes
+- **Rules**: Complex role-based access with specific field requirements
+- **Indexes**: 27 composite indexes covering common query patterns
+- **Notable Rule Inconsistencies**:
+  - Some rules use `memberId` field, others expect it to equal document ID
+  - `gamification` collection uses memberId as doc ID but rules reference `branchId` field
+  - Mixed use of `uid`, `memberId`, and `userid` fields for user identification
+
+## 8. Model Layer
+
+### Common Model Conventions
+- **fromMap(map, id)**: Standard factory constructor for Firestore deserialization
+- **copyWith()**: Immutable update pattern present in most models
+- **timestamp patterns**: Use of `DateTime` fields with server timestamp handling
+- **nullable patterns**: Mixed approach - some fields nullable, others required
+
+### Important Models
+- **Member Model** (`member_model.dart`): 
+  - 5000+ line file with extensive member data
+  - Contains embedded workout/fitness data
+  - Uses `fromMap` and `copyWith` patterns
+- **Workout Model** (`workout_model.dart` in member app):
+  - Exercise arrays, sets/reps tracking
+  - Duration and calorie calculations
+- **AI Plan Model** (`ai_plan_model.dart`):
+  - Workout and diet plan structures
+  - Trainer note fields for customization
+- **Session Model** (`session_model.dart`):
+  - Exercise progression tracking
+  - RPE (Rate of Perceived Exertion) scoring
+- **Gamification Model** (`gamification_model.dart`):
+  - XP, levels, streaks, achievements
+  - Branch-based leaderboard support
+
+### Model Issues Found
+- Inconsistent field naming: `memberId` vs `userid` vs `uid` across models
+- Some models lack proper null safety checks in `fromMap` methods
+- Timestamp handling inconsistent - some use raw timestamps, others use server timestamps
+
+## 9. Service Layer
+
+### Studio App Services
+- **FirestoreService** (`firestore_service.dart`): 42K line central service
+  - Handles all Firestore operations
+  - Singleton pattern via service instantiation
+  - Mix of query and mutation methods
+- **SessionService** (`session_service.dart`): Manages workout sessions
+- **TrainerAjaxService** (`trainer_ajax_service.dart`): 14K line AI/trainer communication
+- **NotificationService** (`notification_service.dart`): Handles FCM and local notifications
+- **PDFService** (`pdf_service.dart`): 32K line document generation
+- **EmailService** (`email_service.dart`): Handles email communications
+- **WhatsAppService** (`whatsapp_service.dart`): 19K line WhatsApp integration
+- **ReminderService** (`reminder_service.dart`): Manages scheduled reminders
+- **TeamBattleService** (`team_battle_service.dart`): Handles team battle logic
+- **AdminGamificationService** (`admin_gamification_service.dart`): XP and award management
+
+### Member App Services
+- **NotificationService** (`services/notification_service.dart`): FCM initialization and handling
+- **Health Services**: Inferred from `health` dependency usage
+- **Payment Services**: Razorpay integration inferred from `razorpay_flutter` dependency
+
+### Service Patterns
+- Most services instantiated as needed rather than singleton
+- FirestoreService is the central data access layer
+- Services that write to Firestore: FirestoreService, SessionService, TrainerAjaxService
+- Display-only services: Limited - most services have both read/write capabilities
+
+## 10. AI and Health Stack
+
+### Wearable Snapshots
+- **Model**: `wearable_snapshot_model.dart` (member app)
+- **Structure**: Daily snapshots with steps, heart rate, calories burned
+- **Storage**: `/wearableSnapshots/{memberId}/daily/{date}` subcollection
+- **Permissions**: Read/write by signed-in users (rules lines 316-322)
+
+### Health Profiles
+- **Model**: `health_profile_model.dart` (member app)
+- **Fields**: Fitness level, goals, medical conditions, preferences
+- **Storage**: `/healthProfiles/{memberId}`
+- **Usage**: AI plan generation input
+
+### AI Plans
+- **Model**: `ai_plan_model.dart` (both apps)
+- **Structure**: Workout plan (exercises, sets, reps) + diet plan (meals, macros)
+- **Storage**: `/aiPlans/{memberId}/current/{docId}`
+- **Trainer Customization**: Trainers can update `trainerNote` and `trainerNoteUpdatedAt` (rules lines 327-334)
+- **Generation**: Likely via Firebase AI extension (firebase_ai dependency)
+
+### Safety Gates
+- **Medical Hold Logic**: Not explicitly found in code review
+- **Plan Validation**: No visible safety checks for exercise contraindications
+- **Age/Gating**: Age-based restrictions not evident in model fields
+
+### Trainer Ajax/AI Services
+- **TrainerAjaxService**: 14K line service in studio app
+  - Likely handles AI plan generation requests
+  - Trainer-member communication
+  - Plan approval/modification workflow
+- **Firebase AI**: Explicit dependency in both pubspecs (`firebase_ai`)
+
+### Session Generation Flow
+- **Training Sessions Model**: `training_session_model.dart`
+- **Flow**: Trainer creates structured workout → Member follows → Progress tracked
+- **Storage**: `/trainingSessions/{sessionId}`
+- **Updates**: Limited to exercise index and RPE during active session (rules lines 358-364)
+
+## 11. Session Flow
+
+### Confirmed Session Flow Elements
+Based on code inspection of `training_session_model.dart` and session service:
+
+1. **Readiness**: Not explicitly modeled - inferred from session start
+2. **Warmup**: Part of exercise array in training session
+3. **Active Session**: 
+   - Tracks `activeExerciseIndex` 
+   - Updates `sessionRpe` during workout
+   - Allows exercise substitution/modification
+4. **Stretching**: Included as exercise type in arrays
+5. **Finalize**: Session completion sets end time and finalizes metrics
+6. **Member Live Session**: 
+   - Clash system in member app (`lib/screens/clash/*`)
+   - Real-time workout participation
+   - Post-session analytics
+7. **Post-Session Flow**: 
+   - Session data copied to `/sessions/{sessionId}` for historical tracking
+   - Gamification events generated for XP awards
+   - Fitness stats updated in member profile
+
+### Session Architecture
+- **Training Sessions**: Template/workout plans (`/trainingSessions`)
+- **Actual Sessions**: Completed workouts (`/sessions`)
+- **Separation**: Allows reusing templates while preserving historical data
+- **Verification**: Rules lines 349-364 show training session permissions
+- **Session Conversion**: Likely handled in `SessionService.copyTrainingSessionToSession()` (inferred)
+
+### Missing Session Flow Elements
+- No explicit warmup/cooldown tracking separate from main exercises
+- No heart rate zone tracking during sessions
+- No automated rest timer between sets
+- No exercise substitution rules (e.g., injury accommodations)
+
+## 12. Gamification Architecture
+
+### Core Systems
+- **XP System**: 
+  - Stored in `gamification.totalXp`
+  - Earned via `gamificationEvents`
+  - Controls level progression
+- **Levels/Ranks**: 
+  - Calculated from XP thresholds
+  - Visual ranks (SSS, SS, S, A, B, C, D, E) with specific colors
+  - Defined in member app `AppColors` (rankSSS, rankSS, etc.)
+- **Streaks**: 
+  - `currentStreak` in gamification model
+  - Based on workout frequency
+  - Reset on missed days
+- **Leaderboards**: 
+  - Branch-based filtering
+  - Sorted by totalXp descending
+  - Indexed for performance (indexes lines 178-192)
+
+### Event Bridge
+- **GamificationEvents Collection**: 
+  - Awards XP for various actions
+  - `processed` flag prevents double-awarding
+  - Indexed for efficient queries (indexes lines 202-208)
+- **Event Types** (inferred from code):
+  - Workout completion
+  - Personal best achievement
+  - Challenge participation
+  - Streak milestones
+  - Attendance consistency
+
+### PB System
+- **Model**: `personal_best_model.dart` (member app)
+- **Storage**: `/personalbests/{docId}` with memberId field
+- **Tracking**: Exercise-specific max weight/reps
+- **Updating**: Compares new lift against existing record
+- **Rules**: Lines 205-211 allow signed-in users to create/update/delete
+
+### Challenge/Clash/War Systems
+- **Challenges**: 
+  - Time-bound fitness competitions
+  - Individual or team-based
+  - Points-based scoring
+  - Model: `challenge_model.dart` (member app)
+- **Clashes**: 
+  - Live head-to-head competitions
+  - Real-time scoring
+  - Screen: `lib/screens/clash/*` (member app)
+- **Weekly Wars**: 
+  - Team-based weekly competitions
+  - Model: `weekly_war_model.dart` (member app)
+  - Rules: Lines 186-196 for weeklyWars collections
+- **Team Battles**: 
+  - Studio app feature
+  - Model: `team_battle_model.dart` (studio app)
+  - Service: `team_battle_service.dart` (studio app)
+  - Likely longer-term team competitions
+
+### Integration Points
+- XP awards flow through `AdminGamificationService`
+- Events trigger via Firestore triggers or service calls
+- Leaderboards update based on gamification document changes
+- PB achievements trigger special XP bonuses
+
+## 13. Current Completion Snapshot
+
+### Confirmed Complete
+- Authentication system with role-based routing
+- Member CRUD operations (studio app)
+- Attendance tracking with QR scanner
+- Payment processing infrastructure
+- Announcement system with read receipts
+- Basic trainer profile management
+- Notification system (FCM + local)
+- Exercise library management
+- Expense tracking (studio app)
+- Gym equipment inventory
+
+### In Progress / Partial
+- AI workout/diet plan generation (basic structure present)
+- Live session/clash system (UI present, backend incomplete)
+- Comprehensive reporting analytics
+- Advanced diet planning (UI present, limited backend)
+- Social features framework (schemas present, UI minimal)
+- Member profile completion (basic fields present)
+- Payment confirmation flows (basic Razorpay integration)
+- Session template system (trainingSessions present)
+
+### Missing / Stubbed
+- Medical hold/safety validation systems
+- Advanced AI personalization beyond basic plan generation
+- Comprehensive social feed implementation
+- Offline data synchronization
+- Multi-language support (i18n present but incomplete)
+- Advanced gym equipment maintenance tracking
+- Comprehensive financial reporting (beyond basic expense tracking)
+- Member referral system
+- Integrated calendar/scheduling system
+- Wearable device automatic sync (manual snapshot only)
+- Advanced injury tracking and workout modification
+
+## 14. Known Pitfalls
+
+- **Auth Role Casing**: Firestore rules expect Title Case roles ('Owner', 'Receptionist', 'Trainer') but no enforcement seen in code
+- **Member Lookup Rules**: Rules allow member creation/update by signed-in users but rely on phone lookup before UID linking - potential for orphaned member records
+- **Rules Deployment Pitfalls**: Complex rules with field-specific permissions; incorrect field names cause silent failures
+- **Index Deletion Pitfalls**: Composite indexes require exact field matching; missing indexes cause query failures
+- **Session Collection Naming**: Both `/sessions` and `/trainingSessions` exist - potential confusion in service layer
+- **Field Naming Inconsistencies**: 
+  - `memberId` used in most collections
+  - `userid` used in some (e.g., memberGoals collection)
+  - `uid` used for auth-linked documents
+  - Inconsistent usage causes query failures
+- **Dead Code / Old Architecture**: 
+  - `_web.dart` files suggest abandoned web responsiveness attempts
+  - Duplicate screen files (e.g., owner/dashboard and owner/dashboard_web)
+  - Test files in main directories (test_challenge_method.dart, test_firestore.dart)
+- **Likely Runtime Crash Points**: 
+  - Null reference errors when accessing nested map values in `fromMap` methods
+  - Type casting errors when Firestore returns unexpected data types
+  - Permission denied errors when role-based rules don't match Firestore data
+
+## 15. Known Runtime Risks
+
+- **Blank Screen Due to Permission-Denied**: 
+  - If user role in Firestore doesn't match expected values, AuthWrapper shows error screen
+  - Risk: Role string mismatches (e.g., 'owner' vs 'Owner') cause infinite login loops
+- **Member Lookup Failures**: 
+  - When memberId field doesn't match Firestore document ID
+  - Risk: Attendance/payment queries return no results despite valid data
+- **Rules Mismatch Between Auth Models**: 
+  - Studio and member apps may have different role expectations
+  - Risk: Users can login to one app but not the other
+- **Old Collection Names Still Referenced**: 
+  - Risk: References to deprecated collections cause missing data
+- **Missing Screens Wired in Docs but Absent in Code**: 
+  - Risk: Navigation to undefined routes causes app crashes
+- **Timestamp Handling Issues**: 
+  - Risk: Mix of timestamp types causes sorting/comparison failures
+- **Null Safety Gaps**: 
+  - Risk: Unexpected null values in Firestore documents cause crashes
+- **Large Model Serialization**: 
+  - Risk: 5000+ line member_model causes performance issues on low-end devices
+
+## 16. Recommended Next Actions
+
+### P0 (Critical - Fix Immediate Risks)
+1. **Standardize Role Strings**: Create role constants and enforce consistent casing across Firestore, rules, and code
+2. **Fix Field Naming Consistency**: Establish and enforce single source of truth for user identification (memberId vs userid vs uid)
+3. **Add Null Safety Guards**: Implement proper null checks in all model `fromMap` methods
+4. **Validate Index Coverage**: Test all major queries against firestore.indexes.json to prevent runtime failures
+
+### P1 (High - Improve Stability)
+1. **Implement Medical Hold System**: Add safety gates for AI plan generation based on health profiles
+2. **Complete Social Features**: Implement springSocial and socialFeed collections with proper UI
+3. **Enhance Session Tracking**: Add heart rate zones, rest timers, and exercise substitution rules
+4. **Standardize Timestamp Usage**: Choose single timestamp approach (server timestamps) and migrate existing data
+
+### P2 (Medium - Enhance Features)
+1. **Improve Offline Support**: Add local Firestore persistence for intermittent connectivity
+2. **Enhance AI Personalization**: Use wearable snapshots and health profiles for better plan generation
+3. **Implement Referral System**: Add member referral tracking and rewards
+4. **Add Advanced Reporting**: Create comprehensive analytics dashboard for studio owners
+5. **Create Wearable Auto-Sync**: Implement background health data collection from device APIs
+
+## 17. File Map Appendix
+
+### Critical Onboarding Files
+
+#### Studio App
+- `lib/main.dart` - App entry and authentication flow
+- `lib/services/firestore_service.dart` - Central data access layer (42K lines)
+- `lib/services/session_service.dart` - Workout session management
+- `lib/services/trainer_ajax_service.dart` - AI and trainer communication (14K lines)
+- `lib/models/member_model.dart` - Core member data structure (5K lines)
+- `lib/models/ai_plan_model.dart` - AI-generated plans
+- `lib/screens/auth/login_screen.dart` - Authentication entry point
+- `lib/screens/owner/owner_dashboard.dart` - Owner interface
+- `lib/screens/receptionist/receptionist_dashboard.dart` - Receptionist interface
+- `lib/screens/trainer/trainer_dashboard_screen.dart` - Trainer interface
+
+#### Member App
+- `lib/main.dart` - App entry and initialization
+- `lib/services/notification_service.dart` - FCM and local notifications
+- `lib/models/workout_model.dart` - Exercise tracking structure
+- `lib/models/gamification_model.dart` - XP, levels, streaks system
+- `lib/models/personal_best_model.dart` - Personal record tracking
+- `lib/models/health_profile_model.dart` - AI plan inputs
+- `lib/models/ai_plan_model.dart` - Generated workout/diet plans
+- `lib/models/wearable_snapshot_model.dart` - Health device data
+- `lib/screens/auth/` - Authentication screens
+- `lib/screens/home/` - Main dashboard
+- `lib/screens/workout/` - Exercise logging
+- `lib/screens/diet/` - Nutrition planning
+- `lib/screens/clash/` - Live session system
+- `lib/screens/gamification/` - XP and rewards
+- `lib/screens/profile/` - Member profile management
+- `lib/screens/settings/` - App configuration
+
+#### Shared Infrastructure
+- `firestore.rules` - Security rules defining access controls
+- `firestore.indexes.json` - Performance indexes for queries
+- `firebase.json` - Firebase project configuration
+- `AGENTS.md` - Development guidelines and constraints
+- `current_state.md` - Project status documentation
+>>>>>>> 87fd93f (fix: restore clean analytics_dashboard, remove orphan test file)

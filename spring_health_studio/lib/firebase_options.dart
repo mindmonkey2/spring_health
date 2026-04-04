@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'spring-health-studio-f4930.firebaseapp.com',
     storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
   );
+
 }

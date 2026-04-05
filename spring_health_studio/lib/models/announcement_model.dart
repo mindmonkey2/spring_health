@@ -13,6 +13,8 @@ class AnnouncementModel {
   final bool isActive;
   final String? imageUrl;
   final List<String> readBy;
+  final List<String> targetBranches;
+  final String createdByUid;
 
   const AnnouncementModel({
     required this.id,
@@ -26,6 +28,8 @@ class AnnouncementModel {
     this.isActive = true,
     this.imageUrl,
     this.readBy = const [],
+    this.targetBranches = const [],
+    this.createdByUid = '',
   });
 
   // ── Alias ─────────────────────────────────────────────────────
@@ -58,6 +62,8 @@ class AnnouncementModel {
       isActive: map['isActive'] as bool? ?? true,
       imageUrl: map['imageUrl'] as String?,
       readBy: List<String>.from(map['readBy'] ?? []),
+      targetBranches: List<String>.from(map['targetBranches'] ?? []),
+      createdByUid: map['createdByUid'] as String? ?? '',
     );
   }
 
@@ -75,6 +81,8 @@ class AnnouncementModel {
         'isActive': isActive,
         if (imageUrl != null) 'imageUrl': imageUrl,
           'readBy': readBy,
+      'targetBranches': targetBranches,
+      'createdByUid': createdByUid,
     };
   }
 
@@ -104,6 +112,8 @@ class AnnouncementModel {
     bool? isActive,
     String? imageUrl,
     List<String>? readBy,
+    List<String>? targetBranches,
+    String? createdByUid,
     bool clearSchedule = false,
   }) {
     return AnnouncementModel(
@@ -118,6 +128,8 @@ class AnnouncementModel {
       isActive: isActive ?? this.isActive,
       imageUrl: imageUrl ?? this.imageUrl,
       readBy: readBy ?? this.readBy,
+      targetBranches: targetBranches ?? this.targetBranches,
+      createdByUid: createdByUid ?? this.createdByUid,
     );
   }
 }

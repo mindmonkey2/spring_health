@@ -1,8 +1,9 @@
 // lib/screens/announcements/create_announcement_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../models/announcement_model.dart';
+import '../../../services/announcement_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/constants.dart';
 
@@ -73,21 +74,21 @@ extends State<CreateAnnouncementScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
 
-      await FirebaseFirestore.instance.collection('announcements').add({
-        'title':          _titleController.text.trim(),
-        'message':        _messageController.text.trim(),
-        'content':        _messageController.text.trim(), // backward-compat
-        'targetBranches': _selectedBranches,
-        'branch':         _primaryBranch,
-        'priority':       _priority,
-        'isActive':       true,
-        'createdAt':      FieldValue.serverTimestamp(),
-        'createdByUid':   user?.uid ?? '',
-        'createdBy':      user?.displayName ??
-        user?.email?.split('@').first ??
-        'Admin',
-        'readBy':         [],
-      });
+      final announcement = AnnouncementModel(
+        id: '',
+        title: _titleController.text.trim(),
+        message: _messageController.text.trim(),
+        branch: _primaryBranch,
+        priority: _priority,
+        isActive: true,
+        createdAt: DateTime.now(),
+        createdBy: user?.displayName ??
+            user?.email?.split('@').first ??
+            'Admin',
+        readBy: [],
+      );
+
+      await AnnouncementService().create(announcement);
 
       if (!mounted) return;
       Navigator.pop(context);

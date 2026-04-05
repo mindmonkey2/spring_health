@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -8,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/member_model.dart';
+import '../../services/firebase_auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final MemberModel member;
@@ -29,6 +29,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isSaving = false;
   bool _isUploadingPhoto = false;
   String? _newPhotoUrl;
+  String? _memberId;
 
   @override
   void initState() {
@@ -41,6 +42,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       text: widget.member.emergencyContactPhone ?? '',
     );
     _newPhotoUrl = widget.member.photoUrl;
+    _loadMemberId();
+  }
+
+  Future<void> _loadMemberId() async {
+    final id = await FirebaseAuthService.instance.getCurrentMemberId();
+    if (mounted) setState(() => _memberId = id);
   }
 
   @override
@@ -128,20 +135,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       maxWidth: 800,
     );
     if (picked == null || !mounted) return;
+    if (_memberId == null) return;
 
     setState(() => _isUploadingPhoto = true);
     try {
-      final uid = FirebaseAuth.instance.currentUser!.uid;
       final ref = FirebaseStorage.instance
           .ref()
           .child('memberphotos')
-          .child('$uid.jpg');
+          .child('$_memberId.jpg');
       await ref.putFile(
         File(picked.path),
         SettableMetadata(contentType: 'image/jpeg'),
       );
       final url = await ref.getDownloadURL();
-      await FirebaseFirestore.instance.collection('members').doc(uid).update({
+      await FirebaseFirestore.instance.collection('members').doc(_memberId).update({
         'photoUrl': url,
       });
       if (!mounted) return;
@@ -166,6 +173,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_memberId == null) return;
+
     setState(() => _isSaving = true);
 
     final updates = <String, dynamic>{
@@ -178,7 +187,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       await FirebaseFirestore.instance
           .collection('members')
-          .doc(widget.member.id)
+          .doc(_memberId)
           .update(updates);
       if (!mounted) return;
       setState(() => _isSaving = false);

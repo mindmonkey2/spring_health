@@ -342,7 +342,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    ' AjAX Plan loaded — modify as needed',
+                                    'Plan loaded — modify as needed',
                                     style: AppTextStyles.caption.copyWith(
                                       color: AppColors.neonLime,
                                     ),

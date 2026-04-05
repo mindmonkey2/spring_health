@@ -499,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ── AjAX Coach Banner ───────────────────────────────────────────────────────
+  // ── AjAX Banner ───────────────────────────────────────────────────────
 
   Widget _buildAiCoachBanner() {
     Color chipColor = AppColors.neonLime;
@@ -590,7 +590,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              _coachNoteSnippet ?? 'Generate your first AjAX plan.',
+              _coachNoteSnippet ?? 'Generate your first plan.',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.white),
             ),
             const SizedBox(height: 12),

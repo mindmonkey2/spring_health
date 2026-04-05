@@ -153,7 +153,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     if (!mounted) return;
     AiLoadingOverlay.show(
       context,
-      message: ' Your AjAX coach is building\nyour plan...',
+      message: ' AjAX is building\nyour plan...',
     );
 
     try {
@@ -228,7 +228,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               Text('No diet plan yet', style: AppTextStyles.bodyMedium),
               const SizedBox(height: 8),
               Text(
-                'Your AjAX nutritionist will build a personalised '
+                'AjAX will build a personalised '
                 '5-meal Indian meal plan based on your goals, '
                 'body metrics, and dietary preference.',
                 style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
@@ -252,7 +252,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                     ),
                   ),
                   child: const Text(
-                    'Get My AjAX Diet Plan',
+                    'Get My Diet Plan',
                     style: TextStyle(color: AppColors.backgroundBlack),
                   ),
                 ),
@@ -535,7 +535,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               Text('No workout plan yet', style: AppTextStyles.heading2),
               const SizedBox(height: 16),
               Text(
-                'Generate your first AjAX personalized workout plan based on your goals and health data.',
+                'Generate your first personalized workout plan based on your goals and health data.',
                 style: AppTextStyles.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -920,7 +920,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
             children: [
               const Icon(Icons.smart_toy_rounded, color: AppColors.neonLime),
               const SizedBox(width: 8),
-              Text('Your AjAX', style: AppTextStyles.heading3),
+              Text('AjAX', style: AppTextStyles.heading3),
             ],
           ),
           const SizedBox(height: 12),
@@ -1230,7 +1230,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
             size: 20,
           ),
           label: Text(
-            'Update your metrics for better AjAX recommendations',
+            'Update your metrics for better recommendations',
             style: AppTextStyles.caption,
             textAlign: TextAlign.center,
           ),

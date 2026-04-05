@@ -121,7 +121,7 @@ class _MemberAiPlanScreenState extends State<MemberAiPlanScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('AjAX Plan'),
+            const Text('Plan'),
             Text(
               widget.memberName,
               style: const TextStyle(fontSize: 12),
@@ -226,7 +226,7 @@ class _MemberAiPlanScreenState extends State<MemberAiPlanScreen> {
                       size: 64, color: Colors.grey),
                   SizedBox(height: 16),
                   Text(
-                    'Member has not generated an AjAX plan yet',
+                    'Member has not generated an plan yet',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
@@ -558,7 +558,7 @@ class _MemberAiPlanScreenState extends State<MemberAiPlanScreen> {
                 maxLines: 4,
                 decoration: InputDecoration(
                   hintText:
-                      'Add a note for this member\'s AjAX plan...',
+                      'Add a note for this member\'s plan...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(

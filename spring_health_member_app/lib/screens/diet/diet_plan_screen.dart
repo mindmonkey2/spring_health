@@ -108,7 +108,7 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
         ),
         content: Text(
           _plan == null
-              ? 'Gemini AjAX will generate a personalised 5-meal Indian diet plan based on your health profile and goals.'
+              ? 'AjAX will generate a personalised 5-meal Indian diet plan based on your health profile and goals.'
               : 'Your current plan will be replaced. A new plan costs one 24h cooldown slot.',
           style: const TextStyle(color: Colors.white60),
         ),
@@ -236,7 +236,7 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Generate a personalised 5-meal Indian diet plan powered by Gemini AjAX.',
+              'Generate a personalised 5-meal Indian diet plan powered AjAX.',
               style: TextStyle(color: Colors.white60),
               textAlign: TextAlign.center,
             ),

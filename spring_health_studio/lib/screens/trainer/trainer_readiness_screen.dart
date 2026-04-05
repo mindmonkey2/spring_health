@@ -31,7 +31,7 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
   bool _isProcessing = false;
 
   Map<String, dynamic>? _yesterdaySession;
-  String _aiRecoveryStatus = 'No AjAX data yet';
+  String _aiRecoveryStatus = 'No data yet';
   List<String> _healthFlags = [];
 
   @override
@@ -64,7 +64,7 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
             .doc('current')
             .get();
         if (aiPlanDoc.exists) {
-          _aiRecoveryStatus = aiPlanDoc.data()?['recoveryStatus'] as String? ?? 'No AjAX data yet';
+          _aiRecoveryStatus = aiPlanDoc.data()?['recoveryStatus'] as String? ?? 'No data yet';
         }
       }
 
@@ -297,7 +297,7 @@ class _TrainerReadinessScreenState extends State<TrainerReadinessScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('AjAX Recovery Status', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text('Recovery Status', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 12),
             Chip(
               label: Text(_aiRecoveryStatus),

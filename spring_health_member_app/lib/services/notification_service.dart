@@ -62,7 +62,7 @@ class NotificationService {
       await _initLocalNotifications();
 
       // 3. FCM token
-      await saveFCMToken();
+      // await saveFCMToken(); // Removed to avoid missing parameter, it's called explicitly with memberId in main_screen.dart.
 
       // 4. Message listeners
       FirebaseMessaging.onMessage.listen(_onForeground);
@@ -83,7 +83,7 @@ class NotificationService {
   // ── Public: Token management ──────────────────────────────────────────────
 
   /// Call this right after login so the token is always fresh.
-  Future<void> saveFCMToken() async {
+  Future<void> saveFCMToken(String memberId) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {

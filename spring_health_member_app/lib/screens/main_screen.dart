@@ -11,6 +11,7 @@ import '../models/member_model.dart';
 import '../services/member_service.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/membership_alert_service.dart';
+import '../services/notification_service.dart';
 import 'home/widgets/membership_expiry_banner.dart';
 import 'home/home_screen.dart';
 import 'fitness/fitness_dashboard_screen.dart';
@@ -136,6 +137,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       }
 
       _memberId = memberId;
+
+      if (_memberId != null) {
+        final notifService = NotificationService();
+        await notifService.initialize();
+        await notifService.saveFCMToken(_memberId!);
+      }
 
       // ✅ One-time load for initial render
       final member = await _memberService.getMemberData(memberId);

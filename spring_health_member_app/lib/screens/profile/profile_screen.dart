@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -34,11 +33,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _picker = ImagePicker();
   bool _isUploadingPhoto = false;
   late MemberModel _member;
+  String? _memberId;
 
   @override
   void initState() {
     super.initState();
     _member = widget.member;
+    _loadMemberId();
+  }
+
+  Future<void> _loadMemberId() async {
+    final id = await FirebaseAuthService.instance.getCurrentMemberId();
+    if (mounted) setState(() => _memberId = id);
   }
 
   // ─── Photo Upload ──────────────────────────────────────────────────────────
@@ -139,15 +145,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _uploadProfilePhoto(File imageFile) async {
+    if (_memberId == null) return;
     try {
-      final uid = FirebaseAuth.instance.currentUser!.uid;
       setState(() => _isUploadingPhoto = true);
 
       // Correct storage path for member photos
       final ref = FirebaseStorage.instance
       .ref()
       .child('member_photos')
-      .child(_member.id)        // Firestore doc ID e.g. 69533bc5-04d3
+      .child(_memberId!)        // Firestore doc ID e.g. 69533bc5-04d3
       .child('profile.jpg');
 
       await ref.putFile(imageFile);
@@ -156,12 +162,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Then write URL back to member doc
       await FirebaseFirestore.instance
       .collection('members')
-      .doc(_member.id)
+      .doc(_memberId)
       .update({'photoUrl': downloadUrl});
-
-      await FirebaseFirestore.instance.collection('members').doc(uid).update({
-        'photoUrl': downloadUrl,
-      });
 
       if (!mounted) return;
       setState(() {

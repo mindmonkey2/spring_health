@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/ai_plan_model.dart';
 import '../../services/ai_coach_service.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/ai_loading_overlay.dart';
 
@@ -16,6 +16,7 @@ class DietPlanScreen extends StatefulWidget {
 }
 
 class _DietPlanScreenState extends State<DietPlanScreen> {
+  String? _memberId;
   AiDietPlanModel? _plan;
   bool _loading = true;
   bool _generating = false;
@@ -28,7 +29,15 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPlan();
+    _loadMemberId();
+  }
+
+  Future<void> _loadMemberId() async {
+    final id = await FirebaseAuthService.instance.getCurrentMemberId();
+    if (mounted) {
+      setState(() => _memberId = id);
+      _loadPlan();
+    }
   }
 
   @override
@@ -37,17 +46,18 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
     super.dispose();
   }
 
-  String get _authUid => FirebaseAuth.instance.currentUser!.uid;
-
   Future<void> _loadPlan() async {
+    if (_memberId == null) return;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
       final planDoc = await FirebaseFirestore.instance
-          .collection('dietPlans')
-          .doc(_authUid)
+          .collection('aiPlans')
+          .doc(_memberId)
+          .collection('current')
+          .doc('current')
           .get();
 
       if (planDoc.exists && planDoc.data() != null) {
@@ -135,10 +145,11 @@ class _DietPlanScreenState extends State<DietPlanScreen> {
     );
 
     if (confirmed != true || !mounted) return;
+    if (_memberId == null) return;
 
     setState(() => _generating = true);
     try {
-      await AiCoachService.instance.generateDietPlan(_authUid);
+      await AiCoachService.instance.generateDietPlan(_memberId!);
       await _loadPlan();
     } catch (e) {
       if (mounted) {

@@ -86,6 +86,8 @@ extends State<CreateAnnouncementScreen> {
             user?.email?.split('@').first ??
             'Admin',
         readBy: [],
+        targetBranches: _selectedBranches,
+        createdByUid: user?.uid ?? '',
       );
 
       await AnnouncementService().create(announcement);

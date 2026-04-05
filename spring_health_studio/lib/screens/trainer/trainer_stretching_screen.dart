@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/member_model.dart';
 import '../../services/trainer_ajax_service.dart';
+import '../../services/session_service.dart';
 import '../../theme/app_colors.dart';
 
 class TrainerStretchingScreen extends StatefulWidget {
@@ -48,9 +48,7 @@ class _TrainerStretchingScreenState extends State<TrainerStretchingScreen> {
     final stretches = await TrainerAjaxService.generateStretching(widget.musclesWorked);
 
     // Also write to session so other devices stay synced
-    await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionId).set({
-      'stretching': stretches,
-    }, SetOptions(merge: true));
+    await SessionService.instance.writeStretching(widget.sessionId, stretches, widget.musclesWorked);
 
     if (!mounted) return;
     setState(() {
@@ -89,9 +87,7 @@ class _TrainerStretchingScreenState extends State<TrainerStretchingScreen> {
     });
 
     // Write to Firestore: update stretching list
-    await FirebaseFirestore.instance.collection('sessions').doc(widget.sessionId).set({
-      'stretching': _stretches,
-    }, SetOptions(merge: true));
+    await SessionService.instance.writeStretching(widget.sessionId, _stretches, widget.musclesWorked);
 
     final next = index + 1;
     if (next < _stretches.length) {

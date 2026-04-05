@@ -57,10 +57,28 @@ class GamificationService {
   // PROCESS EVENT
   // ─────────────────────────────────────────────
   Future<void> processEvent(
-    String event,
-    String memberId, {
+    dynamic eventOrMemberId,
+    dynamic memberIdOrEventData, {
     int? customXP,
   }) async {
+    String event;
+    String memberId;
+    Map<String, dynamic>? eventData;
+
+    if (eventOrMemberId is String && memberIdOrEventData is String) {
+      event = eventOrMemberId;
+      memberId = memberIdOrEventData;
+    } else if (eventOrMemberId is String && memberIdOrEventData is Map) {
+      memberId = eventOrMemberId;
+      eventData = Map<String, dynamic>.from(memberIdOrEventData);
+      event = eventData['event'] ?? 'workout';
+
+      // Keep original behavior of adding to gamification_events collection if called this way
+      await FirebaseFirestore.instance.collection('gamification_events').add(eventData);
+    } else {
+      return;
+    }
+
     int xp = 0;
     String reason = '';
     switch (event) {

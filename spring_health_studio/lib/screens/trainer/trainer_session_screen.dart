@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../models/member_model.dart';
+import '../../services/session_service.dart';
 import 'trainer_stretching_screen.dart';
 
 class TrainerSessionScreen extends StatefulWidget {
@@ -81,27 +82,24 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
           .collection('sessions')
           .doc(widget.sessionId);
 
-      await FirebaseFirestore.instance
-          .runTransaction((transaction) async {
-        final snapshot = await transaction.get(docRef);
-        if (!snapshot.exists) return;
+      final snapshot = await docRef.get();
+      if (!snapshot.exists) return;
 
-        final data = snapshot.data()!;
-        final exercises =
-            List<Map<String, dynamic>>.from(data['exercises'] ?? []);
+      final data = snapshot.data()!;
+      final exercises =
+          List<Map<String, dynamic>>.from(data['exercises'] ?? []);
 
-        if (exerciseIndex >= exercises.length) return;
+      if (exerciseIndex >= exercises.length) return;
 
-        final exToUpdate = exercises[exerciseIndex];
-        final completedSets = List<Map<String, dynamic>>.from(
-            exToUpdate['completedSets'] ?? []);
+      final exToUpdate = exercises[exerciseIndex];
+      final completedSets = List<Map<String, dynamic>>.from(
+          exToUpdate['completedSets'] ?? []);
 
-        completedSets.add({'reps': reps, 'weightKg': weight});
-        exToUpdate['completedSets'] = completedSets;
-        exercises[exerciseIndex] = exToUpdate;
+      completedSets.add({'reps': reps, 'weightKg': weight});
+      exToUpdate['completedSets'] = completedSets;
+      exercises[exerciseIndex] = exToUpdate;
 
-        transaction.update(docRef, {'exercises': exercises});
-      });
+      await SessionService.instance.writeExercises(widget.sessionId, exercises);
 
       repsCtrl.clear();
       weightCtrl.clear();
@@ -116,32 +114,7 @@ class _TrainerSessionScreenState extends State<TrainerSessionScreen> {
   Future<void> _markComplete(int exerciseIndex,
       Map<String, dynamic> exercise, int totalExercises) async {
     try {
-      final docRef = FirebaseFirestore.instance
-          .collection('sessions')
-          .doc(widget.sessionId);
-
-      await FirebaseFirestore.instance
-          .runTransaction((transaction) async {
-        final snapshot = await transaction.get(docRef);
-        if (!snapshot.exists) return;
-
-        final data = snapshot.data()!;
-        final exercises =
-            List<Map<String, dynamic>>.from(data['exercises'] ?? []);
-
-        if (exerciseIndex >= exercises.length) return;
-
-        exercises[exerciseIndex]['status'] = 'complete';
-
-        if (exerciseIndex + 1 < exercises.length) {
-          exercises[exerciseIndex + 1]['status'] = 'active';
-        }
-
-        transaction.update(docRef, {
-          'exercises': exercises,
-          'activeExerciseIndex': exerciseIndex + 1,
-        });
-      });
+      await SessionService.instance.markSetComplete(widget.sessionId, exerciseIndex);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

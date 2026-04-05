@@ -62,7 +62,6 @@ class SessionService {
   ) async {
     await _firestore.collection('sessions').doc(sessionId).set({
       'exercises': exercises,
-      'status': 'planning',
     }, SetOptions(merge: true));
   }
 
@@ -82,24 +81,21 @@ class SessionService {
       final exercises = List<Map<String, dynamic>>.from(data['exercises'] ?? []);
       if (exerciseIndex >= 0 && exerciseIndex < exercises.length) {
         final exercise = Map<String, dynamic>.from(exercises[exerciseIndex]);
-        final completedSets = (exercise['completedSets'] as int?) ?? 0;
-        final totalSets = (exercise['sets'] as int?) ?? 0;
 
-        exercise['completedSets'] = completedSets + 1;
+        exercise['status'] = 'complete';
 
-        if (exercise['completedSets'] as int >= totalSets) {
-          exercise['status'] = 'complete';
-
-          if (exerciseIndex + 1 < exercises.length) {
-            final nextExercise = Map<String, dynamic>.from(exercises[exerciseIndex + 1]);
-            nextExercise['status'] = 'active';
-            exercises[exerciseIndex + 1] = nextExercise;
-          }
+        if (exerciseIndex + 1 < exercises.length) {
+          final nextExercise = Map<String, dynamic>.from(exercises[exerciseIndex + 1]);
+          nextExercise['status'] = 'active';
+          exercises[exerciseIndex + 1] = nextExercise;
         }
 
         exercises[exerciseIndex] = exercise;
 
-        transaction.update(docRef, {'exercises': exercises});
+        transaction.update(docRef, {
+          'exercises': exercises,
+          'activeExerciseIndex': exerciseIndex + 1,
+        });
       }
     });
   }

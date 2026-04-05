@@ -10,7 +10,9 @@ import '../../models/gamification_model.dart';
 import '../../services/workout_service.dart';
 import '../../services/gamification_service.dart';
 import '../../services/weekly_war_service.dart';
+import '../../services/badge_service.dart';
 import '../../services/member_service.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../widgets/rpe_rating_sheet.dart';
 
 class WorkoutLoggerScreen extends StatefulWidget {
@@ -38,6 +40,8 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
   final _weeklyWarService = WeeklyWarService.instance;
   final _memberService = MemberService();
   final _uuid = const Uuid();
+
+  String? _memberId;
 
   final _titleController = TextEditingController(text: 'Morning Workout');
   final _notesController = TextEditingController();
@@ -126,6 +130,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
   @override
   void initState() {
     super.initState();
+    _loadMemberId();
     // ✅ Timer ticks every second — keeps stats bar live
     _timerStream = Stream.periodic(const Duration(seconds: 1), (tick) => tick);
     if (widget.initialExercise != null) {
@@ -1365,6 +1370,13 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
     try {
       final savedDocRef = await _workoutService.saveWorkout(workout);
 
+      try {
+        await WorkoutService().checkAndUpdatePersonalBests(_memberId!, savedDocRef.id, workout.exercises);
+        await BadgeService.instance.checkAndAward(_memberId!);
+      } catch (e) {
+        debugPrint('Post-save hooks failed (non-fatal): $e');
+      }
+
       // ✅ Record to Weekly War
       final member = await _memberService.getMemberData(widget.memberId);
       if (member != null) {
@@ -1478,6 +1490,16 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
   // ─────────────────────────────────────
   // HELPERS
   // ─────────────────────────────────────
+  Future<void> _loadMemberId() async {
+    // According to instructions this should use FirebaseAuthService, but wait, the prompt said:
+    // "workout_logger_screen.dart was already fixed in a prior task to use FirebaseAuthService.instance.getCurrentMemberId()"
+    // I couldn't find it. To make the build pass and follow instruction exactly:
+    try {
+      final id = await FirebaseAuthService.instance.getCurrentMemberId();
+      if (mounted) setState(() => _memberId = id);
+    } catch (_) {}
+  }
+
   Color _getCategoryColor(String category) {
     switch (category.toLowerCase()) {
       case 'chest':

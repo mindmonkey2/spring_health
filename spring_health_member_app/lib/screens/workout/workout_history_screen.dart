@@ -6,6 +6,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../models/workout_model.dart';
 import '../../services/workout_service.dart';
 import '../../services/gamification_service.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../widgets/rpe_rating_sheet.dart';
 import 'workout_detail_screen.dart';
 import 'workout_logger_screen.dart';
@@ -666,14 +667,16 @@ class _QuickLogSheetState extends State<_QuickLogSheet> {
       );
 
       // Explicitly fire gamification_events so it satisfies the strict gamificationEvents prompt rule
-      await FirebaseFirestore.instance.collection('gamification_events').add({
-        'memberId': widget.memberId,
+      final actualMemberId = await FirebaseAuthService.instance.getCurrentMemberId();
+      final eventData = {
+        'memberId': actualMemberId,
         'type': 'quick_log',
         'event': 'workout_quick_log',
         'xpEarned': 10,
         'timestamp': FieldValue.serverTimestamp(),
         'processed': false,
-      });
+      };
+      await GamificationService().processEvent(actualMemberId, eventData);
 
       if (mounted) widget.onSaved();
     } catch (e) {

@@ -1,14 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../models/personal_best_model.dart';
+import '../../services/firebase_auth_service.dart';
+import '../../services/personal_best_service.dart';
 
-class PersonalBestsScreen extends StatelessWidget {
+class PersonalBestsScreen extends StatefulWidget {
   final String memberId;
 
   const PersonalBestsScreen({super.key, required this.memberId});
+
+  @override
+  State<PersonalBestsScreen> createState() => _PersonalBestsScreenState();
+}
+
+class _PersonalBestsScreenState extends State<PersonalBestsScreen> {
+  String? _memberId;
+  Stream<List<PersonalBestRecord>>? _recordsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMemberId();
+  }
+
+  Future<void> _loadMemberId() async {
+    final id = await FirebaseAuthService.instance.getCurrentMemberId();
+    if (mounted) {
+      setState(() => _memberId = id);
+    }
+    if (_memberId == null) return;
+
+    _recordsStream = PersonalBestService().watchRecords(_memberId!);
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +52,8 @@ class PersonalBestsScreen extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('personalbests')
-            .doc(memberId)
-            .snapshots(),
+      body: StreamBuilder<List<PersonalBestRecord>>(
+        stream: _recordsStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -46,10 +72,9 @@ class PersonalBestsScreen extends StatelessWidget {
             );
           }
 
-          final data = snapshot.data?.data() as Map<String, dynamic>?;
-          final exercisesMap = data?['exercises'] as Map<String, dynamic>? ?? {};
+          final exercisesList = snapshot.data ?? [];
 
-          if (exercisesMap.isEmpty) {
+          if (exercisesList.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -69,11 +94,10 @@ class PersonalBestsScreen extends StatelessWidget {
             );
           }
 
-          // Convert map to list and sort by setAt descending
-          final exercisesList = exercisesMap.entries.toList();
+          // Sort by lastLoggedDate descending
           exercisesList.sort((a, b) {
-            final aSetAt = a.value['setAt'] as Timestamp?;
-            final bSetAt = b.value['setAt'] as Timestamp?;
+            final aSetAt = a.lastLoggedDate;
+            final bSetAt = b.lastLoggedDate;
             if (aSetAt == null && bSetAt == null) return 0;
             if (aSetAt == null) return 1;
             if (bSetAt == null) return -1;
@@ -85,16 +109,20 @@ class PersonalBestsScreen extends StatelessWidget {
             itemCount: exercisesList.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final entry = exercisesList[index];
-              final exerciseName = entry.key;
-              final details = entry.value as Map<String, dynamic>;
+              final record = exercisesList[index];
 
-              final value = details['value'] as num;
-              final unit = details['unit'] as String? ?? '';
-              final setAt = details['setAt'] as Timestamp?;
+              final coreEx = CoreExercise.values.firstWhere(
+                (e) => e.key == record.exerciseKey,
+                orElse: () => CoreExercise.pushUps,
+              );
+
+              final exerciseName = coreEx.displayName;
+              final value = record.currentBest;
+              final unit = coreEx.unitShort;
+              final setAt = record.lastLoggedDate;
 
               final dateStr = setAt != null
-                  ? DateFormat('MMM d, yyyy').format(setAt.toDate())
+                  ? DateFormat('MMM d, yyyy').format(setAt)
                   : 'Unknown Date';
 
               return Container(

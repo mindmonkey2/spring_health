@@ -93,6 +93,7 @@ class FirebaseAuthService {
     }
   }
 
+  // ignore: unused_element
   Future<String?> _loadMemberId() async {
     try {
       return await _secureStorage.read(key: _memberIdKey);
@@ -249,7 +250,7 @@ class FirebaseAuthService {
 
               if (userCredential.user != null) {
                 // Store memberId immediately — user is now authenticated
-                await _storeMemberIdFromUser(userCredential.user!);
+                await _storeMemberIdFromUser(_auth.currentUser!);
               }
 
               onAutoVerify?.call();
@@ -316,7 +317,7 @@ class FirebaseAuthService {
 
         if (userCredential.user != null) {
           // Store memberId immediately — user is now authenticated
-          await _storeMemberIdFromUser(userCredential.user!);
+          await _storeMemberIdFromUser(_auth.currentUser!);
         }
 
         return userCredential;
@@ -349,51 +350,20 @@ class FirebaseAuthService {
 
     // ── Path 3: Cold start / app resume ──────────────────────────────────
     Future<String?> getCurrentMemberId() async {
-      try {
-        if (currentUser == null) {
-          debugPrint('⚠️ getCurrentMemberId: no authenticated user');
-          return null;
-        }
+      // 1. Try FlutterSecureStorage first
+      final stored = await _secureStorage.read(key: 'memberId');
+      if (stored != null && stored.isNotEmpty) return stored;
 
-        // 1. Secure storage — fastest, zero network
-        final cached = await _loadMemberId();
-        if (cached != null && cached.isNotEmpty) {
-          debugPrint('✅ memberId from secure storage: $cached');
-          return cached;
-        }
+      // 2. Authenticated fallback — look up by phone
+      final user = _auth.currentUser;
+      if (user == null || user.phoneNumber == null) return null;
 
-        // 2. Phone fallback — user is authenticated at this point
-        final phone = currentUser!.phoneNumber;
-        if (phone == null || phone.isEmpty) {
-          debugPrint('⚠️ No phone number on authenticated user');
-          return null;
-        }
+      final memberData = await checkMemberExists(user.phoneNumber!);
+      if (memberData == null) return null;
 
-        debugPrint('🔍 memberId not cached — falling back to phone lookup: $phone');
-        final memberData = await checkMemberExists(phone);
-
-        if (memberData == null) {
-          debugPrint('❌ Member not found via phone fallback: $phone');
-          return null;
-        }
-
-        final memberId = memberData['id'] as String;
-
-        // Cache for all future calls
-        await _saveMemberId(memberId);
-
-        // Write uid + timestamp back to member doc
-        await _firestore.collection('members').doc(memberId).update({
-          'uid': currentUser!.uid,
-          'last_app_login': FieldValue.serverTimestamp(),
-        });
-
-        debugPrint('✅ memberId resolved via phone fallback and cached: $memberId');
-        return memberId;
-      } catch (e) {
-        debugPrint('❌ Error in getCurrentMemberId: $e');
-        return null;
-      }
+      final memberId = memberData['id'] as String;
+      await _secureStorage.write(key: 'memberId', value: memberId);
+      return memberId;
     }
 
     // ════════════════════════════════════════════════════════════════════════

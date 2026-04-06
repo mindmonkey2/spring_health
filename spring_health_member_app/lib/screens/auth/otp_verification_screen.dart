@@ -197,6 +197,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.backgroundBlack,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundBlack,
@@ -209,12 +210,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height -
+                MediaQuery.of(context).padding.top -
+                MediaQuery.of(context).padding.bottom -
+                kToolbarHeight,
+          ),
+          child: IntrinsicHeight(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               // Animated running logo (icon only, no text)
               Center(child: SpringHealthLogoAnimated(size: 80, showText: false))
                   .animate()
@@ -318,8 +328,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ),
               ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.2, end: 0),
 
-              const SizedBox(height: 16),
-            ],
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

@@ -37,7 +37,6 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
   // ✅ for live timer
   final _workoutService = WorkoutService();
 
-  final _weeklyWarService = WeeklyWarService.instance;
   final _memberService = MemberService();
   final _uuid = const Uuid();
 
@@ -1377,34 +1376,28 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
         debugPrint('Post-save hooks failed (non-fatal): $e');
       }
 
+      // ✅ Award XP + check badges
+      await GamificationService.instance.processEvent('workout', widget.memberId);
+
       // ✅ Record to Weekly War
       final member = await _memberService.getMemberData(widget.memberId);
       if (member != null) {
-        final Map<String, int> exerciseReps = {};
         for (final ex in workout.exercises) {
           int totalReps = 0;
           for (final set in ex.sets) {
             if (set.isCompleted) totalReps += set.reps;
           }
           if (totalReps > 0) {
-            exerciseReps.update(
+            await WeeklyWarService.instance.recordWorkoutEntry(
+              widget.memberId,
+              member.name,
+              member.branch,
               ex.name,
-              (existing) => existing + totalReps,
-              ifAbsent: () => totalReps,
+              totalReps,
             );
           }
         }
-        if (exerciseReps.isNotEmpty) {
-          await _weeklyWarService.recordWorkoutEntries(
-            widget.memberId,
-            member.branch,
-            exerciseReps,
-          );
-        }
       }
-
-      // ✅ Award XP + check badges
-      await GamificationService.instance.processEvent('workout', widget.memberId);
 
       if (!mounted) return;
       setState(() => _isSaving = false);

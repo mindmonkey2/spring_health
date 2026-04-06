@@ -30,14 +30,12 @@ class HealthService {
     HealthDataType.ACTIVE_ENERGY_BURNED,
     HealthDataType.TOTAL_CALORIES_BURNED,
     HealthDataType.HEART_RATE,
-    HealthDataType.DISTANCE_WALKING_RUNNING,
     HealthDataType.DISTANCE_DELTA, // Android specific distance
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.WORKOUT,
   ];
 
   static const List<HealthDataAccess> _permissions = [
-    HealthDataAccess.READ,
     HealthDataAccess.READ,
     HealthDataAccess.READ,
     HealthDataAccess.READ,
@@ -206,7 +204,6 @@ class HealthService {
             HealthDataType.ACTIVE_ENERGY_BURNED,
             HealthDataType.TOTAL_CALORIES_BURNED,
             HealthDataType.HEART_RATE,
-            HealthDataType.DISTANCE_WALKING_RUNNING,
             HealthDataType.DISTANCE_DELTA,
           ],
         );
@@ -237,7 +234,6 @@ class HealthService {
           case HealthDataType.TOTAL_CALORIES_BURNED:
             totalCalories += val;
             break;
-          case HealthDataType.DISTANCE_WALKING_RUNNING:
           case HealthDataType.DISTANCE_DELTA:
             distanceMeters += val;
             break;
@@ -315,7 +311,6 @@ class HealthService {
             HealthDataType.ACTIVE_ENERGY_BURNED,
             HealthDataType.TOTAL_CALORIES_BURNED,
             HealthDataType.HEART_RATE,
-            HealthDataType.DISTANCE_WALKING_RUNNING,
             HealthDataType.DISTANCE_DELTA,
           ],
         );
@@ -338,8 +333,7 @@ class HealthService {
           totalCalories += val;
         } else if (p.type == HealthDataType.HEART_RATE) {
           heartRates.add(val.toInt());
-        } else if (p.type == HealthDataType.DISTANCE_WALKING_RUNNING ||
-            p.type == HealthDataType.DISTANCE_DELTA) {
+        } else if (p.type == HealthDataType.DISTANCE_DELTA) {
           distanceMeters += val;
         }
       }

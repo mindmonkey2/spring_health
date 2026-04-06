@@ -182,17 +182,30 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
-    // ── WEEKLY WARS ────────────────────────────────────────
-    match /weeklywars/{warId} {
+    // ── GAMIFICATION EVENTS ────────────────────────────────
+    match /gamification_events/{eventId} {
       allow read: if isSignedIn();
-      allow create, update: if isAdmin();
+      allow create: if isAdmin() || isSignedIn();
+      allow update: if isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['processed']);
       allow delete: if isOwner();
     }
 
-    match /weeklyWars/{warId} {
+    // ── WEEKLY WARS ────────────────────────────────────────
+    match /weeklywars/{warId} {
       allow read: if isSignedIn();
-      allow create, update: if isAdmin();
+      allow create, update: if isOwner();
       allow delete: if isOwner();
+
+      match /entries/{entryId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.keys().hasAll(['memberId', 'totalReps', 'sessionCount', 'memberName']);
+        allow update: if isSignedIn() && (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalReps', 'sessionCount', 'lastUpdated'])
+          || isOwner()
+        );
+        allow delete: if isOwner();
+      }
     }
 
     // ── WORKOUTS ───────────────────────────────────────────
@@ -287,14 +300,6 @@ service cloud.firestore {
       match /current/{docId} {
         allow read, write: if isOwner() || isTrainer() || isSignedIn();
       }
-    }
-
-    // gamification_events — member reads own events
-    match /gamification_events/{eventId} {
-      allow read: if isSignedIn() &&
-        (resource.data.memberId == request.auth.uid ||
-         isOwner() || isReceptionist());
-      allow write: if isOwner() || isReceptionist();
     }
 
     // fitnessData — member writes own daily data

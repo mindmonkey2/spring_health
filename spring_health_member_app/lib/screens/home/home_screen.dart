@@ -863,7 +863,11 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) =>
-                    WarScreen(memberId: _memberId!, memberName: _member!.name),
+                    WarScreen(
+                      memberId: _memberId!,
+                      memberName: _member!.name,
+                      branch: _member!.branch,
+                    ),
               ),
             );
           },

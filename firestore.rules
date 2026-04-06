@@ -45,11 +45,6 @@ service cloud.firestore {
                 request.resource.data.memberId == request.auth.uid);
     }
 
-    function isMemberOwner(memberId) {
-      return isSignedIn() &&
-        get(/databases/$(database)/documents/members/$(memberId)).data.uid == request.auth.uid;
-    }
-
     // ── USERS ──────────────────────────────────────────────
     match /users/{userId} {
       allow read: if isSignedIn() && (isOwnDocument(userId) || isOwner());
@@ -183,7 +178,7 @@ service cloud.firestore {
     // Doc ID = Firestore member doc ID (NOT auth UID)
     match /gamification/{memberId} {
       allow read: if isAdmin() || isTrainer() || isSignedIn();
-      allow create, update: if isAdmin() || isTrainer() || isMemberOwner(memberId);
+      allow create, update: if isAdmin() || isSignedIn();
       allow delete: if isOwner();
     }
 
@@ -292,6 +287,21 @@ service cloud.firestore {
       match /current/{docId} {
         allow read, write: if isOwner() || isTrainer() || isSignedIn();
       }
+    }
+
+    // gamification_events — member reads own events
+    match /gamification_events/{eventId} {
+      allow read: if isSignedIn() &&
+        (resource.data.memberId == request.auth.uid ||
+         isOwner() || isReceptionist());
+      allow write: if isOwner() || isReceptionist();
+    }
+
+    // fitnessData — member writes own daily data
+    match /fitnessData/{memberId}/daily/{date} {
+      allow read, write: if isSignedIn() &&
+        (request.auth.uid == memberId ||
+         resource == null && request.auth.uid == memberId);
     }
 
     // ── AI HEALTH COLLECTIONS ──────────────────────────────

@@ -36,7 +36,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
     with SingleTickerProviderStateMixin {
   // ✅ for live timer
   final _workoutService = WorkoutService();
-  final _gamService = GamificationService();
+
   final _weeklyWarService = WeeklyWarService.instance;
   final _memberService = MemberService();
   final _uuid = const Uuid();
@@ -1404,13 +1404,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
       }
 
       // ✅ Award XP + check badges
-      final badges = await _gamService.awardXp(
-        widget.memberId,
-        'Workout Logged: ${workout.title}',
-        XpSource.workoutLogged,
-        isWorkout: true,
-        workoutVolumeKg: _totalVolume,
-      );
+      await GamificationService.instance.processEvent('workout', widget.memberId);
 
       if (!mounted) return;
       setState(() => _isSaving = false);
@@ -1433,7 +1427,7 @@ class _WorkoutLoggerScreenState extends State<WorkoutLoggerScreen>
       }
 
       // ✅ Show summary instead of just popping
-      _showWorkoutSummary(workout, badges);
+      _showWorkoutSummary(workout, []);
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSaving = false);

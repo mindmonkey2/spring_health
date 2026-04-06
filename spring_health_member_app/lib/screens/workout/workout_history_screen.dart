@@ -617,7 +617,7 @@ class _QuickLogSheet extends StatefulWidget {
 
 class _QuickLogSheetState extends State<_QuickLogSheet> {
   final _workoutService = WorkoutService();
-  final _gamService = GamificationService();
+
 
   String? _selectedMuscleGroup;
   double _durationMinutes = 45;
@@ -659,12 +659,7 @@ class _QuickLogSheetState extends State<_QuickLogSheet> {
       await _workoutService.saveWorkout(workout);
 
       // Award base 10 XP for quick log
-      await _gamService.awardXp(
-        widget.memberId,
-        'Quick Log Completed',
-        10,
-        isWorkout: true,
-      );
+      await GamificationService.instance.processEvent('workout', widget.memberId);
 
       // Explicitly fire gamification_events so it satisfies the strict gamificationEvents prompt rule
       final actualMemberId = await FirebaseAuthService.instance.getCurrentMemberId();

@@ -134,15 +134,10 @@ class _QrCheckInScreenState extends State<QrCheckInScreen>
   // ─────────────────────────────────────────────────────────
   Future<void> _awardCheckInXp() async {
     try {
-      await GamificationService.instance.processEvent(
-        'check_in',
-        widget.member.id,
-      );
+      await GamificationService.instance.processEvent('checkin', widget.member.id);
       if (mounted) {
         setState(() {
-          _earnedXp = 20; // Changed according to processEvent check_in
-          _newBadges =
-              []; // processEvent handles badge notifications directly now
+          _earnedXp = 20; // Changed according to processEvent checkin
         });
       }
     } catch (e) {

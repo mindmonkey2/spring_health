@@ -7,12 +7,14 @@ class WeeklyWarModel {
   final DateTime startDate;
   final DateTime endDate;
   final String exercise;
-  final String unit; // 'reps' | 'seconds'
+  final String unit; // 'reps' or 'seconds'
   final String category;
   final String status; // 'active' | 'locked' | 'completed' | 'archived'
-  final Map<String, int> prizePool;
+  final Map<String, int>
+  prizePool; // {'rank1': 500, 'rank2': 300, 'rank3': 150, 'participation': 20}
   final String? winnerId;
   final String? winnerName;
+  final DateTime createdAt;
 
   const WeeklyWarModel({
     required this.id,
@@ -27,27 +29,25 @@ class WeeklyWarModel {
     required this.prizePool,
     this.winnerId,
     this.winnerName,
+    required this.createdAt,
   });
 
-  factory WeeklyWarModel.fromMap(Map<String, dynamic> map, String id) {
+  factory WeeklyWarModel.fromMap(String id, Map<String, dynamic> data) {
     return WeeklyWarModel(
       id: id,
-      branchId: map['branchId'] ?? '',
-      weekNumber: map['weekNumber'] ?? 0,
-      startDate: _toDateTime(map['startDate']),
-      endDate: _toDateTime(map['endDate']),
-      exercise: map['exercise'] ?? '',
-      unit: map['unit'] ?? 'reps',
-      category: map['category'] ?? 'strength',
-      status: map['status'] ?? 'active',
-      prizePool: Map<String, int>.from(map['prizePool'] ?? {}),
-      winnerId: map['winnerId'],
-      winnerName: map['winnerName'],
+      branchId: data['branchId'] as String,
+      weekNumber: data['weekNumber'] as int,
+      startDate: (data['startDate'] as Timestamp).toDate(),
+      endDate: (data['endDate'] as Timestamp).toDate(),
+      exercise: data['exercise'] as String,
+      unit: data['unit'] as String,
+      category: data['category'] as String,
+      status: data['status'] as String,
+      prizePool: Map<String, int>.from(data['prizePool'] as Map),
+      winnerId: data['winnerId'] as String?,
+      winnerName: data['winnerName'] as String?,
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
-  }
-
-  factory WeeklyWarModel.fromFirestore(DocumentSnapshot doc) {
-    return WeeklyWarModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
   }
 
   Map<String, dynamic> toMap() {
@@ -63,20 +63,14 @@ class WeeklyWarModel {
       'prizePool': prizePool,
       if (winnerId != null) 'winnerId': winnerId,
       if (winnerName != null) 'winnerName': winnerName,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is String) return DateTime.parse(value);
-    return DateTime.now();
   }
 }
 
 class WarEntryModel {
   final String memberId;
-  final String
-  memberName; // Stored separately if needed, but often fetched via join or assumed available
+  final String memberName;
   final int totalReps;
   final int sessionCount;
   final DateTime lastUpdated;
@@ -93,22 +87,16 @@ class WarEntryModel {
     this.xpAwarded,
   });
 
-  factory WarEntryModel.fromMap(Map<String, dynamic> map, String id) {
+  factory WarEntryModel.fromMap(String memberId, Map<String, dynamic> data) {
     return WarEntryModel(
-      memberId: map['memberId'] ?? id,
-      memberName:
-          map['memberName'] ??
-          '', // Might not be in doc directly, handle carefully
-      totalReps: map['totalReps'] ?? 0,
-      sessionCount: map['sessionCount'] ?? 0,
-      lastUpdated: _toDateTime(map['lastUpdated']),
-      rank: map['rank'],
-      xpAwarded: map['xpAwarded'],
+      memberId: memberId,
+      memberName: data['memberName'] as String,
+      totalReps: data['totalReps'] as int,
+      sessionCount: data['sessionCount'] as int,
+      lastUpdated: (data['lastUpdated'] as Timestamp).toDate(),
+      rank: data['rank'] as int?,
+      xpAwarded: data['xpAwarded'] as int?,
     );
-  }
-
-  factory WarEntryModel.fromFirestore(DocumentSnapshot doc) {
-    return WarEntryModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
   }
 
   Map<String, dynamic> toMap() {
@@ -121,11 +109,5 @@ class WarEntryModel {
       if (rank != null) 'rank': rank,
       if (xpAwarded != null) 'xpAwarded': xpAwarded,
     };
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is String) return DateTime.parse(value);
-    return DateTime.now();
   }
 }

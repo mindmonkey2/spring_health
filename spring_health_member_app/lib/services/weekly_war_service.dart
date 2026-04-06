@@ -2,237 +2,209 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/weekly_war_model.dart';
 import 'gamification_service.dart';
 
-import 'package:flutter/foundation.dart'; // for @visibleForTesting
-
 class WeeklyWarService {
   static final WeeklyWarService instance = WeeklyWarService._internal();
-  WeeklyWarService._internal({FirebaseFirestore? db})
-    : _db = db ?? FirebaseFirestore.instance;
+  WeeklyWarService._internal();
 
-  @visibleForTesting
-  WeeklyWarService.forTesting(FirebaseFirestore db) : _db = db;
+  // 7-week rotating exercise schedule — cycles indefinitely
+  static const List<Map<String, String>> warSchedule = [
+    {
+      'week': '1',
+      'category': 'Upper Body',
+      'exercise': 'Push-ups',
+      'unit': 'reps',
+    },
+    {
+      'week': '2',
+      'category': 'Lower Body',
+      'exercise': 'Squats',
+      'unit': 'reps',
+    },
+    {'week': '3', 'category': 'Core', 'exercise': 'Plank', 'unit': 'seconds'},
+    {
+      'week': '4',
+      'category': 'Full Body',
+      'exercise': 'Burpees',
+      'unit': 'reps',
+    },
+    {
+      'week': '5',
+      'category': 'Cardio',
+      'exercise': 'High Knees',
+      'unit': 'reps',
+    },
+    {
+      'week': '6',
+      'category': 'Gym Equip',
+      'exercise': 'Deadlift',
+      'unit': 'reps',
+    },
+    {
+      'week': '7',
+      'category': 'Upper Body',
+      'exercise': 'Pull-ups',
+      'unit': 'reps',
+    },
+  ];
 
-  final FirebaseFirestore _db;
-  final _gamService = GamificationService();
+  Future<WeeklyWarModel?> getActiveWar(String branch) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('weeklywars')
+        .where('branchId', isEqualTo: branch)
+        .where('status', isEqualTo: 'active')
+        .limit(1)
+        .get();
 
-  Future<WeeklyWarModel?> getActiveWar(String branchId) async {
-    try {
-      final snapshot = await _db
-          .collection('weekly_wars')
-          .where('branchId', isEqualTo: branchId)
-          .where('status', isEqualTo: 'active')
-          .limit(1)
-          .get();
+    if (querySnapshot.docs.isEmpty) return null;
 
-      if (snapshot.docs.isEmpty) return null;
-      return WeeklyWarModel.fromFirestore(snapshot.docs.first);
-    } catch (e) {
-      // debugPrint('Error getting active war: $e');
-      return null;
-    }
+    final doc = querySnapshot.docs.first;
+    return WeeklyWarModel.fromMap(doc.id, doc.data());
   }
 
   Future<void> recordWorkoutEntry(
     String memberId,
-    String branchId,
+    String memberName,
+    String branch,
     String exercise,
     int reps,
   ) async {
-    final war = await getActiveWar(branchId);
-    if (war == null || war.status != 'active') return;
-    if (war.exercise.toLowerCase() != exercise.toLowerCase()) return;
+    final activeWar = await getActiveWar(branch);
+    if (activeWar == null) return;
 
-    final entryRef = _db
-        .collection('weekly_wars')
-        .doc(war.id)
+    if (activeWar.exercise.toLowerCase() != exercise.toLowerCase()) return;
+
+    final entryRef = FirebaseFirestore.instance
+        .collection('weeklywars')
+        .doc(activeWar.id)
         .collection('entries')
         .doc(memberId);
 
-    // Assuming we fetch member name somehow, or just pass it in? We only have memberId.
-    // Let's rely on the DB having member info or we can omit name. Let's just update stats.
     await entryRef.set({
       'memberId': memberId,
+      'memberName': memberName,
       'totalReps': FieldValue.increment(reps),
       'sessionCount': FieldValue.increment(1),
-      'lastUpdated': Timestamp.now(),
-    }, SetOptions(merge: true));
-  }
-
-  Future<void> recordWorkoutEntries(
-    String memberId,
-    String branchId,
-    Map<String, int> exerciseReps,
-  ) async {
-    if (exerciseReps.isEmpty) return;
-
-    final war = await getActiveWar(branchId);
-    if (war == null || war.status != 'active') return;
-
-    // Find if the active war's exercise is in the logged exercises (case-insensitive)
-    final warExerciseLower = war.exercise.toLowerCase();
-    int totalWarReps = 0;
-    for (final entry in exerciseReps.entries) {
-      if (entry.key.toLowerCase() == warExerciseLower) {
-        totalWarReps += entry.value;
-      }
-    }
-
-    if (totalWarReps == 0) return;
-
-    final entryRef = _db
-        .collection('weekly_wars')
-        .doc(war.id)
-        .collection('entries')
-        .doc(memberId);
-
-    await entryRef.set({
-      'memberId': memberId,
-      'totalReps': FieldValue.increment(totalWarReps),
-      'sessionCount': FieldValue.increment(1),
-      'lastUpdated': Timestamp.now(),
+      'lastUpdated': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 
   Stream<List<WarEntryModel>> getWarLeaderboard(String warId) {
-    return _db
-        .collection('weekly_wars')
+    return FirebaseFirestore.instance
+        .collection('weeklywars')
         .doc(warId)
         .collection('entries')
         .orderBy('totalReps', descending: true)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => WarEntryModel.fromFirestore(doc))
+              .map((doc) => WarEntryModel.fromMap(doc.id, doc.data()))
               .toList(),
         );
   }
 
+  Future<WarEntryModel?> getMemberEntry(String warId, String memberId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('weeklywars')
+        .doc(warId)
+        .collection('entries')
+        .doc(memberId)
+        .get();
+
+    if (!doc.exists || doc.data() == null) return null;
+
+    return WarEntryModel.fromMap(doc.id, doc.data()!);
+  }
+
+  Future<List<WeeklyWarModel>> getWarHistory(String branch) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('weeklywars')
+        .where('branchId', isEqualTo: branch)
+        .where('status', whereIn: ['completed', 'archived'])
+        .orderBy('startDate', descending: true)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => WeeklyWarModel.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
   Future<void> completeWar(String warId) async {
-    final warRef = _db.collection('weekly_wars').doc(warId);
-    final entriesRef = warRef.collection('entries');
+    final warRef = FirebaseFirestore.instance
+        .collection('weeklywars')
+        .doc(warId);
 
-    try {
-      final isLocked = await _db.runTransaction((transaction) async {
-        final warDoc = await transaction.get(warRef);
-        if (!warDoc.exists) return false;
+    // 1. Set status = 'locked'
+    await warRef.update({'status': 'locked'});
 
-        final war = WeeklyWarModel.fromFirestore(warDoc);
-        if (war.status != 'active') return false;
+    // 2. Read all entries, sort by totalReps desc
+    final entriesSnapshot = await warRef
+        .collection('entries')
+        .orderBy('totalReps', descending: true)
+        .get();
 
-        // 1. Lock status
-        transaction.update(warRef, {'status': 'locked'});
-        return true;
-      });
+    final entries = entriesSnapshot.docs
+        .map((doc) => WarEntryModel.fromMap(doc.id, doc.data()))
+        .toList();
 
-      if (!isLocked) return;
+    if (entries.isEmpty) {
+      await warRef.update({'status': 'completed'});
+      return;
+    }
 
-      // 2. Read all entries, sort by totalReps desc
-      final entriesSnapshot = await entriesRef
-          .orderBy('totalReps', descending: true)
-          .get();
-      final entries = entriesSnapshot.docs
-          .map((doc) => WarEntryModel.fromFirestore(doc))
-          .toList();
+    String? winnerId;
+    String? winnerName;
 
-      if (entries.isEmpty) {
-        await warRef.update({'status': 'completed'});
-        return;
+    // Iterate through entries and assign ranks and XP
+    for (int i = 0; i < entries.length; i++) {
+      final entry = entries[i];
+      final rank = i + 1;
+      int xpToAward = 20; // Default participation XP
+      String eventType = 'war_participate';
+      int? customXP;
+
+      if (rank == 1) {
+        winnerId = entry.memberId;
+        winnerName = entry.memberName;
+        eventType = 'war_winner';
+        // 5. Increment warWins by 1 in gamification/{memberId} for rank 1 only
+        await FirebaseFirestore.instance
+            .collection('gamification')
+            .doc(entry.memberId)
+            .set({'warWins': FieldValue.increment(1)}, SetOptions(merge: true));
+      } else if (rank == 2) {
+        eventType = 'war_top3';
+        customXP = 300;
+        xpToAward = 300;
+      } else if (rank == 3) {
+        eventType = 'war_top3';
+        customXP = 150;
+        xpToAward = 150;
+      } else if (rank >= 4 && rank <= 10) {
+        eventType = 'war_top3';
+        customXP = 50;
+        xpToAward = 50;
       }
 
-      String? winnerId;
-      String? winnerName;
-
-      // 3. Assign ranks and 4. Distribute XP via processEvent calls
-      for (int i = 0; i < entries.length; i++) {
-        final entry = entries[i];
-        final rank = i + 1;
-        final docRef = entriesRef.doc(entry.memberId);
-
-        if (rank == 1) {
-          winnerId = entry.memberId;
-          winnerName = entry.memberName;
-          await _gamService.processEvent('war_winner', entry.memberId);
-          await _db.collection('gamification').doc(entry.memberId).update({
-            'warWins': FieldValue.increment(1),
-          });
-        } else if (rank <= 3) {
-          await _gamService.processEvent(
-            'war_top3',
-            entry.memberId,
-            customXP: rank == 2 ? 300 : 150,
-          );
-        } else if (rank <= 10) {
-          await _gamService.processEvent(
-            'war_top3',
-            entry.memberId,
-            customXP: 50,
-          );
-        } else {
-          await _gamService.processEvent('war_participate', entry.memberId);
-        }
-
-        await docRef.update({'rank': rank});
-      }
-
-      // 5. Set status: 'completed', winnerId, winnerName
-      await warRef.update({
-        'status': 'completed',
-        'winnerId': winnerId,
-        'winnerName': winnerName,
+      // 3. Assign ranks (rank field on each entry doc)
+      await warRef.collection('entries').doc(entry.memberId).update({
+        'rank': rank,
+        'xpAwarded': xpToAward,
       });
 
-      // 6. Send FCM to all branch members: war result announcement
-      // This part would typically use a Cloud Function or FCM service.
-      // Assuming a notification service exists, or just log for now.
-      // debugPrint('War $warId completed. Winner: $winnerName');
-    } catch (e) {
-      // debugPrint('Error completing war: $e');
-      // Rollback status on fail, but only if we were the ones who locked it
-      try {
-        final doc = await warRef.get();
-        if (doc.exists && doc.data()?['status'] == 'locked') {
-          await warRef.update({'status': 'active'});
-        }
-      } catch (_) {}
+      // 4. Distribute XP
+      GamificationService.instance.processEvent(
+        eventType,
+        entry.memberId,
+        customXP: customXP,
+      );
     }
-  }
 
-  // Helper method for WarScreen to fetch historical wars
-  Future<List<WeeklyWarModel>> getPastWars(String branchId) async {
-    try {
-      final snapshot = await _db
-          .collection('weekly_wars')
-          .where('branchId', isEqualTo: branchId)
-          .where('status', isEqualTo: 'completed')
-          .orderBy('endDate', descending: true)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => WeeklyWarModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      // debugPrint('Error getting past wars: $e');
-      return [];
-    }
-  }
-
-  // Get member's rank in a specific war
-  Future<WarEntryModel?> getMemberWarEntry(
-    String warId,
-    String memberId,
-  ) async {
-    try {
-      final doc = await _db
-          .collection('weekly_wars')
-          .doc(warId)
-          .collection('entries')
-          .doc(memberId)
-          .get();
-      if (!doc.exists) return null;
-      return WarEntryModel.fromFirestore(doc);
-    } catch (e) {
-      // debugPrint('Error getting member war entry: $e');
-      return null;
-    }
+    // 6. Set status = 'completed', set winnerId and winnerName
+    final updateData = <String, dynamic>{
+      'status': 'completed',
+    };
+    if (winnerId != null) updateData['winnerId'] = winnerId;
+    if (winnerName != null) updateData['winnerName'] = winnerName;
+    await warRef.update(updateData);
   }
 }

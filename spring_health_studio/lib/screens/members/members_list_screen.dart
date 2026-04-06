@@ -87,13 +87,10 @@ class _MembersListScreenState extends State<MembersListScreen> {
 
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((member) {
-        if (member.phone.contains(_searchQuery) ||
-            member.email.toLowerCase().contains(_searchQuery) ||
-            member.id.toLowerCase().contains(_searchQuery)) {
-          return true;
-        }
+        final query = _searchQuery.toLowerCase();
+        if (member.phone.contains(query)) return true;
         final nameWords = member.name.toLowerCase().split(' ');
-        return nameWords.any((word) => word.startsWith(_searchQuery));
+        return nameWords.any((word) => word.startsWith(query));
       }).toList();
     }
 

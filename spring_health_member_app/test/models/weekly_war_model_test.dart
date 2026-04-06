@@ -28,7 +28,7 @@ void main() {
         'winnerName': 'John Doe',
       };
 
-      final model = WeeklyWarModel.fromMap(map, 'war_doc_id');
+      final model = WeeklyWarModel.fromMap('war_doc_id', map);
 
       expect(model.id, 'war_doc_id');
       expect(model.branchId, 'branch_123');
@@ -50,7 +50,7 @@ void main() {
         'endDate': '2023-01-08T10:00:00.000Z',
       };
 
-      final model = WeeklyWarModel.fromMap(map, 'test_id');
+      final model = WeeklyWarModel.fromMap('test_id', map);
 
       expect(model.startDate, DateTime.parse('2023-01-01T10:00:00.000Z'));
       expect(model.endDate, DateTime.parse('2023-01-08T10:00:00.000Z'));
@@ -60,7 +60,7 @@ void main() {
       final beforeParsing = DateTime.now();
 
       final map = <String, dynamic>{};
-      final model = WeeklyWarModel.fromMap(map, 'empty_id');
+      final model = WeeklyWarModel.fromMap('empty_id', map);
 
       final afterParsing = DateTime.now();
 
@@ -106,7 +106,7 @@ void main() {
         'prizePool': null,
       };
 
-      final model = WeeklyWarModel.fromMap(map, 'id');
+      final model = WeeklyWarModel.fromMap('id', map);
 
       expect(model.prizePool, isEmpty);
     });

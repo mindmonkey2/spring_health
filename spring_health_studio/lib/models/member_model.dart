@@ -22,6 +22,7 @@ class MemberModel {
   final double upiAmount;
   final double dueAmount;
   final bool isActive;
+  final List<String> loyaltyMilestonesAwarded;
   final bool isArchived;
   final DateTime? lastCheckIn;
   final String qrCode;
@@ -36,6 +37,7 @@ class MemberModel {
     required this.phone,
     required this.email,
     required this.gender,
+    this.loyaltyMilestonesAwarded = const [],
     this.dateOfBirth,
     required this.branch,
     required this.category,
@@ -109,6 +111,7 @@ class MemberModel {
       'upiAmount': upiAmount,
       'dueAmount': dueAmount,
       'isActive': isActive,
+      'loyaltyMilestonesAwarded': loyaltyMilestonesAwarded,
       'isArchived': isArchived,
       'lastCheckIn':
           lastCheckIn != null ? Timestamp.fromDate(lastCheckIn!) : null,
@@ -186,6 +189,7 @@ class MemberModel {
     double? upiAmount,
     double? dueAmount,
     bool? isActive,
+    List<String>? loyaltyMilestonesAwarded,
     bool? isArchived,
     DateTime? lastCheckIn,
     String? qrCode,
@@ -215,6 +219,7 @@ class MemberModel {
       upiAmount: upiAmount ?? this.upiAmount,
       dueAmount: dueAmount ?? this.dueAmount,
       isActive: isActive ?? this.isActive,
+      loyaltyMilestonesAwarded: loyaltyMilestonesAwarded ?? this.loyaltyMilestonesAwarded,
       isArchived: isArchived ?? this.isArchived,
       lastCheckIn: lastCheckIn ?? this.lastCheckIn,
       qrCode: qrCode ?? this.qrCode,

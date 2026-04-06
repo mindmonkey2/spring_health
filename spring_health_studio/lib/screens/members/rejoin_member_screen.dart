@@ -233,25 +233,21 @@ class _RejoinMemberScreenState extends State<RejoinMemberScreen> {
 
       await _firestoreService.addPayment(payment);
 
-      final DateTime joinDate = renewedMember.joiningDate;
-      final int monthsActive = DateTime.now().difference(joinDate).inDays ~/ 30;
+      final joinDate = widget.member.joiningDate;
+      final monthsActive = DateTime.now().difference(joinDate).inDays ~/ 30;
+      final alreadyAwarded = widget.member.loyaltyMilestonesAwarded;
 
-      String? loyaltyEvent;
-      if (monthsActive >= 12) {
-        loyaltyEvent = 'loyalty_1y';
-      } else if (monthsActive >= 6) {
-        loyaltyEvent = 'loyalty_6m';
-      } else if (monthsActive >= 3) {
-        loyaltyEvent = 'loyalty_3m';
-      }
-
-      if (loyaltyEvent != null) {
+      if (monthsActive >= 12 && !alreadyAwarded.contains('loyalty_1y')) {
         await FirebaseFirestore.instance.collection('gamification_events').add({
-          'memberId': renewedMember.id,
-          'event': loyaltyEvent,
-          'triggeredBy': 'rejoin',
-          'timestamp': Timestamp.now(),
-          'processed': false,
+          'memberId': widget.member.id, 'event': 'loyalty_1y', 'timestamp': Timestamp.now(), 'processed': false,
+        });
+      } else if (monthsActive >= 6 && !alreadyAwarded.contains('loyalty_6m')) {
+        await FirebaseFirestore.instance.collection('gamification_events').add({
+          'memberId': widget.member.id, 'event': 'loyalty_6m', 'timestamp': Timestamp.now(), 'processed': false,
+        });
+      } else if (monthsActive >= 3 && !alreadyAwarded.contains('loyalty_3m')) {
+        await FirebaseFirestore.instance.collection('gamification_events').add({
+          'memberId': widget.member.id, 'event': 'loyalty_3m', 'timestamp': Timestamp.now(), 'processed': false,
         });
       }
 

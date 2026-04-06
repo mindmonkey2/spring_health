@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       final gamification = await _gamService.getOrCreate(memberId);
-      _gamService.listenToEvents(memberId);
+      _gamService.listenForPendingLoyaltyEvents(memberId);
 
       // Load AI data concurrently
       String? recoveryStatus;
@@ -148,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Badge toast ───────────────────────────────────────────────────────────
 
+  // ignore: unused_element
   void _showBadgeToast(BadgeDefinition badge) {
     HapticFeedback.mediumImpact();
     showDialog<void>(
@@ -830,16 +831,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
             if (saved == true && _memberId != null) {
-              final badges = await _gamService.awardXp(
-                _memberId!,
-                'Workout Logged',
-                XpSource.workoutLogged,
-                isWorkout: true,
-              );
-              if (mounted) {
-                _loadMemberData();
-                if (badges.isNotEmpty) _showBadgeToast(badges.first);
-              }
+              await GamificationService.instance.processEvent('workout', _memberId!);
+              if (mounted) _loadMemberData();
             }
           },
         ),

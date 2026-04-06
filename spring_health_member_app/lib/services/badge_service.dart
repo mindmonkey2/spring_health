@@ -1,143 +1,102 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/notification_model.dart';
 import 'in_app_notification_service.dart';
+import '../models/notification_model.dart';
 
 class BadgeService {
   static final BadgeService instance = BadgeService._internal();
   BadgeService._internal();
 
-  // Badge definitions — id, label, condition type, threshold
   static const List<Map<String, dynamic>> badgeDefinitions = [
-    {
-      'id': 'first_checkin',
-      'label': 'First Step',
-      'type': 'checkins',
-      'threshold': 1,
-    },
-    {
-      'id': 'streak_7',
-      'label': '7-Day Warrior',
-      'type': 'streak',
-      'threshold': 7,
-    },
-    {
-      'id': 'streak_30',
-      'label': 'Iron Consistent',
-      'type': 'streak',
-      'threshold': 30,
-    },
-    {'id': 'xp_500', 'label': 'Rising Star', 'type': 'xp', 'threshold': 500},
-    {'id': 'xp_2000', 'label': 'XP Beast', 'type': 'xp', 'threshold': 2000},
-    {
-      'id': 'workouts_10',
-      'label': 'Dedicated Lifter',
-      'type': 'workouts',
-      'threshold': 10,
-    },
-    {
-      'id': 'workouts_50',
-      'label': 'Grind Mode',
-      'type': 'workouts',
-      'threshold': 50,
-    },
-    {
-      'id': 'pb_first',
-      'label': 'Personal Legend',
-      'type': 'pbs',
-      'threshold': 1,
-    },
-    {
-      'id': 'war_win',
-      'label': 'War Champion',
-      'type': 'war_wins',
-      'threshold': 1,
-    },
-    {
-      'id': 'loyalty_3m',
-      'label': 'Loyal Member',
-      'type': 'loyalty_months',
-      'threshold': 3,
-    },
-    {
-      'id': 'loyalty_1y',
-      'label': 'Spring Legend',
-      'type': 'loyalty_months',
-      'threshold': 12,
-    },
+    {'id': 'first_checkin',  'label': 'First Step',        'type': 'checkins',      'threshold': 1},
+    {'id': 'streak_7',       'label': '7-Day Warrior',     'type': 'streak',        'threshold': 7},
+    {'id': 'streak_30',      'label': 'Iron Consistent',   'type': 'streak',        'threshold': 30},
+    {'id': 'xp_500',         'label': 'Rising Star',       'type': 'xp',            'threshold': 500},
+    {'id': 'xp_2000',        'label': 'XP Beast',          'type': 'xp',            'threshold': 2000},
+    {'id': 'workouts_10',    'label': 'Dedicated Lifter',  'type': 'workouts',      'threshold': 10},
+    {'id': 'workouts_50',    'label': 'Grind Mode',        'type': 'workouts',      'threshold': 50},
+    {'id': 'pb_first',       'label': 'Personal Legend',   'type': 'pbs',           'threshold': 1},
+    {'id': 'war_win',        'label': 'War Champion',      'type': 'warWins',       'threshold': 1},
+    {'id': 'loyalty_3m',     'label': 'Loyal Member',      'type': 'loyaltyMonths', 'threshold': 3},
+    {'id': 'loyalty_1y',     'label': 'Spring Legend',     'type': 'loyaltyMonths', 'threshold': 12},
   ];
 
   Future<void> checkAndAward(String memberId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('gamification')
-        .doc(memberId)
-        .get();
-    if (!doc.exists) return;
-    final data = doc.data()!;
-    final existingBadges = List<String>.from(data['badges'] ?? []);
+    final docRef = FirebaseFirestore.instance.collection('gamification').doc(memberId);
+    final docSnap = await docRef.get();
 
-    final int currentXP = data['totalXP'] ?? 0;
-    final int currentStreak = data['currentStreak'] ?? 0;
-    final int workoutCount = data['workoutCount'] ?? 0;
-    final int checkinCount = data['checkinCount'] ?? 0;
-    final int pbCount = data['personalBestCount'] ?? 0;
-    final int warWins = data['warWins'] ?? 0;
-    final int loyaltyMonths = data['loyaltyMonths'] ?? 0;
+    if (!docSnap.exists) return;
 
-    final List<String> newlyAwarded = [];
+    final data = docSnap.data()!;
+    final earnedBadges = List<String>.from(data['badges'] ?? []);
+    final totalXP = data['totalXp'] ?? data['totalXP'] ?? 0;
+    final currentStreak = data['currentStreak'] ?? 0;
+    final workoutCount = data['totalWorkouts'] ?? data['workoutCount'] ?? 0;
+    final checkinCount = data['totalCheckIns'] ?? data['checkinCount'] ?? 0;
+    final personalBestCount = data['personalBestCount'] ?? 0;
+    final warWins = data['warWins'] ?? 0;
+    final loyaltyMonths = data['loyaltyMonths'] ?? 0;
+
+    final newlyEarned = <Map<String, dynamic>>[];
 
     for (final badge in badgeDefinitions) {
-      final String id = badge['id'];
-      if (existingBadges.contains(id)) continue;
+      final id = badge['id'] as String;
+      if (earnedBadges.contains(id)) continue;
+
+      final type = badge['type'] as String;
+      final threshold = badge['threshold'] as int;
+
       bool earned = false;
-      switch (badge['type']) {
-        case 'xp':
-          earned = currentXP >= badge['threshold'];
+      switch (type) {
+        case 'checkins':
+          earned = checkinCount >= threshold;
           break;
         case 'streak':
-          earned = currentStreak >= badge['threshold'];
+          earned = currentStreak >= threshold;
+          break;
+        case 'xp':
+          earned = totalXP >= threshold;
           break;
         case 'workouts':
-          earned = workoutCount >= badge['threshold'];
-          break;
-        case 'checkins':
-          earned = checkinCount >= badge['threshold'];
+          earned = workoutCount >= threshold;
           break;
         case 'pbs':
-          earned = pbCount >= badge['threshold'];
+          earned = personalBestCount >= threshold;
           break;
-        case 'war_wins':
-          earned = warWins >= badge['threshold'];
+        case 'warWins':
+          earned = warWins >= threshold;
           break;
-        case 'loyalty_months':
-          earned = loyaltyMonths >= badge['threshold'];
+        case 'loyaltyMonths':
+          earned = loyaltyMonths >= threshold;
           break;
       }
-      if (earned) newlyAwarded.add(id);
+
+      if (earned) {
+        newlyEarned.add(badge);
+      }
     }
 
-    if (newlyAwarded.isEmpty) return;
+    if (newlyEarned.isNotEmpty) {
+      final newBadgeIds = newlyEarned.map((b) => b['id'] as String).toList();
 
-    await FirebaseFirestore.instance
-        .collection('gamification')
-        .doc(memberId)
-        .update({'badges': FieldValue.arrayUnion(newlyAwarded)});
+      // Update Firestore
+      await docRef.update({
+        'badges': FieldValue.arrayUnion(newBadgeIds),
+        // Add it to earnedBadgeIds too since gamification_service.dart uses it
+        'earnedBadgeIds': FieldValue.arrayUnion(newBadgeIds),
+      });
 
-    final notifications = <NotificationData>[];
-    for (final badgeId in newlyAwarded) {
-      final badgeDef = badgeDefinitions.firstWhere((b) => b['id'] == badgeId);
-      notifications.add(
-        NotificationData(
-          type: NotificationType.badge,
-          title: ' Badge Unlocked!',
-          body: 'You earned: ${badgeDef['label']}',
-          metadata: {'badgeId': badgeId},
-        ),
+      // Send notifications
+      final notifications = newlyEarned.map((badge) => NotificationData(
+        type: NotificationType.badge,
+        title: 'Badge Unlocked!',
+        body: 'You earned ${badge['label']}!',
+        metadata: {'badgeId': badge['id']},
+      )).toList();
+
+      await InAppNotificationService().addNotificationsForMemberBatch(
+        uid: memberId,
+        notifications: notifications,
       );
     }
-
-    await InAppNotificationService().addNotificationsForMemberBatch(
-      uid: memberId,
-      notifications: notifications,
-    );
   }
 }

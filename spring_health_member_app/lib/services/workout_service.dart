@@ -102,11 +102,7 @@ class WorkoutService {
 
         if (awardXp) {
           // Award 50 XP
-          await _gamificationService.awardXp(
-            memberId,
-            'New Personal Best: $exerciseName',
-            50,
-          );
+          await _gamificationService.processEvent('workout', memberId);
 
           // Fire gamification event
           await _db.collection('gamification_events').add({

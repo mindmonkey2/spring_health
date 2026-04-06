@@ -221,7 +221,7 @@ class GamificationService {
   // ─────────────────────────────────────────────
   // EVENT LISTENER
   // ─────────────────────────────────────────────
-  void listenToEvents(String memberId) {
+  void listenForPendingLoyaltyEvents(String memberId) {
     FirebaseFirestore.instance
         .collection('gamification_events')
         .where('memberId', isEqualTo: memberId)

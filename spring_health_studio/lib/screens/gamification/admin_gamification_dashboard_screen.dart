@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../models/admin_leaderboard_entry.dart';
 import '../../services/admin_gamification_service.dart';
 import '../../theme/app_colors.dart';
+import 'war_admin_screen.dart';
 
 class AdminGamificationDashboardScreen extends StatefulWidget {
   const AdminGamificationDashboardScreen({super.key});
@@ -122,6 +123,24 @@ class _AdminGamificationDashboardScreenState
           onRefresh: () async => refresh(),
           child: Column(
             children: [
+              Card(
+                color: AppColors.surface,
+                elevation: 2,
+                margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                child: ListTile(
+                  leading: const Icon(Icons.emoji_events, color: Colors.amber),
+                  title: const Text('Weekly Wars', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Start, manage & complete branch wars', style: TextStyle(color: Colors.grey)),
+                  trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WarAdminScreen(branch: branchFilter == 'All' ? 'Hanamkonda' : branchFilter),
+                    ),
+                  ),
+                ),
+              ),
               _StatsStrip(
                 challengesFuture: challengesFuture,
                 entriesFuture: entriesFuture,

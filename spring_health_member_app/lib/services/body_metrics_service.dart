@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart';
 import '../models/body_metrics_model.dart';
 
 class BodyMetricsService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
   static const _col = 'bodyMetrics';
+
+  BodyMetricsService({FirebaseFirestore? firestore})
+      : _db = firestore ?? FirebaseFirestore.instance;
 
   // Add a new entry
   Future<void> addMetrics(BodyMetricsModel metrics) async {

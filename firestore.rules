@@ -45,6 +45,11 @@ service cloud.firestore {
                 request.resource.data.memberId == request.auth.uid);
     }
 
+    function isMemberOwner(memberId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/members/$(memberId)).data.uid == request.auth.uid;
+    }
+
     // ── USERS ──────────────────────────────────────────────
     match /users/{userId} {
       allow read: if isSignedIn() && (isOwnDocument(userId) || isOwner());
@@ -177,8 +182,8 @@ service cloud.firestore {
     // ── GAMIFICATION ───────────────────────────────────────
     // Doc ID = Firestore member doc ID (NOT auth UID)
     match /gamification/{memberId} {
-      allow read: if isAdmin() || isTrainer() || isSignedIn();
-      allow create, update: if isAdmin() || isSignedIn();
+      allow read: if isAdmin() || isTrainer() || isMemberOwner(memberId);
+      allow create, update: if isAdmin() || isMemberOwner(memberId);
       allow delete: if isOwner();
     }
 
@@ -313,31 +318,34 @@ service cloud.firestore {
     // All keyed by Firestore member doc ID (NOT auth UID)
     // isOwnDocument() would fail — use isSignedIn()
     match /healthProfiles/{memberId} {
-      allow read: if isOwner() || isTrainer() || isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+      allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
     }
 
     match /bodyMetricsLogs/{memberId} {
-      allow read: if isOwner() || isTrainer() || isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+      allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
       match /logs/{logId} {
-        allow read, write: if isOwner() || isTrainer() || isSignedIn();
+        allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+        allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
       }
     }
 
     match /fitnessTests/{memberId} {
-      allow read: if isOwner() || isTrainer() || isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+      allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
       match /tests/{testId} {
-        allow read, write: if isOwner() || isTrainer() || isSignedIn();
+        allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+        allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
       }
     }
 
     match /wearableSnapshots/{memberId} {
-      allow read: if isOwner() || isTrainer() || isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+      allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
       match /daily/{date} {
-        allow read, write: if isOwner() || isTrainer() || isSignedIn();
+        allow read: if isOwner() || isTrainer() || isMemberOwner(memberId);
+        allow write: if isOwner() || isTrainer() || isMemberOwner(memberId);
       }
     }
 

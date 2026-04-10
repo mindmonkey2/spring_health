@@ -1,6 +1,5 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:spring_health_member/models/body_metrics_model.dart';
 import 'package:spring_health_member/services/body_metrics_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

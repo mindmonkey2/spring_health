@@ -32,21 +32,30 @@ class WeeklyWarModel {
     required this.createdAt,
   });
 
+  static DateTime _parseDate(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.parse(value);
+    if (value is DateTime) return value;
+    return DateTime.now(); // fallback
+  }
+
   factory WeeklyWarModel.fromMap(String id, Map<String, dynamic> data) {
     return WeeklyWarModel(
       id: id,
-      branchId: data['branchId'] as String,
-      weekNumber: data['weekNumber'] as int,
-      startDate: (data['startDate'] as Timestamp).toDate(),
-      endDate: (data['endDate'] as Timestamp).toDate(),
-      exercise: data['exercise'] as String,
-      unit: data['unit'] as String,
-      category: data['category'] as String,
-      status: data['status'] as String,
-      prizePool: Map<String, int>.from(data['prizePool'] as Map),
+      branchId: data['branchId'] as String? ?? '',
+      weekNumber: data['weekNumber'] as int? ?? 0,
+      startDate: _parseDate(data['startDate']),
+      endDate: _parseDate(data['endDate']),
+      exercise: data['exercise'] as String? ?? '',
+      unit: data['unit'] as String? ?? 'reps',
+      category: data['category'] as String? ?? 'strength',
+      status: data['status'] as String? ?? 'active',
+      prizePool: data['prizePool'] != null
+          ? Map<String, int>.from(data['prizePool'] as Map)
+          : {},
       winnerId: data['winnerId'] as String?,
       winnerName: data['winnerName'] as String?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: _parseDate(data['createdAt']),
     );
   }
 

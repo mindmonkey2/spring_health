@@ -55,15 +55,14 @@ class _WarAdminScreenState extends State<WarAdminScreen> {
     return '${days[dt.weekday - 1]}, ${months[dt.month - 1]} ${dt.day}';
   }
 
-  int _getWeekNumber(DateTime date) {
-    final startOfYear = DateTime(date.year, 1, 1);
-    final diff = date.difference(startOfYear).inDays;
-    return (diff / 7).ceil();
-  }
-
   Future<void> _startWar() async {
     final now = DateTime.now();
-    final weekNumber = _getWeekNumber(now);
+
+    final existingWarsSnap = await FirebaseFirestore.instance
+        .collection('weeklywars')
+        .where('branchId', isEqualTo: widget.branch.toLowerCase())
+        .get();
+    final warCount = existingWarsSnap.docs.length;
 
     const warSchedule = [
       {'category': 'Upper Body', 'exercise': 'Push-ups', 'unit': 'reps'},
@@ -74,7 +73,7 @@ class _WarAdminScreenState extends State<WarAdminScreen> {
       {'category': 'Gym Equip', 'exercise': 'Deadlift', 'unit': 'reps'},
       {'category': 'Upper Body', 'exercise': 'Pull-ups', 'unit': 'reps'},
     ];
-    final slot = warSchedule[weekNumber % 7];
+    final slot = warSchedule[warCount % 7];
 
     final monday = now.subtract(Duration(days: now.weekday - 1));
     final startDate = DateTime(monday.year, monday.month, monday.day, 6, 0);
@@ -84,7 +83,7 @@ class _WarAdminScreenState extends State<WarAdminScreen> {
     try {
       await FirebaseFirestore.instance.collection('weeklywars').add({
         'branchId': widget.branch,
-        'weekNumber': weekNumber,
+        'weekNumber': warCount + 1,
         'startDate': Timestamp.fromDate(startDate),
         'endDate': Timestamp.fromDate(endDate),
         'exercise': slot['exercise'],

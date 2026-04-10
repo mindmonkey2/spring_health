@@ -22,11 +22,12 @@ class WarScreen extends StatefulWidget {
 
 class _WarScreenState extends State<WarScreen> {
   Timer? _countdownTimer;
-  String _timeRemaining = '';
+  final ValueNotifier<String> _timeRemaining = ValueNotifier<String>('');
 
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _timeRemaining.dispose();
     super.dispose();
   }
 
@@ -35,9 +36,7 @@ class _WarScreenState extends State<WarScreen> {
     _updateTimeRemaining(endDate);
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
-        setState(() {
-          _updateTimeRemaining(endDate);
-        });
+        _updateTimeRemaining(endDate);
       }
     });
   }
@@ -47,7 +46,7 @@ class _WarScreenState extends State<WarScreen> {
     final difference = endDate.difference(now);
 
     if (difference.isNegative) {
-      _timeRemaining = 'Ended';
+      _timeRemaining.value = 'Ended';
       _countdownTimer?.cancel();
       return;
     }
@@ -55,7 +54,7 @@ class _WarScreenState extends State<WarScreen> {
     final days = difference.inDays;
     final hours = difference.inHours % 24;
     final minutes = difference.inMinutes % 60;
-    _timeRemaining = 'Ends in  ${days}d ${hours}h ${minutes}m';
+    _timeRemaining.value = 'Ends in  ${days}d ${hours}h ${minutes}m';
   }
 
   @override
@@ -163,7 +162,10 @@ class _WarScreenState extends State<WarScreen> {
                       children: [
                         const Icon(Icons.timer, color: AppColors.info, size: 16),
                         const SizedBox(width: 4),
-                        Text(_timeRemaining, style: const TextStyle(color: AppColors.info, fontWeight: FontWeight.bold)),
+                        ValueListenableBuilder<String>(
+                          valueListenable: _timeRemaining,
+                          builder: (context, value, _) => Text(value, style: const TextStyle(color: AppColors.info, fontWeight: FontWeight.bold)),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),

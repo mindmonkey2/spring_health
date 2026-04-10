@@ -16,7 +16,7 @@ class AiCoachService {
   AiCoachService._internal({FirebaseFirestore? db})
     : _db = db ?? FirebaseFirestore.instance {
     _model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash-preview-04-17',
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
         temperature: 0.4,

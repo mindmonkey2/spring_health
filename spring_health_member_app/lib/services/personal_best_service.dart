@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/personal_best_model.dart';
+import '../services/gamification_service.dart';
 
 /// XP constants for personal best logging
 class PersonalBestXP {
@@ -97,7 +98,7 @@ class PersonalBestService {
       });
 
       // Award XP to main gamification document
-      await _awardXP(uid, xpEarned);
+      await GamificationService.instance.processEvent('personalbest', uid);
 
       // Check if daily checklist is complete → bonus XP
       final bonusXp = await _checkDailyChecklist(uid);
@@ -106,14 +107,6 @@ class PersonalBestService {
       debugPrint('Error logging personal best: $e');
       rethrow;
     }
-  }
-
-  /// Awards XP to the gamification/{uid} document
-  Future<void> _awardXP(String uid, int xp) async {
-    await _gamificationRef(uid).doc(uid).set({
-      'xp': FieldValue.increment(xp),
-      'lastUpdated': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
   }
 
   /// Checks if all 6 core exercises logged today → awards checklist bonus once

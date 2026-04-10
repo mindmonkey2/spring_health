@@ -54,16 +54,19 @@ class AnnouncementModel {
   }
 
   static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    return DateTime.now();
+    return switch (value) {
+      Timestamp t => t.toDate(),
+      DateTime d => d,
+      _ => DateTime.now(),
+    };
   }
 
   static DateTime? _toDateTimeNullable(dynamic value) {
-    if (value == null) return null;
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    return null;
+    return switch (value) {
+      Timestamp t => t.toDate(),
+      DateTime d => d,
+      _ => null,
+    };
   }
 
   // ✅ Convert to Map for Firestore

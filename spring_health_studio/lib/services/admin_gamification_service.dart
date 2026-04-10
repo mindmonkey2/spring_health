@@ -22,15 +22,29 @@ class AdminGamificationService {
     if (snap.docs.isEmpty) return [];
 
     // Join: gamification doc id == members doc id
-    final memberDocs = await Future.wait(
-      snap.docs.map((d) => _db.collection('members').doc(d.id).get()),
-    );
+    final memberIds = snap.docs.map((d) => d.id).toList();
+    final memberDocsMap = <String, DocumentSnapshot<Map<String, dynamic>>>{};
+
+    // Firestore whereIn limit is 30
+    for (var i = 0; i < memberIds.length; i += 30) {
+      final chunk = memberIds.sublist(
+        i,
+        i + 30 > memberIds.length ? memberIds.length : i + 30,
+      );
+      final memberSnap = await _db
+          .collection('members')
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      for (final doc in memberSnap.docs) {
+        memberDocsMap[doc.id] = doc;
+      }
+    }
 
     final entries = <AdminLeaderboardEntry>[];
     for (var i = 0; i < snap.docs.length; i++) {
       final gDoc = snap.docs[i];
       final g = gDoc.data();
-      final m = memberDocs[i].data();
+      final m = memberDocsMap[gDoc.id]?.data();
 
       // Branch filter — in-memory to avoid composite index requirement
       if (branch != null && (m?['branch'] as String?) != branch) continue;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../widgets/goal_set_sheet.dart';
+import '../../services/firebase_auth_service.dart';
 
 class MemberGoalScreen extends StatefulWidget {
   const MemberGoalScreen({super.key});
@@ -14,6 +14,15 @@ class MemberGoalScreen extends StatefulWidget {
 
 class _MemberGoalScreenState extends State<MemberGoalScreen> {
   String? _selectedGoal;
+  String? _memberId;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseAuthService.instance.getCurrentMemberId().then((id) {
+      if (mounted) setState(() => _memberId = id);
+    });
+  }
 
   final List<Map<String, dynamic>> _goals = [
     {'id': 'weight_loss', 'title': 'Weight Loss', 'icon': Icons.monitor_weight_outlined},
@@ -27,8 +36,7 @@ class _MemberGoalScreenState extends State<MemberGoalScreen> {
   void _openGoalSetSheet() {
     if (_selectedGoal == null) return;
 
-    final authUid = FirebaseAuth.instance.currentUser?.uid;
-    if (authUid == null) {
+    if (_memberId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error: Not authenticated')),
       );
@@ -41,7 +49,7 @@ class _MemberGoalScreenState extends State<MemberGoalScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return GoalSetSheet(
-          authUid: authUid,
+          authUid: _memberId!,
           primaryGoal: _selectedGoal!,
           createdBy: 'member',
         );

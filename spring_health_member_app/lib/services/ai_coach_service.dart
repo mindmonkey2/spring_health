@@ -597,7 +597,7 @@ Use Indian foods exclusively or predominantly:
     // 2. Build context
     final context = await _buildMemberContext(memberId);
 
-    final recentRpe = await RpeService.instance.getRecentRpe(limit: 5);
+    final recentRpe = await RpeService.instance.getRecentRpe(memberId: memberId, limit: 5);
     String rpeContext = '';
     if (recentRpe.isNotEmpty) {
       final values = recentRpe.map((e) => e['rpe'] as int).toList();

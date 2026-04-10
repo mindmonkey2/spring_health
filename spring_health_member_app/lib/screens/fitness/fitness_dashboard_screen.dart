@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/fitness_stats_model.dart';
@@ -33,24 +33,29 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
-  late final Stream<QuerySnapshot>? _sessionStream;
+  Stream<QuerySnapshot>? _sessionStream;
+  String? _memberId;
 
   @override
   void initState() {
     super.initState();
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) {
-      _sessionStream = FirebaseFirestore.instance
-          .collection('sessions')
-          .where('memberAuthUid', isEqualTo: uid)
-          .where('status', whereNotIn: ['complete', 'cancelled'])
-          .orderBy('status')
-          .orderBy('createdAt', descending: true)
-          .limit(1)
-          .snapshots();
-    } else {
-      _sessionStream = null;
-    }
+    FirebaseAuthService.instance.getCurrentMemberId().then((id) {
+      if (mounted) {
+        setState(() {
+          _memberId = id;
+          if (_memberId != null) {
+            _sessionStream = FirebaseFirestore.instance
+                .collection('sessions')
+                .where('memberAuthUid', isEqualTo: _memberId)
+                .where('status', whereNotIn: ['complete', 'cancelled'])
+                .orderBy('status')
+                .orderBy('createdAt', descending: true)
+                .limit(1)
+                .snapshots();
+          }
+        });
+      }
+    });
     _checkAndLoad();
   }
 

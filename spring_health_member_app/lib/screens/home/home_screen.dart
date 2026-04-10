@@ -391,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Goal Progress Banner ──────────────────────────────────────────────────
 
   Widget _buildGoalProgressBanner() {
-    final uid = _authService.currentUser?.uid;
+    final uid = _memberId;
     if (uid == null) return const SizedBox.shrink();
 
     return StreamBuilder<DocumentSnapshot>(

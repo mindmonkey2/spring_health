@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../services/rpe_service.dart';
+import '../services/firebase_auth_service.dart';
 
 class RpeRatingSheet extends StatefulWidget {
   final String sessionId;
@@ -30,7 +31,11 @@ class _RpeRatingSheetState extends State<RpeRatingSheet> {
     if (_submitting) return;
     setState(() => _submitting = true);
     try {
+      final memberId = await FirebaseAuthService.instance.getCurrentMemberId();
+      if (memberId == null) return;
+
       await RpeService.instance.submitRpe(
+        memberId: memberId,
         rpe: rpe,
         label: label,
         sessionId: widget.sessionId,

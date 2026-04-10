@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class RpeService {
   static final RpeService instance = RpeService._internal();
   RpeService._internal();
 
-  String get _uid => FirebaseAuth.instance.currentUser!.uid;
-
   Future<void> submitRpe({
+    required String memberId,
     required int rpe,
     required String label,
     required String sessionId,
@@ -18,7 +16,7 @@ class RpeService {
     // Write to rpeLog/{uid}/entries
     final entryRef = FirebaseFirestore.instance
         .collection('rpeLog')
-        .doc(_uid)
+        .doc(memberId)
         .collection('entries')
         .doc();
 
@@ -36,7 +34,7 @@ class RpeService {
     // Compute rolling average of last 5 entries
     final recent = await FirebaseFirestore.instance
         .collection('rpeLog')
-        .doc(_uid)
+        .doc(memberId)
         .collection('entries')
         .orderBy('submittedAt', descending: true)
         .limit(5)
@@ -50,17 +48,17 @@ class RpeService {
     final average = values.reduce((a, b) => a + b) / values.length;
 
     // Update aiPlans/{uid} with rolling average
-    await FirebaseFirestore.instance.collection('aiPlans').doc(_uid).update({
+    await FirebaseFirestore.instance.collection('aiPlans').doc(memberId).update({
       'lastAverageRpe': double.parse(average.toStringAsFixed(2)),
       'lastRpeSubmittedAt': Timestamp.now(),
     });
   }
 
   // Returns the last N RPE entries for use in plan generation context
-  Future<List<Map<String, dynamic>>> getRecentRpe({int limit = 5}) async {
+  Future<List<Map<String, dynamic>>> getRecentRpe({required String memberId, int limit = 5}) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('rpeLog')
-        .doc(_uid)
+        .doc(memberId)
         .collection('entries')
         .orderBy('submittedAt', descending: true)
         .limit(limit)

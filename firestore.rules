@@ -237,8 +237,10 @@ service cloud.firestore {
 
     // ── FITNESS DATA ───────────────────────────────────────
     match /fitnessData/{dataId} {
-      allow read: if isOwner() || isTrainer() || isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow read: if isOwner() || isTrainer() || (isSignedIn() && 'memberId' in resource.data && isMemberOwner(resource.data.memberId));
+      allow create: if isSignedIn() && 'memberId' in request.resource.data && isMemberOwner(request.resource.data.memberId);
+      allow update: if isSignedIn() && 'memberId' in resource.data && isMemberOwner(resource.data.memberId) && 'memberId' in request.resource.data && isMemberOwner(request.resource.data.memberId);
+      allow delete: if isSignedIn() && 'memberId' in resource.data && isMemberOwner(resource.data.memberId);
     }
 
     // ── BODY METRICS ───────────────────────────────────────

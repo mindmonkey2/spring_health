@@ -1,6 +1,6 @@
 # Spring Health Applications — Engineering Memory Document
-**Last Updated:** March 25, 2026
-**Admin App:** 100 | **Member App:** 101
+**Last Updated:** April 14, 2026
+**Admin App:** ~97% (53/55 features) | **Member App:** ~95% (74 features)
 
 ---
 
@@ -88,6 +88,11 @@ Fixed: March 25, 2026
 `healthProfiles`, `aiPlans/{memberId}/current`, `wearableSnapshots/{memberId}/daily/{date}`,
 `bodyMetricsLogs/{memberId}/logs`, `fitnessTests/{memberId}/tests`
 
+  weeklywars/{warId}                    — WeeklyWarModel
+  weeklywars/{warId}/entries/{memberId} — WarEntryModel
+  gamification_events                   — cross-app loyalty + war XP bridge
+                                          (fired by Studio, consumed by Member)
+
 ### 1.6 MemberModel Final Shape
 
 **Identity:** `id`, `name`, `phone`, `email` (nullable), `dateOfBirth` (nullable), `photoUrl` (nullable)
@@ -133,7 +138,7 @@ dependencies:
 10. **Diet Plans Manager** — Configure diet plans linked to members
 11. **Clash Wars Manager** — Configure fitness challenges with XP rewards
 
-### 2.3 Key Implemented Features (49/53)
+### 2.3 Key Implemented Features (53/55)
 
 1. Email-password authentication with role lookup
 2. Owner Dashboard with branch filter, revenue, stats, reminders badges
@@ -184,7 +189,10 @@ dependencies:
 47. Model factory alignment (fromMap consolidation)
 48. Null-safe ReminderService with DOB handling
 49. APK build fixes (Gradle 8.6→8.9.1, AGP, Kotlin 2.1.0)
-50. Implemented TrainerScanScreen navigation from TrainerMemberDetailScreen with pre-filled member data (March 2026)
+50. WarAdminScreen — Start War (exercise from warCount % 7 rotation), Complete War (WriteBatch rank assignment, XP via gamification_events), confirmation dialog, loading overlay, Week number display
+51. AdminGamificationDashboardScreen — Weekly Wars tile added, navigates to WarAdminScreen
+52. AnnouncementModel — targetBranches (List<String>) and createdByUid (String) fields added to model, toMap, fromMap, copyWith
+53. CreateAnnouncementScreen — refactored to use AnnouncementService (was raw Firestore). targetBranches and createdByUid now persisted.
 
 **Remaining High-Priority:**
 - Online payment gateway (Razorpay) for member renewals
@@ -258,7 +266,7 @@ FirebaseFirestore.instance
 **`firebase_auth_service.dart` `checkMemberExists()`** looks up by phone,
 returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
 
-### 3.4 Implemented Features (55/55 core flows + AI Phase 1-3)
+### 3.4 Implemented Features (74 features)
 
 **Auth (Phase 1):**
 1. Phone OTP authentication via FirebaseAuthService singleton
@@ -419,6 +427,60 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
     home screen goal progress card, trainer dashboard chips,
     shared GoalSetSheet widget.
     flutter analyze 0 issues both apps.
+
+56. GamificationService.processEvent() — single XP entry point.
+    13 event types: checkin(20), workout(30), personalbest(50),
+    streakmilestone(100), loyalty3m(100), loyalty6m(250), loyalty1y(500),
+    warparticipate(20), wartop3(150), warwinner(500),
+    challengewin(20), challengelose(-10), challengeparticipate(5)
+57. BadgeService — 11 badge definitions with checkAndAward().
+    Auto-invoked after every processEvent call.
+    Badges: firstcheckin, streak7, streak30, xp500, xp2000,
+    workouts10, workouts50, pbfirst, warwin, loyalty3m, loyalty1y
+58. listenForPendingLoyaltyEvents() — called from HomeScreen initState.
+    Listens to gamification_events where processed != true,
+    fires processEvent, marks processed: true
+59. RejoinMemberScreen (Studio) — fires loyalty milestone to
+    gamification_events collection on rejoin based on months active
+60. MemberModel.loyaltyMilestonesAwarded — List<String> field added
+    to track which milestones have been awarded (prevents double-award)
+61. WeeklyWarModel + WarEntryModel — fromMap/toMap with _parseDate
+    helper that handles Timestamp, ISO-8601 String, and DateTime.
+    prizePool defaults to {} when null.
+62. WeeklyWarService — 6 methods: getActiveWar, recordWorkoutEntry,
+    getWarLeaderboard, getMemberEntry, getWarHistory, completeWar.
+    7-week rotating exercise schedule via warCount % 7.
+63. WarScreen — 3-tab UI (THIS WEEK / 1v1 DUELS / HISTORY).
+    THIS WEEK: active war banner, countdown (ValueNotifier — no setState),
+    prize pool chips, member entry card, live leaderboard StreamBuilder.
+    1v1 DUELS: placeholder (deferred to Spring Social sprint).
+    HISTORY: past wars via getWarHistory.
+64. WorkoutLoggerScreen — calls WeeklyWarService.recordWorkoutEntry
+    per exercise after workout save (old dead batch call removed)
+65. rpe_service.dart — memberId added to submitRpe/getRecentRpe
+    method signatures. auth.uid removed as Firestore key.
+66. member_goal_screen.dart — _memberId loaded in initState,
+    auth.uid replaced in all Firestore paths
+67. fitness_dashboard_screen.dart — _memberId loaded in initState,
+    sessions query uses memberId not auth.uid. late final removed
+    (async load). Unused firebase_auth import removed.
+68. home_screen.dart line 394 — memberGoals query now uses
+    existing _memberId state variable (not auth.uid)
+69. rpe_rating_sheet.dart + ai_coach_service.dart — updated to pass
+    memberId to RpeService.submitRpe / getRecentRpe (caller fix)
+70. main_screen.dart — FCM token registration wired.
+    NotificationService.saveFCMToken(memberId) called after memberId
+    resolves in initState. Guard: only fires when memberId != null.
+71. ai_coach_service.dart — Gemini model updated to
+    gemini-2.5-flash-preview-04-17 (April 2026)
+72. personal_best_service.dart — direct _awardXP() call replaced with
+    GamificationService.instance.processEvent('personalbest', memberId).
+    _awardXP method fully removed.
+73. HealthService — HealthDataType.DISTANCE_WALKING_RUNNING removed
+    from all lists. Was causing repeated "Not available on platform" errors.
+74. WeeklyWarModel.fromMap — _parseDate helper added.
+    Handles Timestamp, ISO-8601 String, DateTime. prizePool null-safe.
+    Fixes 4 previously failing tests. Test suite now 38/38 passing.
 
 **AI Health Foundation — Phase 1 (March 2026):**
 - HealthProfileModel, HealthProfileService, HealthProfileScreen
@@ -715,6 +777,53 @@ Planned features: member list by branch, attendance marking, workout assignment,
 - compileSdk/targetSdk: 35
 - `flutter analyze` must return 0 issues before any `git push`
 
+24. processEvent is the ONLY XP entry point — never call awardXP directly
+    - GamificationService.processEvent() is the single XP gate
+    - All services (WorkoutService, PersonalBestService, QrCheckInScreen,
+      WeeklyWarService) must route through processEvent
+    - Direct awardXP calls are an architectural violation
+    - Fixed Thread 15
+
+25. WeeklyWarService.recordWorkoutEntry called per exercise after save
+    - NOT as a batch call at the end of the workout
+    - One call per exercise entry in the completed workout
+    - Old batch call pattern was dead code — removed Thread 13
+
+26. War exercise rotation uses warCount % 7, NOT getWeekNumber % 7
+    - getWeekNumber helper was deleted — do not re-add it
+    - warCount comes from counting existing weeklywars documents
+    - Fixed Thread 13. getWeekNumber deleted Thread 13.
+
+27. Gemini model string must be 'gemini-2.5-flash-preview-04-17'
+    - As of April 2026 this is the correct model
+    - gemini-2.0-flash is deprecated and returns model unavailable error
+    - Check both ai_coach_service.dart and trainer_ajax_service.dart
+      after any Jules AI task — Jules may revert to old model name
+    - Fixed Thread 15
+
+28. FCM token registration happens once in main_screen.dart
+    - NotificationService.saveFCMToken(memberId) called after
+      memberId resolves in initState
+    - Guard with null check: if (memberId != null)
+    - Do NOT call saveFCMToken before memberId is resolved
+    - Fixed Thread 15
+
+29. WeeklyWarModel.fromMap must use _parseDate for all date fields
+    - Date fields (startDate, endDate, createdAt) can arrive as
+      Timestamp, ISO-8601 String, or DateTime from Firestore/tests
+    - Always use the _parseDate(dynamic value) helper
+    - prizePool must default to {} when null, never throw
+    - Fixed Thread 15
+
+30. auth.uid must NEVER be used as a Firestore document key
+    - Affects: rpe_service, member_goal_screen, fitness_dashboard_screen,
+      home_screen, and any future screens/services
+    - memberId = Firestore document ID (admin-assigned)
+    - auth.uid = Firebase Auth UID — different values, different purposes
+    - Pattern: load memberId via FirebaseAuthService.instance
+      .getCurrentMemberId() in initState, guard all Firestore calls
+    - Fixed Thread 15
+
 ### Code Review Checklist (Pre-PR)
 
 - [ ] `flutter analyze` returns 0 issues
@@ -733,6 +842,9 @@ Planned features: member list by branch, attendance marking, workout assignment,
 - [ ] Firestore role strings verified as Title Case after Jules PRs
 - [ ] Member-side rules use `isSignedIn()` not `isMember()`
 - [ ] No Firestore indexes deleted via CLI prompt
+- [ ] processEvent used for all XP — no direct awardXP calls
+- [ ] Gemini model string is gemini-2.5-flash-preview-04-17
+- [ ] No auth.uid used as Firestore document keys
 
 ---
 

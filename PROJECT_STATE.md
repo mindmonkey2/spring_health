@@ -33,7 +33,7 @@
   - **Dashboard**: Main Screen, Home (`screens/home/`), Settings (`screens/settings/`).
   - **Profile Management**: Profile, Membership Info, Settings Tile (`screens/profile/`).
   - **Fitness & Tracking**: Body Metrics, Fitness Dashboard, Workout Logger, History, Detail (`screens/fitness/`, `screens/workout/`). Health Profile Screen (HealthProfileModel with BP classification and BMI calculation, BodyMetricsLogModel for time-series metrics tracking, FitnessTestModel with 8-test battery and auto-derived fitness level, HealthProfileScreen with two tabs, BP warning system, Trend charts).
-  - **Engagement**: Gamification (Leaderboard, XP) (`screens/gamification/`), Clash Screen (`screens/clash/`), Announcements (`screens/announcements/`), Notifications (`screens/notifications/`), Social Coming Soon (`screens/social/`).
+  - **Engagement**: Gamification (Leaderboard, XP) (`screens/gamification/`), Clash Wars (Weekly Wars UI, 3-tabs, WeeklyWarModel, WeeklyWarService) (`screens/war/war_screen.dart`), Announcements (`screens/announcements/`), Notifications (`screens/notifications/`), Social Coming Soon (`screens/social/`).
   - **Phase 3 — AI Personal Trainer Engine**:
     - WearableSnapshotModel: full daily wearable data snapshot with auto-derived recoveryStatus and sleepQuality
     - WearableSnapshotService: reads 25 health data types from Health Connect / HealthKit, writes daily snapshot to Firestore, auto-updates HealthProfileModel with latest vitals
@@ -89,6 +89,9 @@ Mapped from `services/` across both applications:
 - `trainers`
 - `users`
 - `workouts`
+- `weeklywars/{warId}`
+- `weeklywars/{warId}/entries/{memberId}`
+- `gamification_events`
 
 ## 3. Pending/Stubbed Features
 
@@ -100,7 +103,16 @@ Resolved in Thread 12:
     trainer write scope hardened
   ✓ Privacy Policy + ToS — url_launcher live (springhealthapp.in)
   ✓ member_ai_plan_screen.dart — Trainer Override screen (T11 carry-forward)
-  ✓ Weekly Wars UI — war_screen.dart 3-tab implementation complete
+Resolved in Thread 13:
+  ✓ T1 GamificationService.processEvent single XP entry point,
+    BadgeService 11 badges, loyalty hooks Thread 13
+  ✓ T2 WeeklyWarModel + WarEntryModel + WeeklyWarService
+    6 methods, 7-week schedule Thread 13
+  ✓ T3 WarScreen 3-tab UI THIS WEEK / 1v1 DUELS / HISTORY Thread 13
+  ✓ T4 Studio WarAdminScreen + Weekly Wars tile in
+    AdminGamificationDashboardScreen Thread 13
+  ✓ T5 WorkoutLogger → WeeklyWarService.recordWorkoutEntry
+    per exercise Thread 13
 
 Resolved in Thread 13_2:
   ✓ Thread 13_2 — Firestore schema:
@@ -145,6 +157,16 @@ Resolved in Thread 13_2:
     shared GoalSetSheet widget.
     flutter analyze 0 issues both apps.
 
+Resolved in Thread 15 (System Health Fixes):
+  ✓ auth.uid replaced with memberId in rpe_service, member_goal_screen,
+    fitness_dashboard_screen, home_screen Thread 15
+  ✓ FCM token registration wired in main_screen.dart Thread 15
+  ✓ Gemini model updated to gemini-2.5-flash-preview-04-17 Thread 15
+  ✓ personal_best_service processEvent routing Thread 15
+  ✓ AnnouncementModel targetBranches + createdByUid fields Thread 15
+  ✓ WeeklyWarModel.fromMap date parsing fixed, 4 tests resolved Thread 15
+  ✓ Member app tests: 38/38 passing Thread 15
+
 STILL PENDING:
   - Class Booking / Scheduling
   - Razorpay (do not start without payment contract)
@@ -163,7 +185,9 @@ Evaluating adherence to the directives outlined in `AGENTS.md`:
 - **State Management & ValueNotifier (`AGENTS.md` 4)**: The directive strictly prohibits calling `setState()` at the root of complex widget trees and enforces the use of `ValueNotifier` for temporal state/animations.
   - *Current Status*: A grep analysis shows `ValueNotifier` is being correctly utilized in some areas, specifically `spring_health_member_app/lib/screens/clash/clash_screen.dart` indicating `// ✅ FIX: ValueNotifier so only the countdown Text rebuilds, not the whole screen`. However, there are still hundreds of `setState` calls scattered throughout both the Member App and the Studio Admin App, spanning dashboards, list screens, and authentication flows, which may not strictly adhere to the isolation requirement or might be functioning at root levels.
 - **Strict Code Generation Rules (`AGENTS.md` 3)**: Code MUST pass `flutter analyze` with 0 errors and 0 warnings.
-  - *Current Status*: **CRITICAL FAILURE**. `flutter analyze spring_health_member_app` returns 8,304 issues. `flutter analyze spring_health_studio` returns 10,691 issues. Most issues relate to undefined identifiers, undefined classes/methods, uri not existing (like `cloud_firestore`, `flutter/material.dart`, etc.), and const initialization errors. This suggests a severely broken build state or missing dependency fetching steps (`flutter pub get`).
+  - *Current Status*: `flutter analyze`: Both apps at 0 issues as of April 2026.
+    Member app test suite: 38/38 passing.
+    Studio app test suite: 28/28 passing.
 - **Deprecations/Print Statements**: Did not deeply verify all occurrences, but given the severe compilation errors, the general health of the codebase requires an immediate dependency resolution and code correction pass.
 
 ## 6. Known Rules

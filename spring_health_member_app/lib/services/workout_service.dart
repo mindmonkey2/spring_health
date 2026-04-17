@@ -4,6 +4,7 @@ import '../models/workout_model.dart';
 import '../models/notification_model.dart';
 import 'gamification_service.dart';
 import 'in_app_notification_service.dart';
+import 'firebase_auth_service.dart';
 
 class WorkoutService {
   final _db = FirebaseFirestore.instance;
@@ -116,16 +117,19 @@ class WorkoutService {
           });
 
           // Write in-app notification
-          await _notifService.addNotificationsForMemberBatch(
-            uid: memberId,
-            notifications: [
-              NotificationData(
-                type: NotificationType.gym,
-                title: 'Personal Best!',
-                body: 'New PB: ${maxValue.toInt()}${isWeight ? 'kg' : 'reps'} on $exerciseName',
-              ),
-            ],
-          );
+          final notifUid = FirebaseAuthService.instance.currentUser?.uid;
+          if (notifUid != null) {
+            await _notifService.addNotificationsForMemberBatch(
+              uid: notifUid,
+              notifications: [
+                NotificationData(
+                  type: NotificationType.gym,
+                  title: 'Personal Best!',
+                  body: 'New PB: ${maxValue.toInt()}${isWeight ? 'kg' : 'reps'} on $exerciseName',
+                ),
+              ],
+            );
+          }
         }
       }
     }

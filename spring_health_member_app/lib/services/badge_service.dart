@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'in_app_notification_service.dart';
 import '../models/notification_model.dart';
+import 'firebase_auth_service.dart';
 
 class BadgeService {
   static final BadgeService instance = BadgeService._internal();
@@ -93,10 +94,13 @@ class BadgeService {
         metadata: {'badgeId': badge['id']},
       )).toList();
 
-      await InAppNotificationService().addNotificationsForMemberBatch(
-        uid: memberId,
-        notifications: notifications,
-      );
+      final notifUid = FirebaseAuthService.instance.currentUser?.uid;
+      if (notifUid != null) {
+        await InAppNotificationService().addNotificationsForMemberBatch(
+          uid: notifUid,
+          notifications: notifications,
+        );
+      }
     }
   }
 }

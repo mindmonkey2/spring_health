@@ -5,6 +5,7 @@ import '../models/gamification_model.dart';
 import '../models/notification_model.dart';
 import 'in_app_notification_service.dart';
 import 'badge_service.dart';
+import 'firebase_auth_service.dart';
 
 class GamificationService {
   static final GamificationService instance = GamificationService._internal();
@@ -413,10 +414,13 @@ class GamificationService {
       debugPrint(' Badge notification written: ${badge.title}');
     }
 
-    await notifService.addNotificationsForMemberBatch(
-      uid: memberId,
-      notifications: notifications,
-    );
+    final notifUid = FirebaseAuthService.instance.currentUser?.uid;
+    if (notifUid != null) {
+      await notifService.addNotificationsForMemberBatch(
+        uid: notifUid,
+        notifications: notifications,
+      );
+    }
 
     return newlyEarned;
   }

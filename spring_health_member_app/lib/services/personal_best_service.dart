@@ -98,7 +98,7 @@ class PersonalBestService {
       });
 
       // Award XP to main gamification document
-      await GamificationService.instance.processEvent('personalbest', uid);
+      await GamificationService.instance.processEvent('personal_best', uid);
 
       // Check if daily checklist is complete → bonus XP
       final bonusXp = await _checkDailyChecklist(uid);

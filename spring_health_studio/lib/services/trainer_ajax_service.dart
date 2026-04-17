@@ -227,7 +227,7 @@ class TrainerAjaxService {
       await database.collection('personalbests').doc(mId).set(newPbs, SetOptions(merge: true));
     }
 
-    await database.collection('gamificationEvents').add({
+    await database.collection('gamification_events').add({
       'memberId': mId,
       'type': 'trainer_session_complete',
       'xp': 100,

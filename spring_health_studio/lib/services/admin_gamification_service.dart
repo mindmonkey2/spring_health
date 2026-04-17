@@ -25,16 +25,21 @@ class AdminGamificationService {
     final memberIds = snap.docs.map((d) => d.id).toList();
     final memberDocsMap = <String, DocumentSnapshot<Map<String, dynamic>>>{};
 
-    // Firestore whereIn limit is 30
+    // Parallelize chunked queries - Firestore whereIn limit is 30
+    final memberFutures = <Future<QuerySnapshot<Map<String, dynamic>>>>[];
     for (var i = 0; i < memberIds.length; i += 30) {
       final chunk = memberIds.sublist(
         i,
         i + 30 > memberIds.length ? memberIds.length : i + 30,
       );
-      final memberSnap = await _db
+      memberFutures.add(_db
           .collection('members')
           .where(FieldPath.documentId, whereIn: chunk)
-          .get();
+          .get());
+    }
+
+    final memberSnapshots = await Future.wait(memberFutures);
+    for (final memberSnap in memberSnapshots) {
       for (final doc in memberSnap.docs) {
         memberDocsMap[doc.id] = doc;
       }

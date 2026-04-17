@@ -3,20 +3,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth;
+
+  AuthService({FirebaseAuth? auth})
+      : _auth = auth ?? FirebaseAuth.instance;
 
   User? get currentUser => _auth.currentUser;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  Future<UserCredential> signInWithEmailPassword(String email, String password) async {
+  Future<User?> signInWithEmailAndPassword(String email, String password) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      return credential.user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
+    } catch (e) {
+      throw 'An unexpected error occurred: $e';
     }
   }
 
@@ -42,7 +48,6 @@ class AuthService {
 
       if (userDoc.exists) {
         final userData = userDoc.data()!;
-        // ✅ FIXED: trim + case-insensitive
         role   = (userData['role']   as String? ?? '').trim();
         name   =  userData['name']   as String?;
         branch =  userData['branch'] as String?;
@@ -53,7 +58,6 @@ class AuthService {
       // ── If no users doc, still allow trainer login ──────────────
 
       if (role.toLowerCase() == 'trainer' || role.isEmpty) {
-        // ✅ FIXED: query trainers regardless of users doc state
         final trainerQuery = await FirebaseFirestore.instance
         .collection('trainers')
         .where('authUid', isEqualTo: firebaseUid)
@@ -67,10 +71,9 @@ class AuthService {
         final trainerData = trainerQuery.docs.first.data();
         trainerId = trainerQuery.docs.first.id;
 
-        // Backfill from trainers doc if users doc had no name/branch
         name   ??= trainerData['name']   as String?;
         branch ??= trainerData['branch'] as String?;
-        role     = 'Trainer'; // normalize casing
+        role     = 'Trainer';
       }
 
       return UserModel(
@@ -79,7 +82,7 @@ class AuthService {
         role:      role,
         name:      name,
         branch:    branch,
-        trainerId: trainerId,  // ✅ now guaranteed non-null for trainers
+        trainerId: trainerId,
         createdAt: createdAt,
       );
     } on FirebaseAuthException catch (e) {

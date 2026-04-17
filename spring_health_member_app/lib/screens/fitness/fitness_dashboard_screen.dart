@@ -34,7 +34,6 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   Stream<QuerySnapshot>? _sessionStream;
-  String? _memberId;
 
   @override
   void initState() {
@@ -42,11 +41,11 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
     FirebaseAuthService.instance.getCurrentMemberId().then((id) {
       if (mounted) {
         setState(() {
-          _memberId = id;
-          if (_memberId != null) {
+          final authUid = FirebaseAuthService.instance.currentUser?.uid;
+          if (authUid != null) {
             _sessionStream = FirebaseFirestore.instance
                 .collection('sessions')
-                .where('memberAuthUid', isEqualTo: _memberId)
+                .where('memberAuthUid', isEqualTo: authUid)
                 .where('status', whereNotIn: ['complete', 'cancelled'])
                 .orderBy('status')
                 .orderBy('createdAt', descending: true)

@@ -1,5 +1,5 @@
 # Spring Health Applications — Engineering Memory Document
-**Last Updated:** April 14, 2026
+**Last Updated:** April 18, 2026
 **Admin App:** ~97% (53/55 features) | **Member App:** ~95% (74 features)
 
 ---
@@ -387,9 +387,10 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
     method signatures. auth.uid removed as Firestore key.
 66. member_goal_screen.dart — _memberId loaded in initState,
     auth.uid replaced in all Firestore paths
-67. fitness_dashboard_screen.dart — _memberId loaded in initState,
-    sessions query uses memberId not auth.uid. late final removed
-    (async load). Unused firebase_auth import removed.
+67. fitnessdashboardscreen.dart authUid (FirebaseAuthService.instance
+    .currentUser?.uid) used for live session Firestore query field
+    'memberAuthUid'. Null guard prevents query when authUid is null.
+    Unused _memberId field removed. flutter analyze 0 issues.
 68. home_screen.dart line 394 — memberGoals query now uses
     existing _memberId state variable (not auth.uid)
 69. rpe_rating_sheet.dart + ai_coach_service.dart — updated to pass
@@ -407,6 +408,17 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
 74. WeeklyWarModel.fromMap — _parseDate helper added.
     Handles Timestamp, ISO-8601 String, DateTime. prizePool null-safe.
     Fixes 4 previously failing tests. Test suite now 38/38 passing.
+75. T14 Bug Sprint — Three surgical fixes applied April 2026:
+    (a) Gamification event string literals corrected to snake_case
+    ('check_in' in qr_checkin_screen.dart, 'personal_best' in
+    personal_best_service.dart) to match GamificationService switch
+    cases — check-in and personal best XP now award correctly.
+    (b) fitnessdashboardscreen.dart live session query fixed to use
+    authUid ('memberAuthUid' field) instead of _memberId (Firestore
+    doc ID). Null guard added. Unused _memberId removed.
+    (c) firestore.rules sessions block write ownership changed from
+    memberId to memberAuthUid == request.auth.uid — eliminates
+    PERMISSION_DENIED on live session create/update.
 66. CSV Export: members_list_screen.dart — real export via share_plus
     + path_provider. Respects active filter via _lastFilteredMembers
     cache. Filename: spring_health_members_{branch}_{YYYY-MM-DD}.csv.
@@ -528,9 +540,10 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
     method signatures. auth.uid removed as Firestore key.
 66. member_goal_screen.dart — _memberId loaded in initState,
     auth.uid replaced in all Firestore paths
-67. fitness_dashboard_screen.dart — _memberId loaded in initState,
-    sessions query uses memberId not auth.uid. late final removed
-    (async load). Unused firebase_auth import removed.
+67. fitnessdashboardscreen.dart authUid (FirebaseAuthService.instance
+    .currentUser?.uid) used for live session Firestore query field
+    'memberAuthUid'. Null guard prevents query when authUid is null.
+    Unused _memberId field removed. flutter analyze 0 issues.
 68. home_screen.dart line 394 — memberGoals query now uses
     existing _memberId state variable (not auth.uid)
 69. rpe_rating_sheet.dart + ai_coach_service.dart — updated to pass
@@ -548,6 +561,17 @@ returns `{'id': doc.id, ...data}` — the `id` is the Firestore document ID.
 74. WeeklyWarModel.fromMap — _parseDate helper added.
     Handles Timestamp, ISO-8601 String, DateTime. prizePool null-safe.
     Fixes 4 previously failing tests. Test suite now 38/38 passing.
+75. T14 Bug Sprint — Three surgical fixes applied April 2026:
+    (a) Gamification event string literals corrected to snake_case
+    ('check_in' in qr_checkin_screen.dart, 'personal_best' in
+    personal_best_service.dart) to match GamificationService switch
+    cases — check-in and personal best XP now award correctly.
+    (b) fitnessdashboardscreen.dart live session query fixed to use
+    authUid ('memberAuthUid' field) instead of _memberId (Firestore
+    doc ID). Null guard added. Unused _memberId removed.
+    (c) firestore.rules sessions block write ownership changed from
+    memberId to memberAuthUid == request.auth.uid — eliminates
+    PERMISSION_DENIED on live session create/update.
 
 **AI Health Foundation — Phase 1 (March 2026):**
 - HealthProfileModel, HealthProfileService, HealthProfileScreen
@@ -883,6 +907,28 @@ Planned features: member list by branch, attendance marking, workout assignment,
       .getCurrentMemberId() in initState, guard all Firestore calls
     - Fixed Thread 15
 
+31. GamificationService event string literals must be exact snake_case
+    - GamificationService.processEvent switch cases are 'check_in',
+      'personal_best', 'workout', 'streak_milestone', etc.
+    - Any mismatch (e.g., 'checkin', 'personalbest') falls through to
+      default and awards 0 XP silently — extremely hard to debug.
+    - Always verify event string literals match the switch cases exactly
+      before merging any change to qr_checkin_screen.dart,
+      personal_best_service.dart, or any file that calls processEvent.
+    - Fixed Thread 14.
+
+32. sessions collection uses memberAuthUid for ownership, not memberId
+    - Live session documents written by the member app store the Firebase
+      Auth UID in 'memberAuthUid', not the Firestore document ID.
+    - firestore.rules sessions write rules must check
+      resource.data.memberAuthUid == request.auth.uid.
+    - fitnessdashboardscreen.dart must query .where('memberAuthUid',
+      isEqualTo: authUid) where authUid comes from
+      FirebaseAuthService.instance.currentUser?.uid.
+    - Never use _memberId (the Firestore doc ID) for the sessions query
+      or the sessions write ownership check.
+    - Fixed Thread 14.
+
 ### Build and Deployment Safeguards
 
 - AGP 8.9.1 (required by `androidx.browser:browser:1.9.0`)
@@ -938,6 +984,28 @@ Planned features: member list by branch, attendance marking, workout assignment,
       .getCurrentMemberId() in initState, guard all Firestore calls
     - Fixed Thread 15
 
+31. GamificationService event string literals must be exact snake_case
+    - GamificationService.processEvent switch cases are 'check_in',
+      'personal_best', 'workout', 'streak_milestone', etc.
+    - Any mismatch (e.g., 'checkin', 'personalbest') falls through to
+      default and awards 0 XP silently — extremely hard to debug.
+    - Always verify event string literals match the switch cases exactly
+      before merging any change to qr_checkin_screen.dart,
+      personal_best_service.dart, or any file that calls processEvent.
+    - Fixed Thread 14.
+
+32. sessions collection uses memberAuthUid for ownership, not memberId
+    - Live session documents written by the member app store the Firebase
+      Auth UID in 'memberAuthUid', not the Firestore document ID.
+    - firestore.rules sessions write rules must check
+      resource.data.memberAuthUid == request.auth.uid.
+    - fitnessdashboardscreen.dart must query .where('memberAuthUid',
+      isEqualTo: authUid) where authUid comes from
+      FirebaseAuthService.instance.currentUser?.uid.
+    - Never use _memberId (the Firestore doc ID) for the sessions query
+      or the sessions write ownership check.
+    - Fixed Thread 14.
+
 ### Code Review Checklist (Pre-PR)
 
 - [ ] `flutter analyze` returns 0 issues
@@ -980,4 +1048,4 @@ Planned features: member list by branch, attendance marking, workout assignment,
 
 *Document Maintenance: Update after every bug fix, feature addition, or architectural decision.*
 *New rules added to Section 7 prevent future regressions.*
-*Last updated: March 25, 2026 — Added rules 16–20 (Firestore rules casing, deploy pitfalls, member lookup pattern, phone OTP users architecture)*
+*Last updated: April 18, 2026 — Added rules 31–32, Thread 14 T14 bug sprint.*

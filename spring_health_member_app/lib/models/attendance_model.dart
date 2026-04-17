@@ -188,7 +188,9 @@ class AttendanceModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
+
     return other is AttendanceModel &&
+        other.runtimeType == runtimeType &&
         other.id == id &&
         other.memberId == memberId &&
         other.memberName == memberName &&

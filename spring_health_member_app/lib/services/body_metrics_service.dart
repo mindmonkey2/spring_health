@@ -30,7 +30,7 @@ class BodyMetricsService {
         .snapshots()
         .map(
           (snap) => snap.docs
-              .map((d) => BodyMetricsModel.fromFirestore(d.data(), d.id))
+              .map((d) => BodyMetricsModel.fromMap(d.data(), d.id))
               .toList(),
         );
   }

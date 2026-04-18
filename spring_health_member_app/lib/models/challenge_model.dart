@@ -112,7 +112,7 @@ class ChallengeModel {
 
   // ── Serialization ─────────────────────────────────────────────────────────
 
-  factory ChallengeModel.fromFirestore(
+  factory ChallengeModel.fromMap(
     Map<String, dynamic> map,
     String id,
   ) => ChallengeModel(
@@ -137,6 +137,11 @@ class ChallengeModel {
     description: map['description'] as String? ?? '',
     createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
   );
+
+  factory ChallengeModel.fromFirestore(
+    Map<String, dynamic> map,
+    String id,
+  ) => ChallengeModel.fromMap(map, id);
 
   Map<String, dynamic> toMap() => {
     'title': title,
@@ -174,7 +179,7 @@ class ChallengeEntryModel {
     required this.lastUpdated,
   });
 
-  factory ChallengeEntryModel.fromFirestore(
+  factory ChallengeEntryModel.fromMap(
     Map<String, dynamic> map,
     String id,
   ) => ChallengeEntryModel(
@@ -186,6 +191,11 @@ class ChallengeEntryModel {
     score: (map['score'] as num?)?.toInt() ?? 0,
     lastUpdated: (map['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
   );
+
+  factory ChallengeEntryModel.fromFirestore(
+    Map<String, dynamic> map,
+    String id,
+  ) => ChallengeEntryModel.fromMap(map, id);
 
   Map<String, dynamic> toMap() => {
     'challengeId': challengeId,

@@ -19,7 +19,7 @@ class GamificationService {
   Future<MemberGamification> getOrCreate(String memberId) async {
     final doc = await _db.collection('gamification').doc(memberId).get();
     if (doc.exists) {
-      return MemberGamification.fromFirestore(doc);
+      return MemberGamification.fromMap(doc.data() as Map<String, dynamic>, doc.id);
     }
     final empty = MemberGamification.empty(memberId);
     await _db.collection('gamification').doc(memberId).set(empty.toMap());
@@ -244,7 +244,7 @@ class GamificationService {
   // ─────────────────────────────────────────────
   Stream<MemberGamification> stream(String memberId) {
     return _db.collection('gamification').doc(memberId).snapshots().map((doc) {
-      if (doc.exists) return MemberGamification.fromFirestore(doc);
+      if (doc.exists) return MemberGamification.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       return MemberGamification.empty(memberId);
     });
   }

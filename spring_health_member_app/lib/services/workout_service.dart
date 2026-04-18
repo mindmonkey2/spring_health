@@ -105,17 +105,6 @@ class WorkoutService {
           // Award 50 XP
           await _gamificationService.processEvent('workout', memberId);
 
-          // Fire gamification event
-          await _db.collection('gamification_events').add({
-            'memberId': memberId,
-            'type': 'personal_best',
-            'exerciseName': exerciseName,
-            'newValue': maxValue,
-            'unit': isWeight ? 'kg' : 'reps',
-            'timestamp': FieldValue.serverTimestamp(),
-            'processed': false,
-          });
-
           // Write in-app notification
           final notifUid = FirebaseAuthService.instance.currentUser?.uid;
           if (notifUid != null) {

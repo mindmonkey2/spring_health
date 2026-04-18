@@ -4,11 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../main_screen.dart';
+import 'package:spring_health_member/screens/fitness/post_session_summary_screen.dart';
+import 'package:spring_health_member/services/firebase_auth_service.dart';
 
-class LiveSessionScreen extends StatelessWidget {
+class LiveSessionScreen extends StatefulWidget {
   final String sessionId;
-  const LiveSessionScreen({super.key, required this.sessionId});
+  final String memberId;
+  const LiveSessionScreen({super.key, required this.sessionId, required this.memberId});
+
+  @override
+  State<LiveSessionScreen> createState() => _LiveSessionScreenState();
+}
+
+class _LiveSessionScreenState extends State<LiveSessionScreen> {
+  bool _navigatedToSummary = false;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +26,7 @@ class LiveSessionScreen extends StatelessWidget {
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('sessions')
-            .doc(sessionId)
+            .doc(widget.sessionId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -270,84 +279,25 @@ class LiveSessionScreen extends StatelessWidget {
   }
 
   Widget _buildCompleteView(BuildContext context, Map<String, dynamic> data) {
-    final exercises = List<Map<String, dynamic>>.from(data['exercises'] ?? []);
-    final duration = data['sessionDurationMinutes'] ?? 0;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.check_circle_outline,
-              color: AppColors.neonLime,
-              size: 80,
-            )
-                .animate()
-                .scale(duration: 600.ms, curve: Curves.elasticOut)
-                .fadeIn(),
-            const SizedBox(height: 24),
-            Text(
-              'Session Complete! 💪',
-              style: AppTextStyles.heading2.copyWith(color: AppColors.white),
-            ).animate().fadeIn(delay: 300.ms),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatColumn('Exercises', '${exercises.length}'),
-                _buildStatColumn('Duration', '$duration min'),
-                _buildStatColumn('XP Earned', '100 XP', color: AppColors.neonLime),
-              ],
-            ).animate().fadeIn(delay: 600.ms),
-            const SizedBox(height: 48),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MainScreen(initialIndex: 2),
-                  ),
-                  (route) => false,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.neonLime,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+    if (!_navigatedToSummary) {
+      _navigatedToSummary = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PostSessionSummaryScreen(
+                memberId: widget.memberId,
+                sessionId: widget.sessionId,
+                memberAuthUid:
+                    FirebaseAuthService.instance.currentUser!.uid,
               ),
-              child: const Text(
-                'Open Diet Plan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ).animate().fadeIn(delay: 900.ms),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatColumn(String label, String value, {Color? color}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: AppTextStyles.heading3.copyWith(
-            color: color ?? AppColors.white,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: AppTextStyles.caption.copyWith(color: AppColors.gray400),
-        ),
-      ],
-    );
+            ),
+          );
+        }
+      });
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _buildCancelledView() {

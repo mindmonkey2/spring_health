@@ -131,23 +131,22 @@ class _MemberSessionScreenState extends State<MemberSessionScreen> {
           }
 
           if (status == 'active') {
-            final goalInsight = data['goalInsight'] as String?;
+            final goalInsight = data['goalInsight'] as String? ?? "Stay focused and give your best today!";
             final exercises = List<Map<String, dynamic>>.from(data['exercises'] ?? []);
 
             return Column(
               children: [
-                if (goalInsight != null)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Card(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: const BorderSide(color: AppColors.neonTeal),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Card(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: AppColors.neonTeal),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(

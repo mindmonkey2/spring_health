@@ -241,7 +241,7 @@ class _FitnessDashboardScreenState extends State<FitnessDashboardScreen> {
             final doc = snapshot.data!.docs.first;
             final status = (doc.data() as Map<String, dynamic>)['status'] as String? ?? '';
             if (status != 'complete' && status != 'cancelled') {
-              return LiveSessionScreen(sessionId: doc.id);
+              return LiveSessionScreen(sessionId: doc.id, memberId: widget.memberId ?? '');
             }
           }
           return _buildDashboard(context);

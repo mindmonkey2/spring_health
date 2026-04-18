@@ -3,3 +3,4 @@ spring_health_member_app/android/build/
 spring_health_studio/android/build/
 spring_health_studio/android/app/google-services.json
 spring_health_studio/lib/firebase_options.dart
+functions/node_modules/

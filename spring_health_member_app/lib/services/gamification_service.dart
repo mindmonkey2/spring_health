@@ -61,6 +61,7 @@ class GamificationService {
     int xp = 0;
     String reason = '';
     switch (event) {
+      case 'daily_checkin':
       case 'check_in':
         xp = 20;
         reason = 'Gym check-in';

@@ -22,6 +22,7 @@ class BadgeService {
   ];
 
   Future<void> checkAndAward(String memberId) async {
+    if (memberId.isEmpty) return;
     final docRef = FirebaseFirestore.instance.collection('gamification').doc(memberId);
     final docSnap = await docRef.get();
 

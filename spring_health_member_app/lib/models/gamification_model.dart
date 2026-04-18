@@ -291,10 +291,9 @@ class MemberGamification {
     totalVolumeKg: 0,
   );
 
-  factory MemberGamification.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory MemberGamification.fromMap(Map<String, dynamic> data, String id) {
     return MemberGamification(
-      memberId: doc.id,
+      memberId: id,
       totalXp: data['totalXp'] ?? 0,
       earnedBadgeIds: List<String>.from(data['earnedBadgeIds'] ?? []),
       currentStreak: data['currentStreak'] ?? 0,
@@ -309,6 +308,11 @@ class MemberGamification {
           .map((e) => XpEvent.fromMap(e as Map<String, dynamic>))
           .toList(),
     );
+  }
+
+  factory MemberGamification.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return MemberGamification.fromMap(data, doc.id);
   }
 
   Map<String, dynamic> toMap() => {

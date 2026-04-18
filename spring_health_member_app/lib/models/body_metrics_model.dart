@@ -48,7 +48,7 @@ class BodyMetricsModel {
 
   // ─── Serialization ─────────────────────────────────────────────────────────
 
-  factory BodyMetricsModel.fromFirestore(Map<String, dynamic> map, String id) {
+  factory BodyMetricsModel.fromMap(Map<String, dynamic> map, String id) {
     return BodyMetricsModel(
       id: id,
       memberId: map['memberId'] ?? '',
@@ -63,6 +63,10 @@ class BodyMetricsModel {
       notes: map['notes'],
       recordedAt: _toDateTime(map['recordedAt']),
     );
+  }
+
+  factory BodyMetricsModel.fromFirestore(Map<String, dynamic> map, String id) {
+    return BodyMetricsModel.fromMap(map, id);
   }
 
   static DateTime _toDateTime(dynamic value) {

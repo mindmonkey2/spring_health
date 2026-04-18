@@ -147,7 +147,7 @@ class WorkoutService {
         .orderBy('date', descending: true)
         .get();
 
-    return snap.docs.map((doc) => WorkoutLog.fromFirestore(doc)).toList();
+    return snap.docs.map((doc) => WorkoutLog.fromMap(doc.data(), doc.id)).toList();
   }
 
   // ✅ Get total workouts this week

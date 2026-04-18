@@ -29,10 +29,9 @@ class PaymentModel {
     required this.collectedBy,
   });
 
-  factory PaymentModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory PaymentModel.fromMap(Map<String, dynamic> data, String id) {
     return PaymentModel(
-      id: doc.id,
+      id: id,
       memberId: data['memberId'] ?? '',
       amount: (data['amount'] ?? 0).toDouble(),
       planName: data['planName'] ?? '',
@@ -49,6 +48,11 @@ class PaymentModel {
       notes: data['notes'],
       collectedBy: data['collectedBy'] ?? 'Staff',
     );
+  }
+
+  factory PaymentModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return PaymentModel.fromMap(data, doc.id);
   }
 
   Map<String, dynamic> toMap() {

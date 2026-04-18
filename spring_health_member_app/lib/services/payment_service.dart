@@ -13,7 +13,7 @@ class PaymentService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => PaymentModel.fromFirestore(doc))
+              .map((doc) => PaymentModel.fromMap(doc.data(), doc.id))
               .toList(),
         );
   }

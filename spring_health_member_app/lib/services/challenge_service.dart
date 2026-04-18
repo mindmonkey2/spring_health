@@ -15,7 +15,7 @@ class ChallengeService {
       .map(
         (s) => s.docs.isEmpty
             ? null
-            : ChallengeModel.fromFirestore(
+            : ChallengeModel.fromMap(
                 s.docs.first.data(),
                 s.docs.first.id,
               ),
@@ -28,7 +28,7 @@ class ChallengeService {
       .snapshots()
       .map(
         (s) => s.docs
-            .map((d) => ChallengeEntryModel.fromFirestore(d.data(), d.id))
+            .map((d) => ChallengeEntryModel.fromMap(d.data(), d.id))
             .toList(),
       );
 

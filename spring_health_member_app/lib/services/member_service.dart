@@ -10,7 +10,7 @@ class MemberService {
       final doc = await _firestore.collection('members').doc(memberId).get();
 
       if (doc.exists && doc.data() != null) {
-        return MemberModel.fromFirestore(doc.data()!, doc.id); // ⬅️ FIXED
+        return MemberModel.fromMap(doc.data()!, id: doc.id); // ⬅️ FIXED
       }
 
       return null;
@@ -30,7 +30,7 @@ class MemberService {
 
       if (snapshot.docs.isNotEmpty) {
         final doc = snapshot.docs.first;
-        return MemberModel.fromFirestore(doc.data(), doc.id); // ⬅️ FIXED
+        return MemberModel.fromMap(doc.data(), id: doc.id); // ⬅️ FIXED
       }
 
       return null;
@@ -57,7 +57,7 @@ class MemberService {
       doc,
     ) {
       if (doc.exists && doc.data() != null) {
-        return MemberModel.fromFirestore(doc.data()!, doc.id);
+        return MemberModel.fromMap(doc.data()!, id: doc.id);
       }
       return null;
     });

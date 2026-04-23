@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class AttendanceModel {
   final String id;
@@ -18,31 +19,6 @@ class AttendanceModel {
     required this.date,
     this.checkOutTime,
   });
-
-  // ══════════════════════════════════════════════════════════
-  // SAFE DATE PARSING HELPERS
-  // ══════════════════════════════════════════════════════════
-
-  // ✅ FIX 1: Handles Timestamp, ISO String, AND null — never crashes
-  static DateTime _toDateTime(dynamic value, {DateTime? fallback}) {
-    final fb = fallback ?? DateTime.now();
-    if (value == null) return fb;
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is String && value.isNotEmpty) {
-      return DateTime.tryParse(value) ?? fb;
-    }
-    return fb;
-  }
-
-  // ✅ FIX 1: Nullable variant — safe for checkOutTime
-  static DateTime? _toDateTimeNullable(dynamic value) {
-    if (value == null) return null;
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is String && value.isNotEmpty) return DateTime.tryParse(value);
-    return null;
-  }
 
   // ══════════════════════════════════════════════════════════
   // SERIALISATION
@@ -73,12 +49,13 @@ class AttendanceModel {
       memberId: map['memberId']?.toString() ?? '',
       memberName: map['memberName']?.toString() ?? 'Unknown',
       branch: map['branch']?.toString() ?? '',
-      checkInTime: _toDateTime(
+      checkInTime: DateTimeUtils.toDateTime(
         map['checkInTime'] ??
             map['timestamp'], // also handles 'timestamp' alias
       ),
-      date: _toDateTime(map['date'] ?? map['checkInTime'] ?? map['timestamp']),
-      checkOutTime: _toDateTimeNullable(map['checkOutTime']),
+      date: DateTimeUtils.toDateTime(
+          map['date'] ?? map['checkInTime'] ?? map['timestamp']),
+      checkOutTime: DateTimeUtils.toDateTimeNullable(map['checkOutTime']),
     );
   }
 

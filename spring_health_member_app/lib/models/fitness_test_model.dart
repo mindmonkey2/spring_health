@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class FitnessTestModel {
   final String id;
@@ -44,8 +45,8 @@ class FitnessTestModel {
       deadlift1rmKg: _toDouble(map['deadlift1rmKg']),
       benchpress1rmKg: _toDouble(map['benchpress1rmKg']),
       overallLevel: map['overallLevel'] as String?,
-      testedAt: _toDateTime(map['testedAt']),
-      nextTestDue: _toDateTimeNullable(map['nextTestDue']),
+      testedAt: DateTimeUtils.toDateTime(map['testedAt']),
+      nextTestDue: DateTimeUtils.toDateTimeNullable(map['nextTestDue']),
     );
   }
 
@@ -122,21 +123,6 @@ class FitnessTestModel {
     if (value == null) return null;
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value);
-    return null;
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
-    return DateTime.now();
-  }
-
-  static DateTime? _toDateTimeNullable(dynamic value) {
-    if (value == null) return null;
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
     return null;
   }
 }

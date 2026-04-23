@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class TrainerFeedbackModel {
   final String id;
@@ -30,14 +31,8 @@ class TrainerFeedbackModel {
       workoutType: map['workoutType'] as String? ?? '',
       message: map['message'] as String? ?? '',
       rating: (map['rating'] as num?)?.toInt() ?? 3,
-      createdAt: _toDateTime(map['createdAt']),
+      createdAt: DateTimeUtils.toDateTime(map['createdAt']),
     );
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    return DateTime.now();
   }
 
   Map<String, dynamic> toMap() => {

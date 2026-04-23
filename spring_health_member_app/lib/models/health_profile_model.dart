@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class HealthProfileModel {
   final String id;
@@ -79,7 +80,7 @@ class HealthProfileModel {
               .toList() ??
           const [],
       dietaryPreference: map['dietaryPreference'] as String?,
-      lastUpdated: _toDateTimeNullable(map['lastUpdated']),
+      lastUpdated: DateTimeUtils.toDateTimeNullable(map['lastUpdated']),
     );
   }
 
@@ -180,14 +181,6 @@ class HealthProfileModel {
     if (value == null) return null;
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value);
-    return null;
-  }
-
-  static DateTime? _toDateTimeNullable(dynamic value) {
-    if (value == null) return null;
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
     return null;
   }
 }

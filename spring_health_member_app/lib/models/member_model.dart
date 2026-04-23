@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class MemberModel {
   final String id;
@@ -123,8 +124,8 @@ class MemberModel {
       membershipPlan:
           map['membershipPlan'] as String? ?? map['plan'] as String? ?? '',
       category: map['category'] as String? ?? '',
-      joiningDate: _toDateTime(map['joiningDate']) ?? DateTime.now(),
-      expiryDate: _toDateTime(map['expiryDate']) ?? DateTime.now(),
+      joiningDate: DateTimeUtils.toDateTime(map['joiningDate']),
+      expiryDate: DateTimeUtils.toDateTime(map['expiryDate']),
       totalFee: (map['totalFee'] as num?)?.toDouble() ?? 0,
       discount: (map['discount'] as num?)?.toDouble() ?? 0,
       finalAmount: (map['finalAmount'] as num?)?.toDouble() ?? 0,
@@ -137,7 +138,7 @@ class MemberModel {
         map['loyaltyMilestonesAwarded'] as List? ?? [],
       ),
       totalCheckIns: map['totalCheckIns'] as int? ?? 0,
-      lastCheckInTime: _toDateTime(map['lastCheckInTime']),
+      lastCheckInTime: DateTimeUtils.toDateTimeNullable(map['lastCheckInTime']),
       currentStreak: map['currentStreak'] as int? ?? 0,
       longestStreak: map['longestStreak'] as int? ?? 0,
       xpPoints: map['xpPoints'] as int? ?? 0,
@@ -147,17 +148,9 @@ class MemberModel {
       uid: map['uid'] as String?,
       emergencyContactName: map['emergencyContactName'] as String?,
       emergencyContactPhone: map['emergencyContactPhone'] as String?,
-      createdAt: _toDateTime(map['createdAt']),
-      updatedAt: _toDateTime(map['updatedAt']),
+      createdAt: DateTimeUtils.toDateTimeNullable(map['createdAt']),
+      updatedAt: DateTimeUtils.toDateTimeNullable(map['updatedAt']),
     );
-  }
-
-  static DateTime? _toDateTime(dynamic value) {
-    if (value == null) return null;
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is String) return DateTime.tryParse(value);
-    return null;
   }
 
   Map<String, dynamic> toMap() => {

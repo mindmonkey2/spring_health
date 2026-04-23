@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class AnnouncementModel {
   final String id;
@@ -31,9 +32,9 @@ class AnnouncementModel {
       message: map['message'] ?? map['content'] ?? '',
       imageUrl: map['imageUrl'],
       targetBranches: List<String>.from(map['targetBranches'] ?? ['all']),
-      createdAt: _toDateTime(map['createdAt']),
+      createdAt: DateTimeUtils.toDateTime(map['createdAt']),
       createdByUid: map['createdByUid'],
-      expiresAt: _toDateTimeNullable(map['expiresAt']),
+      expiresAt: DateTimeUtils.toDateTimeNullable(map['expiresAt']),
       readBy: List<String>.from(map['readBy'] ?? []),
     );
   }
@@ -46,27 +47,11 @@ class AnnouncementModel {
       message: map['message'] ?? map['content'] ?? '',
       imageUrl: map['imageUrl'],
       targetBranches: List<String>.from(map['targetBranches'] ?? ['all']),
-      createdAt: _toDateTime(map['createdAt']),
+      createdAt: DateTimeUtils.toDateTime(map['createdAt']),
       createdByUid: map['createdByUid'],
-      expiresAt: _toDateTimeNullable(map['expiresAt']),
+      expiresAt: DateTimeUtils.toDateTimeNullable(map['expiresAt']),
       readBy: List<String>.from(map['readBy'] ?? []),
     );
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    return switch (value) {
-      Timestamp t => t.toDate(),
-      DateTime d => d,
-      _ => DateTime.now(),
-    };
-  }
-
-  static DateTime? _toDateTimeNullable(dynamic value) {
-    return switch (value) {
-      Timestamp t => t.toDate(),
-      DateTime d => d,
-      _ => null,
-    };
   }
 
   // ✅ Convert to Map for Firestore

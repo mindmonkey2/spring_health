@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class WeeklyWarModel {
   final String id;
@@ -32,20 +33,13 @@ class WeeklyWarModel {
     required this.createdAt,
   });
 
-  static DateTime _parseDate(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is String) return DateTime.parse(value);
-    if (value is DateTime) return value;
-    return DateTime.now(); // fallback
-  }
-
   factory WeeklyWarModel.fromMap(String id, Map<String, dynamic> data) {
     return WeeklyWarModel(
       id: id,
       branchId: data['branchId'] as String? ?? '',
       weekNumber: data['weekNumber'] as int? ?? 0,
-      startDate: _parseDate(data['startDate']),
-      endDate: _parseDate(data['endDate']),
+      startDate: DateTimeUtils.toDateTime(data['startDate']),
+      endDate: DateTimeUtils.toDateTime(data['endDate']),
       exercise: data['exercise'] as String? ?? '',
       unit: data['unit'] as String? ?? 'reps',
       category: data['category'] as String? ?? 'strength',
@@ -55,7 +49,7 @@ class WeeklyWarModel {
           : {},
       winnerId: data['winnerId'] as String?,
       winnerName: data['winnerName'] as String?,
-      createdAt: _parseDate(data['createdAt']),
+      createdAt: DateTimeUtils.toDateTime(data['createdAt']),
     );
   }
 

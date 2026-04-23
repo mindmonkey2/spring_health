@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class BodyMetricsModel {
   final String id;
@@ -61,18 +62,12 @@ class BodyMetricsModel {
       arms: map['arms'] != null ? (map['arms']).toDouble() : null,
       thighs: map['thighs'] != null ? (map['thighs']).toDouble() : null,
       notes: map['notes'],
-      recordedAt: _toDateTime(map['recordedAt']),
+      recordedAt: DateTimeUtils.toDateTime(map['recordedAt']),
     );
   }
 
   factory BodyMetricsModel.fromFirestore(Map<String, dynamic> map, String id) {
     return BodyMetricsModel.fromMap(map, id);
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    return DateTime.now();
   }
 
   Map<String, dynamic> toMap() {

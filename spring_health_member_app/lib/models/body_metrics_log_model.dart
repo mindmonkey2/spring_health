@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spring_health_member/core/utils/date_time_utils.dart';
 
 class BodyMetricsLogModel {
   final String id;
@@ -42,7 +43,7 @@ class BodyMetricsLogModel {
       bpDiastolic: map['bpDiastolic'] as int?,
       restingHeartRate: map['restingHeartRate'] as int?,
       notes: map['notes'] as String?,
-      loggedAt: _toDateTime(map['loggedAt']),
+      loggedAt: DateTimeUtils.toDateTime(map['loggedAt']),
     );
   }
 
@@ -97,12 +98,5 @@ class BodyMetricsLogModel {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value);
     return null;
-  }
-
-  static DateTime _toDateTime(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
-    return DateTime.now();
   }
 }

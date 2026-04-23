@@ -1,5 +1,5 @@
 # Spring Health Applications — Engineering Memory Document
-**Last Updated:** April 18, 2026
+**Last Updated:** April 19, 2026
 **Admin App:** ~97% (53/55 features) | **Member App:** ~95% (74 features)
 
 ---
@@ -929,6 +929,13 @@ Planned features: member list by branch, attendance marking, workout assignment,
       or the sessions write ownership check.
     - Fixed Thread 14.
 
+33. Security: Always validate ownership on document creation (IDOR prevention)
+    - Vulnerability: `allow create: if isSignedIn();` allows any user to spoof documents for others.
+    - Fix: Always use `allow create: if isSignedIn() && isOwnNewRecord();`.
+    - This ensures the `memberId`, `memberAuthUid`, `challengerId`, or other identity fields in the new document match the authenticated user's UID.
+    - Impacted collections: `socialFeed`, `socialChallenges`, `gamificationEvents`, `trainerFeedback`, `feedback`.
+    - Fixed April 19, 2026.
+
 ### Build and Deployment Safeguards
 
 - AGP 8.9.1 (required by `androidx.browser:browser:1.9.0`)
@@ -1048,4 +1055,4 @@ Planned features: member list by branch, attendance marking, workout assignment,
 
 *Document Maintenance: Update after every bug fix, feature addition, or architectural decision.*
 *New rules added to Section 7 prevent future regressions.*
-*Last updated: April 18, 2026 — Added rules 31–32, Thread 14 T14 bug sprint.*
+*Last updated: April 19, 2026 — Added rule 33 (IDOR security fix for social feed and other collections).*

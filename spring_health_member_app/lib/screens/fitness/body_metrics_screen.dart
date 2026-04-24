@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/body_metrics_model.dart';
-import '../../models/health_profile_model.dart'; // BUG 3: needed for BP banner
+import '../../models/health_profile_model.dart';
 import '../../services/body_metrics_service.dart';
 
 // ════════════════════════════════════════════════════════════════
@@ -15,7 +15,7 @@ import '../../services/body_metrics_service.dart';
 
 class BodyMetricsScreen extends StatefulWidget {
   final String memberId;
-  // BUG 3: nullable — screen still works without it; banner not shown if null
+  // nullable — screen still works without it; banner not shown if null
   final HealthProfileModel? healthProfile;
 
   const BodyMetricsScreen({
@@ -61,14 +61,14 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
     );
   }
 
-  // ─── BUG 3: BP critical check ──────────────────────────────────────────────
+  // ─── BP critical check ──────────────────────────────────────────────
   // Stage 2 HTN threshold: systolic ≥140 OR diastolic ≥90
   bool _isBPCritical(HealthProfileModel h) {
     return (h.bpSystolic != null && h.bpSystolic! >= 140) ||
         (h.bpDiastolic != null && h.bpDiastolic! >= 90);
   }
 
-  // ─── BUG 3: Non-dismissible BP warning banner ──────────────────────────────
+  // ─── Non-dismissible BP warning banner ──────────────────────────────
   Widget _buildBPWarningBanner() {
     return Container(
       width: double.infinity,
@@ -174,7 +174,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // BUG 3 FIX: BP warning banner at top — non-dismissible, shown when
+          // BP warning banner at top — non-dismissible, shown when
           // healthProfile is passed and BP is Stage 2 or Crisis
           if (widget.healthProfile != null &&
               _isBPCritical(widget.healthProfile!))

@@ -929,6 +929,14 @@ Planned features: member list by branch, attendance marking, workout assignment,
       or the sessions write ownership check.
     - Fixed Thread 14.
 
+33. Eliminate false-logout-on-restart bug via dual-guard auth check
+    - Firebase emits `null` briefly on cold start before session restoration.
+    - Logic must listen to `authStateChanges()` AND check `currentUser` synchronously.
+    - If stream emits `null` but synchronous cache is non-null, hold navigation
+      on a loading screen until the session is restored.
+    - Implemented in Studio (`AuthWrapper`) and Member App (`SplashScreen`).
+    - Fixed April 2026.
+
 ### Build and Deployment Safeguards
 
 - AGP 8.9.1 (required by `androidx.browser:browser:1.9.0`)
@@ -1027,6 +1035,7 @@ Planned features: member list by branch, attendance marking, workout assignment,
 - [ ] processEvent used for all XP — no direct awardXP calls
 - [ ] Gemini model string is gemini-2.5-flash-preview-04-17
 - [ ] No auth.uid used as Firestore document keys
+- [ ] Auth dual-guard implemented in entry point (prevent false logout)
 
 ---
 

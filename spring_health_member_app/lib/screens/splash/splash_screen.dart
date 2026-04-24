@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
@@ -19,11 +21,17 @@ class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   final _authService = FirebaseAuthService();
 
-  // Two conditions must BOTH be true before navigating:
+  // THREE conditions must ALL be true before navigating:
   // 1. Logo animation has completed its entrance cycle
   // 2. Minimum display time has passed (prevents flash on fast devices)
+  // 3. Firebase Auth session restoration has completed (no false logouts)
   bool _logoComplete = false;
   bool _minTimeElapsed = false;
+  bool _authResolved = false;
+  User? _resolvedUser;
+
+  // Stream subscription for auth state
+  StreamSubscription<User?>? _authSubscription;
 
   // Glow orb floating animation
   late AnimationController _orbController;
@@ -57,10 +65,36 @@ class _SplashScreenState extends State<SplashScreen>
         _maybeNavigate();
       }
     });
+
+    // ── Auth session restoration guard ──────────────────
+    // Together these two guards eliminate the false-logout-on-restart bug.
+    _authSubscription = _authService.authStateChanges.listen((user) {
+      if (user != null) {
+        _onAuthResolved(user);
+      } else {
+        // Stream emitted null — check synchronous cache first.
+        // currentUser reflects locally-cached state immediately.
+        if (FirebaseAuth.instance.currentUser == null) {
+          // Genuinely signed out
+          _onAuthResolved(null);
+        }
+        // Otherwise, session is being restored — hold until non-null emission.
+      }
+    });
+  }
+
+  void _onAuthResolved(User? user) {
+    if (!mounted) return;
+    setState(() {
+      _resolvedUser = user;
+      _authResolved = true;
+    });
+    _maybeNavigate();
   }
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _orbController.dispose();
     _dotsController.dispose();
     super.dispose();
@@ -75,15 +109,15 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _maybeNavigate() {
-    if (!_logoComplete || !_minTimeElapsed) return;
+    if (!_logoComplete || !_minTimeElapsed || !_authResolved) return;
     _navigate();
   }
 
   Future<void> _navigate() async {
     if (!mounted) return;
 
-    final user = _authService.currentUser;
-    final destination = user != null ? const MainScreen() : const LoginScreen();
+    final destination =
+        _resolvedUser != null ? const MainScreen() : const LoginScreen();
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

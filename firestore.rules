@@ -166,7 +166,8 @@ service cloud.firestore {
     match /gamificationEvents/{eventId} {
       allow read: if isAdmin()
         || (isSignedIn() && resource.data.memberAuthUid == request.auth.uid);
-      allow create: if isSignedIn() && isOwnNewRecord();
+      allow create: if isSignedIn() &&
+        request.resource.data.memberAuthUid == request.auth.uid;
       allow update: if isAdmin() ||
         (isSignedIn() && 'memberId' in resource.data &&
          resource.data.memberId == request.auth.uid &&
@@ -178,7 +179,8 @@ service cloud.firestore {
     match /gamificationevents/{eventId} {
       allow read: if isAdmin()
         || (isSignedIn() && resource.data.memberAuthUid == request.auth.uid);
-      allow create: if isSignedIn() && isOwnNewRecord();
+      allow create: if isSignedIn() &&
+        request.resource.data.memberAuthUid == request.auth.uid;
       allow update: if isAdmin() ||
         (isSignedIn() && 'memberId' in resource.data &&
          resource.data.memberId == request.auth.uid &&

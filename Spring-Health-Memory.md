@@ -1066,3 +1066,5 @@ Planned features: member list by branch, attendance marking, workout assignment,
 *Document Maintenance: Update after every bug fix, feature addition, or architectural decision.*
 *New rules added to Section 7 prevent future regressions.*
 *Last updated: April 19, 2026 — Added rule 33 (IDOR security fix for social feed and other collections).*
+
+- When making parameters optional that are required for correct behavior of warning banners (like `HealthProfileModel` in `BodyMetricsScreen`), ensure that a fallback mechanism exists to fetch the missing data (e.g. `HealthProfileService().getHealthProfile()`).

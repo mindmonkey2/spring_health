@@ -8,6 +8,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../models/body_metrics_model.dart';
 import '../../models/health_profile_model.dart';
 import '../../services/body_metrics_service.dart';
+import '../../services/health_profile_service.dart';
 
 // ════════════════════════════════════════════════════════════════
 // MAIN SCREEN
@@ -32,11 +33,25 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
     with SingleTickerProviderStateMixin {
   final _service = BodyMetricsService();
   late TabController _tabController;
+  HealthProfileModel? _healthProfile;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _healthProfile = widget.healthProfile;
+    if (_healthProfile == null) {
+      _loadHealthProfile();
+    }
+  }
+
+  Future<void> _loadHealthProfile() async {
+    final profile = await HealthProfileService().getHealthProfile(widget.memberId);
+    if (mounted) {
+      setState(() {
+        _healthProfile = profile;
+      });
+    }
   }
 
   @override
@@ -48,7 +63,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   void _openSheet(List<BodyMetricsModel> existing) {
     final lastHeight = existing.isNotEmpty
         ? existing.first.height
-        : widget.healthProfile?.heightCm;
+        : _healthProfile?.heightCm;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -176,8 +191,8 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
         children: [
           // BP warning banner at top — non-dismissible, shown when
           // healthProfile is passed and BP is Stage 2 or Crisis
-          if (widget.healthProfile != null &&
-              _isBPCritical(widget.healthProfile!))
+          if (_healthProfile != null &&
+              _isBPCritical(_healthProfile!))
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _buildBPWarningBanner(),
@@ -887,8 +902,8 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   Widget _buildEmpty() {
     return Column(
       children: [
-        if (widget.healthProfile != null &&
-            _isBPCritical(widget.healthProfile!))
+        if (_healthProfile != null &&
+            _isBPCritical(_healthProfile!))
           Padding(
             padding: const EdgeInsets.all(16),
             child: _buildBPWarningBanner(),

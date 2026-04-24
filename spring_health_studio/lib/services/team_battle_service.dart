@@ -71,36 +71,36 @@ class TeamBattleService {
     });
   }
 
-  Future<void> computeAndUpdateScores(String battleId) async {
-    final docRef = _firestore.collection('trainerTeamBattles').doc(battleId);
-    final docSnap = await docRef.get();
+  Future<double> _getScoreForMetric(
+      String metric, List<String> memberIds, Timestamp startTimestamp) async {
+    if (memberIds.isEmpty) return 0.0;
 
-    if (!docSnap.exists) return;
+    final chunks = <List<String>>[];
+    for (var i = 0; i < memberIds.length; i += 30) {
+      chunks.add(memberIds.sublist(
+          i, i + 30 > memberIds.length ? memberIds.length : i + 30));
+    }
 
-    final battle = TeamBattleModel.fromMap(docSnap.data()!, docSnap.id);
-    if (battle.status == 'complete') return; // already completed
+    double score = 0.0;
 
-    double t1Score = 0.0;
-    // double t2Score = battle.team2Score; // Team 2 is manual
-
-    final t1MemberIds = List<String>.from(battle.team1['memberIds'] ?? []);
-    final startTimestamp = Timestamp.fromDate(battle.startDate);
-
-    // Note: workouts uses `memberId` field too, so we can query it easily.
-    if (battle.metric == 'total_sessions') {
-      for (final mId in t1MemberIds) {
-        final snap = await _firestore.collection('workouts')
-            .where('memberId', isEqualTo: mId)
-            .where('date', isGreaterThanOrEqualTo: startTimestamp)
-            .get();
-        t1Score += snap.docs.length;
+    if (metric == 'total_sessions') {
+      final futures = chunks.map((chunk) => _firestore
+          .collection('workouts')
+          .where('memberId', whereIn: chunk)
+          .where('date', isGreaterThanOrEqualTo: startTimestamp)
+          .get());
+      final snaps = await Future.wait(futures);
+      for (final snap in snaps) {
+        score += snap.docs.length;
       }
-    } else if (battle.metric == 'total_weight_lifted') {
-      for (final mId in t1MemberIds) {
-        final snap = await _firestore.collection('workouts')
-            .where('memberId', isEqualTo: mId)
-            .where('date', isGreaterThanOrEqualTo: startTimestamp)
-            .get();
+    } else if (metric == 'total_weight_lifted') {
+      final futures = chunks.map((chunk) => _firestore
+          .collection('workouts')
+          .where('memberId', whereIn: chunk)
+          .where('date', isGreaterThanOrEqualTo: startTimestamp)
+          .get());
+      final snaps = await Future.wait(futures);
+      for (final snap in snaps) {
         for (final doc in snap.docs) {
           final data = doc.data();
           final exercises = List.from(data['exercises'] ?? []);
@@ -110,21 +110,41 @@ class TeamBattleService {
               if (s['isCompleted'] == true) {
                 final weight = (s['weightKg'] as num?)?.toDouble() ?? 0.0;
                 final reps = (s['reps'] as num?)?.toInt() ?? 0;
-                t1Score += weight * reps; // typical calculation or just weight
+                score += weight * reps;
               }
             }
           }
         }
       }
-    } else if (battle.metric == 'combined_attendance_days') {
-      for (final mId in t1MemberIds) {
-        final snap = await _firestore.collection('attendance')
-            .where('memberId', isEqualTo: mId)
-            .where('checkInTime', isGreaterThanOrEqualTo: startTimestamp)
-            .get();
-        t1Score += snap.docs.length;
+    } else if (metric == 'combined_attendance_days') {
+      final futures = chunks.map((chunk) => _firestore
+          .collection('attendance')
+          .where('memberId', whereIn: chunk)
+          .where('checkInTime', isGreaterThanOrEqualTo: startTimestamp)
+          .get());
+      final snaps = await Future.wait(futures);
+      for (final snap in snaps) {
+        score += snap.docs.length;
       }
     }
+
+    return score;
+  }
+
+  Future<void> computeAndUpdateScores(String battleId) async {
+    final docRef = _firestore.collection('trainerTeamBattles').doc(battleId);
+    final docSnap = await docRef.get();
+
+    if (!docSnap.exists) return;
+
+    final battle = TeamBattleModel.fromMap(docSnap.data()!, docSnap.id);
+    if (battle.status == 'complete') return; // already completed
+
+    final t1MemberIds = List<String>.from(battle.team1['memberIds'] ?? []);
+    final startTimestamp = Timestamp.fromDate(battle.startDate);
+
+    double t1Score = await _getScoreForMetric(
+        battle.metric, t1MemberIds, startTimestamp);
 
     final updates = <String, dynamic>{
       'team1Score': t1Score,

@@ -925,7 +925,6 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                // BUG 2: already correct — passes [] as expected by _openSheet()
                 ElevatedButton.icon(
                   onPressed: () => _openSheet([]),
                   style: ElevatedButton.styleFrom(

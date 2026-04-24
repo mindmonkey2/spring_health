@@ -170,100 +170,126 @@ class TrainerAjaxService {
 
   static Future<void> finalizeSession(String sessionId) async {
     final database = FirebaseFirestore.instance;
-    final sessionSnapshot = await database.collection('sessions').doc(sessionId).get();
-    if (!sessionSnapshot.exists) return;
+    final sessionRef = database.collection('sessions').doc(sessionId);
 
-    final sData = sessionSnapshot.data()!;
-    if (sData['sessionXpAwarded'] == true) return;
+    // Initial read for session data
+    final initialSessionSnap = await sessionRef.get();
+    if (!initialSessionSnap.exists) return;
 
-    final mId = sData['memberId'] as String;
+    final initialData = initialSessionSnap.data()!;
+    if (initialData['sessionXpAwarded'] == true) return;
+
+    final mId = initialData['memberId'] as String;
+
+    // Read current personal bests to check for updates
+    final pbDoc = await database.collection('personalbests').doc(mId).get();
+    final sData = initialData; // Already have session data
+
     final mAuthUid = sData['memberAuthUid'] as String;
     final tId = sData['trainerId'] as String;
-    final sessionExercises = List<Map<String,dynamic>>.from(sData['exercises'] ?? []);
+    final sessionExercises = List<Map<String, dynamic>>.from(sData['exercises'] ?? []);
     final sessionMuscles = List<String>.from(sData['musclesWorked'] ?? []);
     final cTime = (sData['createdAt'] as Timestamp).toDate();
-    final dMinutes = DateTime.now().difference(cTime).inMinutes;
+
+    final now = DateTime.now();
+    final nowTimestamp = Timestamp.fromDate(now);
+    final dMinutes = now.difference(cTime).inMinutes;
 
     final wExercises = sessionExercises.map((e) {
       final cSets = (e['completedSets'] as int?) ?? 0;
       return {
         'name': e['exerciseName'],
         'category': 'Trainer Session',
-        'sets': List.generate(cSets, (j) => {
-          'setNumber': j + 1,
-          'weight': e['weightKg'] ?? 0,
-          'reps': e['reps'] ?? 0,
-          'isCompleted': true,
-        }),
+        'sets': List.generate(
+            cSets,
+            (j) => {
+                  'setNumber': j + 1,
+                  'weight': e['weightKg'] ?? 0,
+                  'reps': e['reps'] ?? 0,
+                  'isCompleted': true,
+                }),
       };
     }).toList();
 
-    await database.collection('workouts').add({
+    final batch = database.batch();
+
+    // 1. Add Workout
+    final workoutRef = database.collection('workouts').doc();
+    batch.set(workoutRef, {
       'memberId': mId,
       'memberAuthUid': mAuthUid,
       'exercises': wExercises,
       'durationMinutes': dMinutes,
-      'date': Timestamp.now(),
+      'date': nowTimestamp,
       'source': 'trainer_session',
       'sessionId': sessionId,
       'trainerId': tId,
       'musclesWorked': sessionMuscles,
     });
 
-    final pbs = await database.collection('personalbests').doc(mId).get();
-    final pbMap = Map<String,dynamic>.from(pbs.data() ?? {});
-    final newPbs = <String,dynamic>{};
-
+    // 2. Personal Bests
+    final pbMap = Map<String, dynamic>.from(pbDoc.data() ?? {});
+    final newPbs = <String, dynamic>{};
     for (final exItem in sessionExercises) {
       final n = exItem['exerciseName'] as String;
       final w = (exItem['weightKg'] as num?)?.toDouble() ?? 0.0;
       if (w <= 0) continue;
       final oldW = (pbMap[n]?['weightKg'] as num?)?.toDouble() ?? 0.0;
       if (w > oldW) {
-        newPbs[n] = { 'weightKg': w, 'reps': exItem['reps'] ?? 0, 'date': Timestamp.now() };
+        newPbs[n] = {'weightKg': w, 'reps': exItem['reps'] ?? 0, 'date': nowTimestamp};
       }
     }
     if (newPbs.isNotEmpty) {
-      await database.collection('personalbests').doc(mId).set(newPbs, SetOptions(merge: true));
+      batch.set(database.collection('personalbests').doc(mId), newPbs, SetOptions(merge: true));
     }
 
-    await database.collection('gamification_events').add({
+    // 3. Gamification Event
+    final eventRef = database.collection('gamification_events').doc();
+    batch.set(eventRef, {
       'memberId': mId,
       'type': 'trainer_session_complete',
       'xp': 100,
       'processed': false,
-      'createdAt': Timestamp.now(),
+      'createdAt': nowTimestamp,
     });
 
-    final td = DateTime.now();
-    final dKey = '${td.year}-${td.month.toString().padLeft(2,'0')}-${td.day.toString().padLeft(2,'0')}';
-    await database.collection('wearableSnapshots').doc(mAuthUid).collection('daily').doc(dKey).set({
-      'musclesWorked': sessionMuscles,
-      'sessionDurationMinutes': dMinutes,
-      'source': 'trainer_session',
-      'sessionId': sessionId,
-      'nextSessionFocus': sData['nextSessionFocus'] ?? '',
-    }, SetOptions(merge: true));
+    // 4. Wearable Snapshot
+    final dKey = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    batch.set(
+        database.collection('wearableSnapshots').doc(mAuthUid).collection('daily').doc(dKey),
+        {
+          'musclesWorked': sessionMuscles,
+          'sessionDurationMinutes': dMinutes,
+          'source': 'trainer_session',
+          'sessionId': sessionId,
+          'nextSessionFocus': sData['nextSessionFocus'] ?? '',
+        },
+        SetOptions(merge: true));
 
+    // 5. Notification
     final tNotes = sData['trainerNotes'] as String? ?? '';
     final aSum = sData['aiSummary'] as String? ?? '';
     final nBody = tNotes.isNotEmpty
-      ? (tNotes.length > 100 ? '${tNotes.substring(0,100)}...' : tNotes)
-      : (aSum.isNotEmpty ? aSum : 'Session complete. Your diet plan is ready.');
+        ? (tNotes.length > 100 ? '${tNotes.substring(0, 100)}...' : tNotes)
+        : (aSum.isNotEmpty ? aSum : 'Session complete. Your diet plan is ready.');
 
-    await database.collection('notifications').doc(mAuthUid).collection('items').add({
+    final notifRef = database.collection('notifications').doc(mAuthUid).collection('items').doc();
+    batch.set(notifRef, {
       'type': 'session_complete',
       'title': 'Great session!',
       'body': nBody,
       'read': false,
-      'createdAt': Timestamp.now(),
+      'createdAt': nowTimestamp,
     });
 
-    await database.collection('sessions').doc(sessionId).update({
+    // 6. Session Update
+    batch.update(sessionRef, {
       'sessionXpAwarded': true,
       'status': 'complete',
-      'completedAt': Timestamp.now(),
+      'completedAt': nowTimestamp,
     });
+
+    await batch.commit();
   }
 
   static List<String> _getMusclesForCompound(String compound) {

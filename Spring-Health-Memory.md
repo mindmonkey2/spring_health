@@ -1,5 +1,5 @@
 # Spring Health Applications — Engineering Memory Document
-**Last Updated:** April 18, 2026
+**Last Updated:** April 19, 2026
 **Admin App:** ~97% (53/55 features) | **Member App:** ~95% (74 features)
 
 ---
@@ -928,6 +928,13 @@ Planned features: member list by branch, attendance marking, workout assignment,
     - Never use _memberId (the Firestore doc ID) for the sessions query
       or the sessions write ownership check.
     - Fixed Thread 14.
+ security/fix-social-feed-idor-16202163529875206955
+33. Security: Always validate ownership on document creation (IDOR prevention)
+    - Vulnerability: `allow create: if isSignedIn();` allows any user to spoof documents for others.
+    - Fix: Always use `allow create: if isSignedIn() && isOwnNewRecord();`.
+    - This ensures the `memberId`, `memberAuthUid`, `challengerId`, or other identity fields in the new document match the authenticated user's UID.
+    - Impacted collections: `socialFeed`, `socialChallenges`, `gamificationEvents`, `trainerFeedback`, `feedback`.
+    - Fixed April 19, 2026.
 
 33. Eliminate false-logout-on-restart bug via dual-guard auth check
     - Firebase emits `null` briefly on cold start before session restoration.
@@ -936,6 +943,7 @@ Planned features: member list by branch, attendance marking, workout assignment,
       on a loading screen until the session is restored.
     - Implemented in Studio (`AuthWrapper`) and Member App (`SplashScreen`).
     - Fixed April 2026.
+ main
 
 ### Build and Deployment Safeguards
 
@@ -1057,4 +1065,4 @@ Planned features: member list by branch, attendance marking, workout assignment,
 
 *Document Maintenance: Update after every bug fix, feature addition, or architectural decision.*
 *New rules added to Section 7 prevent future regressions.*
-*Last updated: April 18, 2026 — Added rules 31–32, Thread 14 T14 bug sprint.*
+*Last updated: April 19, 2026 — Added rule 33 (IDOR security fix for social feed and other collections).*

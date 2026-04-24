@@ -35,6 +35,8 @@ service cloud.firestore {
     function isOwnRecord(docData) {
       return ('uid' in docData && docData.uid == request.auth.uid) ||
              ('memberId' in docData && docData.memberId == request.auth.uid) ||
+             ('memberAuthUid' in docData && docData.memberAuthUid == request.auth.uid) ||
+             ('challengerId' in docData && docData.challengerId == request.auth.uid) ||
              ('userid' in docData && docData.userid == request.auth.uid);
     }
 
@@ -42,7 +44,13 @@ service cloud.firestore {
       return ('uid' in request.resource.data &&
                 request.resource.data.uid == request.auth.uid) ||
              ('memberId' in request.resource.data &&
-                request.resource.data.memberId == request.auth.uid);
+                request.resource.data.memberId == request.auth.uid) ||
+             ('memberAuthUid' in request.resource.data &&
+                request.resource.data.memberAuthUid == request.auth.uid) ||
+             ('challengerId' in request.resource.data &&
+                request.resource.data.challengerId == request.auth.uid) ||
+             ('userid' in request.resource.data &&
+                request.resource.data.userid == request.auth.uid);
     }
 
     function isMemberOwner(memberId) {
@@ -111,7 +119,7 @@ service cloud.firestore {
     match /trainerFeedback/{feedbackId} {
       allow read: if isOwner() || isTrainer()
         || (isSignedIn() && isOwnRecord(resource.data));
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && isOwnNewRecord();
       allow update: if isOwner()
         || (isTrainer() && 'trainerId' in resource.data &&
             resource.data.trainerId == request.auth.uid);
@@ -122,7 +130,7 @@ service cloud.firestore {
     match /feedback/{feedbackId} {
       allow read: if isOwner() || isTrainer()
         || (isSignedIn() && isOwnRecord(resource.data));
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && isOwnNewRecord();
       allow update: if isOwner() || isTrainer();
       allow delete: if isOwner();
     }
@@ -158,7 +166,8 @@ service cloud.firestore {
     match /gamificationEvents/{eventId} {
       allow read: if isAdmin()
         || (isSignedIn() && resource.data.memberAuthUid == request.auth.uid);
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.memberAuthUid == request.auth.uid;
       allow update: if isAdmin() ||
         (isSignedIn() && 'memberId' in resource.data &&
          resource.data.memberId == request.auth.uid &&
@@ -170,7 +179,8 @@ service cloud.firestore {
     match /gamificationevents/{eventId} {
       allow read: if isAdmin()
         || (isSignedIn() && resource.data.memberAuthUid == request.auth.uid);
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.memberAuthUid == request.auth.uid;
       allow update: if isAdmin() ||
         (isSignedIn() && 'memberId' in resource.data &&
          resource.data.memberId == request.auth.uid &&
@@ -430,14 +440,14 @@ service cloud.firestore {
     }
 
     match /socialFeed/{feedItemId} {
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && isOwnNewRecord();
       allow read: if isSignedIn();
       allow update, delete: if isSignedIn()
         && resource.data.memberId == request.auth.uid;
     }
 
     match /socialChallenges/{challengeId} {
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && isOwnNewRecord();
       allow read: if isSignedIn()
         && (resource.data.challengerId == request.auth.uid
             || resource.data.opponentId == request.auth.uid);

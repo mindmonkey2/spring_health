@@ -88,10 +88,11 @@ class TeamBattleService {
           .collection('workouts')
           .where('memberId', whereIn: chunk)
           .where('date', isGreaterThanOrEqualTo: startTimestamp)
+          .count()
           .get());
       final snaps = await Future.wait(futures);
       for (final snap in snaps) {
-        score += snap.docs.length;
+        score += snap.count ?? 0;
       }
     } else if (metric == 'total_weight_lifted') {
       final futures = chunks.map((chunk) => _firestore
@@ -121,10 +122,11 @@ class TeamBattleService {
           .collection('attendance')
           .where('memberId', whereIn: chunk)
           .where('checkInTime', isGreaterThanOrEqualTo: startTimestamp)
+          .count()
           .get());
       final snaps = await Future.wait(futures);
       for (final snap in snaps) {
-        score += snap.docs.length;
+        score += snap.count ?? 0;
       }
     }
 
@@ -143,8 +145,8 @@ class TeamBattleService {
     final t1MemberIds = List<String>.from(battle.team1['memberIds'] ?? []);
     final startTimestamp = Timestamp.fromDate(battle.startDate);
 
-    double t1Score = await _getScoreForMetric(
-        battle.metric, t1MemberIds, startTimestamp);
+    double t1Score =
+        await _getScoreForMetric(battle.metric, t1MemberIds, startTimestamp);
 
     final updates = <String, dynamic>{
       'team1Score': t1Score,

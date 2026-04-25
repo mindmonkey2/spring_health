@@ -182,6 +182,13 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
 
   Future<void> _addMember() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_dateOfBirth == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Date of birth is required')),
+      );
+      return;
+    }
     if (_finalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid total fee')),

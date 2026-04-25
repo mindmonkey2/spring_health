@@ -34,7 +34,32 @@ class AiCoachService {
   Future<Map<String, dynamic>> _buildMemberContext(String memberId) async {
     final context = <String, dynamic>{};
 
-    // 1. HealthProfile
+    // 1. HealthProfile & Age (1 extra Firestore read)
+    int? computeAge(dynamic dob) {
+      if (dob == null) return null;
+      DateTime? birth;
+      if (dob is Timestamp) {
+        birth = dob.toDate();
+      } else if (dob is String) {
+        birth = DateTime.tryParse(dob);
+      }
+      if (birth == null) return null;
+
+      final today = DateTime.now();
+      int age = today.year - birth.year;
+      if (today.month < birth.month ||
+          (today.month == birth.month && today.day < birth.day)) {
+            age--;
+      }
+      return age;
+    }
+
+    final memberDoc = await _db.collection('members').doc(memberId).get();
+    if (memberDoc.exists) {
+      final age = computeAge(memberDoc.data()?['dateOfBirth']);
+      if (age != null) context['computedAge'] = age;
+    }
+
     final profileService = HealthProfileService(db: _db);
     final healthProfile = await profileService.getHealthProfile(memberId);
     if (healthProfile != null) {
@@ -207,7 +232,6 @@ class AiCoachService {
   }
 
   String _buildWorkoutPrompt(Map<String, dynamic> context) {
-    final age = context['age'] ?? 'Unknown';
     final gender = context['gender'] ?? 'Unknown';
     final heightCm = context['heightCm'] ?? 'Unknown';
     final weightKg = context['weightKg'] ?? 'Unknown';
@@ -278,9 +302,9 @@ Respond ONLY with valid JSON — no text, no markdown, no explanation
 outside the JSON object.
 
 ═══ MEMBER IDENTITY ═══
-Age: $age | Gender: $gender
+Gender: $gender
 Height: ${heightCm}cm | Weight: ${weightKg}kg | BMI: $bmi
-Gym: Spring Health Studio, $branchName branch, Warangal, India
+${context['computedAge'] != null ? 'Member age: ${context['computedAge']} years\n' : ''}Gym: Spring Health Studio, $branchName branch, Warangal, India
 Member since: $joiningDate
 
 ═══ FITNESS GOAL & LEVEL ═══
@@ -420,7 +444,6 @@ Standard commercial gym: barbells, dumbbells 20-40kg range, cable machines, lat 
   }
 
   String _buildDietPrompt(Map<String, dynamic> context) {
-    final age = context['age'] ?? 'Unknown';
     final gender = context['gender'] ?? 'Unknown';
     final weightKg = context['weightKg'] ?? 'Unknown';
     final bmi = context['bmi'] ?? 'Unknown';
@@ -457,9 +480,9 @@ Generate a personalized daily diet plan for this gym member.
 Respond ONLY with valid JSON — no text outside the JSON.
 
 ═══ MEMBER PROFILE ═══
-Age: $age | Gender: $gender | Weight: ${weightKg}kg
+Gender: $gender | Weight: ${weightKg}kg
 BMI: $bmi | Body Fat: $bodyFatPercentage%
-Goal: $fitnessGoal
+${context['computedAge'] != null ? 'Member age: ${context['computedAge']} years\n' : ''}Goal: $fitnessGoal
 Dietary Preference: $dietaryPreference
 Medical Conditions: $medicalConditions
 

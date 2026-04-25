@@ -37,6 +37,8 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
   bool _isProcessing = false;
   bool _torchEnabled = false;
   String? _lastError;
+  String? _scannedMemberName;
+  int? _scannedMemberAge;
 
   @override
   void initState() {
@@ -52,6 +54,25 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
   void dispose() {
     _scannerController.dispose();
     super.dispose();
+  }
+
+  int? _computeAge(dynamic dob) {
+    if (dob == null) return null;
+    DateTime? birth;
+    if (dob is Timestamp) {
+      birth = dob.toDate();
+    } else if (dob is String) {
+      birth = DateTime.tryParse(dob);
+    }
+    if (birth == null) return null;
+
+    final today = DateTime.now();
+    int age = today.year - birth.year;
+    if (today.month < birth.month ||
+        (today.month == birth.month && today.day < birth.day)) {
+          age--;
+    }
+    return age;
   }
 
   void _resetScanner() {
@@ -70,6 +91,11 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
       _lastError = null;
     });
 
+    setState(() {
+      _scannedMemberName = null;
+      _scannedMemberAge = null;
+    });
+
     try {
       if (!qrData.startsWith('SPRING_')) {
         throw Exception('Invalid QR Code - Not a Spring Health member code');
@@ -86,6 +112,11 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
         _resetScanner();
         return;
       }
+
+      setState(() {
+        _scannedMemberName = member.name;
+        _scannedMemberAge = _computeAge(member.dateOfBirth);
+      });
 
       final dynamic memberDyn = member;
       if (memberDyn.assignedTrainerId != widget.trainerId) {
@@ -427,15 +458,17 @@ class _TrainerScanScreenState extends State<TrainerScanScreen> {
           if (_isProcessing)
             Container(
               color: Colors.black.withValues(alpha: 0.7),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: AppColors.primary),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: AppColors.primary),
+                    const SizedBox(height: 16),
                     Text(
-                      'Analyzing Member Data...',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      _scannedMemberName != null
+                          ? 'Analyzing ${_scannedMemberName!}${_scannedMemberAge != null ? ' (${_scannedMemberAge!} yrs)' : ''}...'
+                          : 'Analyzing Member Data...',
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),

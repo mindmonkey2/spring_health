@@ -1068,3 +1068,7 @@ Planned features: member list by branch, attendance marking, workout assignment,
 *Last updated: April 19, 2026 — Added rule 33 (IDOR security fix for social feed and other collections).*
 
 - When making parameters optional that are required for correct behavior of warning banners (like `HealthProfileModel` in `BodyMetricsScreen`), ensure that a fallback mechanism exists to fetch the missing data (e.g. `HealthProfileService().getHealthProfile()`).
+
+## Member App UI / UX
+
+* When building warning or informational banners inside standard content streams (e.g. `_buildBPWarningBanner` in `body_metrics_screen.dart`), wrap them so they are dismissible by the user unless explicitly mandated otherwise. Use local `setState` with boolean tracking flags (e.g. `_isBPBannerDismissed`) and wrap action icons (like `Icons.close_rounded`) inside `GestureDetector`.

@@ -34,6 +34,7 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
   final _service = BodyMetricsService();
   late TabController _tabController;
   HealthProfileModel? _healthProfile;
+  bool _isBPBannerDismissed = false;
 
   @override
   void initState() {
@@ -83,18 +84,18 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
         (h.bpDiastolic != null && h.bpDiastolic! >= 90);
   }
 
-  // ─── Non-dismissible BP warning banner ──────────────────────────────
+  // ─── Dismissible BP warning banner ──────────────────────────────
   Widget _buildBPWarningBanner() {
     return Container(
       width: double.infinity,
       color: AppColors.error,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
-          SizedBox(width: 10),
-          Expanded(
+          const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+          const SizedBox(width: 10),
+          const Expanded(
             child: Text(
               ' Your blood pressure reading is elevated. '
               'Please consult a doctor before intense exercise.',
@@ -105,7 +106,14 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
               ),
             ),
           ),
-          // No X button — non-dismissible per Phase 1 AI rules
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isBPBannerDismissed = true;
+              });
+            },
+            child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+          ),
         ],
       ),
     );
@@ -189,10 +197,11 @@ class _BodyMetricsScreenState extends State<BodyMetricsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // BP warning banner at top — non-dismissible, shown when
+          // BP warning banner at top — shown when
           // healthProfile is passed and BP is Stage 2 or Crisis
           if (_healthProfile != null &&
-              _isBPCritical(_healthProfile!))
+              _isBPCritical(_healthProfile!) &&
+              !_isBPBannerDismissed)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _buildBPWarningBanner(),

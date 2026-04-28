@@ -13,9 +13,10 @@ class AnnouncementService {
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
-              .map(
-                (doc) => AnnouncementModel.fromFirestore(doc.data(), doc.id),
-              ) // ⬅️ FIXED
+              .map((doc) {
+                // ignore: unnecessary_cast
+                return AnnouncementModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+              }) // ⬅️ FIXED
               .toList();
         });
   }
@@ -29,7 +30,10 @@ class AnnouncementService {
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
-              .map((doc) => AnnouncementModel.fromFirestore(doc.data(), doc.id))
+              .map((doc) {
+                // ignore: unnecessary_cast
+                return AnnouncementModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+              })
               .toList();
         });
   }
@@ -42,9 +46,10 @@ class AnnouncementService {
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
-              .map(
-                (doc) => AnnouncementModel.fromFirestore(doc.data(), doc.id),
-              ) // ⬅️ FIXED
+              .map((doc) {
+                // ignore: unnecessary_cast
+                return AnnouncementModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+              }) // ⬅️ FIXED
               .toList();
         });
   }

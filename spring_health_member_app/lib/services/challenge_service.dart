@@ -12,14 +12,14 @@ class ChallengeService {
       .where('status', isEqualTo: 'active')
       .limit(1)
       .snapshots()
-      .map(
-        (s) => s.docs.isEmpty
-            ? null
-            : ChallengeModel.fromMap(
-                s.docs.first.data(),
-                s.docs.first.id,
-              ),
-      );
+      .map((s) {
+        if (s.docs.isEmpty) return null;
+        return ChallengeModel.fromMap(
+          // ignore: unnecessary_cast
+          s.docs.first.data() as Map<String, dynamic>,
+          s.docs.first.id,
+        );
+      });
 
   Stream<List<ChallengeEntryModel>> getEntriesStream(String challengeId) => _db
       .collection('challengeEntries')
@@ -27,9 +27,10 @@ class ChallengeService {
       .orderBy('score', descending: true)
       .snapshots()
       .map(
-        (s) => s.docs
-            .map((d) => ChallengeEntryModel.fromMap(d.data(), d.id))
-            .toList(),
+        (s) => s.docs.map((d) {
+          // ignore: unnecessary_cast
+          return ChallengeEntryModel.fromMap(d.data() as Map<String, dynamic>, d.id);
+        }).toList(),
       );
 
   // ── Join Team ─────────────────────────────────────────────────────────────

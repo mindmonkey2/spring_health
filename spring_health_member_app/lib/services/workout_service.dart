@@ -136,7 +136,10 @@ class WorkoutService {
         .orderBy('date', descending: true)
         .get();
 
-    return snap.docs.map((doc) => WorkoutLog.fromMap(doc.data(), doc.id)).toList();
+    return snap.docs.map((doc) {
+      // ignore: unnecessary_cast
+      return WorkoutLog.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+    }).toList();
   }
 
   // ✅ Get total workouts this week

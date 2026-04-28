@@ -19,7 +19,7 @@ class StorageService {
 
       // ✅ Store by authUid but keep memberId as metadata for reference
       final Reference storageRef = _storage.ref().child(
-        'member_photos/${authUid}.jpg',
+        'member_photos/$authUid.jpg',
       );
 
       final UploadTask uploadTask = storageRef.putFile(
@@ -59,7 +59,7 @@ class StorageService {
 
   Future<void> deleteProfileImage(String authUid) async {
     try {
-      await _storage.ref().child('member_photos/${authUid}.jpg').delete();
+      await _storage.ref().child('member_photos/$authUid.jpg').delete();
     } on FirebaseException catch (e) {
       debugPrint('Delete error [${e.code}]: ${e.message}');
     }

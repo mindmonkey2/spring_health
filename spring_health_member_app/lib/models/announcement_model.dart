@@ -24,9 +24,9 @@ class AnnouncementModel {
   });
 
   // ✅ Create from Map (generic)
-  factory AnnouncementModel.fromMap(Map<String, dynamic> map) {
+  factory AnnouncementModel.fromMap(Map<String, dynamic> map, [String id = '']) {
     return AnnouncementModel(
-      id: map['id'] ?? '',
+      id: id.isNotEmpty ? id : (map['id'] ?? ''),
       title: map['title'] ?? '',
       message: map['message'] ?? map['content'] ?? '',
       imageUrl: map['imageUrl'],

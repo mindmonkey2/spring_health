@@ -29,9 +29,10 @@ class BodyMetricsService {
         .limit(30)
         .snapshots()
         .map(
-          (snap) => snap.docs
-              .map((d) => BodyMetricsModel.fromMap(d.data(), d.id))
-              .toList(),
+          (snap) => snap.docs.map((d) {
+            // ignore: unnecessary_cast
+            return BodyMetricsModel.fromMap(d.data() as Map<String, dynamic>, d.id);
+          }).toList(),
         );
   }
 

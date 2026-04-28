@@ -84,7 +84,7 @@ service cloud.firestore {
     // memberId field = Firestore doc ID (NOT auth UID)
     // isSignedIn() used — isOwnRecord() would fail
     match /attendance/{attendanceId} {
-      allow read: if isAdmin() || isTrainer() || isSignedIn();
+      allow read: if isAdmin() || isTrainer() || isReceptionist() || isMemberOwner(resource.data.memberId);
       allow create: if isAdmin() || isSignedIn();
       allow update, delete: if isAdmin();
     }
@@ -92,8 +92,7 @@ service cloud.firestore {
     // ── PAYMENTS ───────────────────────────────────────────
     // memberId field = Firestore doc ID (NOT auth UID)
     match /payments/{paymentId} {
-      allow read: if isAdmin() || (isSignedIn() &&
-          resource.data.memberId == request.auth.uid);
+      allow read: if isAdmin() || isReceptionist() || isMemberOwner(resource.data.memberId);
       allow create, update: if isAdmin();
       allow delete: if isOwner();
     }
@@ -234,7 +233,7 @@ service cloud.firestore {
     // ── WORKOUTS ───────────────────────────────────────────
     // memberId field = Firestore doc ID (NOT auth UID)
     match /workouts/{workoutId} {
-      allow read: if isAdmin() || isTrainer() || (isSignedIn() && resource.data.memberId == request.auth.uid);
+      allow read: if isAdmin() || isTrainer() || isMemberOwner(resource.data.memberId);
       allow create: if isAdmin() || (isSignedIn() && request.resource.data.memberId == request.auth.uid);
       allow update, delete: if isAdmin() || (isSignedIn() && resource.data.memberId == request.auth.uid);
     }
@@ -242,8 +241,8 @@ service cloud.firestore {
     // ── PERSONAL BESTS ─────────────────────────────────────
     // memberId field = Firestore doc ID (NOT auth UID)
     // isOwnNewRecord() would fail on create — use isSignedIn()
-    match /personalbests/{docId} {
-      allow read: if isAdmin() || isTrainer() || (isSignedIn() && isMemberOwner(docId));
+    match /personalbests/{memberId} {
+      allow read: if isAdmin() || isTrainer() || isMemberOwner(memberId);
       allow create: if isAdmin() || (isSignedIn() && request.resource.data.memberId == request.auth.uid);
       allow update, delete: if isAdmin() || (isSignedIn() && resource.data.memberId == request.auth.uid);
     }
@@ -267,8 +266,7 @@ service cloud.firestore {
     // ── BODY METRICS ───────────────────────────────────────
     // memberId field = Firestore doc ID (NOT auth UID)
     match /bodyMetrics/{docId} {
-      allow read: if isOwner() || isTrainer() || (isSignedIn() &&
-          resource.data.memberId == request.auth.uid);
+      allow read: if isAdmin() || isTrainer() || isMemberOwner(resource.data.memberId);
       allow create: if isAdmin() || (isSignedIn() && request.resource.data.memberId == request.auth.uid);
       allow update, delete: if isAdmin() || (isSignedIn() && resource.data.memberId == request.auth.uid);
     }

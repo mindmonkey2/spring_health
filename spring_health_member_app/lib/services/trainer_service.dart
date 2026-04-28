@@ -51,7 +51,8 @@ class TrainerService {
   Stream<DietPlanModel?> getDietPlanStream(String memberId) {
     return _db.collection('dietPlans').doc(memberId).snapshots().map((doc) {
       if (!doc.exists || doc.data() == null) return null;
-      final plan = DietPlanModel.fromFirestore(doc);
+      // ignore: unnecessary_cast
+      final plan = DietPlanModel.fromMap(doc.data()! as Map<String, dynamic>, doc.id);
       return plan.isActive ? plan : null;
     });
   }

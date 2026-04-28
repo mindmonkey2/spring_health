@@ -111,9 +111,10 @@ class InAppNotificationService {
         .limit(50)
         .snapshots()
         .map(
-          (s) => s.docs
-              .map((d) => AppNotification.fromFirestore(d.data(), d.id))
-              .toList(),
+          (s) => s.docs.map((d) {
+            // ignore: unnecessary_cast
+            return AppNotification.fromMap(d.data() as Map<String, dynamic>, d.id);
+          }).toList(),
         );
   }
 
@@ -126,9 +127,10 @@ class InAppNotificationService {
         .limit(50)
         .snapshots()
         .map(
-          (s) => s.docs
-              .map((d) => AppNotification.fromFirestore(d.data(), d.id))
-              .toList(),
+          (s) => s.docs.map((d) {
+            // ignore: unnecessary_cast
+            return AppNotification.fromMap(d.data() as Map<String, dynamic>, d.id);
+          }).toList(),
         );
   }
 

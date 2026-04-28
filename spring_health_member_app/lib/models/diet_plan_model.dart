@@ -180,12 +180,9 @@ class DietPlanModel {
   });
 
   // ✅ FIX 7: proper DocumentSnapshot factory
-  factory DietPlanModel.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    final map = doc.data() ?? {};
+  factory DietPlanModel.fromMap(Map<String, dynamic> map, String id) {
     return DietPlanModel(
-      id: doc.id, // ✅ FIX 4
+      id: id, // ✅ FIX 4
       title: map['title'] as String? ?? 'Diet Plan', // ✅ FIX 5
       memberId: map['memberId'] as String?, // ✅ FIX 9
       trainerId: map['trainerId'] as String? ?? '',
@@ -204,6 +201,13 @@ class DietPlanModel {
       notes: map['notes'] as String?,
       isActive: map['isActive'] as bool? ?? true,
     );
+  }
+
+  factory DietPlanModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final map = doc.data() ?? {};
+    return DietPlanModel.fromMap(map, doc.id);
   }
 
   // ✅ FIX 3: typed Map<String, dynamic>

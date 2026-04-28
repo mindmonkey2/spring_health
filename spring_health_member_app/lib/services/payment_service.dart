@@ -12,9 +12,10 @@ class PaymentService {
         .orderBy('paymentDate', descending: true)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => PaymentModel.fromMap(doc.data(), doc.id))
-              .toList(),
+          (snapshot) => snapshot.docs.map((doc) {
+            // ignore: unnecessary_cast
+            return PaymentModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+          }).toList(),
         );
   }
 

@@ -35,7 +35,7 @@ class AppNotification {
     this.metadata,
   });
 
-  factory AppNotification.fromFirestore(Map<String, dynamic> data, String id) {
+  factory AppNotification.fromMap(Map<String, dynamic> data, String id) {
     return AppNotification(
       id: id,
       type: NotificationType.values.firstWhere(
@@ -49,6 +49,8 @@ class AppNotification {
       metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }
+
+  factory AppNotification.fromFirestore(Map<String, dynamic> data, String id) { return AppNotification.fromMap(data, id); }
 
   Map<String, dynamic> toFirestore() => {
     'type': type.name,

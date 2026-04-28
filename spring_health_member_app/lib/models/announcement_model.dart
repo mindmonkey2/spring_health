@@ -24,17 +24,17 @@ class AnnouncementModel {
   });
 
   // ✅ Create from Map (generic)
-  factory AnnouncementModel.fromMap(Map<String, dynamic> map) {
+  factory AnnouncementModel.fromMap(Map<String, dynamic> data, String id) {
     return AnnouncementModel(
-      id: map['id'] ?? '',
-      title: map['title'] ?? '',
-      message: map['message'] ?? map['content'] ?? '',
-      imageUrl: map['imageUrl'],
-      targetBranches: List<String>.from(map['targetBranches'] ?? ['all']),
-      createdAt: _toDateTime(map['createdAt']),
-      createdByUid: map['createdByUid'],
-      expiresAt: _toDateTimeNullable(map['expiresAt']),
-      readBy: List<String>.from(map['readBy'] ?? []),
+      id: id,
+      title: data['title'] ?? '',
+      message: data['message'] ?? data['content'] ?? '',
+      imageUrl: data['imageUrl'],
+      targetBranches: List<String>.from(data['targetBranches'] ?? ['all']),
+      createdAt: _toDateTime(data['createdAt']),
+      createdByUid: data['createdByUid'],
+      expiresAt: _toDateTimeNullable(data['expiresAt']),
+      readBy: List<String>.from(data['readBy'] ?? []),
     );
   }
 

@@ -198,7 +198,7 @@ class FirestoreService {
           .snapshots()
           .map((snapshot) {
             return snapshot.docs.map((doc) {
-              return AnnouncementModel.fromMap({...doc.data(), 'id': doc.id});
+              return AnnouncementModel.fromMap(doc.data(), doc.id);
             }).toList();
           });
     } catch (e) {
@@ -217,7 +217,7 @@ class FirestoreService {
           .snapshots()
           .map((snapshot) {
             return snapshot.docs.map((doc) {
-              return AnnouncementModel.fromMap({...doc.data(), 'id': doc.id});
+              return AnnouncementModel.fromMap(doc.data(), doc.id);
             }).toList();
           });
     } catch (e) {

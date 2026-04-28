@@ -14,7 +14,7 @@ class AnnouncementService {
         .map((snapshot) {
           return snapshot.docs
               .map(
-                (doc) => AnnouncementModel.fromFirestore(doc.data(), doc.id),
+                (doc) => AnnouncementModel.fromMap(doc.data(), doc.id),
               ) // ⬅️ FIXED
               .toList();
         });
@@ -29,7 +29,7 @@ class AnnouncementService {
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
-              .map((doc) => AnnouncementModel.fromFirestore(doc.data(), doc.id))
+              .map((doc) => AnnouncementModel.fromMap(doc.data(), doc.id))
               .toList();
         });
   }
@@ -43,7 +43,7 @@ class AnnouncementService {
         .map((snapshot) {
           return snapshot.docs
               .map(
-                (doc) => AnnouncementModel.fromFirestore(doc.data(), doc.id),
+                (doc) => AnnouncementModel.fromMap(doc.data(), doc.id),
               ) // ⬅️ FIXED
               .toList();
         });

@@ -15,7 +15,7 @@ void main() {
         'targetBranches': ['all'],
         'createdAt': timestamp,
       };
-      final model = AnnouncementModel.fromMap(map);
+      final model = AnnouncementModel.fromMap(map, map['id'] as String);
       expect(model.createdAt.millisecondsSinceEpoch, now.millisecondsSinceEpoch);
     });
 
@@ -27,7 +27,7 @@ void main() {
         'targetBranches': ['all'],
         'createdAt': now,
       };
-      final model = AnnouncementModel.fromMap(map);
+      final model = AnnouncementModel.fromMap(map, map['id'] as String);
       expect(model.createdAt, now);
     });
 
@@ -40,7 +40,7 @@ void main() {
         'createdAt': timestamp,
         'expiresAt': timestamp,
       };
-      final model = AnnouncementModel.fromMap(map);
+      final model = AnnouncementModel.fromMap(map, map['id'] as String);
       expect(model.expiresAt?.millisecondsSinceEpoch, now.millisecondsSinceEpoch);
     });
 
@@ -53,7 +53,7 @@ void main() {
         'createdAt': timestamp,
         'expiresAt': now,
       };
-      final model = AnnouncementModel.fromMap(map);
+      final model = AnnouncementModel.fromMap(map, map['id'] as String);
       expect(model.expiresAt, now);
     });
 
@@ -66,7 +66,7 @@ void main() {
         'createdAt': timestamp,
         'expiresAt': null,
       };
-      final model = AnnouncementModel.fromMap(map);
+      final model = AnnouncementModel.fromMap(map, map['id'] as String);
       expect(model.expiresAt, isNull);
     });
 
@@ -78,7 +78,7 @@ void main() {
         'targetBranches': ['all'],
         'createdAt': timestamp,
       };
-      final model = AnnouncementModel.fromMap(map);
+      final model = AnnouncementModel.fromMap(map, map['id'] as String);
       expect(model.expiresAt, isNull);
     });
   });

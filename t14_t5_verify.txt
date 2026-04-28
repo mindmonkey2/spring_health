@@ -1,0 +1,141 @@
+spring_health_member_app/lib/services/gamification_service.dart:11:  static final GamificationService instance = GamificationService._internal();
+spring_health_member_app/lib/services/gamification_service.dart:13:  GamificationService._internal();
+spring_health_member_app/lib/services/personal_best_service.dart:101:      await GamificationService.instance.processEvent('personal_best', uid);
+spring_health_member_app/lib/services/workout_service.dart:106:          await _gamificationService.processEvent('workout', memberId);
+spring_health_member_app/lib/services/gamification_service.dart:61:  Future<void> processEvent(String event, String memberId, {int? customXP}) async {
+spring_health_member_app/lib/services/gamification_service.dart:215:              await processEvent(event, memberId);
+spring_health_member_app/lib/services/weekly_war_service.dart:195:      GamificationService.instance.processEvent(
+spring_health_member_app/lib/screens/home/home_screen.dart:834:              await GamificationService.instance.processEvent('workout', _memberId!);
+spring_health_member_app/lib/screens/workout/workout_history_screen.dart:660:      await GamificationService.instance.processEvent('workout', widget.memberId);
+spring_health_member_app/lib/screens/workout/workout_logger_screen.dart:1380:      await GamificationService.instance.processEvent('workout', widget.memberId);
+spring_health_member_app/lib/screens/checkin/qr_checkin_screen.dart:137:      await GamificationService.instance.processEvent('check_in', widget.member.id);
+spring_health_member_app/lib/screens/checkin/qr_checkin_screen.dart:140:          _earnedXp = 20; // Changed according to processEvent checkin
+spring_health_member_app/lib/screens/checkin/qr_checkin_screen.dart:144:      debugPrint(' QrCheckInScreen processEvent error: $e');
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 93.0.0 (100.0.0 available)
+  _flutterfire_internals 1.3.68 (1.3.69 available)
+  analyzer 10.0.1 (13.0.0 available)
+  async 2.13.0 (2.13.1 available)
+  build_runner 2.13.1 (2.14.1 available)
+  cloud_firestore 6.2.0 (6.3.0 available)
+  cloud_firestore_platform_interface 7.1.0 (7.2.0 available)
+  cloud_firestore_web 5.2.0 (5.3.0 available)
+  dart_style 3.1.7 (3.1.8 available)
+  device_info_plus 12.3.0 (13.1.0 available)
+  device_info_plus_platform_interface 7.0.3 (8.1.0 available)
+  firebase_ai 3.10.0 (3.11.0 available)
+  firebase_app_check 0.4.2 (0.4.3 available)
+  firebase_app_check_platform_interface 0.2.2 (0.3.0 available)
+  firebase_app_check_web 0.2.3 (0.2.4 available)
+  firebase_auth 6.3.0 (6.4.0 available)
+  firebase_auth_platform_interface 8.1.8 (8.1.9 available)
+  firebase_auth_web 6.1.4 (6.1.5 available)
+  firebase_core 4.6.0 (4.7.0 available)
+  firebase_core_web 3.5.1 (3.6.0 available)
+  firebase_messaging 16.1.3 (16.2.0 available)
+  firebase_messaging_platform_interface 4.7.8 (4.7.9 available)
+  firebase_messaging_web 4.1.4 (4.1.5 available)
+  firebase_storage 13.2.0 (13.3.0 available)
+  firebase_storage_platform_interface 5.2.19 (5.2.20 available)
+  firebase_storage_web 3.11.4 (3.11.5 available)
+  flutter_local_notifications 20.1.0 (21.0.0 available)
+  flutter_local_notifications_linux 7.0.0 (8.0.0 available)
+  flutter_local_notifications_platform_interface 10.0.0 (11.0.0 available)
+  flutter_local_notifications_windows 2.0.1 (3.0.0 available)
+  flutter_plugin_android_lifecycle 2.0.33 (2.0.34 available)
+  hooks 1.0.2 (1.0.3 available)
+  image_picker_android 0.8.13+14 (0.8.13+16 available)
+  lottie 3.3.2 (3.3.3 available)
+  matcher 0.12.18 (0.12.19 available)
+  meta 1.17.0 (1.18.2 available)
+  native_toolchain_c 0.17.6 (0.18.0 available)
+  path_provider_android 2.2.22 (2.3.1 available)
+  razorpay_flutter 1.4.1 (1.4.4 available)
+  rx 0.4.0 (0.5.0 available)
+  shared_preferences 2.5.4 (2.5.5 available)
+  shared_preferences_android 2.4.21 (2.4.23 available)
+  shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+  test_api 0.7.9 (0.7.11 available)
+  timezone 0.10.1 (0.11.0 available)
+  url_launcher_android 6.3.28 (6.3.29 available)
+  vector_math 2.2.0 (2.3.0 available)
+  vm_service 15.0.2 (15.1.0 available)
+  win32 5.15.0 (6.1.0 available)
+  win32_registry 2.1.0 (3.0.3 available)
+  xml 6.6.1 (7.0.1 available)
+Got dependencies!
+51 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing spring_health_member_app...
+No issues found! (ran in 9.1s)
+Resolving dependencies...
+Downloading packages...
+  _flutterfire_internals 1.3.68 (1.3.69 available)
+  archive 4.0.7 (4.0.9 available)
+  async 2.13.0 (2.13.1 available)
+  cloud_firestore 6.2.0 (6.3.0 available)
+  cloud_firestore_platform_interface 7.1.0 (7.2.0 available)
+  cloud_firestore_web 5.2.0 (5.3.0 available)
+  connectivity_plus 6.1.5 (7.1.1 available)
+  connectivity_plus_platform_interface 2.0.1 (2.1.0 available)
+  cross_file 0.3.5 (0.3.5+2 available)
+  csv 7.1.0 (8.0.0 available)
+  dbus 0.7.11 (0.7.12 available)
+  device_info_plus 11.5.0 (13.1.0 available)
+  device_info_plus_platform_interface 7.0.3 (8.1.0 available)
+  ffi 2.1.4 (2.2.0 available)
+  firebase_ai 3.10.0 (3.11.0 available)
+  firebase_app_check 0.4.2 (0.4.3 available)
+  firebase_app_check_platform_interface 0.2.2 (0.3.0 available)
+  firebase_app_check_web 0.2.3 (0.2.4 available)
+  firebase_auth 6.3.0 (6.4.0 available)
+  firebase_auth_platform_interface 8.1.8 (8.1.9 available)
+  firebase_auth_web 6.1.4 (6.1.5 available)
+  firebase_core 4.6.0 (4.7.0 available)
+  firebase_core_web 3.5.1 (3.6.0 available)
+  firebase_storage 13.2.0 (13.3.0 available)
+  firebase_storage_platform_interface 5.2.19 (5.2.20 available)
+  firebase_storage_web 3.11.4 (3.11.5 available)
+  fl_chart 0.69.2 (1.2.0 available)
+  flutter_lints 4.0.0 (6.0.0 available)
+  flutter_plugin_android_lifecycle 2.0.33 (2.0.34 available)
+  google_fonts 6.3.3 (8.0.2 available)
+  image 4.5.4 (4.8.0 available)
+  image_picker_android 0.8.13+14 (0.8.13+16 available)
+  lints 4.0.0 (6.1.0 available)
+  mailer 6.6.0 (7.1.0 available)
+  matcher 0.12.18 (0.12.19 available)
+  meta 1.17.0 (1.18.2 available)
+  mobile_scanner 5.2.3 (7.2.0 available)
+  path_provider_android 2.2.20 (2.3.1 available)
+  path_provider_foundation 2.4.3 (2.6.0 available)
+  pdf 3.11.3 (3.12.0 available)
+  petitparser 7.0.1 (7.0.2 available)
+  posix 6.0.3 (6.5.0 available)
+  printing 5.14.2 (5.14.3 available)
+  share_plus 10.1.4 (13.1.0 available)
+  share_plus_platform_interface 5.0.2 (7.1.0 available)
+  source_span 1.10.1 (1.10.2 available)
+  test_api 0.7.9 (0.7.11 available)
+  url_launcher_android 6.3.28 (6.3.29 available)
+  url_launcher_ios 6.3.6 (6.4.1 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_web 2.4.1 (2.4.2 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  uuid 4.5.2 (4.5.3 available)
+  vector_math 2.2.0 (2.3.0 available)
+  vibration 2.1.0 (3.1.8 available)
+  vibration_platform_interface 0.0.3 (0.1.2 available)
+  vm_service 15.0.2 (15.1.0 available)
+  win32 5.15.0 (6.1.0 available)
+  win32_registry 2.1.0 (3.0.3 available)
+  xml 6.6.1 (7.0.1 available)
+Got dependencies!
+60 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing spring_health_studio...
+No issues found! (ran in 7.7s)
+40b2403 refactor(T14-T4): complete fromFirestore→fromMap migration for member services
+1e15499 style: remove unnecessary string interpolation braces in storage_service
+97e8f1a refactor(T14-T4): fromFirestore→fromMap migration in member app services

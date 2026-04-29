@@ -107,11 +107,11 @@ class GamificationService {
         reason = 'Weekly War participation';
         break;
       case 'war_top3':
-        xp = customXP ?? 150;
+        xp = customXP ?? 75;
         reason = 'Weekly War podium';
         break;
       case 'war_winner':
-        xp = 500;
+        xp = 200;
         reason = 'Weekly War champion';
         break;
       case 'challenge_win':
@@ -271,6 +271,9 @@ class GamificationService {
         newStreak = 1; // reset
       } else if (lastDate == yesterdayDate) {
         newStreak = current.currentStreak + 1; // extend
+        if (newStreak == 7 || newStreak == 30) {
+          await processEvent('streak_milestone', memberId, customXP: 100);
+        }
       }
       // same day → no streak change (implicit)
       newLongest = newStreak > current.longestStreak

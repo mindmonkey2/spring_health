@@ -1,5 +1,5 @@
 # Spring Health Applications — Engineering Memory Document
-**Last Updated:** April 19, 2026
+**Last Updated:** April 29, 2026
 **Admin App:** ~97% (53/55 features) | **Member App:** ~95% (74 features)
 
 ---
@@ -228,6 +228,16 @@ dependencies:
 6. QR scanner no duplicate guard → `hasCheckedInToday(memberId, branch)`
 7. QR scanner hang → `resetScanner` helper, `barrierDismissible: false`
 8. QR scanner re-entrant onDetect → `await scannerController.stop()` as first line
+
+
+**Thread 14 Tasks (Shipped April 29, 2026):**
+- T14-T1: event constants, live session query, repo cleanup
+- T14-T2: full Firestore security rules overhaul (7 collections)
+- T14-T3: notification uid mismatch fix
+- T14-T4: fromFirestore→fromMap migration (7 service files)
+- T14-T5: processEvent cleanup, dead XP writes removed
+- T14-T6: PostSessionSummaryScreen — trainer session payoff
+- T14-T7: RPE scale, streak milestone, war XP cap, duels flag, cooldown UI, battle screen timer
 
 **Thread 9 (March 2026):**
 9. Gamification event bridge → Studio fires `gamificationEvents`, member app processes with idempotency
@@ -1022,6 +1032,38 @@ Planned features: member list by branch, attendance marking, workout assignment,
       or the sessions write ownership check.
     - Fixed Thread 14.
 
+
+34. All models use fromMap(data, id) exclusively — never fromFirestore
+    - Models must be instantiated using fromMap(data, id) to ensure consistent document ID handling.
+    - Fixed Thread 14.
+
+35. AnnouncementModel.fromMap takes 2 args: (Map<String,dynamic> data, String id)
+    - Ensure the document ID is passed alongside data.
+    - Fixed Thread 14.
+
+36. GamificationService.processEvent signature: (String event, String memberId, {int? customXP})
+    - Must use signature `(String event, String memberId, {int? customXP})`.
+    - Fixed Thread 14.
+
+37. warwinner XP cap: 200 (not 500). war_top3 halved proportionally
+    - `warwinner` awards 200 XP. `wartop3` awards 75 XP.
+    - Fixed Thread 14.
+
+38. streak_milestone fires at 7 and 30 consecutive check-in days (100 XP)
+    - Fixed Thread 14.
+
+39. Notification writes must use FirebaseAuthService.instance.currentUser!.uid not memberId
+    - memberId is the Firestore document ID, while auth UID is used for notifications.
+    - Fixed Thread 14.
+
+40. PostSessionSummaryScreen is read-only — zero Firestore writes
+    - The summary screen must not write to Firestore.
+    - Fixed Thread 14.
+
+41. Verify outputs go in git commit body, not in task chat
+    - Always include verification outputs directly in the commit message body.
+    - Fixed Thread 14.
+
 ### Code Review Checklist (Pre-PR)
 
 - [ ] `flutter analyze` returns 0 issues
@@ -1065,7 +1107,7 @@ Planned features: member list by branch, attendance marking, workout assignment,
 
 *Document Maintenance: Update after every bug fix, feature addition, or architectural decision.*
 *New rules added to Section 7 prevent future regressions.*
-*Last updated: April 19, 2026 — Added rule 33 (IDOR security fix for social feed and other collections).*
+*Last updated: April 29, 2026 — Thread 14 Complete.*
 
 - When making parameters optional that are required for correct behavior of warning banners (like `HealthProfileModel` in `BodyMetricsScreen`), ensure that a fallback mechanism exists to fetch the missing data (e.g. `HealthProfileService().getHealthProfile()`).
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/member_model.dart';
@@ -5,7 +6,7 @@ import '../../models/team_battle_model.dart';
 import '../../services/team_battle_service.dart';
 import '../../theme/app_colors.dart';
 
-class TrainerTeamBattleScreen extends StatelessWidget {
+class TrainerTeamBattleScreen extends StatefulWidget {
   final String trainerId;
   final String trainerName;
   final List<MemberModel> assignedMembers;
@@ -17,15 +18,37 @@ class TrainerTeamBattleScreen extends StatelessWidget {
     required this.assignedMembers,
   });
 
+  @override
+  State<TrainerTeamBattleScreen> createState() => _TrainerTeamBattleScreenState();
+}
+
+class _TrainerTeamBattleScreenState extends State<TrainerTeamBattleScreen> {
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) { if (mounted) setState(() {}); },
+    );
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
   void _showCreateBattleBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => _CreateBattleBottomSheet(
-        trainerId: trainerId,
-        trainerName: trainerName,
-        assignedMembers: assignedMembers,
+        trainerId: widget.trainerId,
+        trainerName: widget.trainerName,
+        assignedMembers: widget.assignedMembers,
       ),
     );
   }
@@ -35,7 +58,7 @@ class TrainerTeamBattleScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: StreamBuilder<List<TeamBattleModel>>(
-        stream: TeamBattleService.instance.getActiveBattlesForTrainer(trainerId),
+        stream: TeamBattleService.instance.getActiveBattlesForTrainer(widget.trainerId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(

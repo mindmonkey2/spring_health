@@ -1,32 +1,13 @@
 {
   "project_info": {
-    "project_number": "527678863150",
-    "project_id": "spring-health-studio-f4930",
-    "storage_bucket": "spring-health-studio-f4930.firebasestorage.app"
+    "project_number": "172840829163",
+    "project_id": "springhealth-d00aa",
+    "storage_bucket": "springhealth-d00aa.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:527678863150:android:b7c18fb4abd67526eaecbf",
-        "android_client_info": {
-          "package_name": "com.example.spring_health_studio"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyA9y_fTKrfIRYlw4Th_2o93tZUlOsfwu30"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:527678863150:android:2dbc3d2b5111e7caeaecbf",
+        "mobilesdk_app_id": "1:172840829163:android:d00c60504ef85c8313feae",
         "android_client_info": {
           "package_name": "com.springhealth.member"
         }
@@ -34,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA9y_fTKrfIRYlw4Th_2o93tZUlOsfwu30"
+          "current_key": "AIzaSyAx0by3QN9NSvcxyxg4hEEZhLBpOSPJ2G4"
         }
       ],
       "services": {

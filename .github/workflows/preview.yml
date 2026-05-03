@@ -1,0 +1,121 @@
+name: Firebase Hosting Preview
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel stale runs on the same ref so PRs don't queue up previews.
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ──────────────────────────────────────────────
+  #  Member App — build web + deploy to Hosting
+  # ──────────────────────────────────────────────
+  deploy-member-app:
+    name: Member App — Build & Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring_health_member_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-member-${{ hashFiles('spring_health_member_app/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-member-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      # On pull_request: deploy to a unique preview channel (auto URL posted as PR comment).
+      # On push to main: deploy to the live channel (production).
+      - name: Deploy preview
+        if: github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
+          projectId: springhealth-d00aa
+          entryPoint: spring_health_member_app
+
+      - name: Deploy to production
+        if: github.event_name == 'push'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
+          projectId: springhealth-d00aa
+          channelId: live
+          entryPoint: spring_health_member_app
+
+  # ──────────────────────────────────────────────
+  #  Studio App — build web + deploy to Hosting
+  # ──────────────────────────────────────────────
+  deploy-studio-app:
+    name: Studio App — Build & Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring_health_studio
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-studio-${{ hashFiles('spring_health_studio/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-studio-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Deploy preview
+        if: github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
+          projectId: springhealth-d00aa
+          entryPoint: spring_health_studio
+
+      - name: Deploy to production
+        if: github.event_name == 'push'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
+          projectId: springhealth-d00aa
+          channelId: live
+          entryPoint: spring_health_studio

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../widgets/spring_health_logo_animated.dart';
@@ -11,10 +12,23 @@ class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
 
+  @visibleForTesting
+  final Future<void> Function(String otp, {String? verificationId})?
+      verifyOtpOverride;
+
+  @visibleForTesting
+  final Future<void> Function({
+    required String phoneNumber,
+    required void Function(String) onCodeSent,
+    required void Function(String) onError,
+  })? resendOtpOverride;
+
   const OtpVerificationScreen({
     super.key,
     required this.phoneNumber,
     required this.verificationId,
+    this.verifyOtpOverride,
+    this.resendOtpOverride,
   });
 
   @override
@@ -25,8 +39,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final TextEditingController _otpController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  // ✅ FIXED — singleton, not new instance
-  final _authService = FirebaseAuthService.instance;
+  late final _authService = FirebaseAuthService.instance;
 
   bool _isLoading = false;
   bool _isResending = false;
@@ -58,7 +71,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.verifyOTP(otp, verificationId: _currentVerificationId);
+      final override = widget.verifyOtpOverride;
+      if (override != null) {
+        await override(otp, verificationId: _currentVerificationId);
+      } else {
+        await _authService.verifyOTP(otp, verificationId: _currentVerificationId);
+      }
 
       if (!mounted) return;
 
@@ -83,38 +101,49 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isResending = true);
     _otpController.clear();
 
+    void onCodeSent(String newVerificationId) {
+      if (!mounted) return;
+      setState(() {
+        _currentVerificationId = newVerificationId;
+        _isResending = false;
+      });
+      _showSuccess('New OTP sent to +91 ${widget.phoneNumber}');
+      _focusNode.requestFocus();
+    }
+
+    void onError(String error) {
+      if (!mounted) return;
+      setState(() => _isResending = false);
+      _showError('Failed to resend OTP: $error');
+    }
+
     try {
-      await _authService.sendOTP(
-        phoneNumber: widget.phoneNumber,
-        onCodeSent: (newVerificationId) {
-          if (!mounted) return;
-          setState(() {
-            _currentVerificationId = newVerificationId;
-            _isResending = false;
-          });
-          _showSuccess('New OTP sent to +91 ${widget.phoneNumber}');
-          _focusNode.requestFocus();
-        },
-        onCodeAutoRetrievalTimeout: (newVerificationId) {
-          if (!mounted) return;
-          setState(() {
-            _currentVerificationId = newVerificationId;
-          });
-        },
-        onAutoVerify: () {
-          if (!mounted) return;
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const MainScreen()),
-            (route) => false,
-          );
-        },
-        onError: (error) {
-          if (!mounted) return;
-          setState(() => _isResending = false);
-          _showError('Failed to resend OTP: $error');
-        },
-      );
+      final override = widget.resendOtpOverride;
+      if (override != null) {
+        await override(
+          phoneNumber: widget.phoneNumber,
+          onCodeSent: onCodeSent,
+          onError: onError,
+        );
+      } else {
+        await _authService.sendOTP(
+          phoneNumber: widget.phoneNumber,
+          onCodeSent: onCodeSent,
+          onCodeAutoRetrievalTimeout: (newVerificationId) {
+            if (!mounted) return;
+            setState(() => _currentVerificationId = newVerificationId);
+          },
+          onAutoVerify: () {
+            if (!mounted) return;
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+              (route) => false,
+            );
+          },
+          onError: onError,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isResending = false);

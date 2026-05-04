@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/weekly_war_model.dart';
 import 'gamification_service.dart';
 
 class WeeklyWarService {
   static final WeeklyWarService instance = WeeklyWarService._internal();
-  WeeklyWarService._internal();
+  WeeklyWarService._internal() : _db = FirebaseFirestore.instance;
+
+  @visibleForTesting
+  WeeklyWarService.withFirestore(FirebaseFirestore firestore) : _db = firestore;
+
+  final FirebaseFirestore _db;
 
   // 7-week rotating exercise schedule — cycles indefinitely
   static const List<Map<String, String>> warSchedule = [
@@ -48,7 +54,7 @@ class WeeklyWarService {
   ];
 
   Future<WeeklyWarModel?> getActiveWar(String branch) async {
-    final querySnapshot = await FirebaseFirestore.instance
+    final querySnapshot = await _db
         .collection('weeklywars')
         .where('branchId', isEqualTo: branch)
         .where('status', isEqualTo: 'active')
@@ -73,7 +79,7 @@ class WeeklyWarService {
 
     if (activeWar.exercise.toLowerCase() != exercise.toLowerCase()) return;
 
-    final entryRef = FirebaseFirestore.instance
+    final entryRef = _db
         .collection('weeklywars')
         .doc(activeWar.id)
         .collection('entries')
@@ -89,7 +95,7 @@ class WeeklyWarService {
   }
 
   Stream<List<WarEntryModel>> getWarLeaderboard(String warId) {
-    return FirebaseFirestore.instance
+    return _db
         .collection('weeklywars')
         .doc(warId)
         .collection('entries')
@@ -103,7 +109,7 @@ class WeeklyWarService {
   }
 
   Future<WarEntryModel?> getMemberEntry(String warId, String memberId) async {
-    final doc = await FirebaseFirestore.instance
+    final doc = await _db
         .collection('weeklywars')
         .doc(warId)
         .collection('entries')
@@ -116,7 +122,7 @@ class WeeklyWarService {
   }
 
   Future<List<WeeklyWarModel>> getWarHistory(String branch) async {
-    final querySnapshot = await FirebaseFirestore.instance
+    final querySnapshot = await _db
         .collection('weeklywars')
         .where('branchId', isEqualTo: branch)
         .where('status', whereIn: ['completed', 'archived'])
@@ -129,7 +135,7 @@ class WeeklyWarService {
   }
 
   Future<void> completeWar(String warId) async {
-    final warRef = FirebaseFirestore.instance
+    final warRef = _db
         .collection('weeklywars')
         .doc(warId);
 
@@ -167,7 +173,7 @@ class WeeklyWarService {
         winnerName = entry.memberName;
         eventType = 'war_winner';
         // 5. Increment warWins by 1 in gamification/{memberId} for rank 1 only
-        await FirebaseFirestore.instance
+        await _db
             .collection('gamification')
             .doc(entry.memberId)
             .set({'warWins': FieldValue.increment(1)}, SetOptions(merge: true));

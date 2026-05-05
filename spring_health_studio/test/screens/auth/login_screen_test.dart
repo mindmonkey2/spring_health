@@ -58,7 +58,7 @@ void main() {
     testWidgets('renders email field, password field, and sign-in button',
         (tester) async {
       await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       expect(
           find.widgetWithText(TextFormField, 'Enter your email'), findsOneWidget);
@@ -69,7 +69,7 @@ void main() {
 
     testWidgets('shows app title and welcome text', (tester) async {
       await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       expect(find.text('SPRING HEALTH STUDIO'), findsOneWidget);
       expect(find.text('Welcome Back'), findsOneWidget);
@@ -77,7 +77,7 @@ void main() {
 
     testWidgets('password is obscured by default', (tester) async {
       await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       final field = tester.widget<TextField>(
         find.descendant(
@@ -91,7 +91,7 @@ void main() {
     testWidgets('password visibility toggle reveals then re-hides password',
         (tester) async {
       await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.tap(find.byIcon(Icons.visibility_outlined));
       await tester.pump();
@@ -122,7 +122,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(user: null),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
@@ -134,7 +134,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(user: null),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Enter your email'),
@@ -150,7 +150,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(user: null),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Enter your email'),
@@ -167,7 +167,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(user: null),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Enter your email'),
@@ -189,7 +189,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(completer: completer),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Enter your email'),
@@ -214,7 +214,7 @@ void main() {
     testWidgets('does not call auth service when form is invalid', (tester) async {
       final fakeAuth = _FakeAuthService(user: null);
       await tester.pumpWidget(_wrap(LoginScreen(authService: fakeAuth)));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
@@ -231,7 +231,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(completer: completer),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await _fillAndSubmit(tester);
 
@@ -245,7 +245,7 @@ void main() {
         (tester) async {
       final fakeAuth = _FakeAuthService(throwError: 'stop');
       await tester.pumpWidget(_wrap(LoginScreen(authService: fakeAuth)));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await _fillAndSubmit(tester, email: 'owner@gym.com', password: 'hunter2');
       await tester.pump();
@@ -258,7 +258,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(throwError: 'No user found with this email.'),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await _fillAndSubmit(tester);
       await tester.pump();
@@ -270,7 +270,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(
         authService: _FakeAuthService(throwError: 'Incorrect password.'),
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await _fillAndSubmit(tester);
       await tester.pump();
@@ -282,7 +282,7 @@ void main() {
         (tester) async {
       final fakeAuth = _FakeAuthService(throwError: 'stop-before-navigation');
       await tester.pumpWidget(_wrap(LoginScreen(authService: fakeAuth)));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await _fillAndSubmit(tester, email: 'owner@gym.com', password: 'hunter2');
       await tester.pump();
@@ -297,7 +297,7 @@ void main() {
         throwError: 'stop-before-navigation',
       );
       await tester.pumpWidget(_wrap(LoginScreen(authService: fakeAuth)));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1500));
 
       await _fillAndSubmit(
           tester, email: 'receptionist@gym.com', password: 'abc123');

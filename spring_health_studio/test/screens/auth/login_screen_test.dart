@@ -79,8 +79,11 @@ void main() {
       await tester.pumpWidget(_wrap(const LoginScreen()));
       await tester.pumpAndSettle();
 
-      final field = tester.widget<TextFormField>(
-        find.widgetWithText(TextFormField, 'Enter your password'),
+      final field = tester.widget<TextField>(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Enter your password'),
+          matching: find.byType(TextField),
+        ),
       );
       expect(field.obscureText, isTrue);
     });
@@ -93,16 +96,22 @@ void main() {
       await tester.tap(find.byIcon(Icons.visibility_outlined));
       await tester.pump();
 
-      final visibleField = tester.widget<TextFormField>(
-        find.widgetWithText(TextFormField, 'Enter your password'),
+      final visibleField = tester.widget<TextField>(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Enter your password'),
+          matching: find.byType(TextField),
+        ),
       );
       expect(visibleField.obscureText, isFalse);
 
       await tester.tap(find.byIcon(Icons.visibility_off_outlined));
       await tester.pump();
 
-      final hiddenField = tester.widget<TextFormField>(
-        find.widgetWithText(TextFormField, 'Enter your password'),
+      final hiddenField = tester.widget<TextField>(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Enter your password'),
+          matching: find.byType(TextField),
+        ),
       );
       expect(hiddenField.obscureText, isTrue);
     });

@@ -47,6 +47,7 @@ Future<void> _fillAndSubmit(
     find.widgetWithText(TextFormField, 'Enter your password'),
     password,
   );
+  await tester.ensureVisible(find.text('SIGN IN'));
   await tester.tap(find.text('SIGN IN'));
   await tester.pump();
 }
@@ -124,6 +125,7 @@ void main() {
       )));
       await tester.pump(const Duration(milliseconds: 1500));
 
+      await tester.ensureVisible(find.text('SIGN IN'));
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
 
@@ -140,6 +142,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Enter your email'),
         'notanemail',
       );
+      await tester.ensureVisible(find.text('SIGN IN'));
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
 
@@ -156,6 +159,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Enter your email'),
         'test@gym.com',
       );
+      await tester.ensureVisible(find.text('SIGN IN'));
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
 
@@ -177,6 +181,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Enter your password'),
         'abc',
       );
+      await tester.ensureVisible(find.text('SIGN IN'));
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
 
@@ -199,6 +204,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Enter your password'),
         'validpass',
       );
+      await tester.ensureVisible(find.text('SIGN IN'));
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
 
@@ -216,6 +222,7 @@ void main() {
       await tester.pumpWidget(_wrap(LoginScreen(authService: fakeAuth)));
       await tester.pump(const Duration(milliseconds: 1500));
 
+      await tester.ensureVisible(find.text('SIGN IN'));
       await tester.tap(find.text('SIGN IN'));
       await tester.pump();
 

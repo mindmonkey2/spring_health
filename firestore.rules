@@ -76,8 +76,7 @@ service cloud.firestore {
     }
 
     match /members/{memberId}/entries/{entryId} {
-      allow read, write: if isSignedIn();
-      allow read: if isOwner() || isTrainer();
+      allow read, write: if isAdmin() || isTrainer() || isMemberOwner(memberId);
     }
 
     // ── ATTENDANCE ─────────────────────────────────────────

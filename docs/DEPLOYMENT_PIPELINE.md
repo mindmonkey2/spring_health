@@ -234,3 +234,5 @@ Merge to main
 ├─► preview.yml     (deploy to live channels)
 └─► distribute.yml  (build signed APK + Firebase App Distribution)
 ```
+
+<!-- pipeline test trigger: 2026-05-04 -->

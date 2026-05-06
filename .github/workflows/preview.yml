@@ -54,7 +54,7 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
-          projectId: springhealth-d00aa
+          projectId: spring-health-studio-f4930
           entryPoint: spring_health_member_app
 
       - name: Deploy to production
@@ -63,7 +63,7 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
-          projectId: springhealth-d00aa
+          projectId: spring-health-studio-f4930
           channelId: live
           entryPoint: spring_health_member_app
 
@@ -107,7 +107,7 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
-          projectId: springhealth-d00aa
+          projectId: spring-health-studio-f4930
           entryPoint: spring_health_studio
 
       - name: Deploy to production
@@ -116,6 +116,6 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPRINGHEALTH }}
-          projectId: springhealth-d00aa
+          projectId: spring-health-studio-f4930
           channelId: live
           entryPoint: spring_health_studio

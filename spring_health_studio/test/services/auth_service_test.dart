@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spring_health_studio/services/auth_service.dart';
@@ -33,6 +34,8 @@ class MockUser extends Fake implements User {
   String? get email => 'test@example.com';
 }
 
+class MockFirebaseFirestore extends Fake implements FirebaseFirestore {}
+
 void main() {
   group('AuthService', () {
     late AuthService authService;
@@ -40,7 +43,7 @@ void main() {
 
     setUp(() {
       mockAuth = MockFirebaseAuth();
-      authService = AuthService(auth: mockAuth);
+      authService = AuthService(auth: mockAuth, firestore: MockFirebaseFirestore());
     });
 
     group('signInWithEmailAndPassword', () {

@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/auth_service.dart';
-import '../../services/firestore_service.dart';
 import '../../theme/app_colors.dart';
 import '../../models/user_model.dart';
 import '../owner/owner_dashboard.dart';
@@ -25,8 +23,6 @@ class _LoginScreenState extends State<LoginScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   late final _authService = widget.authService ?? AuthService();
-  // ignore: unused_field
-  final _firestoreService = FirestoreService();
 
   late AnimationController _floatController;
   late AnimationController _fadeController;

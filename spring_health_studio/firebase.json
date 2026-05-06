@@ -46,7 +46,6 @@
     }
   ],
   "hosting": {
-    "site": "springhealth-studio",
     "public": "build/web",
     "ignore": [
       "firebase.json",

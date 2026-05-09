@@ -11,6 +11,11 @@ concurrency:
   group: preview-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
 jobs:
   # ──────────────────────────────────────────────
   #  Member App — build web + deploy to Hosting

@@ -1,3 +1,5 @@
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ OtpVerificationScreen _screen({
     verificationId: verificationId,
     verifyOtpOverride: verifyOverride,
     resendOtpOverride: resendOverride,
+    testMode: true,
   );
 }
 
@@ -36,38 +39,47 @@ Future<void> _enter6Digits(WidgetTester tester, String digits) async {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    Animate.restartOnHotReload = false;
+  });
+
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    Animate.restartOnHotReload = false;
+  });
+
+  Future<void> pumpScreen(WidgetTester tester, Widget screen) async {
+    await tester.pumpWidget(_wrap(screen));
+    await tester.pump(const Duration(milliseconds: 500));
+  }
   group('OtpVerificationScreen — rendering', () {
     testWidgets('displays the phone number OTP was sent to', (tester) async {
-      await tester.pumpWidget(_wrap(_screen(phoneNumber: '9876543210')));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, _screen(phoneNumber: '9876543210'));
 
       expect(find.textContaining('9876543210'), findsOneWidget);
     });
 
     testWidgets('shows VERIFY IDENTITY heading', (tester) async {
-      await tester.pumpWidget(_wrap(_screen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, _screen());
 
       expect(find.text('VERIFY IDENTITY'), findsOneWidget);
     });
 
     testWidgets('shows VERIFY & CONTINUE button', (tester) async {
-      await tester.pumpWidget(_wrap(_screen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, _screen());
 
       expect(find.text('VERIFY & CONTINUE'), findsOneWidget);
     });
 
     testWidgets('shows Resend OTP link', (tester) async {
-      await tester.pumpWidget(_wrap(_screen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, _screen());
 
       expect(find.text('Resend OTP'), findsOneWidget);
     });
 
     testWidgets('back button is present in AppBar', (tester) async {
-      await tester.pumpWidget(_wrap(_screen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, _screen());
 
       expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
     });
@@ -76,8 +88,7 @@ void main() {
   group('OtpVerificationScreen — OTP length validation', () {
     testWidgets('shows error SnackBar when tapping verify with no digits entered',
         (tester) async {
-      await tester.pumpWidget(_wrap(_screen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, _screen());
 
       await tester.tap(find.text('VERIFY & CONTINUE'));
       await tester.pump();
@@ -91,12 +102,11 @@ void main() {
 
     testWidgets('does not call verifyOtp when OTP field is empty', (tester) async {
       var called = false;
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         verifyOverride: (otp, {verificationId}) async {
           called = true;
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await tester.tap(find.text('VERIFY & CONTINUE'));
       await tester.pump();
@@ -108,13 +118,11 @@ void main() {
   group('OtpVerificationScreen — verify flow', () {
     testWidgets('shows loading indicator while verifying', (tester) async {
       final completer = Completer<void>();
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         verifyOverride: (otp, {verificationId}) => completer.future,
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enter6Digits(tester, '123456');
-      await tester.tap(find.text('VERIFY & CONTINUE'));
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -126,12 +134,11 @@ void main() {
     });
 
     testWidgets('shows error SnackBar when verification throws', (tester) async {
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         verifyOverride: (otp, {verificationId}) async {
           throw Exception('Invalid OTP code. Please check and try again.');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enter6Digits(tester, '999999');
       await tester.tap(find.text('VERIFY & CONTINUE'));
@@ -145,12 +152,11 @@ void main() {
     });
 
     testWidgets('hides loading indicator after verification fails', (tester) async {
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         verifyOverride: (otp, {verificationId}) async {
           throw Exception('Session expired');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enter6Digits(tester, '123456');
       await tester.tap(find.text('VERIFY & CONTINUE'));
@@ -166,7 +172,7 @@ void main() {
       String? capturedOtp;
       String? capturedVid;
 
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         verificationId: 'real-vid-123',
         // Throw after capturing to prevent navigation to MainScreen
         verifyOverride: (otp, {verificationId}) async {
@@ -174,8 +180,7 @@ void main() {
           capturedVid = verificationId;
           throw Exception('stop-navigation');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enter6Digits(tester, '654321');
       await tester.tap(find.text('VERIFY & CONTINUE'));
@@ -190,15 +195,14 @@ void main() {
   group('OtpVerificationScreen — resend flow', () {
     testWidgets('shows spinner while resending OTP', (tester) async {
       final completer = Completer<void>();
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         resendOverride: ({
           required phoneNumber,
           required onCodeSent,
           required onError,
         }) =>
             completer.future,
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await tester.tap(find.text('Resend OTP'));
       await tester.pump();
@@ -210,7 +214,7 @@ void main() {
     });
 
     testWidgets('shows success SnackBar after successful resend', (tester) async {
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         phoneNumber: '9876543210',
         resendOverride: ({
           required phoneNumber,
@@ -219,8 +223,7 @@ void main() {
         }) async {
           onCodeSent('new-vid');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await tester.tap(find.text('Resend OTP'));
       await tester.pump();
@@ -233,7 +236,7 @@ void main() {
     });
 
     testWidgets('shows error SnackBar when resend fails', (tester) async {
-      await tester.pumpWidget(_wrap(_screen(
+      await pumpScreen(tester, _screen(
         resendOverride: ({
           required phoneNumber,
           required onCodeSent,
@@ -241,8 +244,7 @@ void main() {
         }) async {
           onError('quota exceeded');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await tester.tap(find.text('Resend OTP'));
       await tester.pump();

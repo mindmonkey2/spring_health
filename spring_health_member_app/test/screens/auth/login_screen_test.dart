@@ -1,3 +1,5 @@
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -32,32 +34,38 @@ Future<void> _enterPhoneAndTap(WidgetTester tester, String phone) async {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    Animate.restartOnHotReload = false;
+  });
+
+  Future<void> pumpScreen(WidgetTester tester, Widget screen, {List<NavigatorObserver>? observers}) async {
+    await tester.pumpWidget(_wrap(screen, observers: observers));
+    await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+  }
   group('Member LoginScreen — rendering', () {
     testWidgets('renders phone input field and SEND OTP button', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       expect(find.byType(TextFormField), findsOneWidget);
       expect(find.text('SEND OTP'), findsOneWidget);
     });
 
     testWidgets('shows WELCOME BACK heading', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       expect(find.text('WELCOME BACK'), findsOneWidget);
     });
 
     testWidgets('shows +91 country code prefix', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       expect(find.text('+91'), findsOneWidget);
     });
 
     testWidgets('shows membership notice text', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       expect(
         find.textContaining('registered Spring Health members'),
@@ -68,8 +76,7 @@ void main() {
 
   group('Member LoginScreen — phone validation', () {
     testWidgets('shows error when phone is empty', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       await tester.tap(find.text('SEND OTP'));
       await tester.pump();
@@ -78,8 +85,7 @@ void main() {
     });
 
     testWidgets('shows error when phone has fewer than 10 digits', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       await _enterPhoneAndTap(tester, '98765432'); // 8 digits
 
@@ -88,8 +94,7 @@ void main() {
 
     testWidgets('shows error when phone starts with 5 (invalid Indian number)',
         (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       await _enterPhoneAndTap(tester, '5123456789');
 
@@ -97,8 +102,7 @@ void main() {
     });
 
     testWidgets('shows error for phone starting with 0', (tester) async {
-      await tester.pumpWidget(_wrap(const LoginScreen()));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester, const LoginScreen(testMode: true));
 
       await _enterPhoneAndTap(tester, '0123456789');
 
@@ -107,7 +111,8 @@ void main() {
 
     testWidgets('does not call sendOtp when form is invalid', (tester) async {
       var called = false;
-      await tester.pumpWidget(_wrap(LoginScreen(
+      await pumpScreen(tester, LoginScreen(
+        testMode: true,
         sendOtpOverride: ({
           required phoneNumber,
           required onCodeSent,
@@ -115,8 +120,7 @@ void main() {
         }) async {
           called = true;
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       // Submit without entering a phone number
       await tester.tap(find.text('SEND OTP'));
@@ -130,7 +134,8 @@ void main() {
     for (final startDigit in ['6', '7', '8', '9']) {
       testWidgets('accepts valid phone starting with $startDigit', (tester) async {
         var called = false;
-        await tester.pumpWidget(_wrap(LoginScreen(
+        await pumpScreen(tester, LoginScreen(
+        testMode: true,
           sendOtpOverride: ({
             required phoneNumber,
             required onCodeSent,
@@ -139,8 +144,7 @@ void main() {
             called = true;
             onCodeSent('vid');
           },
-        )));
-        await tester.pumpAndSettle();
+        ));
 
         await _enterPhoneAndTap(tester, '${startDigit}123456789');
         await tester.pump(Duration.zero);
@@ -157,15 +161,15 @@ void main() {
   group('Member LoginScreen — OTP send flow', () {
     testWidgets('shows loading indicator while OTP is being sent', (tester) async {
       final completer = Completer<void>();
-      await tester.pumpWidget(_wrap(LoginScreen(
+      await pumpScreen(tester, LoginScreen(
+        testMode: true,
         sendOtpOverride: ({
           required phoneNumber,
           required onCodeSent,
           required onError,
         }) =>
             completer.future,
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enterPhoneAndTap(tester, '9876543210');
 
@@ -177,7 +181,8 @@ void main() {
 
     testWidgets('calls sendOtp with the entered phone number', (tester) async {
       String? capturedPhone;
-      await tester.pumpWidget(_wrap(LoginScreen(
+      await pumpScreen(tester, LoginScreen(
+        testMode: true,
         sendOtpOverride: ({
           required phoneNumber,
           required onCodeSent,
@@ -186,8 +191,7 @@ void main() {
           capturedPhone = phoneNumber;
           onCodeSent('vid');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enterPhoneAndTap(tester, '9876543210');
       await tester.pump(Duration.zero);
@@ -196,7 +200,8 @@ void main() {
     });
 
     testWidgets('shows error SnackBar when OTP send fails', (tester) async {
-      await tester.pumpWidget(_wrap(LoginScreen(
+      await pumpScreen(tester, LoginScreen(
+        testMode: true,
         sendOtpOverride: ({
           required phoneNumber,
           required onCodeSent,
@@ -204,8 +209,7 @@ void main() {
         }) async {
           onError('Too many requests. Please wait before trying again.');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enterPhoneAndTap(tester, '9876543210');
       await tester.pump();
@@ -219,7 +223,8 @@ void main() {
 
     testWidgets('hides loading indicator and restores button after OTP error',
         (tester) async {
-      await tester.pumpWidget(_wrap(LoginScreen(
+      await pumpScreen(tester, LoginScreen(
+        testMode: true,
         sendOtpOverride: ({
           required phoneNumber,
           required onCodeSent,
@@ -227,8 +232,7 @@ void main() {
         }) async {
           onError('OTP failed');
         },
-      )));
-      await tester.pumpAndSettle();
+      ));
 
       await _enterPhoneAndTap(tester, '9876543210');
       await tester.pump();
@@ -239,8 +243,8 @@ void main() {
 
     testWidgets('initiates navigation after successful OTP send', (tester) async {
       final captor = _RouteCaptor();
-      await tester.pumpWidget(_wrap(
-        LoginScreen(
+      await pumpScreen(tester, LoginScreen(
+        testMode: true,
           sendOtpOverride: ({
             required phoneNumber,
             required onCodeSent,
@@ -248,10 +252,7 @@ void main() {
           }) async {
             onCodeSent('fake-verification-id');
           },
-        ),
-        observers: [captor],
-      ));
-      await tester.pumpAndSettle();
+        ), observers: [captor]);
 
       await _enterPhoneAndTap(tester, '9876543210');
       await tester.pump(Duration.zero);

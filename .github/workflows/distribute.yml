@@ -9,6 +9,9 @@ concurrency:
   group: distribute-main
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   distribute-member-apk:
     name: Member App — Build & Distribute APK

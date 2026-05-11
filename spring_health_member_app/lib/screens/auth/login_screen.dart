@@ -15,10 +15,11 @@ typedef SendOtpCallback = Future<void> Function({
 });
 
 class LoginScreen extends StatefulWidget {
+  final bool testMode;
   @visibleForTesting
   final SendOtpCallback? sendOtpOverride;
 
-  const LoginScreen({super.key, this.sendOtpOverride});
+  const LoginScreen({super.key, this.sendOtpOverride, this.testMode = false});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -172,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen>
       padding: EdgeInsets.symmetric(vertical: logoSize * 0.15),
       color: AppColors.backgroundBlack,
       child: Center(
-        child: SpringHealthLogoAnimated(size: logoSize, showText: true),
+        child: SpringHealthLogoAnimated(size: logoSize, showText: true, testMode: widget.testMode),
       ),
     );
   }

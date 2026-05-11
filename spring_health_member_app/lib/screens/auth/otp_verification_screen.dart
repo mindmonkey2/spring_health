@@ -8,6 +8,7 @@ import '../../services/firebase_auth_service.dart';
 import '../main_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
+  final bool testMode;
   final String phoneNumber;
   final String verificationId;
 
@@ -28,6 +29,7 @@ class OtpVerificationScreen extends StatefulWidget {
     required this.verificationId,
     this.verifyOtpOverride,
     this.resendOtpOverride,
+    this.testMode = false,
   });
 
   @override
@@ -254,7 +256,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
               // Animated running logo (icon only, no text)
-              Center(child: SpringHealthLogoAnimated(size: 80, showText: false))
+              Center(child: SpringHealthLogoAnimated(size: 80, showText: false, testMode: widget.testMode))
                   .animate()
                   .fadeIn(duration: 500.ms)
                   .scale(

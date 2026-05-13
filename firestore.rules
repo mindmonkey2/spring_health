@@ -25,14 +25,6 @@ service cloud.firestore {
       return isOwner() || isReceptionist();
     }
 
-    function isStaff() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    function getStaffBranch() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.branch;
-    }
-
     function isOwnDocument(docId) {
       return request.auth.uid == docId;
     }
@@ -108,20 +100,7 @@ service cloud.firestore {
 
     // ── ANNOUNCEMENTS ──────────────────────────────────────
     match /announcements/{announcementId} {
-      allow read: if isSignedIn() && (
-        isOwner() ||
-        resource.data.get('branch', 'All').lower() == 'all' ||
-        resource.data.get('targetBranches', []).hasAny(['all', 'All', 'ALL']) ||
-        (isStaff() && (
-          getStaffBranch() == resource.data.get('branch', '') ||
-          resource.data.get('targetBranches', []).hasAny([getStaffBranch()])
-        )) ||
-        // Rule 20: Phone OTP members have no /users/{uid} document.
-        // Branch verification for members in rules is currently not possible
-        // without architectural changes to how member branch data is exposed to rules.
-        // Isolation is maintained via branch-filtered queries in the Member App.
-        !isStaff()
-      );
+      allow read: if isSignedIn();
       allow create, delete: if isAdmin();
       allow update: if isAdmin() || (isSignedIn() &&
         request.resource.data.diff(resource.data)

@@ -1,5 +1,5 @@
 # Spring Health Applications — Engineering Memory Document
-**Last Updated:** May 13, 2026
+**Last Updated:** April 29, 2026
 **Admin App:** ~97% (53/55 features) | **Member App:** ~95% (74 features)
 
 ---
@@ -899,7 +899,6 @@ Planned features: member list by branch, attendance marking, workout assignment,
       memberId resolves in initState
     - Guard with null check: if (memberId != null)
     - Do NOT call saveFCMToken before memberId is resolved
-    - Dead code: Commented-out `saveFCMToken()` in `NotificationService.initialize()` was removed to prevent accidental re-introduction of the missing parameter bug.
     - Fixed Thread 15
 
 29. WeeklyWarModel.fromMap must use _parseDate for all date fields
@@ -1090,25 +1089,6 @@ Planned features: member list by branch, attendance marking, workout assignment,
 
 ---
 
-**T15-PRE Regression Fix (Shipped May 13, 2026):**
-- Firebase project restored: member app Android →
-  spring-health-studio-f4930
-- war_winner XP corrected: 500 → 200
-- CLAUDE.md Gemini model corrected:
-  gemini-2.0-flash → gemini-2.5-flash-preview-04-17
-- 32 auth test failures fixed:
-  - testMode added to SpringHealthLogoAnimated,
-    LoginScreen, OtpVerificationScreen
-  - GoogleFonts.config.allowRuntimeFetching = false
-    in test setUpAll
-  - Animate.restartOnHotReload = false in test setUpAll
-  - pump() replaces pumpAndSettle() throughout auth tests
-    (Pinput cursor + flutter_animate block settlement)
-- Node.js 20 CI deprecation resolved:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true in all
-  .github/workflows/*.yml files
-- Member: 136 passed | Studio: 116 passed | Both: 0 issues
-
 ## 8. How to Use This Document
 
 **When planning sprints:** Use Section 6 completion stats to identify backlog items.
@@ -1127,7 +1107,7 @@ Planned features: member list by branch, attendance marking, workout assignment,
 
 *Document Maintenance: Update after every bug fix, feature addition, or architectural decision.*
 *New rules added to Section 7 prevent future regressions.*
-*Last updated: May 13, 2026*
+*Last updated: April 29, 2026 — Thread 14 Complete.*
 
 - When making parameters optional that are required for correct behavior of warning banners (like `HealthProfileModel` in `BodyMetricsScreen`), ensure that a fallback mechanism exists to fetch the missing data (e.g. `HealthProfileService().getHealthProfile()`).
 

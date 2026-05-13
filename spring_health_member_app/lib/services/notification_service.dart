@@ -61,12 +61,15 @@ class NotificationService {
       // 2. Local notifications
       await _initLocalNotifications();
 
-      // 3. Message listeners
+      // 3. FCM token
+      // await saveFCMToken(); // Removed to avoid missing parameter, it's called explicitly with memberId in main_screen.dart.
+
+      // 4. Message listeners
       FirebaseMessaging.onMessage.listen(_onForeground);
       FirebaseMessaging.onMessageOpenedApp.listen(_onTap);
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-      // 4. Cold start tap
+      // 5. Cold start tap
       final initial = await _messaging.getInitialMessage();
       if (initial != null) _onTap(initial);
 

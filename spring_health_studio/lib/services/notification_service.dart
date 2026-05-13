@@ -43,6 +43,9 @@ class NotificationService {
       : _firestoreService = FirestoreService.instance,
         _whatsAppService = WhatsAppService.instance;
 
+  // FIX 1: Centralized delay constant — easy to tune without hunting the file
+  static const _kRateLimitDelay = Duration(seconds: 2);
+
   // FIX 2: Helper to normalize DateTime to date-only (removes time component)
   // Prevents inDays returning wrong value when expiry is midnight vs 11:59 PM
   DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
@@ -68,12 +71,12 @@ class NotificationService {
             m.dateOfBirth!.day == today.day;
       }).toList();
 
-      final results = await Future.wait(birthdayMembers.map((member) async {
+      final sentTo = <String>[];
+      for (final member in birthdayMembers) {
         final sent = await _whatsAppService.sendBirthdayWish(member);
-        return sent ? member.name : null;
-      }));
-
-      final sentTo = results.whereType<String>().toList();
+        if (sent) sentTo.add(member.name);
+        await Future.delayed(_kRateLimitDelay);
+      }
 
       debugPrint(
           'Birthday wishes sent: ${sentTo.length}/${birthdayMembers.length}');
@@ -117,22 +120,19 @@ class NotificationService {
 
       // FIX 6: Send in priority order — most urgent first
       Future<List<String>> sendBatch(List<MemberModel> batch, int days) async {
-        final results = await Future.wait(batch.map((m) async {
-          final success = await _whatsAppService.sendExpiryReminder(m, days);
-          return success ? m.name : null;
-        }));
-        return results.whereType<String>().toList();
+        final sent = <String>[];
+        for (final m in batch) {
+          if (await _whatsAppService.sendExpiryReminder(m, days)) {
+            sent.add(m.name);
+          }
+          await Future.delayed(_kRateLimitDelay);
+        }
+        return sent;
       }
 
-      final batchResults = await Future.wait([
-        sendBatch(expiring1, 1),
-        sendBatch(expiring3, 3),
-        sendBatch(expiring7, 7),
-      ]);
-
-      final oneDay = batchResults[0];
-      final threeDays = batchResults[1];
-      final sevenDays = batchResults[2];
+      final oneDay = await sendBatch(expiring1, 1);
+      final threeDays = await sendBatch(expiring3, 3);
+      final sevenDays = await sendBatch(expiring7, 7);
 
       final result = ExpiryReminderResult(
         sevenDays: sevenDays,
@@ -158,12 +158,12 @@ class NotificationService {
       final members = membersList ?? await _getMembers(branch);
       final membersWithDues = members.where((m) => m.dueAmount > 0).toList();
 
-      final results = await Future.wait(membersWithDues.map((member) async {
+      final sentTo = <String>[];
+      for (final member in membersWithDues) {
         final sent = await _whatsAppService.sendDuePaymentReminder(member);
-        return sent ? member.name : null;
-      }));
-
-      final sentTo = results.whereType<String>().toList();
+        if (sent) sentTo.add(member.name);
+        await Future.delayed(_kRateLimitDelay);
+      }
 
       debugPrint(
           'Due reminders sent: ${sentTo.length}/${membersWithDues.length}');

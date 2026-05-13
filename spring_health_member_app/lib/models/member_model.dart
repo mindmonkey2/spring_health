@@ -77,13 +77,8 @@ class MemberModel {
 
   bool get isExpired => DateTime.now().isAfter(expiryDate);
 
-  bool get isExpiringSoon {
-    if (isExpired) return false;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final expiry = DateTime(expiryDate.year, expiryDate.month, expiryDate.day);
-    return expiry.difference(today).inDays <= 7;
-  }
+  bool get isExpiringSoon =>
+      !isExpired && expiryDate.difference(DateTime.now()).inDays <= 7;
 
   /// Active = not expired AND not archived
   bool get isActive => !isExpired && !isArchived;

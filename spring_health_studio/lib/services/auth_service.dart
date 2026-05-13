@@ -4,11 +4,9 @@ import '../models/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
 
-  AuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
-      : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance;
+  AuthService({FirebaseAuth? auth})
+      : _auth = auth ?? FirebaseAuth.instance;
 
   User? get currentUser => _auth.currentUser;
 
@@ -43,7 +41,7 @@ class AuthService {
       DateTime createdAt = DateTime.now();
 
       // ── Try users collection first ──────────────────────────────
-      final userDoc = await _firestore
+      final userDoc = await FirebaseFirestore.instance
       .collection('users')
       .doc(firebaseUid)
       .get();
@@ -60,7 +58,7 @@ class AuthService {
       // ── If no users doc, still allow trainer login ──────────────
 
       if (role.toLowerCase() == 'trainer' || role.isEmpty) {
-        final trainerQuery = await _firestore
+        final trainerQuery = await FirebaseFirestore.instance
         .collection('trainers')
         .where('authUid', isEqualTo: firebaseUid)
         .limit(1)

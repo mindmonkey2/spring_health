@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/auth_service.dart';
+import '../../services/firestore_service.dart';
 import '../../theme/app_colors.dart';
 import '../../models/user_model.dart';
 import '../owner/owner_dashboard.dart';
@@ -8,10 +9,7 @@ import '../receptionist/receptionist_dashboard.dart';
 import '../trainer/trainer_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  @visibleForTesting
-  final AuthService? authService;
-
-  const LoginScreen({super.key, this.authService});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -23,7 +21,8 @@ class _LoginScreenState extends State<LoginScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
-  late final _authService = widget.authService ?? AuthService();
+  // ignore: unused_field
+  final _firestoreService = FirestoreService();
 
   late AnimationController _floatController;
   late AnimationController _fadeController;

@@ -8,18 +8,8 @@ import '../../services/firebase_auth_service.dart';
 import '../../widgets/spring_health_logo_animated.dart';
 import 'otp_verification_screen.dart';
 
-typedef SendOtpCallback = Future<void> Function({
-  required String phoneNumber,
-  required void Function(String verificationId) onCodeSent,
-  required void Function(String error) onError,
-});
-
 class LoginScreen extends StatefulWidget {
-  final bool testMode;
-  @visibleForTesting
-  final SendOtpCallback? sendOtpOverride;
-
-  const LoginScreen({super.key, this.sendOtpOverride, this.testMode = false});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -28,7 +18,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _phoneController = TextEditingController();
-  late final _authService = FirebaseAuthService.instance;
+  final _authService = FirebaseAuthService.instance; // ✅ FIX 1
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
@@ -70,53 +60,45 @@ class _LoginScreenState extends State<LoginScreen>
 
     final phone = _phoneController.text.trim();
 
-    void onCodeSent(String verificationId) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              OtpVerificationScreen(
-                phoneNumber: phone,
-                verificationId: verificationId,
-              ),
-          transitionsBuilder:
-              (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1.0, 0),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    ),
-                  ),
-                  child: child,
-                );
-              },
-        ),
-      );
-    }
-
-    void onError(String error) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      _triggerShake();
-      _showError(error);
-    }
-
-    final override = widget.sendOtpOverride;
-    if (override != null) {
-      await override(phoneNumber: phone, onCodeSent: onCodeSent, onError: onError);
-    } else {
-      await _authService.sendOTP(
-        phoneNumber: phone,
-        onCodeSent: onCodeSent,
-        onError: onError,
-      );
-    }
+    await _authService.sendOTP(
+      phoneNumber: phone,
+      onCodeSent: (verificationId) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                OtpVerificationScreen(
+                  phoneNumber: phone,
+                  verificationId: verificationId,
+                ),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(1.0, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
+                    child: child,
+                  );
+                },
+          ),
+        );
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        _triggerShake();
+        _showError(error);
+      },
+    );
   }
 
   void _showError(String message) {
@@ -173,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen>
       padding: EdgeInsets.symmetric(vertical: logoSize * 0.15),
       color: AppColors.backgroundBlack,
       child: Center(
-        child: SpringHealthLogoAnimated(size: logoSize, showText: true, testMode: widget.testMode),
+        child: SpringHealthLogoAnimated(size: logoSize, showText: true),
       ),
     );
   }

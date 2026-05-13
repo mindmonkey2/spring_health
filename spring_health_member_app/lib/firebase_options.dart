@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -47,11 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAx0by3QN9NSvcxyxg4hEEZhLBpOSPJ2G4',
-    appId: '1:172840829163:android:d00c60504ef85c8313feae',
-    messagingSenderId: '172840829163',
-    projectId: 'springhealth-d00aa',
-    storageBucket: 'springhealth-d00aa.firebasestorage.app',
+    apiKey: 'AIzaSyA9y_fTKrfIRYlw4Th_2o93tZUlOsfwu30',
+    appId: '1:527678863150:android:2dbc3d2b5111e7caeaecbf',
+    messagingSenderId: '527678863150',
+    projectId: 'spring-health-studio-f4930',
+    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -62,15 +65,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
     iosBundleId: 'com.springhealthtech.springHealthMember',
   );
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDNuVVBgoJZJ7dvoljDfz0J-3wAFajDU5E',
-    appId: '1:172840829163:web:50e0a382dcfe707313feae',
-    messagingSenderId: '172840829163',
-    projectId: 'springhealth-d00aa',
-    authDomain: 'springhealth-d00aa.firebaseapp.com',
-    storageBucket: 'springhealth-d00aa.firebasestorage.app',
-    measurementId: 'G-4EPV8DFS9Y',
-  );
-
 }

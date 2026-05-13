@@ -72,10 +72,8 @@ class MemberModel {
   /// True if expiry is within the next 7 days and not yet expired
   bool get isExpiringSoon {
     if (isExpired) return false;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final expiry = DateTime(expiryDate.year, expiryDate.month, expiryDate.day);
-    return expiry.difference(today).inDays <= 7;
+    final daysLeft = expiryDate.difference(DateTime.now()).inDays;
+    return daysLeft <= 7;
   }
 
   /// Days remaining until expiry — 0 if already expired

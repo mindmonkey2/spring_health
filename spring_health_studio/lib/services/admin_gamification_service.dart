@@ -7,6 +7,12 @@ class AdminGamificationService {
 
   final FirebaseFirestore _db;
 
+  // In-memory cache for member documents to reduce redundant reads.
+  // Values can be null (negative caching for non-existent members).
+  static final Map<String, Map<String, dynamic>?> _memberCache = {};
+
+  static void clearMemberCache() => _memberCache.clear();
+
   /// sortBy: totalXp | currentStreak | totalWorkouts | totalCheckIns | longestStreak
   Future<List<AdminLeaderboardEntry>> getLeaderboard({
     required String sortBy,
@@ -23,25 +29,39 @@ class AdminGamificationService {
 
     // Join: gamification doc id == members doc id
     final memberIds = snap.docs.map((d) => d.id).toList();
-    final memberDocsMap = <String, DocumentSnapshot<Map<String, dynamic>>>{};
 
-    // Parallelize chunked queries - Firestore whereIn limit is 30
-    final memberFutures = <Future<QuerySnapshot<Map<String, dynamic>>>>[];
-    for (var i = 0; i < memberIds.length; i += 30) {
-      final chunk = memberIds.sublist(
-        i,
-        i + 30 > memberIds.length ? memberIds.length : i + 30,
-      );
-      memberFutures.add(_db
-          .collection('members')
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get());
-    }
+    // Identify IDs not in cache
+    final missingMemberIds = memberIds.where((id) => !_memberCache.containsKey(id)).toList();
 
-    final memberSnapshots = await Future.wait(memberFutures);
-    for (final memberSnap in memberSnapshots) {
-      for (final doc in memberSnap.docs) {
-        memberDocsMap[doc.id] = doc;
+    if (missingMemberIds.isNotEmpty) {
+      // Parallelize chunked queries - Firestore whereIn limit is 30
+      final memberFutures = <Future<QuerySnapshot<Map<String, dynamic>>>>[];
+      for (var i = 0; i < missingMemberIds.length; i += 30) {
+        final chunk = missingMemberIds.sublist(
+          i,
+          i + 30 > missingMemberIds.length ? missingMemberIds.length : i + 30,
+        );
+        memberFutures.add(_db
+            .collection('members')
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get());
+      }
+
+      final memberSnapshots = await Future.wait(memberFutures);
+      final fetchedIds = <String>{};
+
+      for (final memberSnap in memberSnapshots) {
+        for (final doc in memberSnap.docs) {
+          _memberCache[doc.id] = doc.data();
+          fetchedIds.add(doc.id);
+        }
+      }
+
+      // Negative caching: mark requested but missing IDs as null to avoid re-fetching
+      for (final id in missingMemberIds) {
+        if (!fetchedIds.contains(id)) {
+          _memberCache[id] = null;
+        }
       }
     }
 
@@ -49,7 +69,7 @@ class AdminGamificationService {
     for (var i = 0; i < snap.docs.length; i++) {
       final gDoc = snap.docs[i];
       final g = gDoc.data();
-      final m = memberDocsMap[gDoc.id]?.data();
+      final m = _memberCache[gDoc.id];
 
       // Branch filter — in-memory to avoid composite index requirement
       if (branch != null && (m?['branch'] as String?) != branch) continue;

@@ -52,10 +52,8 @@ class AdminGamificationService {
 
       for (final memberSnap in memberSnapshots) {
         for (final doc in memberSnap.docs) {
-          if (doc.exists && doc.data() != null) {
-            _memberCache[doc.id] = doc.data();
-            fetchedIds.add(doc.id);
-          }
+          _memberCache[doc.id] = doc.data();
+          fetchedIds.add(doc.id);
         }
       }
 

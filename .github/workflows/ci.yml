@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel any in-progress run on the same branch when a new commit arrives.
+# This keeps the queue clean on fast-moving PRs without wasting runner minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  # ──────────────────────────────────────────────
+  #  Member App — spring_health_member_app
+  # ──────────────────────────────────────────────
+  test-member-app:
+    name: Member App — Analyze & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring_health_member_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+          cache: true
+
+      # Cache pub packages keyed on pubspec.lock so the cache is
+      # invalidated only when dependencies actually change.
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-member-${{ hashFiles('spring_health_member_app/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-member-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Static analysis — fails the build on any error or warning.
+      # Both apps are expected to produce 0 issues (per CLAUDE.md).
+      - name: Analyze
+        run: flutter analyze
+
+      # benchmark_test.dart is excluded intentionally: it contains a
+      # timing assertion (batchedTime < nPlus1Time) that is environment-
+      # sensitive and produces false failures on fast CI runners.
+      # Unit tests covering models and services are deterministic and run here.
+      - name: Run unit tests
+        run: flutter test test/models test/services
+
+  # ──────────────────────────────────────────────
+  #  Studio App — spring_health_studio
+  # ──────────────────────────────────────────────
+  test-studio-app:
+    name: Studio App — Analyze & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spring_health_studio
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-studio-${{ hashFiles('spring_health_studio/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-studio-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      # All 4 studio tests are deterministic (pure service logic,
+      # custom in-memory mocks, no timing assertions).
+      - name: Run unit tests
+        run: flutter test

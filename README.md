@@ -75,25 +75,15 @@ Spring Health is a multi-branch gym management system composed of two mobile app
 
 ## 7. Local Development Setup
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd spring_health
+For detailed instructions on setting up your local environment, configuring Firebase, and running both applications, please refer to the [Local Setup Guide](docs/LOCAL_SETUP.md).
 
+### Quick Start
+```bash
 # Setup Member App
-cd spring_health_member_app
-flutter pub get
-# Ensure google-services.json (Android) and GoogleService-Info.plist (iOS) are configured.
-flutter run
+cd spring_health_member_app && flutter pub get && flutter run
 
 # Setup Studio App
-cd ../spring_health_studio
-flutter pub get
-# Ensure google-services.json (Android) and GoogleService-Info.plist (iOS) are configured.
-flutter run
-
-# Deploy Firestore Rules (from project root)
-firebase deploy --only firestore:rules
+cd spring_health_studio && flutter pub get && flutter run
 ```
 
 ## 8. Key Engineering Decisions

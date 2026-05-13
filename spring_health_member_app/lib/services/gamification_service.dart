@@ -10,8 +10,12 @@ import 'firebase_auth_service.dart';
 class GamificationService {
   static final GamificationService instance = GamificationService._internal();
   factory GamificationService() => instance;
-  GamificationService._internal();
-  final _db = FirebaseFirestore.instance;
+  GamificationService._internal() : _db = FirebaseFirestore.instance;
+
+  @visibleForTesting
+  GamificationService.withFirestore(FirebaseFirestore firestore) : _db = firestore;
+
+  final FirebaseFirestore _db;
 
   // ─────────────────────────────────────────────
   // GET OR CREATE
@@ -30,7 +34,7 @@ class GamificationService {
   // LOYALTY HELPERS
   // ─────────────────────────────────────────────
   Future<bool> _isMilestoneAlreadyAwarded(String memberId, String event) async {
-    final doc = await FirebaseFirestore.instance
+    final doc = await _db
         .collection('gamification')
         .doc(memberId)
         .get();
@@ -93,7 +97,7 @@ class GamificationService {
             : 500;
         reason = _loyaltyLabel(event);
         await awardXp(memberId, reason, xp);
-        await FirebaseFirestore.instance
+        await _db
             .collection('gamification')
             .doc(memberId)
             .update({
@@ -202,7 +206,7 @@ class GamificationService {
   // EVENT LISTENER
   // ─────────────────────────────────────────────
   void listenForPendingLoyaltyEvents(String memberId) {
-    FirebaseFirestore.instance
+    _db
         .collection('gamification_events')
         .where('memberId', isEqualTo: memberId)
         .where('processed', isEqualTo: false)

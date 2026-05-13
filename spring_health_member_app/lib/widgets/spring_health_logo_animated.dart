@@ -6,12 +6,14 @@ class SpringHealthLogoAnimated extends StatefulWidget {
   final double size;
   final bool showText;
   final VoidCallback? onComplete;
+  final bool testMode;
 
   const SpringHealthLogoAnimated({
     super.key,
     this.size = 140,
     this.showText = true,
     this.onComplete,
+    this.testMode = false,
   });
 
   @override
@@ -65,7 +67,8 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
     _floatCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2600),
-    )..repeat(reverse: true);
+    );
+    if (!widget.testMode) _floatCtrl.repeat(reverse: true);
     _floatAnim = Tween<double>(
       begin: -6.0,
       end: 6.0,
@@ -74,7 +77,8 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
     _glowCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
+    );
+    if (!widget.testMode) _glowCtrl.repeat(reverse: true);
     _glowAnim = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -83,7 +87,8 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
     _orbitCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4000),
-    )..repeat();
+    );
+    if (!widget.testMode) _orbitCtrl.repeat();
     _orbitAnim = Tween<double>(
       begin: 0.0,
       end: 2 * pi,
@@ -92,7 +97,8 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
     _scanCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: false);
+    );
+    if (!widget.testMode) _scanCtrl.repeat(reverse: false);
     _scanAnim = Tween<double>(
       begin: -1.0,
       end: 1.0,
@@ -101,7 +107,8 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
     _particleCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
-    )..repeat();
+    );
+    if (!widget.testMode) _particleCtrl.repeat();
     _particleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_particleCtrl);
 
     _textCtrl = AnimationController(
@@ -114,15 +121,21 @@ class _SpringHealthLogoAnimatedState extends State<SpringHealthLogoAnimated>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeOutCubic));
 
-    _entranceCtrl.forward().then((_) {
-      if (!mounted) return;
-      _textCtrl.forward().then((_) {
+    if (!widget.testMode) {
+      _entranceCtrl.forward().then((_) {
         if (!mounted) return;
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) widget.onComplete?.call();
+        _textCtrl.forward().then((_) {
+          if (!mounted) return;
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) widget.onComplete?.call();
+          });
         });
       });
-    });
+    } else {
+      _entranceCtrl.value = 1.0;
+      _textCtrl.value = 1.0;
+      if (mounted) widget.onComplete?.call();
+    }
   }
 
   void _buildParticles() {

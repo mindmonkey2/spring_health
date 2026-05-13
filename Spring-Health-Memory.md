@@ -889,6 +889,7 @@ Planned features: member list by branch, attendance marking, workout assignment,
       memberId resolves in initState
     - Guard with null check: if (memberId != null)
     - Do NOT call saveFCMToken before memberId is resolved
+    - Dead code: Commented-out `saveFCMToken()` in `NotificationService.initialize()` was removed to prevent accidental re-introduction of the missing parameter bug.
     - Fixed Thread 15
 
 29. WeeklyWarModel.fromMap must use _parseDate for all date fields

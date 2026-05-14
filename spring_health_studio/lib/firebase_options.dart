@@ -41,47 +41,47 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDECFGrE2vvd51ildvQpZKiScE1uz1Kxmo',
-    appId: '1:527678863150:web:7ed76c694aefb927eaecbf',
-    messagingSenderId: '527678863150',
-    projectId: 'spring-health-studio-f4930',
-    authDomain: 'spring-health-studio-f4930.firebaseapp.com',
-    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_WEB'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_WEB'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_WEB'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_WEB'),
+    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN_WEB'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_WEB'),
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA9y_fTKrfIRYlw4Th_2o93tZUlOsfwu30',
-    appId: '1:527678863150:android:b7c18fb4abd67526eaecbf',
-    messagingSenderId: '527678863150',
-    projectId: 'spring-health-studio-f4930',
-    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_ANDROID'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_ANDROID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_ANDROID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_ANDROID'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_ANDROID'),
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDh4qZeMR0d78FTsVWSpby6fWGIR-amEso',
-    appId: '1:527678863150:ios:9493d77549d4286feaecbf',
-    messagingSenderId: '527678863150',
-    projectId: 'spring-health-studio-f4930',
-    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
-    iosBundleId: 'com.example.springHealthStudio',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_IOS'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_IOS'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_IOS'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_IOS'),
+    iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID'),
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDh4qZeMR0d78FTsVWSpby6fWGIR-amEso',
-    appId: '1:527678863150:ios:9493d77549d4286feaecbf',
-    messagingSenderId: '527678863150',
-    projectId: 'spring-health-studio-f4930',
-    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
-    iosBundleId: 'com.example.springHealthStudio',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_IOS'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_IOS'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_IOS'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_IOS'),
+    iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID'),
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDECFGrE2vvd51ildvQpZKiScE1uz1Kxmo',
-    appId: '1:527678863150:web:8d202dc122e5a1e5eaecbf',
-    messagingSenderId: '527678863150',
-    projectId: 'spring-health-studio-f4930',
-    authDomain: 'spring-health-studio-f4930.firebaseapp.com',
-    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_WEB'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_WINDOWS'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_WEB'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_WEB'),
+    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN_WEB'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_WEB'),
   );
 
 }

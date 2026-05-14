@@ -1069,14 +1069,12 @@ Future<void> updateTrainerProfile(
   Future<Map<String, Map<String, dynamic>>> getBranchWiseStats() async {
     try {
       final branches = ['Hanamkonda', 'Warangal'];
-      final Map<String, Map<String, dynamic>> branchStats = {};
 
-      for (var branch in branches) {
-        final stats = await getDashboardStats(branch);
-        branchStats[branch] = stats;
-      }
+      final statsList = await Future.wait(
+        branches.map((branch) => getDashboardStats(branch)),
+      );
 
-      return branchStats;
+      return Map.fromIterables(branches, statsList);
     } catch (e) {
       debugPrint('Error getting branch-wise stats: $e');
       return {};

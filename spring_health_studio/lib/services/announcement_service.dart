@@ -78,11 +78,10 @@ class AnnouncementService {
 
   // ── Read Tracking ─────────────────────────────────────────────────
 
-  /// ✅ FIX: Was completely missing — marks announcement as read for a member
-  /// Writes memberId into the readBy array in Firestore
-  /// This fixes:
-  ///   - Member app: NEW badge not disappearing after tap
-  ///   - Admin app: read count showing 0 forever
+  /// ✅ FIX: Marks announcement as read for a member
+  /// Writes memberId into the readBy array in Firestore.
+  /// This fixes the missing functionality where the "NEW" badge
+  /// wouldn't disappear and read counts remained zero.
   Future<void> markAsRead(String announcementId, String memberId) async {
     try {
       await _col.doc(announcementId).update({
@@ -94,16 +93,20 @@ class AnnouncementService {
     }
   }
 
-  /// ✅ Mark multiple announcements as read at once (used on screen open)
+  /// ✅ Marks multiple announcements as read at once (used on screen open)
   Future<void> markAllAsRead(
       List<String> announcementIds, String memberId) async {
-    final batch = _db.batch();
-    for (final id in announcementIds) {
-      batch.update(_col.doc(id), {
-        'readBy': FieldValue.arrayUnion([memberId]),
-      });
+    try {
+      final batch = _db.batch();
+      for (final id in announcementIds) {
+        batch.update(_col.doc(id), {
+          'readBy': FieldValue.arrayUnion([memberId]),
+        });
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint('markAllAsRead error: $e');
     }
-    await batch.commit();
   }
 
   // ── Stats ─────────────────────────────────────────────────────────

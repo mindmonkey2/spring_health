@@ -42,7 +42,7 @@ class AnnouncementModel {
   int get readCount => readBy.length;
 
   bool get isPending =>
-  scheduledAt != null && scheduledAt!.isAfter(DateTime.now());
+      scheduledAt != null && scheduledAt!.isAfter(DateTime.now());
 
   bool get isUrgent => priority == 'urgent';
 
@@ -76,11 +76,12 @@ class AnnouncementModel {
       'priority': priority,
       'createdBy': createdBy,
       'createdAt': Timestamp.fromDate(createdAt),
-      if (scheduledAt != null)
-        'scheduledAt': Timestamp.fromDate(scheduledAt!),
-        'isActive': isActive,
-        if (imageUrl != null) 'imageUrl': imageUrl,
-          'readBy': readBy,
+      // NOTE: Explicitly include null values to ensure proper behavior with Firestore .merge()
+      'scheduledAt':
+          scheduledAt != null ? Timestamp.fromDate(scheduledAt!) : null,
+      'isActive': isActive,
+      'imageUrl': imageUrl, // Explicitly include null
+      'readBy': readBy,
       'targetBranches': targetBranches,
       'createdByUid': createdByUid,
     };

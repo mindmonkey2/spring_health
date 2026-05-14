@@ -47,30 +47,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAx0by3QN9NSvcxyxg4hEEZhLBpOSPJ2G4',
-    appId: '1:172840829163:android:d00c60504ef85c8313feae',
-    messagingSenderId: '172840829163',
-    projectId: 'springhealth-d00aa',
-    storageBucket: 'springhealth-d00aa.firebasestorage.app',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_ANDROID'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_ANDROID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_ANDROID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_ANDROID'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_ANDROID'),
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDh4qZeMR0d78FTsVWSpby6fWGIR-amEso',
-    appId: '1:527678863150:ios:2286e1c9f1ad7332eaecbf',
-    messagingSenderId: '527678863150',
-    projectId: 'spring-health-studio-f4930',
-    storageBucket: 'spring-health-studio-f4930.firebasestorage.app',
-    iosBundleId: 'com.springhealthtech.springHealthMember',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_IOS'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_IOS'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_IOS'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_IOS'),
+    iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID'),
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDNuVVBgoJZJ7dvoljDfz0J-3wAFajDU5E',
-    appId: '1:172840829163:web:50e0a382dcfe707313feae',
-    messagingSenderId: '172840829163',
-    projectId: 'springhealth-d00aa',
-    authDomain: 'springhealth-d00aa.firebaseapp.com',
-    storageBucket: 'springhealth-d00aa.firebasestorage.app',
-    measurementId: 'G-4EPV8DFS9Y',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_WEB'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_WEB'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID_WEB'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID_WEB'),
+    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN_WEB'),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET_WEB'),
+    measurementId: String.fromEnvironment('FIREBASE_MEASUREMENT_ID_WEB'),
   );
 
 }

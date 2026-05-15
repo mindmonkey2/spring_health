@@ -20,6 +20,7 @@ import 'profile/profile_screen.dart';
 import 'lockout/membership_expired_screen.dart';
 import '../screens/ai_coach/ai_coach_screen.dart';
 import '../services/wearable_snapshot_service.dart';
+import 'social/social_feed_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -59,6 +60,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       Icons.fitness_center_outlined,
       'Train',
     ),
+    _NavItem(Icons.groups_rounded, Icons.groups_outlined, 'Social'),
     _NavItem(Icons.smart_toy_rounded, Icons.smart_toy_outlined, 'AjAX'),
     _NavItem(
       Icons.notifications_rounded,
@@ -208,6 +210,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       return [
         const HomeScreen(),
         const FitnessDashboardScreen(),
+        const SizedBox(), // Social placeholder
         const SizedBox(), // AjAX placeholder
         const AnnouncementsScreen(),
         _buildProfileErrorState(),
@@ -220,6 +223,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       _cachedScreens = [
         const HomeScreen(),
         FitnessDashboardScreen(memberId: _member!.id),
+        SocialFeedScreen(
+          memberId: _member!.id,
+          memberAuthUid: _member!.uid ?? '',
+          memberName: _member!.name,
+          branch: _member!.branch,
+        ),
         AiCoachScreen(memberId: _member!.id),
         const AnnouncementsScreen(),
         ProfileScreen(member: _member!),
@@ -284,8 +293,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             children: List.generate(_navItems.length, (i) {
-              // ✅ Only Alerts tab (index 3) gets a badge
-              final badge = i == 3 ? _unreadCount : 0;
+              // ✅ Only Alerts tab (index 4) gets a badge
+              final badge = i == 4 ? _unreadCount : 0;
               return _buildNavItem(
                 index: i,
                 item: _navItems[i],

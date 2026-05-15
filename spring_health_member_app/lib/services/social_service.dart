@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
 import '../models/like_model.dart';
@@ -11,11 +13,38 @@ class SocialService {
   static SocialService get instance => _instance;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  Future<void> createPost(PostModel post) async {
+  Future<void> createPost(PostModel post, {File? imageFile}) async {
     try {
       final docRef = _firestore.collection('posts').doc();
-      await docRef.set(post.toMap());
+      String? uploadedPhotoUrl;
+
+      if (imageFile != null) {
+        final storageRef = _storage.ref().child('post_photos/${docRef.id}.jpg');
+        final uploadTask = await storageRef.putFile(
+          imageFile,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+        uploadedPhotoUrl = await uploadTask.ref.getDownloadURL();
+      }
+
+      final postToSave = PostModel(
+        id: post.id,
+        memberAuthUid: post.memberAuthUid,
+        memberId: post.memberId,
+        memberName: post.memberName,
+        photoUrl: uploadedPhotoUrl ?? post.photoUrl,
+        branch: post.branch,
+        text: post.text,
+        mediaUrl: post.mediaUrl,
+        tags: post.tags,
+        likeCount: post.likeCount,
+        commentCount: post.commentCount,
+        createdAt: post.createdAt,
+      );
+
+      await docRef.set(postToSave.toMap());
 
       final querySnapshot = await _firestore
           .collection('posts')

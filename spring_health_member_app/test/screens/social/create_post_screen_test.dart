@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spring_health_member/models/post_model.dart';
 import 'package:spring_health_member/models/comment_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:spring_health_member/screens/social/create_post_screen.dart';
 import 'package:spring_health_member/services/social_service.dart';
 
@@ -12,6 +13,21 @@ class MockSocialService implements SocialService {
   bool shouldThrow = false;
   PostModel? lastCreatedPost;
   File? lastUploadedImage;
+
+  @override
+  Stream<DocumentSnapshot> getPostStream(String postId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<QuerySnapshot> getCommentsStream(String postId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> toggleLikeWithMemberId(String postId, String memberId) {
+    throw UnimplementedError();
+  }
 
   @override
   Future<void> createPost(PostModel post, {File? imageFile}) async {

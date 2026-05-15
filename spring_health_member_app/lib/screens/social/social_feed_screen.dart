@@ -5,6 +5,7 @@ import 'package:spring_health_member/models/post_model.dart';
 import 'package:spring_health_member/services/social_service.dart';
 import 'package:spring_health_member/widgets/social/post_card_widget.dart';
 import 'post_detail_screen.dart';
+import 'member_wall_screen.dart';
 
 class SocialFeedScreen extends StatefulWidget {
   final String memberId;
@@ -154,6 +155,17 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                   return PostCardWidget(
                     post: post,
                     isLiked: isLiked,
+                    onHeaderTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MemberWallScreen(
+                            memberId: post.memberId,
+                            currentMemberId: widget.memberId,
+                          ),
+                        ),
+                      );
+                    },
                     onTap: () {
                       Navigator.push(
                         context,

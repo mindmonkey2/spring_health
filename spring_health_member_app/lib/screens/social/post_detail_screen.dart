@@ -5,6 +5,7 @@ import 'package:spring_health_member/core/theme/app_colors.dart';
 import 'package:spring_health_member/models/post_model.dart';
 import 'package:spring_health_member/models/comment_model.dart';
 import 'package:spring_health_member/services/social_service.dart';
+import 'member_wall_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final String postId;
@@ -268,38 +269,52 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: AppColors.backgroundBlack,
-                                backgroundImage: post.photoUrl != null && post.photoUrl!.isNotEmpty
-                                    ? NetworkImage(post.photoUrl!)
-                                    : null,
-                                child: post.photoUrl == null || post.photoUrl!.isEmpty
-                                    ? Text(
-                                        post.memberName.isNotEmpty ? post.memberName[0].toUpperCase() : 'M',
-                                        style: const TextStyle(color: AppColors.neonLime, fontWeight: FontWeight.bold),
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      post.memberName,
-                                      style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      _formatDate(post.createdAt.toDate()),
-                                      style: const TextStyle(color: AppColors.textSecondary),
-                                    ),
-                                  ],
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MemberWallScreen(
+                                    memberId: post.memberId,
+                                    currentMemberId: widget.currentMemberId,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: AppColors.backgroundBlack,
+                                  backgroundImage: post.photoUrl != null && post.photoUrl!.isNotEmpty
+                                      ? NetworkImage(post.photoUrl!)
+                                      : null,
+                                  child: post.photoUrl == null || post.photoUrl!.isEmpty
+                                      ? Text(
+                                          post.memberName.isNotEmpty ? post.memberName[0].toUpperCase() : 'M',
+                                          style: const TextStyle(color: AppColors.neonLime, fontWeight: FontWeight.bold),
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        post.memberName,
+                                        style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        _formatDate(post.createdAt.toDate()),
+                                        style: const TextStyle(color: AppColors.textSecondary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(

@@ -8,6 +8,7 @@ class PostCardWidget extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onLikePressed;
   final VoidCallback onCommentPressed;
+  final VoidCallback? onHeaderTap;
   final bool isLiked;
 
   const PostCardWidget({
@@ -16,6 +17,7 @@ class PostCardWidget extends StatelessWidget {
     required this.onTap,
     required this.onLikePressed,
     required this.onCommentPressed,
+    this.onHeaderTap,
     required this.isLiked,
   });
 
@@ -69,23 +71,47 @@ class PostCardWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        post.memberName,
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.neonLime,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onHeaderTap,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: AppColors.backgroundBlack,
+                          backgroundImage: post.photoUrl != null && post.photoUrl!.isNotEmpty
+                              ? NetworkImage(post.photoUrl!)
+                              : null,
+                          child: post.photoUrl == null || post.photoUrl!.isEmpty
+                              ? Text(
+                                  post.memberName.isNotEmpty ? post.memberName[0].toUpperCase() : 'M',
+                                  style: const TextStyle(color: AppColors.neonLime, fontWeight: FontWeight.bold),
+                                )
+                              : null,
                         ),
-                      ),
-                      Text(
-                        post.branch,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.gray400,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post.memberName,
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.neonLime,
+                                ),
+                              ),
+                              Text(
+                                post.branch,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.gray400,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Text(

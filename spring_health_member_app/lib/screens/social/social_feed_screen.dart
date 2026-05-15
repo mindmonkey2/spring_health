@@ -4,6 +4,7 @@ import 'package:spring_health_member/core/theme/app_text_styles.dart';
 import 'package:spring_health_member/models/post_model.dart';
 import 'package:spring_health_member/services/social_service.dart';
 import 'package:spring_health_member/widgets/social/post_card_widget.dart';
+import 'post_detail_screen.dart';
 
 class SocialFeedScreen extends StatefulWidget {
   final String memberId;
@@ -154,26 +155,26 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                     post: post,
                     isLiked: isLiked,
                     onTap: () {
-                      Navigator.pushNamed(
+                      Navigator.push(
                         context,
-                        '/social/post',
-                        arguments: {
-                          'postId': post.id,
-                          'currentMemberAuthUid': widget.memberAuthUid,
-                          'memberId': widget.memberId,
-                        },
+                        MaterialPageRoute(
+                          builder: (_) => PostDetailScreen(
+                            postId: post.id,
+                            currentMemberId: widget.memberId,
+                          ),
+                        ),
                       );
                     },
                     onLikePressed: () => _handleLike(post),
                     onCommentPressed: () {
-                      Navigator.pushNamed(
+                      Navigator.push(
                         context,
-                        '/social/post',
-                        arguments: {
-                          'postId': post.id,
-                          'currentMemberAuthUid': widget.memberAuthUid,
-                          'memberId': widget.memberId,
-                        },
+                        MaterialPageRoute(
+                          builder: (_) => PostDetailScreen(
+                            postId: post.id,
+                            currentMemberId: widget.memberId,
+                          ),
+                        ),
                       );
                     },
                   );

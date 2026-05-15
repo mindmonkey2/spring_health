@@ -102,6 +102,19 @@ class SocialService {
             .toList());
   }
 
+  Stream<DocumentSnapshot> getPostStream(String postId) {
+    return _firestore.collection('posts').doc(postId).snapshots();
+  }
+
+  Stream<QuerySnapshot> getCommentsStream(String postId) {
+    return _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .orderBy('createdAt', descending: false)
+        .snapshots();
+  }
+
   Stream<List<CommentModel>> streamComments(String postId) {
     return _firestore
         .collection('posts')
@@ -218,6 +231,28 @@ class SocialService {
       return docSnap.exists;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<void> toggleLikeWithMemberId(String postId, String memberId) async {
+    try {
+      final ref = _firestore.collection('posts').doc(postId);
+      await _firestore.runTransaction((tx) async {
+        final snap = await tx.get(ref);
+        final data = snap.data() ?? {};
+        final liked = List<String>.from(data['likedBy'] ?? []);
+        if (liked.contains(memberId)) {
+          liked.remove(memberId);
+        } else {
+          liked.add(memberId);
+        }
+        tx.update(ref, {
+          'likedBy': liked,
+          'likeCount': liked.length,
+        });
+      });
+    } catch (e) {
+      rethrow;
     }
   }
 }

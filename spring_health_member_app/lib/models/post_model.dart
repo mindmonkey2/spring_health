@@ -13,6 +13,7 @@ class PostModel {
   final int likeCount;
   final int commentCount;
   final Timestamp createdAt;
+  final List<String> likedBy;
 
   const PostModel({
     required this.id,
@@ -27,6 +28,7 @@ class PostModel {
     required this.likeCount,
     required this.commentCount,
     required this.createdAt,
+    this.likedBy = const [],
   });
 
   factory PostModel.fromMap(Map<String, dynamic> data, String id) {
@@ -43,6 +45,7 @@ class PostModel {
       likeCount: data['likeCount'] as int? ?? 0,
       commentCount: data['commentCount'] as int? ?? 0,
       createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
+      likedBy: (data['likedBy'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
 
@@ -59,6 +62,7 @@ class PostModel {
       'likeCount': likeCount,
       'commentCount': commentCount,
       'createdAt': createdAt,
+      'likedBy': likedBy,
     };
   }
 }

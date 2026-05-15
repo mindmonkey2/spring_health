@@ -940,6 +940,14 @@ Planned features: member list by branch, attendance marking, workout assignment,
       or the sessions write ownership check.
     - Fixed Thread 14.
  security/fix-social-feed-idor-16202163529875206955
+Security Fix (May 15, 2026):
+- members/{memberId}/entries: restricted to
+  isAdmin, isTrainer, isMemberOwner(memberId)
+  was: allow read, write: if isSignedIn()
+- attendance create: restricted to isAdmin, isTrainer,
+  or own memberId check
+  was: allow create: if isAdmin() || isSignedIn()
+
 33. Security: Always validate ownership on document creation (IDOR prevention)
     - Vulnerability: `allow create: if isSignedIn();` allows any user to spoof documents for others.
     - Fix: Always use `allow create: if isSignedIn() && isOwnNewRecord();`.

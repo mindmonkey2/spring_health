@@ -84,8 +84,9 @@ service cloud.firestore {
     }
 
     match /members/{memberId}/entries/{entryId} {
-      allow read, write: if isSignedIn();
-      allow read: if isOwner() || isTrainer();
+      allow read, write: if isAdmin()
+        || isTrainer()
+        || isMemberOwner(memberId);
     }
 
     // ── ATTENDANCE ─────────────────────────────────────────
@@ -93,7 +94,9 @@ service cloud.firestore {
     // isSignedIn() used — isOwnRecord() would fail
     match /attendance/{attendanceId} {
       allow read: if isAdmin() || isTrainer() || isSignedIn();
-      allow create: if isAdmin() || isSignedIn();
+      allow create: if isAdmin() || isTrainer()
+        || (isSignedIn()
+          && request.resource.data.memberId == request.auth.uid);
       allow update, delete: if isAdmin();
     }
 

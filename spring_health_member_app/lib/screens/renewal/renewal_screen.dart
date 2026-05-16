@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../models/member_model.dart';
-import '../../services/renewal_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/config/app_config.dart';
 import 'renewal_confirmation_screen.dart';
@@ -33,7 +32,6 @@ class RenewalScreen extends StatefulWidget {
 }
 
 class _RenewalScreenState extends State<RenewalScreen> {
-  final RenewalService _renewalService = RenewalService();
   late Razorpay _razorpay;
 
   String _selectedPlan = '1 Month';
@@ -70,6 +68,10 @@ class _RenewalScreenState extends State<RenewalScreen> {
       'name': 'Spring Health Studio',
       'description': '$_selectedPlan Membership Renewal',
       'prefill': {'contact': widget.member.phone, 'name': widget.member.name},
+      'notes': {
+        'memberId': widget.member.id,
+        'planName': _selectedPlan,
+      },
       'theme': {'color': '#00C853'},
     };
     try {
@@ -85,16 +87,11 @@ class _RenewalScreenState extends State<RenewalScreen> {
     _processingNotifier.value = true;
     try {
       final plan = _kPlans[_selectedPlan]!;
-      await _renewalService.processSuccessfulRenewal(
-        memberId: widget.member.id,
-        memberPhone: widget.member.phone,
-        branch: widget.member.branch,
-        plan: _selectedPlan,
-        planDays: plan.days,
-        amount: _priceForPlan(_selectedPlan).toDouble(),
-        razorpayPaymentId: response.paymentId ?? '',
-        currentExpiry: widget.member.expiryDate,
-      );
+
+      // Client trust removed: We no longer write to Firestore here.
+      // The authoritative renewal writeback is handled by the Razorpay webhook
+      // securely on the backend (Firebase Cloud Functions).
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -111,8 +108,8 @@ class _RenewalScreenState extends State<RenewalScreen> {
         );
       }
     } catch (e) {
-      debugPrint('Razorpay Update Error: $e');
-      _showSnack('Payment recorded but update failed. Contact gym.');
+      debugPrint('Razorpay Screen Error: $e');
+      _showSnack('An error occurred during UI transition.');
     } finally {
       if (mounted) _processingNotifier.value = false;
     }

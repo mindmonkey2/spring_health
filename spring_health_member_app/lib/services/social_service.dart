@@ -203,10 +203,14 @@ class SocialService {
           });
 
           if (postDoc.exists) {
-            final currentLikeCount = postDoc.data()?['likeCount'] as int? ?? 0;
-            if (currentLikeCount == 4) {
+            final data = postDoc.data() ?? {};
+            final currentLikeCount = data['likeCount'] as int? ?? 0;
+            final popularXpAwarded = data['popularXpAwarded'] == true;
+
+            if (currentLikeCount == 4 && !popularXpAwarded) {
               popularTriggered = true;
-              postMemberId = postDoc.data()?['memberId'] as String?;
+              postMemberId = data['memberId'] as String?;
+              transaction.update(postRef, {'popularXpAwarded': true});
             }
           }
         }

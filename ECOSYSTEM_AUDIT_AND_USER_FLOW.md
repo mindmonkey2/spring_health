@@ -80,15 +80,15 @@ The high-level business purpose is to provide a seamless, integrated digital exp
 - **Trigger:** Member completes an XP-eligible action (check-in, workout, personal best).
 - **Main steps:** Action occurs -> `gamificationEvents` document created -> `processEvent` updates XP/streak -> Member checks leaderboard -> At week's end, top 3 in war receive bonus XP (`warwinner`, `wartop3`).
 - **Firestore collections touched:** `gamificationEvents`, `gamification`, `weeklywars`
-- **Member-facing result:** Sees level progress, badges, and leaderboard position.
+- **Member-facing result:** Sees level progress, badges, and leaderboard position. (War auto-post deferred to Studio admin side).
 - **Status marker:** [COMPLETED]
 
 ### Social flow
 - **Trigger:** Member interacts with community.
-- **Main steps:** View global/branch feed -> Like/comment on workouts -> Challenge another member to a duel.
+- **Main steps:** View global/branch feed -> Like/comment on workouts -> Challenge another member to a duel. System generates achievement auto-posts.
 - **Firestore collections touched:** `socialFeed`, `socialChallenges`, `posts`, `comments`, `likes`
-- **Member-facing result:** Sees friends' activities and can interact.
-- **Status marker:** [PARTIAL] (Infrastructure and basic feed IDOR fixes completed, 1v1 duels deferred)
+- **Member-facing result:** Sees friends' activities, interacts, and broadcasts milestones (e.g. Personal Bests).
+- **Status marker:** [PARTIAL] (Infrastructure, IDOR fixes, and PB auto-post completed. War auto-post blocked. 1v1 duels deferred. Pending remaining roadmap).
 
 ### Trainer-assisted flow
 - **Trigger:** Member requests trainer guidance or trainer needs to assign a plan.
@@ -180,9 +180,10 @@ The high-level business purpose is to provide a seamless, integrated digital exp
 ## 6. Social roadmap snapshot
 
 The social features are currently in a transition state, having been prioritized for foundational work in Thread 15 but requiring future sprints to complete the vision.
-- **Completed pieces:** Basic social feed infrastructure, Firestore collections (`socialFeed`, `socialChallenges`, `posts`, `comments`, `likes`), IDOR prevention on social document creation, and optimistic UI state patterns using `ValueNotifier`.
+- **Completed pieces:** Basic social feed infrastructure, Firestore collections (`socialFeed`, `socialChallenges`, `posts`, `comments`, `likes`), IDOR prevention on social document creation, optimistic UI state patterns using `ValueNotifier`, and PB auto-post hooks.
 - **In-progress / next pieces:** Further refinement of the social feed, comment/like UI polish, and cross-member interactions.
-- **Future pieces:** 1v1 Duels (deferred to a dedicated "Spring Social" sprint), advanced leaderboards, and direct messaging/friend systems.
+- **Blocked/Deferred pieces:** Weekly War auto-post hooks (blocked pending Studio-side integration) and 1v1 Duels (deferred to a dedicated "Spring Social" sprint).
+- **Future pieces:** Advanced leaderboards, and direct messaging/friend systems.
 
 ## 7. Architecture and data ownership rules
 

@@ -1054,22 +1054,29 @@ Security Fix (May 15, 2026):
     - Must use signature `(String event, String memberId, {int? customXP})`.
     - Fixed Thread 14.
 
-37. warwinner XP cap: 200 (not 500). war_top3 halved proportionally
+37. System / Auto-post Hooks (Thread 15 / T15-12)
+    - Personal Best auto-post hooks implemented.
+    - Deduplication strictly uses deterministic document IDs in `SocialService.createSystemPost` (pattern: `${memberId}_${sourceType}_$sourceId`). Do NOT use query-then-insert without a deterministic ID guard.
+    - memberId vs auth.uid separation preserved (post uses memberId as authoritative owner).
+    - No direct XP writes introduced; XP flow remains through `GamificationService.instance.processEvent()`.
+    - Weekly War auto-post is intentionally blocked/deferred on the member side because authoritative completion executes in Spring Health Studio. Future war auto-posting must be implemented on the Studio (Admin) side to prevent architectural violation.
+
+38. warwinner XP cap: 200 (not 500). war_top3 halved proportionally
     - `warwinner` awards 200 XP. `wartop3` awards 75 XP.
     - Fixed Thread 14.
 
-38. streak_milestone fires at 7 and 30 consecutive check-in days (100 XP)
+39. streak_milestone fires at 7 and 30 consecutive check-in days (100 XP)
     - Fixed Thread 14.
 
-39. Notification writes must use FirebaseAuthService.instance.currentUser!.uid not memberId
+40. Notification writes must use FirebaseAuthService.instance.currentUser!.uid not memberId
     - memberId is the Firestore document ID, while auth UID is used for notifications.
     - Fixed Thread 14.
 
-40. PostSessionSummaryScreen is read-only — zero Firestore writes
+41. PostSessionSummaryScreen is read-only — zero Firestore writes
     - The summary screen must not write to Firestore.
     - Fixed Thread 14.
 
-41. Verify outputs go in git commit body, not in task chat
+42. Verify outputs go in git commit body, not in task chat
     - Always include verification outputs directly in the commit message body.
     - Fixed Thread 14.
 

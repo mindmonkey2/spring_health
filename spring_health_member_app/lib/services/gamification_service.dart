@@ -53,6 +53,8 @@ class GamificationService {
         return '6-month loyalty bonus';
       case 'loyalty_1y':
         return '1-year loyalty bonus';
+      case 'first_post':
+        return 'First social post';
       default:
         return 'Loyalty bonus';
     }
@@ -85,16 +87,21 @@ class GamificationService {
       case 'loyalty_3m':
       case 'loyalty_6m':
       case 'loyalty_1y':
+      case 'first_post':
         final alreadyAwarded = await _isMilestoneAlreadyAwarded(
           memberId,
           event,
         );
         if (alreadyAwarded) return;
-        xp = event == 'loyalty_3m'
-            ? 100
-            : event == 'loyalty_6m'
-            ? 250
-            : 500;
+        if (event == 'loyalty_3m') {
+          xp = 100;
+        } else if (event == 'loyalty_6m') {
+          xp = 250;
+        } else if (event == 'loyalty_1y') {
+          xp = 500;
+        } else if (event == 'first_post') {
+          xp = 50;
+        }
         reason = _loyaltyLabel(event);
         await awardXp(memberId, reason, xp);
         await _db
@@ -104,7 +111,11 @@ class GamificationService {
               'loyaltyMilestonesAwarded': FieldValue.arrayUnion([event]),
             });
         await calculateStreak(memberId);
-        await BadgeService.instance.checkAndAward(memberId);
+        try {
+          await BadgeService.instance.checkAndAward(memberId);
+        } catch (e) {
+          debugPrint('Badge check skipped: $e');
+        }
         return; // early return — XP already awarded above, skip fall-through
       case 'war_participate':
         xp = 20;
@@ -130,6 +141,10 @@ class GamificationService {
         xp = 5;
         reason = '1v1 Challenge participation';
         break;
+      case 'post_popular':
+        xp = 20;
+        reason = 'Popular social post';
+        break;
       default:
         return;
     }
@@ -141,7 +156,11 @@ class GamificationService {
       isWorkout: event == 'workout',
     );
     await calculateStreak(memberId);
-    await BadgeService.instance.checkAndAward(memberId);
+    try {
+      await BadgeService.instance.checkAndAward(memberId);
+    } catch (e) {
+      debugPrint('Badge check skipped: $e');
+    }
   }
 
   // ─────────────────────────────────────────────
@@ -371,41 +390,45 @@ class GamificationService {
       'for "$reason". New total: $totalNewXp',
     );
 
-    // 🆕 Write XP notification to in-app feed
-    final notifService = InAppNotificationService();
-    final notifications = <NotificationData>[
-      NotificationData(
-        type: NotificationType.xp,
-        title: '+$xp XP ${_xpEmoji(reason)}',
-        body: reason,
-        metadata: {
-          'xpGained': xp,
-          'bonusXp': badgeXpBonus,
-          'totalXp': totalNewXp,
-          'level': newLevel.level,
-        },
-      ),
-    ];
-
-    // 🆕 Write a badge notification for each newly unlocked badge
-    for (final badge in newlyEarned) {
-      notifications.add(
+    try {
+      // 🆕 Write XP notification to in-app feed
+      final notifService = InAppNotificationService();
+      final notifications = <NotificationData>[
         NotificationData(
-          type: NotificationType.badge,
-          title: ' Badge Unlocked: ${badge.title}',
-          body: badge.description,
-          metadata: {'badgeId': badge.id, 'xpReward': badge.xpReward},
+          type: NotificationType.xp,
+          title: '+$xp XP ${_xpEmoji(reason)}',
+          body: reason,
+          metadata: {
+            'xpGained': xp,
+            'bonusXp': badgeXpBonus,
+            'totalXp': totalNewXp,
+            'level': newLevel.level,
+          },
         ),
-      );
-      debugPrint(' Badge notification written: ${badge.title}');
-    }
+      ];
 
-    final notifUid = FirebaseAuthService.instance.currentUser?.uid;
-    if (notifUid != null) {
-      await notifService.addNotificationsForMemberBatch(
-        uid: notifUid,
-        notifications: notifications,
-      );
+      // 🆕 Write a badge notification for each newly unlocked badge
+      for (final badge in newlyEarned) {
+        notifications.add(
+          NotificationData(
+            type: NotificationType.badge,
+            title: ' Badge Unlocked: ${badge.title}',
+            body: badge.description,
+            metadata: {'badgeId': badge.id, 'xpReward': badge.xpReward},
+          ),
+        );
+        debugPrint(' Badge notification written: ${badge.title}');
+      }
+
+      final notifUid = FirebaseAuthService.instance.currentUser?.uid;
+      if (notifUid != null) {
+        await notifService.addNotificationsForMemberBatch(
+          uid: notifUid,
+          notifications: notifications,
+        );
+      }
+    } catch (e) {
+      debugPrint('Notification skipped: $e');
     }
 
     return newlyEarned;

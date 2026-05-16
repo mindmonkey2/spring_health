@@ -197,6 +197,51 @@ void main() {
     });
   });
 
+  group('GamificationService.processEvent (Social Hooks)', () {
+    Future<void> seedGamification() async {
+      await fakeFirestore.collection('gamification').doc(memberId).set({
+        'memberId': memberId,
+        'totalXp': 0,
+        'currentStreak': 0,
+        'longestStreak': 0,
+        'totalCheckIns': 0,
+        'totalWorkouts': 0,
+        'totalVolumeKg': 0,
+        'earnedBadgeIds': [],
+        'recentXpEvents': [],
+        'warWins': 0,
+        'loyaltyMilestonesAwarded': [],
+      });
+    }
+
+    test('awards 50 XP for first_post and records in loyaltyMilestonesAwarded', () async {
+      await seedGamification();
+      await service.processEvent('first_post', memberId);
+
+      final doc = await fakeFirestore.collection('gamification').doc(memberId).get();
+      final data = doc.data()!;
+      expect(data['totalXp'], 50);
+      expect(data['loyaltyMilestonesAwarded'], contains('first_post'));
+    });
+
+    test('first_post is idempotent (does not award XP twice)', () async {
+      await seedGamification();
+      await service.processEvent('first_post', memberId);
+      await service.processEvent('first_post', memberId);
+
+      final doc = await fakeFirestore.collection('gamification').doc(memberId).get();
+      expect(doc.data()!['totalXp'], 50); // XP should remain 50, not 100
+    });
+
+    test('awards 20 XP for post_popular', () async {
+      await seedGamification();
+      await service.processEvent('post_popular', memberId);
+
+      final doc = await fakeFirestore.collection('gamification').doc(memberId).get();
+      expect(doc.data()!['totalXp'], 20);
+    });
+  });
+
   group('GamificationService.stream', () {
     test('emits empty profile when document does not exist', () async {
       final profile = await service.stream(memberId).first;

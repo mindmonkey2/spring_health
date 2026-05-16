@@ -35,10 +35,15 @@ Future<void> mockWebhookRenewal({
   final baseDate = currentExpiry.isBefore(now) ? now : currentExpiry;
 
   int planDays = 30;
-  if (planName == '1 Month') planDays = 30;
-  else if (planName == '3 Months') planDays = 90;
-  else if (planName == '6 Months') planDays = 180;
-  else if (planName == '12 Months') planDays = 365;
+  if (planName == '1 Month') {
+    planDays = 30;
+  } else if (planName == '3 Months') {
+    planDays = 90;
+  } else if (planName == '6 Months') {
+    planDays = 180;
+  } else if (planName == '12 Months') {
+    planDays = 365;
+  }
 
   final newExpiry = baseDate.add(Duration(days: planDays));
 

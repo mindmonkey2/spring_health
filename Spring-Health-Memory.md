@@ -1119,6 +1119,13 @@ Security Fix (May 15, 2026):
 
 ## 8. How to Use This Document
 
+### Living Documents Ecosystem
+
+- **`Spring-Health-Memory.md`** remains the canonical engineering memory and rulebook.
+- **`ECOSYSTEM_AUDIT_AND_USER_FLOW.md`** is the living ecosystem + feature audit.
+- **`PROJECT_CURRENT_STATE_AND_DEVELOPMENT_PLAN.md`** is the living execution-state + roadmap document.
+- **All three must be kept aligned** after feature merges, regressions, architectural changes, and thread transitions.
+
 **When planning sprints:** Use Section 6 completion stats to identify backlog items.
 
 **When working on Admin App:** See Section 2 for data models, screen responsibilities, and bug fix history. Check Section 7 for known pitfalls before any change.

@@ -32,6 +32,10 @@ The Spring Health ecosystem is largely feature-complete for core operations, wit
   - Eliminated the false-logout-on-restart bug via a dual-guard auth check in both apps.
 - **Thread 15 (Social Work):**
   - Set up core social collections and enforced the `processEvent` gamification rule.
+  - [COMPLETED] Personal Best achievement visibility via deterministic auto-post hooks.
+  - [BLOCKED] Weekly War auto-post hooks blocked on member side pending Studio-side implementation.
+  - [DEFERRED] 1v1 Duels.
+  - [PENDING] Notifications for social interactions and remaining UI polish.
 
 ## 4. Pending roadmap by priority
 

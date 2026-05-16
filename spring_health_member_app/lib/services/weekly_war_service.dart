@@ -134,6 +134,12 @@ class WeeklyWarService {
         .toList();
   }
 
+  // NOTE: Weekly War auto-post hooks are blocked here because `completeWar`
+  // execution and completion logic actually run inside the Studio (Admin) app.
+  // Implementing a member-side duplicate hook would violate the app architecture
+  // and risk duplication without a trusted admin-side trigger.
+  // Future implementation should occur on the Studio side when triggered.
+
   Future<void> completeWar(String warId) async {
     final warRef = _db
         .collection('weeklywars')

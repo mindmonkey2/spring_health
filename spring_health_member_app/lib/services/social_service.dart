@@ -15,6 +15,47 @@ class SocialService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
+  Future<void> createSystemPost({
+    required String memberAuthUid,
+    required String memberId,
+    required String memberName,
+    required String branch,
+    required String text,
+    required String sourceType,
+    required String sourceId,
+  }) async {
+    try {
+      // Deterministic ID logic
+      final deterministicId = '${memberId}_${sourceType}_$sourceId';
+      final docRef = _firestore.collection('posts').doc(deterministicId);
+
+      // Duplicate prevention
+      final docSnap = await docRef.get();
+      if (docSnap.exists) {
+        return; // Already posted for this hook instance
+      }
+
+      final postToSave = PostModel(
+        id: deterministicId,
+        memberAuthUid: memberAuthUid,
+        memberId: memberId,
+        memberName: memberName,
+        branch: branch,
+        text: text,
+        tags: const ['achievement'],
+        likeCount: 0,
+        commentCount: 0,
+        createdAt: Timestamp.now(),
+        sourceType: sourceType,
+        sourceId: sourceId,
+      );
+
+      await docRef.set(postToSave.toMap());
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> createPost(PostModel post, {File? imageFile}) async {
     try {
       final docRef = _firestore.collection('posts').doc();

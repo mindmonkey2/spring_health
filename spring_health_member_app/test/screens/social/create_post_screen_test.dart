@@ -15,6 +15,19 @@ class MockSocialService implements SocialService {
   File? lastUploadedImage;
 
   @override
+  Future<void> createSystemPost({
+    required String memberAuthUid,
+    required String memberId,
+    required String memberName,
+    required String branch,
+    required String text,
+    required String sourceType,
+    required String sourceId,
+  }) async {
+    // Stub implementation for tests
+  }
+
+  @override
   Stream<DocumentSnapshot> getPostStream(String postId) {
     throw UnimplementedError();
   }

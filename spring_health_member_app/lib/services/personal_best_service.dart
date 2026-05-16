@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/personal_best_model.dart';
 import '../services/gamification_service.dart';
+import '../services/member_service.dart';
+import '../services/social_service.dart';
 
 /// XP constants for personal best logging
 class PersonalBestXP {
@@ -96,6 +98,29 @@ class PersonalBestService {
         'lastLoggedDate': Timestamp.fromDate(now),
         'totalXpEarned': (existing?.totalXpEarned ?? 0) + xpEarned,
       });
+
+      // Handle personal best milestone
+      if (isPersonalBest) {
+        try {
+          final member = await MemberService().getMemberData(uid);
+          if (member != null && member.uid != null) {
+            final now = DateTime.now();
+            final dateKey = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+            final shortUnit = exercise.unitShort;
+            await SocialService.instance.createSystemPost(
+              memberAuthUid: member.uid!,
+              memberId: member.id,
+              memberName: member.name,
+              branch: member.branch,
+              text: 'New personal best unlocked for ${exercise.displayName}: $value $shortUnit',
+              sourceType: 'personal_best',
+              sourceId: '${exercise.key}_$dateKey',
+            );
+          }
+        } catch (e) {
+          debugPrint('Error creating personal best auto-post: $e');
+        }
+      }
 
       // Award XP to main gamification document
       await GamificationService.instance.processEvent('personal_best', uid);

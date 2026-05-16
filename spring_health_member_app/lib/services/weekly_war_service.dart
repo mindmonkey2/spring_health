@@ -55,11 +55,11 @@ class WeeklyWarService {
 
   Future<WeeklyWarModel?> getActiveWar(String branch) async {
     final querySnapshot = await _db
-        .collection('weeklywars')
-        .where('branchId', isEqualTo: branch)
-        .where('status', isEqualTo: 'active')
-        .limit(1)
-        .get();
+    .collection('weeklywars')
+    .where('branchId', isEqualTo: branch)
+    .where('status', isEqualTo: 'active')
+    .limit(1)
+    .get();
 
     if (querySnapshot.docs.isEmpty) return null;
 
@@ -80,10 +80,10 @@ class WeeklyWarService {
     if (activeWar.exercise.toLowerCase() != exercise.toLowerCase()) return;
 
     final entryRef = _db
-        .collection('weeklywars')
-        .doc(activeWar.id)
-        .collection('entries')
-        .doc(memberId);
+    .collection('weeklywars')
+    .doc(activeWar.id)
+    .collection('entries')
+    .doc(memberId);
 
     await entryRef.set({
       'memberId': memberId,
@@ -96,25 +96,25 @@ class WeeklyWarService {
 
   Stream<List<WarEntryModel>> getWarLeaderboard(String warId) {
     return _db
-        .collection('weeklywars')
-        .doc(warId)
-        .collection('entries')
-        .orderBy('totalReps', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => WarEntryModel.fromMap(doc.id, doc.data()))
-              .toList(),
-        );
+    .collection('weeklywars')
+    .doc(warId)
+    .collection('entries')
+    .orderBy('totalReps', descending: true)
+    .snapshots()
+    .map(
+      (snapshot) => snapshot.docs
+      .map((doc) => WarEntryModel.fromMap(doc.id, doc.data()))
+      .toList(),
+    );
   }
 
   Future<WarEntryModel?> getMemberEntry(String warId, String memberId) async {
     final doc = await _db
-        .collection('weeklywars')
-        .doc(warId)
-        .collection('entries')
-        .doc(memberId)
-        .get();
+    .collection('weeklywars')
+    .doc(warId)
+    .collection('entries')
+    .doc(memberId)
+    .get();
 
     if (!doc.exists || doc.data() == null) return null;
 
@@ -123,34 +123,40 @@ class WeeklyWarService {
 
   Future<List<WeeklyWarModel>> getWarHistory(String branch) async {
     final querySnapshot = await _db
-        .collection('weeklywars')
-        .where('branchId', isEqualTo: branch)
-        .where('status', whereIn: ['completed', 'archived'])
-        .orderBy('startDate', descending: true)
-        .get();
+    .collection('weeklywars')
+    .where('branchId', isEqualTo: branch)
+    .where('status', whereIn: ['completed', 'archived'])
+    .orderBy('startDate', descending: true)
+    .get();
 
     return querySnapshot.docs
-        .map((doc) => WeeklyWarModel.fromMap(doc.id, doc.data()))
-        .toList();
+    .map((doc) => WeeklyWarModel.fromMap(doc.id, doc.data()))
+    .toList();
   }
+
+  // NOTE: Weekly War auto-post hooks are blocked here because `completeWar`
+  // execution and completion logic actually run inside the Studio (Admin) app.
+  // Implementing a member-side duplicate hook would violate the app architecture
+  // and risk duplication without a trusted admin-side trigger.
+  // Future implementation should occur on the Studio side when triggered.
 
   Future<void> completeWar(String warId) async {
     final warRef = _db
-        .collection('weeklywars')
-        .doc(warId);
+    .collection('weeklywars')
+    .doc(warId);
 
     // 1. Set status = 'locked'
     await warRef.update({'status': 'locked'});
 
     // 2. Read all entries, sort by totalReps desc
     final entriesSnapshot = await warRef
-        .collection('entries')
-        .orderBy('totalReps', descending: true)
-        .get();
+    .collection('entries')
+    .orderBy('totalReps', descending: true)
+    .get();
 
     final entries = entriesSnapshot.docs
-        .map((doc) => WarEntryModel.fromMap(doc.id, doc.data()))
-        .toList();
+    .map((doc) => WarEntryModel.fromMap(doc.id, doc.data()))
+    .toList();
 
     if (entries.isEmpty) {
       await warRef.update({'status': 'completed'});
@@ -174,9 +180,9 @@ class WeeklyWarService {
         eventType = 'war_winner';
         // 5. Increment warWins by 1 in gamification/{memberId} for rank 1 only
         await _db
-            .collection('gamification')
-            .doc(entry.memberId)
-            .set({'warWins': FieldValue.increment(1)}, SetOptions(merge: true));
+        .collection('gamification')
+        .doc(entry.memberId)
+        .set({'warWins': FieldValue.increment(1)}, SetOptions(merge: true));
       } else if (rank == 2) {
         eventType = 'war_top3';
         customXP = 300;
